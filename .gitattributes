@@ -1,0 +1,11 @@
+* text=auto
+*.pen binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.xlsm binary
+*.mp4 binary
+*.figcraft filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,23 @@
+const fs=require("fs"),cv=require("./convert.js"),em=require("./emit.js"),rc=require("./revc.js");
+cv.OPT.images=true;
+const names=[...cv.doc().querySelectorAll("body > div > div")].map(d=>d.getAttribute("data-pencil-name"));
+const only=process.argv[3]?process.argv[3].split("|"):names;
+const svgs={};rc.setSvgs(svgs);
+const items=[];
+only.forEach(n=>{ cv.OPT.comp=/Components$/.test(n); const t=cv.convert(cv.frameByName(n),null,svgs); cv.OPT.comp=false; delete t.ab; items.push(rc.patch(n,t)); });
+let extra=[];
+try{ extra=require("./newframes.js").make(rc,svgs); }catch(e){ if(e.code!=="MODULE_NOT_FOUND") throw e; }
+if(process.argv[4]!=="noextra") extra.forEach(t=>items.push(t));
+const tk=require("./tokens.js");em.Emitter.tokens=tk.map;
+const E=new em.Emitter(svgs,2);
+E.steps.push(...tk.steps);
+E.prepare(items);
+const libId=E.buildLibrary();
+const ids=[];
+items.forEach(t=>{ const id=E.node(t,undefined,{auto:false}); ids.push([t.n,id]); });
+ids.push(["Component library",libId]);
+em.writeImages();
+console.log("components:",Object.values(E.comps).length,"instances:",E.used);
+fs.writeFileSync(process.argv[2],JSON.stringify(E.steps));
+fs.writeFileSync(process.argv[2].replace(/\.json$/,".ids.json"),JSON.stringify(ids));
+console.log(JSON.stringify({frames:items.length,steps:E.steps.length,warn:[...E.warn]}));
