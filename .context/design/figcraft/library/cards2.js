@@ -1,0 +1,58 @@
+const { section } = require("./found.js");
+
+function mobileCards(b, pan) {
+  const W = 358, base = { fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 8, pad: 16, sizeH: "fixed", sizeV: "hug" };
+  const one = (name, build) => b.set(pan, name, [{ name: "Card", w: W, h: 150, frame: base, build }], { cols: 1, cw: 400, ch: 220, W: 440, H: 250 });
+  const row = (cid, name) => b.frame(cid, { name, w: W - 32, h: 24, layout: "h", gap: 8, cross: "center", main: "spaceBetween", sizeH: "fill", sizeV: "hug" });
+  one("Card batch", (cid) => { const h = row(cid, "Head"); b.text(h, "B-2026-0417", { style: "Data/Strong", color: "Text/heading", name: "Number" }); b.instT(h, "Status badge", "Status=Analysis, Size=sm"); b.text(cid, "PT Bukit Asam", { style: "Body/SemiBold", name: "Company" }); b.text(cid, "Exploration · DH-BKA-009", { style: "Caption/Regular", color: "Text/text-secondary", name: "Meta" }); const f = row(cid, "Foot"); b.instT(f, "Progress bar", "Tone=Primary", { Value: "18/24" }); b.text(f, "Due 21 Oct", { style: "Caption/Medium", color: "Text/text-secondary", name: "Due" }); });
+  one("Card job order", (cid) => { const h = row(cid, "Head"); b.text(h, "JO-2026-0142", { style: "Data/Strong", color: "Text/heading", name: "Number" }); b.instT(h, "Status badge", "Status=In progress, Size=sm"); b.text(cid, "PT Bara Nusantara Mandiri", { style: "Body/SemiBold", name: "Client" }); b.text(cid, "Prox + TM + TS + CV · ASTM", { style: "Caption/Regular", color: "Text/text-secondary", name: "Service" }); const f = row(cid, "Foot"); b.text(f, "Samples 12 / 12", { style: "Caption/Medium", color: "Text/text-secondary", name: "Samples" }); b.text(f, "Due 24 Oct", { style: "Caption/Medium", color: "Text/text-secondary", name: "Due" }); });
+  one("Card drill hole", (cid) => { const h = row(cid, "Head"); b.text(h, "BTBB_035-R2", { style: "Data/Strong", color: "Text/heading", name: "Code" }); b.inst(h, "Tag", "Type=No CoA"); b.text(cid, "19 samples", { style: "Caption/Regular", color: "Text/text-secondary", name: "Samples" }); const f = b.frame(cid, { name: "Files", w: 200, h: 24, layout: "h", gap: 6, sizeH: "hug", sizeV: "hug" }); ["PDF", "XLS", "CSV"].forEach((t) => b.inst(f, "File chip", `Type=${t}, State=Available`)); });
+  one("Card sample entry", (cid) => { const h = row(cid, "Head"); b.text(h, "BNM-3501", { style: "Data/Strong", color: "Text/heading", name: "Sample ID" }); b.inst(h, "Tag", "Type=Printed"); const g = b.frame(cid, { name: "Fields", w: W - 32, h: 52, layout: "h", gap: 12, sizeH: "fill", sizeV: "hug" }); const m = b.frame(g, { name: "Mass", w: 140, h: 52, layout: "v", gap: 4, sizeH: "fill", sizeV: "hug" }); b.text(m, "Mass (kg)", { style: "Caption/Medium", color: "Text/text-secondary", name: "MassLabel" }); b.instT(m, "Cell input", "State=Default", { Value: "2.40" }, { sizingH: "fill" }); const c = b.frame(g, { name: "Condition", w: 140, h: 52, layout: "v", gap: 4, sizeH: "fill", sizeV: "hug" }); b.text(c, "Condition", { style: "Caption/Medium", color: "Text/text-secondary", name: "ConditionLabel" }); const s = b.frame(c, { name: "Select", w: 140, h: 32, fill: "Surface/card", stroke: "Surface/border-strong", sw: 1, r: 6, layout: "h", pad: [0, 8, 0, 8], cross: "center", sizeH: "fill", sizeV: "fixed" }); b.text(s, "Good", { style: "Body small/Regular", name: "Value", fill: true }); b.icon(s, "caret-down", 14, "Text/text-secondary"); });
+  const coa = ["Not generated", "Generated", "Sent"].map((st) => ({ name: `State=${st}`, w: 340, h: 110, frame: { fill: st === "Not generated" ? "Surface/muted" : "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 8, pad: 16, sizeH: "fixed", sizeV: "hug" },
+    build(cid) { const h = b.frame(cid, { name: "Head", w: 300, h: 24, layout: "h", gap: 8, cross: "center", sizeH: "fill", sizeV: "hug" }); b.icon(h, "certificate", 20, "Action/brand-text"); b.text(h, "Certificate of Analysis", { style: "Body/SemiBold", color: "Text/heading", name: "Title", fill: true }); b.inst(h, "Tag", st === "Sent" ? "Type=CoA uploaded" : st === "Generated" ? "Type=Saved" : "Type=Pending"); return { Text: b.text(cid, st === "Not generated" ? "The CoA is built from the approved RoA once every batch has been issued." : "CoA-JO-2026-0141-1 · revision 1", { style: "Body small/Regular", color: "Text/text-secondary", name: "Text", fill: true }) }; } }));
+  b.set(pan, "Card CoA", coa, { cols: 3, cw: 380, ch: 160, W: 1172, H: 192, textProps: ["Text"] });
+  one("Batch mini card", (cid) => { const h = row(cid, "Head"); b.text(h, "B-2026-0417", { style: "Data/Strong", color: "Text/heading", name: "Number" }); b.instT(h, "Status badge", "Status=Analysis, Size=sm"); b.text(cid, "12 samples", { style: "Caption/Regular", color: "Text/text-secondary", name: "Samples" }); const p = b.frame(cid, { name: "People", w: 200, h: 24, layout: "h", gap: 6, cross: "center", sizeH: "hug", sizeV: "hug" }); b.inst(p, "Avatar", "Size=24"); b.inst(p, "Avatar", "Size=24"); });
+}
+
+function calendar(b, pan) {
+  const dv = [];
+  for (const st of ["Default", "Today", "Selected", "Has due"]) {
+    const on = st === "Today" || st === "Selected";
+    dv.push({ name: `State=${st}`, w: 40, h: 56, frame: { fill: st === "Today" ? "Action/action" : st === "Selected" ? "Primary/primary-100" : "none", r: 10, layout: "v", gap: 2, pad: [6, 0, 6, 0], main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed" },
+      build(cid) { const w = b.text(cid, "Wed", { style: "Caption/Medium", color: st === "Today" ? "Text/text-inverse" : "Text/text-muted", name: "Weekday" }); const d = b.text(cid, "21", { style: "Body/SemiBold", color: st === "Today" ? "Text/text-inverse" : "Text/foreground", name: "Date" }); const dot = b.frame(cid, { name: "Dot", w: 5, h: 5, fill: st === "Today" ? "Accent/accent-soft" : "Accent/accent", r: 3 }); if (st !== "Has due" && st !== "Today") b.raw("node.set", { ids: [dot], props: { visible: false } }); return { Weekday: w, Date: d }; } });
+  }
+  b.set(pan, "Calendar day", dv, { cols: 4, cw: 80, ch: 80, W: 352, H: 112, textProps: ["Weekday", "Date"] });
+  const cal = b.component(pan, { name: "Mini calendar", w: 340, h: 120, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 10, pad: 16, sizeH: "fixed", sizeV: "hug" });
+  const h = b.frame(cal, { name: "Header", w: 308, h: 28, layout: "h", cross: "center", main: "spaceBetween", sizeH: "fill", sizeV: "hug" });
+  b.icon(h, "caret-left", 14, "Text/text-secondary"); b.text(h, "October 2026", { style: "Body/SemiBold", color: "Text/heading", name: "Month" }); b.icon(h, "caret-right", 14, "Text/text-secondary");
+  const r = b.frame(cal, { name: "Days", w: 308, h: 56, layout: "h", gap: 0, main: "spaceBetween", sizeH: "fill", sizeV: "hug" });
+  ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((wd, i) => { const st = i === 2 ? "Today" : i === 1 || i === 4 ? "Has due" : "Default"; const d = b.instT(r, "Calendar day", `State=${st}`, { Weekday: wd, Date: String(19 + i) }); });
+  const di = b.component(pan, { name: "Deadline item", w: 308, h: 56, layout: "v", gap: 4, pad: [10, 0, 10, 0], sizeH: "fixed", sizeV: "hug" });
+  const dr = b.frame(di, { name: "Head", w: 308, h: 22, layout: "h", gap: 8, cross: "center", main: "spaceBetween", sizeH: "fill", sizeV: "hug" });
+  b.text(dr, "B-2026-0417", { style: "Data/Strong", color: "Text/heading", name: "Batch" }); b.inst(dr, "Tag", "Type=Due today");
+  b.text(di, "Wed 21 Oct · 17:00 · PT Bukit Asam", { style: "Caption/Regular", color: "Text/text-secondary", name: "Meta", fill: true });
+}
+
+function misc(b, pan) {
+  const ph = ["Image", "Empty", "Uploading"].map((st) => ({ name: `State=${st}`, w: 88, h: 88, frame: { fill: st === "Image" ? "Surface/sand" : "Surface/muted", stroke: st === "Image" ? undefined : "Surface/border-strong", sw: 1.5, dash: st === "Empty" ? [5, 4] : undefined, r: 12, layout: "v", gap: 4, main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed", clip: true },
+    build(cid) { if (st === "Image") b.icon(cid, "package", 20, "Text/text-muted"); if (st === "Empty") { b.icon(cid, "plus", 20, "Action/brand-text"); b.text(cid, "Add photo", { style: "Caption/Medium", color: "Action/brand-text", name: "Label" }); } if (st === "Uploading") { b.icon(cid, "spinner", 20, "Action/brand-text"); b.text(cid, "62%", { style: "Caption/SemiBold", color: "Text/text-secondary", name: "Label" }); } } }));
+  b.set(pan, "Photo thumbnail", ph, { cols: 3, cw: 130, ch: 120, W: 422, H: 152 });
+  const lp = b.component(pan, { name: "Label preview", w: 240, h: 110, fill: "Surface/card", stroke: "Surface/border-strong", sw: 1, r: 8, layout: "v", gap: 6, pad: 12, sizeH: "fixed", sizeV: "hug" });
+  const t1 = b.text(lp, "B0420-01", { style: "Data/Strong", color: "Text/heading", name: "Lab code" });
+  const bars = b.frame(lp, { name: "Barcode", w: 216, h: 40, layout: "h", gap: 2, sizeH: "fill", sizeV: "fixed" });
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  for (let i = 0; i < 38; i++) b.frame(bars, { name: "Bar", w: 2 + Math.floor(rnd() * 3), h: 40, fill: "Text/foreground", sizeV: "fixed" });
+  b.text(lp, "BNM-3501 · PT Bara Nusantara", { style: "Caption/Regular", color: "Text/text-secondary", name: "Client", fill: true });
+  const es = ["Page", "Card"].map((sz) => ({ name: `Size=${sz}`, w: sz === "Page" ? 480 : 320, h: 220, frame: { layout: "v", gap: 10, pad: sz === "Page" ? 40 : 24, main: "center", cross: "center", sizeH: "fixed", sizeV: "hug", fill: sz === "Card" ? "Surface/muted" : "none", r: 16 },
+    build(cid) { const c = b.frame(cid, { name: "Icon", w: 48, h: 48, fill: "Primary/primary-50", r: 24, layout: "h", main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed" }); b.icon(c, "tray", 20, "Action/brand-text"); const t = b.text(cid, "No batches yet", { style: "Heading/H3", color: "Text/heading", name: "Title", align: "center" }); const d = b.text(cid, "Create a batch from the samples that have arrived.", { style: "Body small/Regular", color: "Text/text-secondary", name: "Text", align: "center", w: sz === "Page" ? 360 : 260 }); const a = b.instT(cid, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { Label: "Add batch" }); return { Title: t, Text: d, Action: a }; } }));
+  b.set(pan, "Empty state", es, { cols: 2, cw: 540, ch: 280, W: 1112, H: 312, textProps: ["Title", "Text"], bools: [{ name: "Action", key: "Action", default: true }] });
+  const sk = ["Line", "Row", "Card"].map((sh) => ({ name: `Shape=${sh}`, w: 300, h: 40, frame: { layout: "v", gap: 8, pad: sh === "Card" ? 16 : 0, sizeH: "fixed", sizeV: "hug", fill: sh === "Card" ? "Surface/card" : "none", stroke: sh === "Card" ? "Surface/border" : undefined, sw: 1, r: 12 },
+    build(cid) { const n = sh === "Line" ? 1 : sh === "Row" ? 2 : 3; for (let i = 0; i < n; i++) b.frame(cid, { name: "Bar", w: i === 0 ? 260 : 180, h: sh === "Card" && i === 0 ? 20 : 12, fill: "Surface/sand", r: 6, sizeV: "fixed" }); } }));
+  b.set(pan, "Skeleton", sk, { cols: 3, cw: 340, ch: 120, W: 1052, H: 152 });
+}
+function cards2(b, host) {
+  mobileCards(b, section(b, host, "List cards (phone and tablet)", "Card batch, Card job order, Card drill hole, Card sample entry (Reception), Card CoA and Batch mini card."));
+  calendar(b, section(b, host, "Calendar and deadlines", "Calendar day states and the week strip; Deadline item for the dashboard."));
+  misc(b, section(b, host, "Photos, labels, empty and loading", "Photo thumbnail for reception photos, Label preview for printing, Empty state for every list and grid, Skeleton while data loads."));
+}
+module.exports = { cards2 };

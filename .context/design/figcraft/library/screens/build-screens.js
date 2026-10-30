@@ -1,0 +1,23 @@
+const fs = require("fs"), cp = require("child_process");
+const { B } = require("../dsl.js");
+const { loadReg } = require("./reg.js");
+require("./shell.js");
+const run = require("../run.js");
+const CLI = "C:/Users/pc/figcraft/app/figcraft-0.12.1-windows-x64-portable/figcraft-cli.exe";
+const dir = "D:/SGSI/LIMS/.context/design/figcraft";
+const MAIN = dir + "/SGSI-LIMS-screens.figcraft";
+const json = process.env.JSON_IN || "C:/Users/pc/AppData/Local/Temp/main.json";
+cp.execFileSync(CLI, ["convert", MAIN, json]);
+const J = JSON.parse(fs.readFileSync(json));
+const reg = loadReg(J);
+const b = new B(J.next_id).useReg(reg).regSets();
+b.logo = {};
+const rows = (process.argv[2] || "A").split(",");
+// pages
+b.raw("page.rename", { id: 1, name: "Library" });
+b.raw("page.add", { name: "Job orders" }); b.id += 1;
+for (const r of rows) require("./row" + r + ".js").build(b);
+b.applyTextStyles();
+b.raw("file.save", { path: dir + "/scratch/screens.figcraft" });
+const res = run(b, MAIN, dir + "/scratch/screens.figcraft", "screens");
+module.exports = { b, res };

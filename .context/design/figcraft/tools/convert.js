@@ -79,7 +79,7 @@ function convert(el, parent, svgs) {
     const lh = m ? m[2] : "normal";
     if (lh !== "normal") out.lh = /px$/.test(lh) ? num(lh) : +(parseFloat(lh) * out.fs).toFixed(2);
     const col = get(/^text-\[(#[0-9A-Fa-f]{6,8})\]$/); if (col) out.c = normHex(col);
-    const ff = get(/^font-\['([^']+)'/) || get(/^font-\[([A-Za-z_]+),/); if (ff && un(ff) !== "Montserrat") out.ff = un(ff);
+    const ff = get(/^font-\['([^']+)'/) || get(/^font-\[([A-Za-z_]+),/); if (ff && un(ff) !== "Noto Sans") out.ff = un(ff);
     const fwv = cs.includes("font-bold") ? 700 : cs.includes("font-semibold") ? 600 : cs.includes("font-medium") ? 500 : 400; if (fwv !== 400) out.fw = fwv;
     if (cs.includes("italic")) out.it = 1;
     const ls = get(/^tracking-\[(-?[\d.]+)px\]$/); if (ls) out.ls = +ls;

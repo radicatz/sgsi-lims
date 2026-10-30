@@ -3,6 +3,122 @@
 Oct 21, 2026 · screen S-17 in `Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
 Revised Oct 27, 2026 after the first review: see **Revision 2**; **Revision 3** (contact dropdown, hint clean-up) is planned and waits for approval. It covers company and contacts, the Standard field, parameter pills, the stepper, tab order, and the new Add batch screen.
 
+Revision 6 (Oct 30, 2026, **PLAN, waiting for approval**): the job order frames are redrawn from scratch in FigCraft, built only from the new component library. See the next section.
+
+## Revision 6 · Redraw in FigCraft from the component library (Oct 30, 2026) · PLAN
+
+Written for: the product owner, who approves the plan, and whoever builds or reviews the frames.
+
+### 6.1 Why and where
+
+The screens were deleted on Oct 30 so they can be rebuilt on the new library (74 component sets, Noto Sans, tokens bound by role). The job order flow goes first because every later screen reuses its shell, list, detail and modal patterns.
+
+| Item | Plan |
+| --- | --- |
+| Where | A **new page "Job orders"** in `SGSI-LIMS-screens.figcraft`. The library stays on "Page 1" (renamed **Library**). A separate `.figcraft` file is not used: a second file cannot reach the components without publishing a library, so the screens would lose their link to the components (see open point R6-1) |
+| Content | The current design, which is the sum of Revisions 2, 3, 3b, 4, 5 and C (Reception plan section 15). No new features |
+| Source of truth for behaviour | This plan, `Job_Order_Prototype_Plan.md` sections 5 and 6, and Reception plan sections 14 and 15. The live prototype (artifact version 30) shows the intended interaction |
+| Reference look | The old frames in `.context/design/export/*.png` (layout, density, demo data). They are not copied pixel for pixel: they become library instances, with the changes in 6.3 |
+| Sizes | Desktop 1440, tablet 834, phone 390, as before |
+| Light and dark | Frames are drawn in Light mode. One frame is switched to the Dark mode of the variables as a preview (no separate dark drawing) |
+
+### 6.2 Frames
+
+Grouped in rows on the new page; each row has a title. **52 frames.**
+
+| Row | Frame | Sizes | State and demo data |
+| --- | --- | --- | --- |
+| A · List | List | D, T, P | 128 job orders, status chips, filters, 10 rows (one past due, one cancelled, two CoA sent) |
+| | List · Empty | D | First use: `clipboard-text`, help line, **New job order** |
+| B · Create | Create (modal 720 over the dimmed list) | D, T | JO for PT Bara Nusantara Mandiri, template TM + Prox + TS + CV, drawn at full length |
+| | Create · Step 1, Step 2 | P, P | Full-screen form in two steps, sticky Next and Submit |
+| | Contact dropdown · List, · Edit | D, D | List: Budi Hartono checked; Edit: new row with inputs and the save icon, other rows dimmed |
+| | Contact sheet · List, · Edit | P, P | Bottom sheet versions |
+| | Signatory dropdown · List, · Edit | D, D | Ir. Bambang Sutrisno, M.T. checked |
+| | Signatory sheet · List, · Edit | P, P | Bottom sheet versions |
+| | Ash analysis open | D | Checklist popover, 9 of 29 selected |
+| | Ash analysis sheet | P | **New:** the phone bottom sheet, never drawn before |
+| | P1 Validation errors | D | Summary "Fix 3 fields to submit", three fields in error |
+| | P10 Remove contact | D | Dialog over the open contact dropdown |
+| | P11 Coking coal, ASTM + GB/T | D | **Updated** to the open point 11 rule (see 6.3) |
+| C · Detail | Overview | D, T, P | JO-2026-0142: stepper on Analysis, Properties, Batches card, CoA card (not ready) |
+| | Overview · Dark preview | D | The desktop Overview with the frame set to the Dark mode |
+| | Batches | D, T, P | JO-2026-0142: B-2026-0417 Completed with RoA number and PDF link, B-2026-0418 Analysis |
+| | Batches · Empty | D, T | JO-2026-0137, **+ Add batch** |
+| | Batches · Samples awaiting arrival | D | Revision B: the line about samples waiting, with the link to Add batch |
+| | Samples | D, T, P | JO-2026-0134: 6 expected, editable grid (phone: cards) |
+| | Samples · Mixed states | D, T, P | JO-2026-0137: 4 received, 2 in batch (B-2026-0421), 1 awaiting arrival, 1 not received; counts line "8 samples · 4 received · 2 in batch · 1 awaiting arrival · 1 not received" |
+| | Samples · Mark as not received | D, P | Dialog with the required reason |
+| | P2 Submitted toast | D | Empty Samples tab with "JO-2026-0143 submitted · add the sample IDs next" |
+| | P3 Paste preview | D | 12 rows found, 11 new, 1 duplicate |
+| | P4 Unsaved rows | D | Unsaved dots, duplicate message |
+| | P5 Locked row tooltip | D | "Received on 21 Oct by Dedi Kurniawan" |
+| D · Add batch | Add batch (modal 720 over Batches · Empty) | D, T | JO-2026-0137: batch number editable with the pattern hint, Standard ASTM or GB/T, 8 of 16 samples ticked, "+ HGI compared with the job order" |
+| | Add batch · Step 1, Step 2 | P, P | **Redrawn:** these two frames went missing on Oct 27 |
+| | Add batch · Late samples | D | Revision B: the awaiting-arrival samples pre-selected |
+| E · CoA and actions | CoA · Mark sent | D | Dialog: date, channel (segmented), recipient pre-filled |
+| | CoA · Sent | D | "Sent via WhatsApp to Budi Hartono · 25 Oct", stepper complete |
+| | Mark sent sheet | P | Bottom sheet |
+| | P7 Cancel job order | D | Destructive dialog with the required reason |
+
+D = desktop 1440, T = tablet 834, P = phone 390.
+
+**Dropped compared with the old file:** the four tablet dropdown frames (contact and signatory, list and edit), because on tablet the dropdown is the same panel at the same width as on desktop; the separate Mobile · Create step 2 duplicate (P8 was a copy of Step 2); and Create · Dark mode preview (replaced by the Overview dark preview). Tell me if you want any of them back.
+
+### 6.3 What changes against the old frames
+
+| # | Change | Why |
+| --- | --- | --- |
+| 1 | Every part is an instance of the library: Sidebar, Top bar, Page header, Tabs, Stepper, Filter chips, Table rows, Cards, Fields, Dialog, Side sheet, Bottom sheet, Toast | One change in a component reaches every screen |
+| 2 | **Five sample states** with real per-row badges and the counts line | Open item 1 of the Reception plan 15.13: the old frames only had the text rename |
+| 3 | Batches show **Completed with the RoA number and a PDF link** | Revision C |
+| 4 | Add batch: **batch number editable** with "Pattern B-YYYY-NNNN. The number must be unique." | Revision C (C1) |
+| 5 | Coking pills follow the **open point 11 rule**: Gray-King, Y value and G index are unavailable under ASTM only ("No ASTM method. Add ISO or GB/T under Standard."); pills not covered by every standard carry a tag with the standards that cover them ("ISO · GB/T") | Already in the prototype since version 25; the old frames still said "GB/T only" |
+| 6 | Parameter pill **On** = tinted fill, blue border and a check icon | Prototype rule (colour is never the only signal). The library pill is currently a solid navy fill without a check; see 6.4 |
+| 7 | Phone Add batch frames redrawn; phone Ash analysis sheet drawn | Missing in the old file |
+| 8 | Performer chip gone; batch rows name who did what as text ("Prep: Dedi K. · Analysis: Fitri H.") | Revision C (C5) |
+| 9 | Dark mode is a variable mode, not separate drawings | The library is fully token-bound |
+
+### 6.4 Library changes needed first
+
+Small additions to the library generator (`.context/design/figcraft/library/`), made before the screens:
+
+| Component | Change |
+| --- | --- |
+| Sidebar | New variant property **Active** (My work, Dashboard, Job orders, Batches, and the other items), so each screen picks its highlighted item |
+| Dialog | New size **xl (720)** for the Create, Edit and Add batch modals; the body slot holds the form |
+| Parameter pill | On state as in 6.3 (6); new state **Unavailable** (disabled with tooltip text) and an optional **coverage tag** ("ISO · GB/T", "subcontracted") |
+| Option row | New states **Editing** (name, phone and email inputs, save icon) and **Dimmed** (other rows while one is edited), for the contact and signatory dropdowns |
+| Table row | New templates **Job order compact** (tablet list) and **Job order batch** (Batches tab: batch no., standard, samples, parameters, status, performers, RoA, deadline); the Sample template gets an **Unsaved** state (dot) |
+| Stepper | No change: the job order uses Steps=6 with its own step names |
+
+The library is rebuilt by the same scripts in order (`build.js`, `finish.js`, the Foundations merge and the dark-mode fix). This regenerates the library, so the main file is checked first: if it changed since my last save (your edits in the app), I stop and ask before rebuilding.
+
+### 6.5 How it is built
+
+1. Library changes (6.4), rebuilt and checked by render.
+2. A screen generator (`library/screens/`): an app-shell builder (sidebar, top bar, page area at each size), the demo data, and one function per frame. It writes to a copy of the file; nothing touches the main file until the frames pass the checks.
+3. Every frame is rendered and checked: no clipping, no horizontal page scroll, 44 px touch targets on tablet and phone, text inside its box.
+4. The copy replaces the main file; old version to `backup/`.
+5. Docs: build status here, README, memory.
+
+I will show you renders after step 1 and after the first row (A · List), then build the rest.
+
+### 6.5b Build status (Oct 30, 2026): row A built
+
+Answers: new page in the same file (R6-1); tablet dropdown frames dropped (R6-4); keep "RoA approved" (R6-2); keep Input ROA and Review ROA in the sidebar for now (R6-3).
+
+Built on the page **Job orders** (the library page is renamed **Library**): List · Desktop, List · Empty · Desktop, List · Tablet, List · Phone. The shell (top bar, sidebar with the active item, content area) is generated at three sizes from library instances. Library changes made for row A, in the generator (`library/screens/`), not by hand: the job order table row is narrower (1102) with a flexible Company column; new `Table header row compact` and `Table row compact` for the tablet list; the old `Card job order` is replaced by a card with progress, RoA and CoA lines and a past-due state. The other changes in 6.4 (pill On state, Dialog 720, Option row editing) come with rows B to D. The CoA column uses the existing Tag variants (No CoA, Saved with the text Published, CoA uploaded with the text Sent · channel); a dedicated CoA tag is a later library item.
+
+### 6.6 Open points
+
+| # | Question | Default if not answered |
+| --- | --- | --- |
+| R6-1 | "New page file": a new **page** in the same file, or a separate `.figcraft` file? | New page "Job orders" in the same file, because a separate file loses the link to the components |
+| R6-2 | Job order stepper in v1: the fourth step is "RoA approved", but in v1 the batch completes when the lab's signed RoA is uploaded | Keep "RoA approved" (the signature on the uploaded RoA is the approval) |
+| R6-3 | Sidebar in v1: **Input ROA** and **Review ROA** describe the worksheet flow, which is out of v1 (results are entered in the batch's Analysis tab) | Keep both items for now; to settle when the batch screens are redrawn |
+| R6-4 | Tablet dropdown frames dropped (6.2) | Dropped |
+
 ## Why this screen first
 
 The Oct 20–21 changes added a record that every other screen now depends on: the **job order**. The CSO creates it (step 1 of the flow), the sample IDs are registered on it, the Preparation team labels with those IDs, batches sit inside it, and the one CoA per job order hangs off it. Nothing in `screens.pen` shows it yet.

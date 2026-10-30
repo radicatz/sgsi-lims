@@ -13,8 +13,8 @@
   --action:#1B3A6F;--action-hover:#15305C;--action-foreground:#FFFFFF;--action-strong:#0E2A4E;--brand-text:#1B3A6F;--nav-active:#0E2A4E;
   --scrim:rgba(14,42,78,.42);--shadow-1:0 1px 2px rgba(14,42,78,.06);--shadow-2:0 8px 24px rgba(20,33,61,.18);
   --review:#0E2A4E;--review-fg:#FFFFFF;--review-soft:rgba(255,255,255,.14);--review-line:rgba(255,255,255,.24);
-  --f-body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;--f-display:"Newsreader",Georgia,"Times New Roman",serif;--f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
-  --r-xs:4px;--r-sm:8px;--r-md:12px;--r-lg:16px;--logo:url("data:image/png;base64,__LOGO__");
+  --f-body:"Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-display:"Newsreader",Georgia,"Times New Roman",serif;--f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r-xs:4px;--r-sm:8px;--r-md:12px;--r-lg:16px;--logo:url("data:image/svg+xml;base64,__LOGO__");
 }
 *{box-sizing:border-box}
 html,body{min-height:100%}
@@ -483,7 +483,7 @@ textarea.input{height:auto;min-height:80px;padding:10px 14px;resize:vertical}
   --st-created:#9AA3B8;--st-created-100:#1F2638;--st-prep:#E8A93A;--st-prep-100:#3A2E12;--st-analysis:#8DB4F0;--st-analysis-100:#1E3A66;--st-finished:#B79CF0;--st-finished-100:#2B2244;--st-completed:#4FB287;--st-completed-100:#12302A;
   --action:#8DB4F0;--action-hover:#A9C6F5;--action-foreground:#0A1A33;--action-strong:#8DB4F0;--brand-text:#8DB4F0;--nav-active:#1E3A66;
   --scrim:rgba(2,8,18,.62);--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 8px 24px rgba(0,0,0,.5);
-  --review:#081B38;--logo:url("data:image/png;base64,__LOGO_WHITE__");}
+  --review:#081B38;--logo:url("data:image/svg+xml;base64,__LOGO_WHITE__");}
 :root[data-theme="dark"] .device{box-shadow:0 0 0 1px var(--border),0 18px 50px rgba(0,0,0,.5)}
 
 /* ---------- Revision C: photos and analysis ---------- */

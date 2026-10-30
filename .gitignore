@@ -15,3 +15,7 @@ desktop.ini
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# FigCraft work files: rebuild scratch and file backups (local only)
+.context/design/figcraft/scratch/
+.context/design/figcraft/backup/

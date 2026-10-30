@@ -7,8 +7,8 @@ const place=(name,id)=>{const f=fr[id];if(!f)return;if(x>0&&x+f.width>W){x=0;y+=
 const orig=+nOrig;
 ids.slice(0,orig).forEach(([n,id])=>place(n,id));
 x=0;y+=rowH+400;rowH=0;
-steps.push({command:"node.create",params:{type:"text",text:"Batch · Revision C Row",x:0,y:y-90,props:{fontFamily:"Montserrat",fontStyle:"SemiBold",fontSize:40,fill:"#0E2A4E"}}});
+steps.push({command:"node.create",params:{type:"text",text:"Batch · Revision C Row",x:0,y:y-90,props:{fontFamily:"Noto Sans",fontStyle:"SemiBold",fontSize:40,fill:"#0E2A4E"}}});
 ids.slice(orig).filter(([n])=>n!=="Component library").forEach(([n,id])=>place(n,id));
 const lib=ids.find(([n])=>n==="Component library");
-if(lib){x=0;y+=rowH+400;rowH=0;steps.push({command:"node.create",params:{type:"text",text:"Component library",x:0,y:y-90,props:{fontFamily:"Montserrat",fontStyle:"SemiBold",fontSize:40,fill:"#0E2A4E"}}});place(lib[0],lib[1]);}
+if(lib){x=0;y+=rowH+400;rowH=0;steps.push({command:"node.create",params:{type:"text",text:"Component library",x:0,y:y-90,props:{fontFamily:"Noto Sans",fontStyle:"SemiBold",fontSize:40,fill:"#0E2A4E"}}});place(lib[0],lib[1]);}
 fs.writeFileSync(outFile,JSON.stringify(steps));console.log(steps.length,"layout steps; end y",y+rowH);

@@ -9,8 +9,8 @@ import pathlib
 HERE = pathlib.Path(__file__).resolve().parent
 SRC = HERE / "src"
 OUT = HERE / "job-order-prototype.html"
-LOGO = HERE.parent / "assets" / "sgsi-logo-icon.png"
-LOGO_WHITE = HERE.parent / "images" / "sgsi-logo-white.png"
+LOGO = HERE.parent / "assets" / "sgsi-icon-primary.svg"
+LOGO_WHITE = HERE.parent / "assets" / "sgsi-icon-white.svg"
 
 
 def read(name):

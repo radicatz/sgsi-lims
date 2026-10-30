@@ -105,7 +105,7 @@ class Emitter {
     const place = {};
     if (parent !== undefined) { if (abs) { place.x = s.ab[0]; place.y = s.ab[1]; } }
     if (s.k === "t") {
-      const fw = s.fw || 400, family = s.ff || "Montserrat";
+      const fw = s.fw || 400, family = s.ff || "Noto Sans";
       let style = STYLE[fw] || "Regular";
       if (family === "JetBrains Mono" && fw === 600) style = "Bold";
       if (s.it) style = style === "Regular" ? "Italic" : style + " Italic";
