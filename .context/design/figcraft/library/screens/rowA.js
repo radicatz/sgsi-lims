@@ -15,7 +15,6 @@ function head(b, main, kind, count) {
   const left = b.frame(hdr, { name: "Title block", w: 500, h: 90, layout: "v", gap: 4, sizeH: kind === "phone" ? "fill" : "hug", sizeV: "hug" });
   b.text(left, kind === "desktop" ? "WORK · TUESDAY 21 OCTOBER 2026" : "WORK · JOB ORDERS", { style: "Overline", color: "Text/text-muted", name: "Overline" });
   b.text(left, "Job orders", { style: kind === "phone" ? "Heading/H1" : "Display/XL", color: "Text/heading", name: "Title" });
-  b.text(left, count, { style: "Body small/Regular", color: "Text/text-secondary", name: "Subtitle" });
   if (kind !== "phone") b.instV(hdr, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { texts: { Label: "New job order" }, setProps: { "Leading icon": true } });
   return hdr;
 }
@@ -77,7 +76,7 @@ function listTablet(b, x, y) {
     const [no, co, attn, svc, smp, bat, due, dueState, st, coa] = d;
     const n = smp.split(" / ");
     const t = { Number: no, Company: co, Line: `${n[1]} samples · ${svc}`, Due: due.replace(" 2026", "") };
-    b.instV(c, "Table row compact", "Template=Job order, State=Default", { texts: t, fills: dueState === "late" ? { Due: "Feedback/error" } : undefined, swaps: [["Badge", "Status badge", status(st)], ["Tag", "Tag", `Type=${coa[0]}`]], props: { sizingH: "fill" } });
+    b.instV(c, "Table row compact", "Template=Job order, State=Default", { texts: t, fills: dueState === "late" ? { Due: "Feedback/error" } : undefined, swaps: [["Status badge", "Status badge", status(st)], ["Tag", "Tag", `Type=${coa[0]}`]], props: { sizingH: "fill" } });
   });
   footer(b, c, "tablet");
   return s;
@@ -113,4 +112,4 @@ exports.build = (b) => {
   listTablet(b, 3120, 0);
   listPhone(b, 4074, 0);
 };
-exports.listDesktop = listDesktop;
+exports.listDesktop = listDesktop; exports.listTablet = listTablet;

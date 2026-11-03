@@ -51,6 +51,7 @@ class B {
     if (o.sizeH) props.sizingH = o.sizeH; if (o.sizeV) props.sizingV = o.sizeV;
     if (o.absolute) props.absolute = true;
     const p = { type: o.type || "frame", name: o.name, parent, x: o.x || 0, y: o.y || 0, width: o.w || 100, height: o.h || 100, props };
+    if (o.index !== undefined) p.index = o.index;
     const id = this.step("node.create", p, 1);
     (this.pend || []).forEach(([f, v]) => this.bind(id, f, v));
     this.pend = [];
@@ -63,6 +64,7 @@ class B {
     if (ls) props.letterSpacing = ls; if (tc) props.textCase = tc;
     this.pend = []; this.paint(0, props, { fill: o.color || "Text/foreground" });
     const p = { type: "text", text: str, name: o.name || str, parent, x: o.x || 0, y: o.y || 0, props };
+    if (o.index !== undefined) p.index = o.index;
     if (o.w) { p.width = o.w; props.textAutoResize = "height"; if (o.fill) props.sizingH = "fill"; } else if (o.fill) { props.textAutoResize = "height"; props.sizingH = "fill"; }
     const id = this.step("node.create", p, 1);
     (this.pend || []).forEach(([f, v]) => this.bind(id, f, v)); this.pend = [];

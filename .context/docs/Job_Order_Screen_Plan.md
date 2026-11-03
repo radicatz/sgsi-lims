@@ -3,7 +3,34 @@
 Oct 21, 2026 · screen S-17 in `Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
 Revised Oct 27, 2026 after the first review: see **Revision 2**; **Revision 3** (contact dropdown, hint clean-up) is planned and waits for approval. It covers company and contacts, the Standard field, parameter pills, the stepper, tab order, and the new Add batch screen.
 
-Revision 6 (Oct 30, 2026, **PLAN, waiting for approval**): the job order frames are redrawn from scratch in FigCraft, built only from the new component library. See the next section.
+Revision 7 (Nov 2, 2026, **BUILT** in the frames): the Create form follows the prototype (version 31) and three owner changes; the FigCraft file is organised by screen size. See the next section.
+
+Revision 6 (Oct 30, 2026, built in part): the job order frames are redrawn from scratch in FigCraft, built only from the new component library. See the section after Revision 7.
+
+## Revision 7 · Prototype sync and Create form changes (Nov 2, 2026) · BUILT
+
+Written for: the product owner and whoever builds or reviews the frames and the prototype.
+
+The prototype (artifact version 31, read from its source) had moved ahead of the row B frames. The frames now match it, plus three changes the product owner asked for. Frames affected: every Create frame at three sizes, the contact and signatory dropdowns and sheets, P1, P10, P11 and the Ash analysis popover and sheet.
+
+| # | Change | Source | What the frames show now |
+| --- | --- | --- | --- |
+| 1 | **Contact person is one field**, not rows of contacts. A select box showing name, phone and email (phone: name and phone), disabled until a company is chosen. The company's contacts open in the dropdown (desktop, tablet) or sheet (phone). The rows with phone, email and trash, the "Primary contact" note and the **+ Add contact** button under the field are gone (the button lives in the dropdown) | Prototype | Create · Desktop, Tablet, Step 1; Company name and Client reference / PO share a row on desktop and tablet |
+| 2 | **Preparation is a parameter pill**, the first row of the Parameters block, on by default. The switch "Sample preparation by the lab" is gone. Off means the client sends a ready −212 µm analysis sample | Prototype | Row "Preparation" with one pill; the count "8 selected" counts it |
+| 3 | **Search parameters** is a search field between the quick select and the first row of pills ("Search parameters…"). The prototype only shows a ghost button that explains it is specified, not built | Prototype, owner's choice of look | Search field on desktop, tablet and phone |
+| 4 | **A selected parameter pill has no icon.** On = tinted fill, blue border, dark blue text. Locked keeps its lock, Auto-added its sparkle. The check icon on the selected standard chips stays | Owner | Library: Parameter pill, State=On |
+| 5 | **Expected samples shows a hint, not a value**: the placeholder is the muted text "e.g. 12". The earlier frames showed 12 as an entered value (in the prototype the placeholder is a bare "12", which looks like data). The filled frames keep 12 as entered data; the P1 frame shows the empty field with the hint | Owner | P1 Validation errors |
+| 6 | **The Samples choice is removed** (Add samples now / Later). Submit always opens the new job order on its Samples tab with the toast "JO-2026-0143 submitted · add the sample IDs next" (frame P2) | Owner | Create · Step 2 has Report and Notes and files only |
+
+Smaller alignments with the prototype: a subtitle under the modal title ("Enter the company's request. Sample IDs come next."); a counter "N selected" beside Parameters; the quick-select buttons are **ghost buttons (text only)** with no selected state, because they are shortcuts that replace the selection and nothing more (hover is allowed); the "Matches: …" label, the standard helper line and the P11 info alert are not drawn (hints removed in Revision 3); the section "Other" is called **Notes and files**; Sample type reads Exploration cores and Priority reads Standard; the signatory label is "Default signatory (optional)"; the remove-contact dialog reads "Remove *name* from contacts?" with "Submitted job orders keep this contact's name on their documents."
+
+### 7.1 FigCraft pages by size
+
+`SGSI-LIMS-screens.figcraft` now has four pages: **Library** (components, foundations), **Desktop** (1440), **Tablet** (834) and **Mobile Phone** (390). Each screen frame sits on the page of its size. Desktop: List, List · Empty, and row B (Create, P1, P11, contact dropdown list and edit, remove contact, ash analysis open, signatory dropdown list and edit). Tablet: List, Create. Mobile Phone: List, Create step 1 and 2, contact and signatory sheets (list, edit), ash analysis sheet. New screens follow the same rule. The generator (`library/screens/rowB.js`) selects the page by size.
+
+### 7.2 Prototype follow-up
+
+The prototype (version 31) still differs from points 2 to 6: its Preparation pill and the other selected pills show a check, unselected pills a plus; Search parameters is a button with a toast; Expected samples has the placeholder "12"; and Create still shows Add samples now / Later. These are listed in the prototype plan, section 13, as the next prototype change.
 
 ## Revision 6 · Redraw in FigCraft from the component library (Oct 30, 2026) · PLAN
 
@@ -15,7 +42,7 @@ The screens were deleted on Oct 30 so they can be rebuilt on the new library (74
 
 | Item | Plan |
 | --- | --- |
-| Where | A **new page "Job orders"** in `SGSI-LIMS-screens.figcraft`. The library stays on "Page 1" (renamed **Library**). A separate `.figcraft` file is not used: a second file cannot reach the components without publishing a library, so the screens would lose their link to the components (see open point R6-1) |
+| Where | Pages by size in `SGSI-LIMS-screens.figcraft` (Revision 7: Library, Desktop, Tablet, Mobile Phone; first drawn on one page "Job orders"). The library stays on "Page 1" (renamed **Library**). A separate `.figcraft` file is not used: a second file cannot reach the components without publishing a library, so the screens would lose their link to the components (see open point R6-1) |
 | Content | The current design, which is the sum of Revisions 2, 3, 3b, 4, 5 and C (Reception plan section 15). No new features |
 | Source of truth for behaviour | This plan, `Job_Order_Prototype_Plan.md` sections 5 and 6, and Reception plan sections 14 and 15. The live prototype (artifact version 30) shows the intended interaction |
 | Reference look | The old frames in `.context/design/export/*.png` (layout, density, demo data). They are not copied pixel for pixel: they become library instances, with the changes in 6.3 |
@@ -49,7 +76,7 @@ Grouped in rows on the new page; each row has a title. **52 frames.**
 | | Samples | D, T, P | JO-2026-0134: 6 expected, editable grid (phone: cards) |
 | | Samples · Mixed states | D, T, P | JO-2026-0137: 4 received, 2 in batch (B-2026-0421), 1 awaiting arrival, 1 not received; counts line "8 samples · 4 received · 2 in batch · 1 awaiting arrival · 1 not received" |
 | | Samples · Mark as not received | D, P | Dialog with the required reason |
-| | P2 Submitted toast | D | Empty Samples tab with "JO-2026-0143 submitted · add the sample IDs next" |
+| | P2 Submitted toast | D | Empty Samples tab with "JO-2026-0143 submitted. Add the sample IDs next." |
 | | P3 Paste preview | D | 12 rows found, 11 new, 1 duplicate |
 | | P4 Unsaved rows | D | Unsaved dots, duplicate message |
 | | P5 Locked row tooltip | D | "Received on 21 Oct by Dedi Kurniawan" |
@@ -57,7 +84,7 @@ Grouped in rows on the new page; each row has a title. **52 frames.**
 | | Add batch · Step 1, Step 2 | P, P | **Redrawn:** these two frames went missing on Oct 27 |
 | | Add batch · Late samples | D | Revision B: the awaiting-arrival samples pre-selected |
 | E · CoA and actions | CoA · Mark sent | D | Dialog: date, channel (segmented), recipient pre-filled |
-| | CoA · Sent | D | "Sent via WhatsApp to Budi Hartono · 25 Oct", stepper complete |
+| | CoA · Sent | D | "Sent by WhatsApp to" + recipient + date as separate texts, stepper complete |
 | | Mark sent sheet | P | Bottom sheet |
 | | P7 Cancel job order | D | Destructive dialog with the required reason |
 
@@ -74,7 +101,7 @@ D = desktop 1440, T = tablet 834, P = phone 390.
 | 3 | Batches show **Completed with the RoA number and a PDF link** | Revision C |
 | 4 | Add batch: **batch number editable** with "Pattern B-YYYY-NNNN. The number must be unique." | Revision C (C1) |
 | 5 | Coking pills follow the **open point 11 rule**: Gray-King, Y value and G index are unavailable under ASTM only ("No ASTM method. Add ISO or GB/T under Standard."); pills not covered by every standard carry a tag with the standards that cover them ("ISO · GB/T") | Already in the prototype since version 25; the old frames still said "GB/T only" |
-| 6 | Parameter pill **On** = tinted fill, blue border and a check icon | Prototype rule (colour is never the only signal). The library pill is currently a solid navy fill without a check; see 6.4 |
+| 6 | Parameter pill **On** = tinted fill and blue border, **no icon** (Revision 7: the prototype's check icon is dropped on the owner's request; fill and border still tell On from Off) | Owner, Revision 7 |
 | 7 | Phone Add batch frames redrawn; phone Ash analysis sheet drawn | Missing in the old file |
 | 8 | Performer chip gone; batch rows name who did what as text ("Prep: Dedi K. · Analysis: Fitri H.") | Revision C (C5) |
 | 9 | Dark mode is a variable mode, not separate drawings | The library is fully token-bound |
@@ -87,7 +114,7 @@ Small additions to the library generator (`.context/design/figcraft/library/`), 
 | --- | --- |
 | Sidebar | New variant property **Active** (My work, Dashboard, Job orders, Batches, and the other items), so each screen picks its highlighted item |
 | Dialog | New size **xl (720)** for the Create, Edit and Add batch modals; the body slot holds the form |
-| Parameter pill | On state as in 6.3 (6); new state **Unavailable** (disabled with tooltip text) and an optional **coverage tag** ("ISO · GB/T", "subcontracted") |
+| Parameter pill | On state as in 6.3 (6), no icon; new state **Unavailable** (disabled with tooltip text) and an optional **coverage tag** ("ISO · GB/T", "subcontracted") |
 | Option row | New states **Editing** (name, phone and email inputs, save icon) and **Dimmed** (other rows while one is edited), for the contact and signatory dropdowns |
 | Table row | New templates **Job order compact** (tablet list) and **Job order batch** (Batches tab: batch no., standard, samples, parameters, status, performers, RoA, deadline); the Sample template gets an **Unsaved** state (dot) |
 | Stepper | No change: the job order uses Steps=6 with its own step names |
@@ -176,7 +203,7 @@ The frames are drawn for the CSO, who has every action on this screen. The Add b
 
 ### How many pills
 
-The form shows **36 pills in 9 groups**, plus two group pills that open a checklist, and a search for the rest of the catalogue. The Preparation switch is not a pill.
+The form shows **34 pills in 9 groups**, plus two group pills that open a checklist, and a search for the rest of the catalogue. The Preparation switch is not a pill.
 
 | Group | Pills | Count |
 | --- | --- | --- |
@@ -188,8 +215,8 @@ The form shows **36 pills in 9 groups**, plus two group pills that open a checkl
 | Physical | HGI, RD, Sizing | 3 |
 | Ash | AFT reducing, AFT oxidising, Ash analysis ▸, Metal in ash | 4 |
 | Chemical | Cl, P, F, Hg, Trace elements ▸ | 5 |
-| Coking coal | CSN, Gieseler, Dilatation, Ro, Macerals, G index, Y value, Roga, Gray-King, CSR/CRI | 10 |
-| **Total** | | **36** |
+| Coking coal | CSN (Crucible Swelling Number), Gieseler Plastometer, Gray King Coke Type, Dilatometer Test, Sapozhnikov Test, G – Index (G Caking Index Test), CRI/CSR (Coke Reactivity Index/Coke Strength After Reaction), Maceral Analysis (Petrographic): the eight tests of the lab (corrected Nov 3, 2026; earlier drafts listed Ro, Roga and Y value) | 8 |
+| **Total** | | **34** |
 
 `Ash analysis ▸` opens a checklist of about 29 oxides and ratios, and `Trace elements ▸` about 36 elements (spec section 11). Both count as one pill each on the form. The default template turns on 7 pills; Full analysis turns on 20; Coking coal turns on 14 (16 with GB/T). The lists are data (`parameters`, `service_parameters`), so the lab can change them in Configuration.
 
@@ -247,9 +274,9 @@ Rejected alternatives: one standard per sample (it breaks batch averages and dup
 The single Service select is replaced by **parameter pills**: each pill is one parameter, and clicking it turns it on or off. Above the pills, quick-select templates appear as tertiary buttons. Clicking a template **replaces** the selection with the template's set. A label shows which template the selection matches, or "Custom · 9 parameters" when it matches none.
 
 ```
-Sample preparation by the lab   [■ on]       (switch; off when the client sends a ready −212 µm analysis sample)
 Quick select:  TM + Prox + TS + CV · Prox only · Full analysis · Coking coal · Preparation only · Clear
-Matches: TM + Prox + TS + CV
+[ Search parameters…                    ]    (Revision 7: a search field above the first row)
+Preparation  [Preparation●]    (Revision 7: a pill, not a switch; off when the client sends a ready −212 µm analysis sample)
 Moisture     [TM●] [IM●] [EQM]
 Proximate    [Ash●] [VM●] [FC●]
 Sulfur       [TS●] [Forms of sulfur]
@@ -258,8 +285,7 @@ Ultimate     [C] [H] [N] [O]
 Physical     [HGI] [RD] [Sizing]
 Ash          [AFT red.] [AFT ox.] [Ash analysis ▸] [Metal in ash]
 Chemical     [Cl] [P] [F] [Hg] [Trace elements ▸]
-Coking coal  [CSN] [Gieseler] [Dilatation] [Ro] [Macerals] [G index] [Y value] [Roga] [Gray-King] [CSR/CRI]
-+ Search parameters…
+Coking coal  [CSN] [Gieseler] [Gray King Coke Type ISO GB/T] [Dilatometer] [Sapozhnikov ISO GB/T] [G Index ISO GB/T] [CRI/CSR SUB] [Maceral]
 ```
 
 Agreed with the proposal, with these additions:
@@ -534,11 +560,11 @@ Desktop and tablet: a **centered modal**, 720 px wide, with rounded corners and 
 
 | Section | Fields |
 | --- | --- |
-| Company (Revision 2) | Company name* (searchable select, "+ Add as new company"), Company address (optional), **Contacts**: rows of Contact person* (dropdown of the company's contacts or a new name), Phone*, Email (optional), trash per row, **+ Add contact**; Client reference / PO |
-| Work (Revision 2) | **Standard*** (ASTM · ISO · GB/T toggle chips, multi-select), **Sample preparation by the lab** (switch), **Parameters*** (pills with quick-select templates; default TM + Prox + TS + CV), Sample type, Expected samples*, Due date* (suggested from the template turnaround), Priority |
-| Report | Default signatory for this client (optional): pick from list or type name + title (spec D-41) |
-| Samples | "Add samples now" (opens the grid after saving) or "Later" |
-| Other | Notes, Files (drop zone) |
+| Company (Revision 2, 3, 7) | Company name* (searchable select, "+ Add as new company") and Client reference / PO on one row, Company address (optional), **Contact person*** (one select field; the company's contacts open in a dropdown or sheet, see Revision 3) |
+| Work (Revision 2, 7) | **Standard*** (ASTM · ISO · GB/T toggle chips, multi-select), **Parameters*** ("N selected", quick-select templates, a search field, then rows of pills; **Preparation** is the first pill, on by default; default TM + Prox + TS + CV), Sample type, Expected samples* (placeholder "e.g. 12"), Due date* (suggested from the template turnaround), Priority |
+| Report | Default signatory (optional): pick from the dropdown or sheet, add and edit there (spec D-41) |
+| Samples | **Removed in Revision 7.** Submit opens the job order on its Samples tab (P2) |
+| Notes and files | Notes, Files (drop zone) |
 | Actions | **Save as draft**, **Submit** (draft → awaiting samples) |
 
 Mobile step 1: Company + Work. Step 2: Report, Samples, Notes, Files, then Submit. With contacts and pills the create sheet no longer fits without scrolling on desktop; the sheet body scrolls and the footer stays fixed.
@@ -665,7 +691,7 @@ The prototype is built only after the frames are approved, so it copies settled 
 
 | ID | Flow | Actor | Steps (each step is a frame or a state) |
 | --- | --- | --- | --- |
-| F1 | Create a job order | CSO | List → **New job order** → modal opens → fill Company name (pick or add new), address, one or more contacts, Standard, Parameters (default template pre-set, pills adjusted), Expected samples, Due date (suggested) → **Submit** → validation passes → sheet closes, toast "JO-2026-0143 submitted · Add samples" → detail opens on the **Samples** tab |
+| F1 | Create a job order | CSO | List → **New job order** → modal opens → fill Company name (pick or add new), address, Contact person (dropdown), Standard, Parameters (default template pre-set, pills adjusted), Expected samples, Due date (suggested) → **Submit** → validation passes → sheet closes, toast "JO-2026-0143 submitted · Add samples" → detail opens on the **Samples** tab |
 | F1a | Save as draft | CSO | Same as F1, but **Save as draft** needs only Client; the list shows the row with a Draft badge |
 | F1b | Validation error | CSO | **Submit** with missing fields → fields marked, error summary at the top of the sheet with links to each field, focus moves to the summary |
 | F2 | Register sample IDs | CSO | Samples tab → **Paste from Excel** → paste preview (rows found, columns mapped, 1 duplicate flagged) → **Add 12 rows** → grid filled, unsaved dot → **Save** → toast "12 samples saved" |
@@ -691,9 +717,9 @@ The prototype is built only after the frames are approved, so it copies settled 
 | Pagination | 10 rows; page kept in the URL; changing a filter returns to page 1 |
 | Modal (New job order, Add batch) | Fades and scales in from 96 % in 150 ms over a scrim; Esc or the close button closes it; clicking the scrim does not close it while the form has input (it asks "Discard changes?"); focus starts on the first field, is trapped in the modal and returns to **New job order** on close; header and footer stay visible while the body scrolls |
 | Company select | Type to search; no match offers "+ Add 'name' as a new company", which keeps the typed name and unlocks the address field; the company is created when the job order is saved |
-| Contact rows | Name combobox lists the company's contacts not already used in another row; picking fills phone and email. **+ Add contact** adds a row and focuses it. Trash shows on row hover or focus on desktop and always on touch; it is absent when one row remains. Trash opens the remove dialog; **Remove** deletes the row and shows a toast with **Undo** for 10 seconds |
-| Parameter pills | Click or Space toggles a pill; on state uses the primary fill with a check icon, off state an outline (colour is not the only signal). Auto-added inputs show a short note under the group. A pill that others depend on cannot be turned off; its tooltip names the dependant. Arrow keys move between pills in a group |
-| Templates | Tertiary buttons; clicking replaces the selection; the "Matches" label updates live; the due date suggestion follows the template turnaround (or the longest turnaround among the selected parameters when custom) and stays marked "suggested" until the user changes it |
+| Contact person | One select field (Revision 3 and 7); disabled until a company is chosen ("Select a company first"). Opens the dropdown of the company's contacts: check on the selected row, pencil, trash (disabled on the selected row), **+ Add contact** inside the dropdown. Trash opens the remove dialog |
+| Parameter pills | Click or Space toggles a pill; on state uses a tinted fill and a blue border with no icon (Revision 7), off state an outline. Auto-added inputs show a short note under the group. A pill that others depend on cannot be turned off; its tooltip names the dependant. Arrow keys move between pills in a group |
+| Templates | Ghost (text-only) buttons with no selected state (Revision 7; the "Matches" label was dropped in Revision 3); clicking replaces the selection; the due date suggestion follows the template turnaround (or the longest turnaround among the selected parameters when custom) and stays marked "suggested" until the user changes it |
 | Standard | Toggle chips ASTM, ISO, GB/T; at least one stays on (the last chip on cannot be turned off, with a tooltip); with two or more on, the helper line about batches appears |
 | Default signatory | Pick from the list, or "Type manually" reveals name and title fields |
 | Validation | On blur for each field, on Submit for all; messages under the field in plain words ("Enter the expected number of samples"); Submit is never disabled, so the user always learns what is missing |
@@ -884,3 +910,176 @@ The Samples tab status column now has four states: Registered, Received, **Await
 The Samples tab now has **five** states: **Expected** (was Registered; on the job order, not in a batch), **In batch** (reception not confirmed yet, shows the batch number), **Received** (arrival confirmed, locked), **Awaiting arrival** and **Not received**. The header counts only the states that occur, for example "8 samples · 2 expected · 4 in batch · 2 received". The Batches tab shows Completed batches with the RoA number and a PDF link. Rules, frames and prototype are in section 15 of `Reception_Preparation_Screen_Plan.md`.
 
 **Design source:** from Oct 29, 2026 the frames live in FigCraft (`.context/design/figcraft/SGSI-LIMS-screens.figcraft`), not in `screens.pen`; the pen.dev plan limit was reached. In the FigCraft file the job order frames carry the rename "Registered" to "Expected" as a text change only. The per-row badges and header counts for In batch and Received are still to be redrawn (see 15.13 in the Reception plan, open item 1).
+
+### 6.5c Build status (Nov 2, 2026): sidebar fix and library patches for row B
+
+- **Sidebar active icon:** the Icon variant swapped into the active Nav item brought its own dark glyph colour. The active icon is now bound to `Text/text-inverse` (same as the label) on the three built frames, and `screens/shell.js` does it for every new frame.
+- **Library patches made live in the file** (with `component.addVariant`, not by regenerating the library): Dialog **Size=xl** (720 wide); Parameter pill **On** = tinted fill (`primary-50`), `action` border, check icon, `primary-deep` text; new Parameter pill **Unavailable** state and a boolean **Show coverage** property (text "ISO · GB/T", hidden by default); Option row **Dimmed** (50 % opacity) and **Editing** (Name field, Phone and Email fields, discard and save icon buttons). Still to come with the frames: Table row templates Job order batch and Sample Unsaved (rows C and D).
+- Live edits are driven through the app's control port with `scratchpad/fcall.js` (a stdio bridge to `figcraft-cli mcp --attach 7979`) when the MCP tools are not attached to the session.
+
+### 6.5d Build status (Nov 2, 2026): row B built (17 frames), then updated by Revision 7
+
+Frames sit on the page of their size (generator `library/screens/rowB.js`; a rebuild deletes row B first, so it can be rerun):
+- **Desktop** (row B from y 1910): **Create · Desktop**, **P1 Validation errors** (company, contact person and expected samples in error, "e.g. 12" hint), **P11 Coking coal, ASTM + GB/T** (coverage tags on the pills that not every chosen standard covers), **Contact dropdown · List / Edit**, **Remove contact**, **Create · Ash analysis open** (checklist popover, 9 of 29), **Signatory dropdown · List / Edit**.
+- **Tablet:** **Create · Tablet** (modal 720).
+- **Mobile Phone:** **Create · Step 1 · Phone**, **Step 2 · Phone**, **Contact sheet · List / Edit**, **Signatory sheet · List / Edit**, **Ash analysis sheet**.
+- Library: the Dialog xl footer has Cancel · Save as draft · Submit; Parameter pill has On without icon, Unavailable, and a Show coverage option; Option row has Dimmed and Editing. The icon set has no left arrow, so the phone back button uses a left caret.
+- Not yet: the dark preview frame (row C) and a touch-target check on tablet and phone.
+
+### 6.5e Build status (Nov 2, 2026): row C built (stage 1 and 2)
+
+Frames on the page of their size (generator `library/screens/rowC.js`, rerunnable; it deletes its own frames first).
+- **Desktop:** Overview, Overview · Dark preview (the Overview frame set to the Dark mode of the variables), Batches, Batches · Empty, Batches · Samples awaiting arrival, Samples, Samples · Mixed states, Samples · Mark as not received (dialog), P2 Submitted toast, P3 Paste preview, P4 Unsaved rows, P5 Locked row tooltip.
+- **Tablet:** Overview, Batches, Batches · Empty, Samples, Samples · Mixed states, Samples · Mark as not received.
+- **Mobile Phone:** Overview, Batches, Samples, Samples · Mixed states, Samples · Mark as not received (bottom sheet).
+- **Deviation:** the mixed-states frames use **JO-2026-0139** (PT Mahakam Coal Resources, 8 samples: 4 received, 2 in batch B-2026-0421, 1 awaiting arrival, 1 not received), not JO-2026-0137, because 0137 has no batch in the list and in the Batches · Empty frame.
+- **Library additions:** table sets "Table header row batches" and "Table row batches" (desktop and compact), "Card batch compact" (phone), "Table row sample states" (state line and action link under the badge, locked variant). The job order stepper is drawn as one continuous line behind six Stepper step instances (green up to the current step).
+- **Not yet in row C:** the unsaved state is shown with an accent dot in the index cell and the duplicate message under the row's status cell (P4); a separate "Unsaved" library variant is still to do if wanted.
+
+**Card padding rule (Nov 2, 2026, from the product owner's edit of the "Batches card"):** a card carries its own padding (16 top and bottom, 20 left and right) and a gap of 16 between its parts. The children (card head, tables, notes, lists, key-value rows) have no padding of their own on the card's sides; table headers and rows inside a card drop their side padding (cells keep their 8 px so text is not glued to the header fill). This replaces the earlier build where each child padded itself, which let text such as the Samples hint touch the card edge. Applied to every card in row C (Properties, Batches, Samples, Batches tab, empty and P2 to P5 frames).
+
+### 6.5f Feedback of Nov 3, 2026 on the Samples tab (applied in row C)
+
+From the owner's reference frames "Samples · P5 Locked row tooltip · Desktop edit" and "… edit dark" (kept on the Desktop page):
+- **Card titles carry no count subtitle** ("8 samples · 4 received · …", "2 batches · 12 samples", "12 expected", "3 unsaved changes"). The counts already show in the tabs, badges and tables. Applies to every screen: the subtitle under the job order list title (row A) is removed too. The modal subtitle in Create is a sentence, not a count, and stays.
+- The samples card is titled **Registered Samples**.
+- **Sample table** (library sets "Table header row samples" and "Table row samples", replacing "Table row sample states"): header and rows share fixed columns (# 40, Sample ID 130, Client description fills, Depth / lot reference 230, Remarks 130, Batch 130, Status 130, **Action 64**), so they line up.
+- **Action column**: one ghost icon button per row (library "Icon button", Ghost 32; Ghost 44 on phone). Received and in-batch rows show a **disabled lock**; an awaiting-arrival row shows **Mark as not received** (file-x); a not-received row shows **Restore** (arrow-counter-clockwise); editable expected rows have no action. The links and the state sub-line ("from B-2026-0421", "Lost in transit") are gone. P5's tooltip now points at the lock.
+- All rows use the same colours (secondary text on white); the state is shown by the badge and the action, not by a row tint. The batch number uses `Primary/primary` (light `#1B3A6F`, dark `#3D69B0`); "—" for no batch is muted.
+- **Tabs** follow the updated library Tab: 16 px between tabs, the count pill only on tabs with a count (Batches, Samples, Files).
+
+## Revision 8 · Second feedback of Nov 3, 2026 · BUILT (Nov 3, 2026)
+
+Source: the owner's feedback of Nov 3 and three reference frames on the Desktop page: **Select reference** (contact person field), **Properties ref** (Overview properties card) and **Batches · Desktop reference** (job order header and batch table). The reference frames stay in the file.
+
+### 8.1 Rule: no values joined with " · "
+
+UI text never joins values with a middle dot, as in "Budi Hartono · +62 812 5550 1844 · budi@baranusa.co.id". Each value is its own text layer, in one of four patterns:
+
+| Pattern | Where | Build |
+| --- | --- | --- |
+| **Inline values** | Select field value, key-value values, table cells with two facts | Text layers side by side in a horizontal row. First value `Text/text` (or the cell's main colour), the others `Text/text-secondary`. Gap 8 inside an input (Select reference), gap 12 in a key-value value (Properties ref) |
+| **Icon meta row** | Job order header under the title | Horizontal row, gap 16; each item is a 14 px icon + text, gap 4, `Text/text-secondary`, Body small/Regular. Wraps on phone |
+| **Two lines** | Table cells (batch number and date, person and date) | Main line Body small/Medium, second line Caption/Regular `Text/text-secondary` |
+| **Plain sentence** | Toasts, hints, status words | Rewrite as a sentence or with a comma: "PDF, XLS or CSV, up to 10 MB", "Sent by WhatsApp", "JO-2026-0143 submitted. Add the sample IDs next." |
+
+Frame and layer names (for example "Samples · Desktop") are names, not UI text, and keep the dot.
+
+### 8.2 Contact person field (Select reference)
+
+The Select field gets a **Contact** value layout: a horizontal frame "Contact" (gap 8, fill) holding three Body/Regular texts: name (`Text/text`), phone and email (`Text/text-secondary`), then the caret. The phone version shows name and phone only. The contact dropdown's Option row second line follows the same rule: phone and email as two text layers, gap 8.
+
+### 8.3 Job order header (all row C frames)
+
+From Batches · Desktop reference: under the title row,
+1. **Company** on its own line, Body/Medium, `Text/text-secondary`.
+2. **Icon meta row**: `user` + contact name, `receipt` + client reference (PO), `calendar-blank` + due date. The `user` and `receipt` glyphs (14) were added to the Icon set by the owner.
+3. Past due (JO-2026-0139): the due item's icon and text use the error colour and a separate "Past due" text follows it; "(past due)" in brackets goes.
+
+Applies to every job order detail frame on all three pages (header height grows from 68 to 96 on desktop).
+
+### 8.4 Overview · Properties card (Properties ref)
+
+- **Remove** the Preparation row ("By the lab (Preparation team)"); preparation shows as the first pill of the parameters.
+- **Contact**: name `Text/text`, phone and email `Text/text-secondary`, gap 12 (phone: name and phone).
+- **Parameters**, two rows:
+  - Row 1, in the value column: service name (the quick select used, "TM + Prox + TS + CV") · then **"customized"** in `Text/text-muted` only when parameters were added to or removed from that quick select (nothing otherwise) · then the **total** ("8 parameters", `Text/text-secondary`) pushed to the right end.
+  - Row 2: every parameter pill (Preparation first), starting at the value column: left inset 122 = key width 110 + gap 12. On phone (stacked rows) the pills start at the left edge.
+- **Expected samples**: "12" then "Exploration cores" (`Text/text-secondary`), gap 12.
+- **Default signatory**: name then title ("Laboratory Manager", secondary), gap 12. **Created by**: name then date, gap 12.
+- The Overview's **Batches** list (right column) drops "12 samples · RoA RoA-0417" and "Prep: Dedi K. · 21 Oct": samples and RoA become two separate texts, and Preparation and Analysis each become an avatar + two lines (full name, date) under a muted caption "Preparation" / "Analysis".
+
+### 8.5 Batches tab (Batches · Desktop reference)
+
+- **Columns** (header and rows share them): Batch no. 130 (number + date, two lines) · Standard 84 (tag) · Samples 76 · Parameters fills (service + note on two lines) · Status 124 · **Preparation** fills · **Analysis** fills · RoA 88 · Deadline 84 · chevron 36. Preparation and Analysis were one "Progress" cell; each is now its own column: 24 px avatar + two lines (full name Body small/Medium, date Caption `Text/text-secondary`). A batch not started shows "—" in `Text/text-muted`.
+- The card head is the title "Batches" and the **Add batch** secondary button, no subtitle.
+- Tablet (Compact template): keeps Batch no., Standard, Samples, Status, Deadline, chevron; no dot texts. Phone ("Card batch compact"): samples, standard and due as separate texts.
+
+### 8.6 Create job order (row B)
+
+- Remove the subtitle "128 job orders · 21 in progress, 9 waiting for samples" under the "Job orders" heading behind the overlay (9 desktop frames and the tablet frame).
+- Contact person field and dropdown per 8.2.
+- Coverage tag on Parameter pills ("ISO · GB/T"): two text layers, gap 4 ("ISO", "GB/T").
+- Phone step progress: "Step 1 of 2" (caption) and "Company and work" (title) as two texts.
+- Drop zone hint: "PDF, XLS or CSV, up to 10 MB". Ash analysis label: "Ash analysis" and "9 of 29" as two texts.
+
+### 8.7 Every screen that changes
+
+| Row | Frames | Changes |
+| --- | --- | --- |
+| Library | Select (Contact layout), Option row, Parameter pill (coverage), Table row (Attn and PO), Table row compact, Table row samples (depth: drill hole and interval as two texts), Table header row batches + Table row batches (Preparation and Analysis columns, Desktop template), Card batch compact, Card job order (service + standard tag), Mobile step progress, Drop zone, Toast text, Page header, Grid cell ("% adb"), Card KPI, Card panel, Queue card, WIP row, Card batch, Card CoA ("Revision 1" as its own text), Deadline item, Label preview, Chart card | 8.1 patterns; library documentation labels on the Foundations and section frames use commas or separate columns |
+| A · List | List · Desktop, List · Tablet, List · Phone | Contact and PO as two texts; "Sent by WhatsApp", "Sent by email"; tablet line "12 samples" and the service as two texts; phone card service + standard tag |
+| B · Create | Create · Desktop, P1, P11, Contact dropdown List and Edit, Remove contact, Ash analysis open, Signatory dropdown List and Edit, Create · Tablet; phone Step 1, Step 2, Contact sheet List and Edit, Signatory sheet List and Edit, Ash analysis sheet (17) | 8.6 |
+| C · Detail | All 23 frames (12 desktop, 6 tablet, 5 phone) | Header 8.3 on every frame; Overview D/T/P + Dark preview: 8.4; Batches D, Batches · Empty D/T, Batches · Samples awaiting arrival, Batches T/P: 8.5; every Samples frame: depth column as two texts; P2 toast as a sentence |
+| Canvas | Row titles "A · Job orders list", "B · Create job order", "C · Job order detail" | "A  Job orders list" style: letter and name as separate texts |
+
+Reference frames kept: Select reference, Properties ref, Batches · Desktop reference, and the owner's **dark copy of Samples · P5** (it has the same name as the generated P5, so it is renamed "Samples · P5 Locked row tooltip · Desktop dark reference" before the rebuild and the generator skips frames whose name ends in "reference").
+
+### 8.8 Build order (after go)
+
+1. Library patches (8.1 to 8.5 components) on the open file, generators `rowC.js` `patchC` and a new `patchR8`.
+2. Rebuild rows A, B and C with the generators (backup first, then swap the file).
+3. Render and check one frame per size for each row, then update the prototype (Prototype plan section 14).
+
+### 8.9 Build status (Nov 3, 2026)
+
+Built in the FigCraft file (backup before: backup/SGSI-LIMS-screens.before-rev8.figcraft). No text in the file joins values with a middle dot any more (checked by a scan of every text layer).
+- **Library:** 76 component texts were split into separate layers by `library/rev8.js` (stage L). A text in a horizontal row gets extra texts after it; a text in a two-line cell gets a **Split** frame (horizontal, gap 6) and the original is kept hidden as "... source". **Select** (Value, Value 2, Value 3, gap 8) and **Key-value row** (gap 12) carry three value layers; the unused ones are hidden. The table sets "Table header row batches" and "Table row batches" were rebuilt with separate **Preparation** and **Analysis** columns (`library/rev8lb.js`). Documentation labels use commas.
+- **Deviations from 8.1:** the Parameter pill coverage tag stays one layer, written "ISO, GB/T" (its visibility is bound to the Show coverage property, which cannot drive extra layers); the Drop zone hint is "PDF, XLS or CSV, up to 10 MB"; the row titles read "A  Job orders list" (two spaces); the overline "WORK  TUESDAY 21 OCTOBER 2026" is two texts.
+- **Rows B and C rebuilt** (40 frames), row A patched in place (stage D, `rev8.js`): the job order header, Overview properties, Overview batch list, Batches tab, Create contact field and dropdown, and the list rows follow 8.2 to 8.6. The "128 job orders ..." subtitle is gone behind the Create overlay.
+- **Reference frames kept:** Select reference, Properties ref, Batches · Desktop reference, and the dark P5 copy, renamed "Samples · P5 Locked row tooltip · Desktop dark reference". The generators skip frames whose name ends in "reference".
+- **Notes:** the Key-value instances inside the frame "Properties ref" picked up the new split layers, so its contact and expected samples now show as separate texts. Touch-target checks on tablet and phone are still open.
+
+## Revision 9 · Parameter selection like the prototype · BUILT (Nov 3, 2026)
+
+**Why the frames differ from the prototype (found Nov 3, 2026).** No note asks for a different selection; it is drift.
+- The plan ("How many pills") has **9 groups including Coking coal**. The row B build (`rowB.js`, list GROUPS) only drew the first 8, so the Coking coal group is missing from Create · Desktop, Tablet, Phone and the frames built on them.
+- P11 used a separate, shorter list (Moisture, Proximate, Sulfur, Calorific, plus five coking pills named CSN, Gray-King, Y value, G index, Roga), written before the research of Oct 28. The prototype and the plan's own standards table use the **eight tests on the lab's list**: CSN, Gieseler Plastometer, Gray King Coke Type, Dilatometer Test, Sapozhnikov Test, G Index, CRI/CSR, Maceral Analysis. The plan's pill list (Dilatation, Ro, Macerals, Roga, Y value, Gray-King, CSR/CRI) is out of date and is corrected here.
+- The coverage tag exists only as one hidden text in the Parameter pill ("ISO, GB/T" since Revision 8) and shows on four pills in P11 only. The **SUB** (subcontracted) tag and the unavailable pills under ASTM are not drawn at all.
+
+**Plan.**
+1. **New library component "Coverage tag"**: small mono tag (Accent/accent-100 fill, Accent/accent-text text, radius 4, 10 px, padding 0/4). Variants: Standards (the standards that have a method, as separate layers: "ISO", "GB/T") and Subcontracted ("SUB"). Parameter pill gets a Tag slot with an instance of it instead of the single text.
+2. **Parameter pill** states stay Off, On, Locked, Unavailable (grey, no icon, tag visible). Pills have no icon when Off or On (Revision 7); long names wrap the row like the prototype.
+3. **Create frames at three sizes** show all 9 groups and the eight coking tests with their full names. Default (ASTM): Gray King, Sapozhnikov and G Index unavailable with tag ISO + GB/T; CRI/CSR with SUB. P11 (ASTM + GB/T): the same pills available, tags still shown for the pills not covered by every standard. Phone keeps the accordion; the Coking coal group is one more accordion item.
+4. **Frames rebuilt:** Create D, T, P Step 1; P1; P11; Contact and Signatory dropdown and sheet frames; Remove contact; Ash analysis open (17 frames, taller because of the Coking group). Docs: the pill list table above is corrected to the eight tests.
+5. The prototype already has this behaviour; no prototype change.
+
+### 9.1 Build status (Nov 3, 2026)
+
+- **Library:** new component set **Coverage tag** (Kind: ISO and GB/T, ISO, GB/T, Subcontracted; amber soft fill, 10 px mono, the standards as separate layers 3 px apart). **Parameter pill** (Off, On, Unavailable) now holds a Tag instance with the properties **Show tag** (boolean) and **Tag** (instance swap); the old Coverage text and the "Show coverage" property are gone.
+- **Create frames** (17, desktop, tablet, phone) show all 9 groups. Default (ASTM only): Gray King Coke Type, Sapozhnikov Test and G – Index are Unavailable with the ISO and GB/T tag; CRI/CSR carries SUB. P11 (ASTM + GB/T): those three are available, G – Index is on, the tags stay; "15 selected". Frame height 2000 (P1 +150, P11 +160), signatory dropdown anchor moved to y 1458.
+- Clean-up pass fixed one bug of Revision 8: untouched default text in hidden "source" layers was being copied over real values (the three contacts in the dropdown all showed Budi's phone and email). The contact and signatory dropdowns are correct now.
+- The prototype already behaves this way; no prototype change.
+
+## Revision 10 · Owner edits carried to every size, rows D and E · BUILT (Nov 3, 2026)
+
+### 10.1 Owner edits applied to all sizes
+
+Found by comparing the file with the Revision 8 build (the owner edited desktop frames only):
+- **Job order header** (every detail frame, D, T, P): company name `Text/foreground` (was secondary); the contact, PO and due date items and their icons `Text/text-muted` (were secondary); "Past due" in Body small/SemiBold, still in the error colour.
+- **Overview batch list** (Overview D, T, P and the dark preview): name and date on one line (Label frame horizontal, gap 8, name fills); an analysis in progress shows "Started" in `Text/text-muted` and the date in secondary as two texts.
+- The stepper's green line no longer runs past the last step when every step is done.
+
+### 10.2 Rows D and E
+
+Canvas order on every page: A list, B create, C detail, D add batch, E CoA and actions (row titles "D  Add batch", "E  CoA and actions"). Generators `library/screens/rowD.js` and `rowE.js`, run with row C (`build-screens.js C,D,E`); they place themselves below the lowest frame of each page.
+
+| Frame | Size | Content |
+| --- | --- | --- |
+| Add batch · Desktop, · Tablet | D, T | Dialog xl over Batches · Empty of JO-2026-0137 (16 samples, ASTM and GB/T). Job order number and company as two texts; Batch no. B-2026-0422 with the pattern hint; Batch date read-only; Deadline; Standard chips ASTM (on) and GB/T with "One standard per batch. This job order has ASTM and GB/T."; Samples "8 of 16 selected", Select all (16) and Clear, checkbox grid; parameter pills with HGI added ("+ HGI compared with the job order"); Priority, CoC no., Notes; Cancel and Create batch |
+| Add batch · Late samples · Desktop | D | Over Batches · Samples awaiting arrival (JO-2026-0139, ASTM only): note "Settings copied from B-2026-0421: ASTM, TM + Prox + TS + CV and Standard priority."; BNM-3507 ticked first with "Awaiting arrival" and "from B-2026-0421" as separate texts; "Awaiting arrival comes first and is ticked for you." |
+| Add batch · Step 1, Step 2 · Phone | P | Step 1 Samples (full-width checkbox list, sticky "Next (8 selected)"); Step 2 Details (fields stacked, sticky Back and Create batch) |
+| CoA · Mark sent · Desktop | D | CoA tab of JO-2026-0141 (Reported, stepper on Sent to client): CoA card with Download PDF, Print, Mark sent; facts Number, Revision, Published (date and name), Signatory (name and title), Covers; Built from B-2026-0416 with RoA-0416 and the approver. Dialog md "Mark CoA as sent": Date sent, Recipient (pre-filled, helper), Channel as checkboxes (Hard copy, Email, WhatsApp ticked, Other; more than one can be ticked), Note; Cancel and Confirm |
+| CoA · Sent · Desktop | D | JO-2026-0141 Delivered, stepper complete; green line "Sent by WhatsApp to", **Sari Wulandari**, 25 Oct 2026; button Add another send |
+| CoA · Mark sent sheet · Phone | P | The CoA tab on phone with the same form in a bottom sheet |
+| Cancel job order · P7 · Desktop | D | Over JO-2026-0137 (no sample received): destructive dialog "Cancel JO-2026-0137?", Reason (required), Keep job order and Cancel job order |
+
+**Deviations:** the CoA frames use **JO-2026-0141** (PT Kaltara Energi Prima, contact Sari Wulandari), not 0142, because 0142 is still in analysis. Add batch on phone keeps the two steps of section 8; the tablet keeps the modal.
+
+### 10.3 Tokens
+
+The owner changed 11 colour values (mostly dark mode, plus light `Text/text-muted` `#A4A39A`). `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` were re-exported and `Design_Tokens.md` regenerated (its section 1 lists the changes). Contrast to review: muted text is 2.5 to 1 on card in light (2.4 in dark), below 4.5, and the header now uses it for contact, PO and due date.
+
+### 10.4 Still open
+
+Touch targets on tablet and phone (the phone checkbox list rows are 14 px apart, not 44 px tall); the tablet detail frames clip below 908 px; the prototype update (Prototype plan section 14).

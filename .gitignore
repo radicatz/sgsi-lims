@@ -19,3 +19,4 @@ desktop.ini
 # FigCraft work files: rebuild scratch and file backups (local only)
 .context/design/figcraft/scratch/
 .context/design/figcraft/backup/
+.context/design/figcraft/library/scratch/

@@ -105,8 +105,8 @@ Rules in the screen plan that are not listed here still apply.
 | Contact person | One contact per job order. A select field showing name, phone and email (mobile: name and phone). Disabled until a company is chosen ("Select a company first"). Opens a dropdown (desktop, tablet) or bottom sheet (mobile) with the company's contacts: name, phone, email; **check** on the selected row only; pencil; trash; **+ Add contact** at the bottom. Clicking a row selects it and closes the panel. Edit or add switches to the edit state: the edited row becomes inputs, its check becomes **Save** (floppy disk), every other row and **+ Add contact** are dimmed and inactive. Save needs a name and a phone; email is optional and checked when given. Esc cancels the edit; Esc again closes the panel. Focus returns to the field. The field never shows more than one contact |
 | Default signatory | Same pattern as Contact person: name and title, check on the selected row, pencil, trash, **+ Add signatory**; the edit row has Name and Title. The "Type name and title manually" button is gone |
 | Group pills (Ash analysis ▸, Trace elements ▸) | Clicking the pill (not toggling it) opens a checklist popover anchored under the pill, 560 px, flipped above the pill when there is no room below; mobile uses a bottom sheet. Search filters the list as you type. Select all, Clear. **Apply · N parameters** turns the pill on when at least one item is ticked and off when none; **Cancel**, Esc or a click outside discards. The pill counts as one parameter in "N selected" |
-| Parameter pills | Click or Space toggles. On: tinted fill, blue border and a check icon (not colour alone). Arrow keys move within a group. Dependent pills cannot be turned off; the tooltip names the dependant |
-| Templates | Clicking a template replaces the selection and highlights that template; changing any pill afterwards removes the highlight (custom). No "Matches" label |
+| Parameter pills | Click or Space toggles. On: tinted fill and blue border, no icon (Revision 7: the check icon was dropped on the owner's request). Arrow keys move within a group. Dependent pills cannot be turned off; the tooltip names the dependant |
+| Templates | Quick select is a row of ghost (text-only) buttons: clicking one replaces the selection; the buttons have no selected state (hover only), so nothing is highlighted afterwards (Revision 7). No "Matches" label. Prototype version 31 still highlights the chosen template (section 13) |
 | Standard | Toggle chips ASTM, ISO, GB/T; at least one stays on (the last one cannot be turned off, with a tooltip). No helper line; the rule "one standard per batch" shows in Add batch, where the batch picks one of the job order's standards |
 | Remove contact dialog | "Remove *name* from contacts?" / "Submitted job orders keep this contact's name on their documents." / Cancel, **Remove** |
 | Modal (New job order, Edit, Add batch) | As in the screen plan: centered 720 px, scrim, Esc closes (asks "Discard changes?" when there is input), focus trapped and returned. Only one dropdown or popover open at a time; Esc closes the innermost layer first |
@@ -182,3 +182,56 @@ The prototype (https://claude.ai/artifact/73FDBne3B8rbFcXoa6dDZo, version 28) gr
 | C (Oct 29, version 28) | Roles CSO, Lab admin and Preparation confirm reception; photos at reception; editable batch number; ADL-only preparation with Entered by; the Analysis tab with calculated FC and range warnings; signed RoA upload and Complete batch; five sample states; a new **Analyst** role (Fitri Handayani); a **Light / Dark** switch in the review bar; flows F18 to F23 | Reception plan section 15, spec sections 1.1 and 9.2.1 |
 
 Headless checks: all earlier suites plus the C1 to C8 checks pass. The prototype and the FigCraft frames (`.context/design/figcraft`) cover the same Revision C screens; where they differ, the prototype is the behaviour reference and the frames are the visual reference. Frames still to redraw for the five sample states are listed in section 15.13 of the Reception plan.
+
+## 13 · Revision 7 changes the prototype still has to take (Nov 2, 2026)
+
+The frames (screen plan, Revision 7) are ahead of prototype version 31 on these points:
+
+| Part | Frames and plan now | Prototype version 31 |
+| --- | --- | --- |
+| Preparation | A pill in the first row of Parameters, on by default, no icon | A pill already, but it shows a check or a plus |
+| Parameter pills | No icon on selected pills (Locked keeps the lock) | Check on selected pills, plus on the others |
+| Search parameters | A search field between the quick select and the first row; typing filters the pills and finds any catalogue parameter | A ghost button that shows a toast |
+| Expected samples | Placeholder "e.g. 12" in muted text | Placeholder "12" |
+| Samples choice | Removed; Submit always opens the Samples tab (P2) with the toast "JO-2026-0143 submitted. Add the sample IDs next." | "Add samples now / Later" segmented choice |
+
+The Contact person field and the dropdown already match the frames.
+
+## 14 · Nov 3 feedback the prototype still has to take (Nov 3, 2026) · PLAN, waiting for go
+
+Four rounds of owner feedback on Nov 3 changed the frames (screen plan sections 6.5f and Revisions 8, 9 and 10). Prototype version 31 has none of it yet. Done together with the section 13 points in one update (version 32).
+
+| Part | Frames and plan now | Prototype version 31 (file and line) |
+| --- | --- | --- |
+| Dot-joined text (rule 8.1) | Separate values: inline texts, icon meta row, two lines or a plain sentence | About 90 strings in `app.js`, `app2.js`, `data.js`, `reception.js` join values with " · " |
+| Job orders list subtitle | Removed | "128 job orders · 21 open, 9 waiting for samples" (`app.js` 385) |
+| List rows | Contact and PO as two texts; "Sent by WhatsApp" | `app.js` 409, 424; CoA sent labels |
+| Job order header | Company line, then icon row: user + contact, receipt + PO, calendar + due (past due in the error colour) | One line "Company · Attn. … · PO … · Due …" (`app2.js` 475) |
+| Overview properties | No Preparation row; Contact as name, phone, email; Parameters row 1 = service + "customized" (only when changed from the quick select) + total on the right, row 2 = pills aligned to the value column; Expected samples, Default signatory, Created by as two texts | Preparation row shown; dot-joined values (`app2.js` 510 to 520) |
+| Overview batch list | Samples and RoA as two texts; Preparation and Analysis each an avatar with name and date | "Prep: name · date" (`app2.js` 526 to 531) |
+| Batches tab table | Separate **Preparation** and **Analysis** columns (avatar, full name, date); card head without the count subtitle | One cell with both (`app2.js` 560 to 574) |
+| Samples tab (6.5f) | Card "Registered Samples", no subtitle; Action column with icon buttons (lock disabled, Mark as not received, Restore); same row colours; batch number in `primary`; no "from B-…" or "Lost in transit" sub-line; depth as drill hole + interval | Links under the badge, sub-lines, tinted rows, count subtitle (`app2.js` 716) |
+| Tabs | 16 px gap, count pill only on Batches, Samples, Files | Count on every tab |
+| Toasts and hints | Sentences: "JO-2026-0143 submitted. Add the sample IDs next." | Dot-joined toasts (`app2.js` 374, 609, 827, 971) |
+| Create | Apply button "Apply 3 parameters"; dependency note as sentences ("FC needs IM, Ash and VM, so those stay on.") | `app2.js` 209, 290 |
+| Coverage tags (Revision 9) | One amber tag **per standard**: "ISO" and "GB/T" are two separate tag pills, 4 px apart; "SUB" stays one tag. Unavailable pills keep their tags | One tag "ISO · GB/T" built by `coverTag` (`data.js` 33, `app2.js` 284) |
+| Parameter groups (Revision 9) | All 9 groups with the eight coking tests; already the same in the prototype | No change |
+| Header colours (Revision 10) | Company in `foreground`; contact, PO, due date and their icons in `text-muted`; "Past due" semibold in the error colour | `.dmeta` in one colour (`app2.js` 475) |
+| Overview batch list (Revision 10) | Name and date on one line; "Started" muted, date secondary, as two texts | Name above date (`app2.js` 530) |
+| Add batch (Revision 10) | Job order number and company as two texts in the modal head; "Settings copied from B-2026-0421: ASTM, TM + Prox + TS + CV and Standard priority."; "Awaiting arrival" and "from B-…" as two texts; links Select all and Clear without a dot between them; toast "B-2026-0418 created. 4 samples, ASTM."; the phone version is drawn now, so its "Not drawn yet" tag goes | `app2.js` 609 to 636 |
+| CoA tab and Mark sent (Revision 10) | Facts as separate texts (date and name, name and title, batches and samples); sent line "Sent by WhatsApp to" + recipient + date; "Built from" row: batch, RoA, "Approved by …"; dialog text "CoA-JO-2026-0141-1 for PT Kaltara Energi Prima."; Channel is a row of checkboxes (several ways can be ticked; the sent line then lists each channel); toast "CoA marked as sent. JO-2026-0141 is delivered." | `app2.js` 798 to 837 |
+| Colour tokens (Revision 10) | 11 values changed on Nov 3 (see Design_Tokens.md section 1) | `styles.css` `:root` and dark blocks still hold the older values: copy them from `tokens/sgsi-tokens.css` |
+| Contact person field | Name, phone, email as separate texts, chevron at the right | Already separate spans (`app2.js` 139); only the Overview contact (`app2.js` 510) still joins phone and email |
+
+Demo data: the paste sample in `data.js` (191 to 204) keeps the tab-separated format; only the depth text loses the dot ("DH BNM-031  10.20–10.90 m" split into hole and interval columns of the preview).
+
+Checks: re-run the headless suites, then publish to the same artifact URL as version 32.
+
+### 14.1 Order of work and checks
+
+1. Text rule first (rule 8.1): replace every " · " join in `app.js`, `app2.js`, `data.js` and `reception.js` with separate elements, a comma or a sentence, so later edits do not reintroduce it. A test fails the build if a rendered page contains " · ".
+2. Section 13 points (Preparation pill without icon, no icons on pills, Search field, "e.g. 12", Samples choice removed, toast).
+3. Detail screens: header icon row, Overview properties and batch list, Batches table columns, Samples tab (Registered Samples, Action column, row colours, batch colour), tabs.
+4. Coverage tags as separate pills (`coverTag` returns a list; the pill renders one tag per standard).
+4a. Revision 10: header colours, Overview batch list, Add batch and CoA texts, and the token values in `styles.css`.
+5. Re-run the headless suites (all earlier checks plus C1 to C8), add checks for: no " · " in any view, the Action column states, separate Preparation and Analysis columns, two tags on Gray King Coke Type under ASTM. Then publish to the same artifact URL as version 32 (https://claude.ai/artifact/73FDBne3B8rbFcXoa6dDZo). Publishing changes the shared link, so it waits for the owner's go.

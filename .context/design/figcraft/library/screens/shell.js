@@ -19,7 +19,11 @@ B.prototype.shell = function (o) {
     // the library sidebar has Dashboard active: reset it, then activate the wanted item
     const dash = sv.insts.find((i) => i.label === "Dashboard"), want = sv.insts.find((i) => (i.label || "") === active) || null;
     if (active !== "Dashboard") { this.raw("instance.swap", { ids: [sb + dash.pos], component: dflt }); }
-    if (want && active !== "Dashboard") this.raw("instance.swap", { ids: [sb + want.pos], component: act });
+    if (want && active !== "Dashboard") {
+      this.raw("instance.swap", { ids: [sb + want.pos], component: act });
+      // the swapped-in Icon variant brings its own dark glyph colour: give it the label colour (Text/text-inverse)
+      this.bind(sb + want.pos + 2, "fill", "Text/text-inverse");
+    }
     if (kind === "desktop" || kind === "tablet") this.raw("node.set", { ids: [sb], props: { sizingV: "fill" } });
     this.sidebar = sb;
   }

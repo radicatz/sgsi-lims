@@ -52,7 +52,16 @@ B.prototype.instV = function (parent, setName, variant, o = {}) {
     const nm = v.names || v.off;
     const pos = /^\d+$/.test(k) ? v.texts[+k].pos : nm[k];
     if (pos === undefined) throw new Error(`no text ${k} in ${setName} / ${variant}`);
-    this.raw("node.set", { ids: [id + pos], props: { characters: t } });
+    // values are never joined with a dot: "a · b · c" fills the split layers "Name", "Name 2", "Name 3" (Revision 8)
+    const i = v.texts ? v.texts.findIndex((x) => x.pos === pos) : -1, sibs = [];
+    if (i >= 0) for (let j = i + 1; v.texts[j] && v.texts[j].name === v.texts[i].name + " " + (sibs.length + 2); j++) sibs.push(v.texts[j]);
+    const parts = String(t).split(" · ");
+    if (!sibs.length) { this.raw("node.set", { ids: [id + pos], props: { characters: parts.join(", ") } }); continue; }
+    this.raw("node.set", { ids: [id + pos], props: { characters: parts.length > sibs.length + 1 ? parts.slice(0, 1).join("") : parts[0] } });
+    sibs.forEach((sb, j) => {
+      const last = j === sibs.length - 1, val = last && parts.length > j + 2 ? parts.slice(j + 1).join(", ") : parts[j + 1];
+      this.raw("node.set", { ids: [id + sb.pos], props: val === undefined ? { visible: false } : { characters: val, visible: true } });
+    });
   }
   for (const [ni, sn, vn] of o.swaps || []) {
     const nm = v.names || v.off; let pos;

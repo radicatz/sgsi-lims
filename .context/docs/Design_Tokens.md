@@ -1,10 +1,28 @@
 # SGSI LIMS Design Tokens
 
-Oct 29, 2026 · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
+Nov 3, 2026 (values updated; first written Oct 29) · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
 
 Written for: designers and developers who build or restyle screens.
 
 ## 1. What changed, and where the values come from
+
+**Nov 3, 2026 update.** The product owner adjusted these colour values in the FigCraft file after the Oct 29 export. `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` were re-exported from the file and the tables below show the new values.
+
+| Token | Mode | Before (Oct 29 export) | Now |
+| --- | --- | --- | --- |
+| `Text/text-muted` | Light | `#7D8699` | `#A4A39A` |
+| `Text/text-muted` | Dark | `#7F8DA6` | `#435C86` |
+| `Text/heading` | Dark | `#F4F7FB` | `#C0D8F9` |
+| `Text/text-secondary` | Dark | `#A9B6CC` | `#92AEDD` |
+| `Text/text-inverse` | Dark | `#0A1A33` | `#FFFFFF` |
+| `Primary/primary-deep` | Dark | `#8CA4C6` | `#588DD9` |
+| `Primary/primary-50` | Dark | `#0F1E36` | `#14243D` |
+| `Primary/primary-100` | Dark | `#B6C9E7` | `#2A4A7D` |
+| `Primary/primary-200` | Dark | `#1E3A66` | `#274C86` |
+| `Accent/accent-text` | Dark | `#A9C6F5` | `#6D8FE7` |
+| `Surface/muted` | Dark | `#14243D` | `#1D3050` |
+
+Contrast to review (section 4): `Text/text-muted` on card is 2.5 in light and 2.4 in dark, below the 4.5 needed for body text. Since Nov 3 the job order header uses it for the contact, PO and due date, so those texts are below AA. Accent text on the amber tint is 3.6 in dark. Keep muted for placeholders and decorative text, or darken it.
 
 The tokens started as the `screens.pen` variables (Revision 2, mirrored in the prototype's `styles.css`). On Oct 29, 2026 the product owner corrected the colours **inside the FigCraft file**. This document records the corrected set exactly as exported from that file. Where the older documents (research plan, screen plans) or the prototype show other values, **this file wins**.
 
@@ -13,8 +31,8 @@ Ten values differ from the earlier set (one light, nine dark):
 | Token | Mode | Earlier | Now |
 | --- | --- | --- | --- |
 | `Primary/primary` | Dark | `#122B52` | `#3D69B0` |
-| `Primary/primary-deep` | Dark | `#081B38` | `#8CA4C6` |
-| `Primary/primary-100` | Dark | `#14284A` | `#B6C9E7` |
+| `Primary/primary-deep` | Dark | `#081B38` | `#588DD9` |
+| `Primary/primary-100` | Dark | `#14284A` | `#2A4A7D` |
 | `Accent/accent` | Dark | `#8DB4F0` | `#F1AA41` |
 | `Surface/background` | Dark | `#0A1424` | `#03060C` |
 | `Surface/shell` | Dark | `#0D1A2E` | `#0F1929` |
@@ -40,11 +58,11 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
 | `Primary/primary` | `#1B3A6F` | `#3D69B0` | Brand blue; primary button fill, selected tab and pill outlines |
-| `Primary/primary-deep` | `#0E2A4E` | `#8CA4C6` | Headings on tints, notification button, strong blue text |
+| `Primary/primary-deep` | `#0E2A4E` | `#588DD9` | Headings on tints, notification button, strong blue text |
 | `Primary/primary-hover` | `#15305C` | `#0E2347` | Hover and pressed state of primary |
-| `Primary/primary-50` | `#F0F4FA` | `#0F1E36` | Table header rows, selected pill fill |
-| `Primary/primary-100` | `#E3EAF4` | `#B6C9E7` | Secondary button fill, avatar fill, info tint |
-| `Primary/primary-200` | `#C5D2E6` | `#1E3A66` | Soft outlines on blue tints |
+| `Primary/primary-50` | `#F0F4FA` | `#14243D` | Table header rows, selected pill fill |
+| `Primary/primary-100` | `#E3EAF4` | `#2A4A7D` | Secondary button fill, avatar fill, info tint |
+| `Primary/primary-200` | `#C5D2E6` | `#274C86` | Soft outlines on blue tints |
 | `Primary/primary-300` | `#9AB0D2` | `#3A5A8E` | Disabled and decorative blue |
 | `Primary/primary-400` | `#5F7FB0` | `#6E8EC0` | Chart blue, secondary icons on tints |
 
@@ -54,7 +72,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | --- | --- | --- | --- |
 | `Accent/accent-soft` | `#F4B860` | `#A9C6F5` | Soft highlight |
 | `Accent/accent-100` | `#FCEFD9` | `#1E3A66` | Amber tint (Preparation chip, search button, hint boxes) |
-| `Accent/accent-text` | `#9A5A00` | `#A9C6F5` | Text on the amber tint |
+| `Accent/accent-text` | `#9A5A00` | `#6D8FE7` | Text on the amber tint |
 | `Accent/accent` | `#E89010` | `#F1AA41` | Highlights and the current stepper marker |
 
 ### Rust
@@ -71,7 +89,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | `Surface/background` | `#F6F1E6` | `#03060C` | Page background |
 | `Surface/shell` | `#FBF9F4` | `#0F1929` | App shell and panels behind cards |
 | `Surface/card` | `#FFFFFF` | `#152032` | Cards, inputs, dialogs, tables |
-| `Surface/muted` | `#F9F6F1` | `#14243D` | Disabled inputs, read-only cells, calculated cells, count pills |
+| `Surface/muted` | `#F9F6F1` | `#1D3050` | Disabled inputs, read-only cells, calculated cells, count pills |
 | `Surface/sand` | `#EDE5D2` | `#1A2C48` | Neutral fills and skeletons |
 | `Surface/border` | `#E8DFC9` | `#1F3250` | Card and input outlines |
 | `Surface/border-strong` | `#D9CFB8` | `#2C4468` | Emphasised outlines, stepper lines, drop zones |
@@ -82,10 +100,10 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
 | `Text/foreground` | `#1A1A1A` | `#EDF1F7` | Body text |
-| `Text/heading` | `#0E2A4E` | `#F4F7FB` | Headings |
-| `Text/text-secondary` | `#4A5876` | `#A9B6CC` | Secondary text, labels |
-| `Text/text-muted` | `#7D8699` | `#7F8DA6` | Hints, placeholders, units |
-| `Text/text-inverse` | `#FFFFFF` | `#0A1A33` | Text on filled primary surfaces |
+| `Text/heading` | `#0E2A4E` | `#C0D8F9` | Headings |
+| `Text/text-secondary` | `#4A5876` | `#92AEDD` | Secondary text, labels |
+| `Text/text-muted` | `#A4A39A` | `#435C86` | Hints, placeholders, units |
+| `Text/text-inverse` | `#FFFFFF` | `#FFFFFF` | Text on filled primary surfaces |
 
 ### Feedback
 
@@ -170,22 +188,22 @@ WCAG 2 contrast ratios computed from the exported values (4.5 is the AA minimum 
 | Pair | Light | Dark |
 | --- | --- | --- |
 | `Text/foreground` on `Surface/card` | 17.4 | 14.4 |
-| `Text/heading` on `Surface/card` | 14.4 | 15.2 |
-| `Text/text-secondary` on `Surface/card` | 7.1 | 8.0 |
-| `Text/text-muted` on `Surface/card` | 3.7 (below 4.5) | 4.9 |
-| `Text/text-muted` on `Surface/muted` | 3.4 (below 4.5) | 4.6 |
+| `Text/heading` on `Surface/card` | 14.4 | 11.2 |
+| `Text/text-secondary` on `Surface/card` | 7.1 | 7.3 |
+| `Text/text-muted` on `Surface/card` | 2.5 (below 4.5) | 2.4 (below 4.5) |
+| `Text/text-muted` on `Surface/muted` | 2.4 (below 4.5) | 2.0 (below 4.5) |
 | `Action/action-foreground` on `Action/action` | 11.2 | 8.2 |
-| `Text/text-inverse` on `Primary/primary` | 11.2 | 3.2 (below 4.5) |
+| `Text/text-inverse` on `Primary/primary` | 11.2 | 5.5 |
 | `Feedback/success` on `Surface/card` | 5.0 | 6.3 |
 | `Feedback/error` on `Surface/card` | 5.3 | 4.4 (below 4.5) |
 | `Feedback/warning` on `Surface/card` | 5.5 | 7.9 |
-| `Accent/accent-text` on `Accent/accent-100` | 4.8 | 6.5 |
+| `Accent/accent-text` on `Accent/accent-100` | 4.8 | 3.6 (below 4.5) |
 | `Status/st-created` on `Status/st-created-100` | 4.1 (below 4.5) | 1.7 (below 4.5) |
 | `Status/st-prep` on `Status/st-prep-100` | 4.8 | 6.4 |
 | `Status/st-analysis` on `Status/st-analysis-100` | 9.2 | 5.4 |
 | `Status/st-finished` on `Status/st-finished-100` | 5.5 | 6.4 |
 | `Status/st-completed` on `Status/st-completed-100` | 4.3 (below 4.5) | 5.4 |
-| `Primary/primary-deep` on `Primary/primary-50` | 13.0 | 6.5 |
+| `Primary/primary-deep` on `Primary/primary-50` | 13.0 | 4.6 |
 | `Action/brand-text` on `Surface/shell` | 10.6 | 8.3 |
 
 A pair below 4.5 is acceptable only for large text, icons and bold chip text of 13 px or more if the ratio is 3 or higher; anything lower needs a change. Check the list again after every token edit.
