@@ -1,0 +1,47 @@
+# Frame naming
+
+Nov 3, 2026. Every screen frame in `SGSI-LIMS-screens.figcraft` (Desktop, Tablet and Mobile Phone pages) and every exported PNG uses this name.
+
+Written for: designers and anyone who generates or exports frames.
+
+## Format
+
+`{Size}-{MM}-{Module}-{SS}-{Screen}-{VV}-{Variant}`
+
+| Part | Rule | Example |
+| --- | --- | --- |
+| Size | Desktop, Tablet or Phone (the Mobile Phone page) | `Desktop` |
+| MM | Two-digit number of the sidebar module, in sidebar order | `03` |
+| Module | The sidebar item, words joined with underscores | `Job_orders` |
+| SS | Two-digit number of the screen inside the module, in flow order | `02` |
+| Screen | Screen title, underscores | `New_job_order` |
+| VV | Two-digit number of the state or variant inside the screen; the same state keeps the same number on all sizes where it exists | `04` |
+| Variant | State or variant, underscores, no dots or slashes | `Contact_dropdown_list` |
+
+Example: `Desktop-03-Job_orders-02-New_job_order-04-Contact_dropdown_list`.
+
+Sorted by name, the frames group by size, then module, then screen, then state.
+
+## Module numbers (sidebar order)
+
+My_work 01, Dashboard 02, Job_orders 03, Batches 04, Input_ROA 05, Review_ROA 06, Reports 07, Search 08, Clients 09, Drill_hole 10, Lithology 11, Seam 12, Users 13, Configuration 14, Audit_log 15. The sidebar Batches item (04) is the batch module across job orders and is not designed yet; the Batches tab of a job order is a state of Job_order_detail, so its frames keep the Job orders item active in the sidebar.
+
+## Job orders screens
+
+| SS | Screen | Variants (VV) |
+| --- | --- | --- |
+| 01 | Job_orders_list | 01 Default, 02 Empty |
+| 02 | New_job_order | 01 Form, 02 Step_1, 03 Step_2, 04 Contact_dropdown_list (phone: Contact_sheet_list), 05 Contact_dropdown_edit, 06 Signatory_dropdown_list, 07 Signatory_dropdown_edit, 08 Ash_analysis_open (phone: Ash_analysis_sheet), 09 Validation_errors, 10 Remove_contact, 11 Coking_coal_ASTM_and_GBT |
+| 03 | Job_order_detail | 01 Overview, 02 Overview_dark_preview, 03 Batches, 04 Batches_empty, 05 Batches_samples_awaiting_arrival, 06 Samples, 07 Samples_mixed_states, 08 Samples_mark_as_not_received, 09 Samples_submitted_toast, 10 Samples_paste_preview, 11 Samples_unsaved_rows, 12 Samples_locked_row_tooltip |
+| 04 | Add_batch | 01 Dialog, 02 Late_samples, 03 Step_1, 04 Step_2 |
+| 05 | CoA_and_actions | 01 Mark_sent (phone: Mark_sent_sheet), 02 Sent, 03 Cancel_job_order |
+
+The screen number equals the row letter on the canvas (A 01, B 02, C 03, D 04, E 05).
+
+## How it is applied
+
+- `library/naming.js` holds the rules and renames all frames of the three pages (`node naming.js <in> <out>`); run it at the end of every build, after the row generators, and before exporting.
+- The generators (`rowB.js` to `rowE.js`) still create frames under their short working names and find their earlier frames under either name.
+- Frames the owner keeps as references (names ending in "reference", "edit", "edit dark", and "Select reference", "Properties ref") are not renamed and not exported.
+- Exports go to `.context/design/export/`, one PNG per frame, file name = frame name.
+- A new screen or state gets the next free number; a new module takes its sidebar number.

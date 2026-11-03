@@ -4,7 +4,7 @@ require("./shell.js");
 const { H } = require("./rowC.js");
 const { TITLE, page, batches, awaiting, scrimOver } = H;
 
-const DE_NAMES = /^(Add batch ·|CoA · Mark sent|CoA · Sent|Cancel job order ·)/;
+const DE_NAMES = /^(Add batch ·|CoA · Mark sent|CoA · Sent|Cancel job order ·|(Desktop|Tablet|Phone)-03-Job_orders-0[45]-)/;
 // lowest frame on each page, row D and E frames left out (they are rebuilt)
 function bottoms(b) {
   const N = b.reg.N, out = {};

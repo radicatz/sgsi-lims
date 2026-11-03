@@ -5,7 +5,7 @@ require("./shell.js");
 const TITLE = (b, x, y, t) => b.text(undefined, t, { style: "Heading/H2", color: "Text/heading", x, y, name: "Row title" });
 const PAGE = { desktop: "desktop", tablet: "tablet", phone: "phone" };
 const page = (b, kind) => b.raw("page.select", { id: b.pageIds[PAGE[kind]] });
-const NAMES = /^(Overview|Batches|Samples)( ·|$)(?!.*( edit( dark)?| reference)$)/;
+const NAMES = /^((Overview|Batches|Samples)( ·|$)(?!.*( edit( dark)?| reference)$)|(Desktop|Tablet|Phone)-03-Job_orders-03-)/;
 const WCONTENT = { desktop: 1128, tablet: 698, phone: 358 };
 const PAD = { desktop: [28, 32, 40, 32], tablet: [24, 24, 32, 24], phone: [16, 16, 24, 16] };
 

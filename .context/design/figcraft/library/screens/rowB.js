@@ -238,7 +238,7 @@ function phoneSheet(b, x, y, o) {
 exports.build = (b, only) => {
   // a rebuild replaces what row B drew before, on all three size pages
   const N = b.reg.N, old = [];
-  for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) { const n = N[id]; if (/^(Create|Contact |Signatory |Ash analysis)(?!.*reference$)/.test(n.name || "") || (n.name === "Row title" && /^B( ·|  )/.test(n.characters || ""))) old.push(id); }
+  for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) { const n = N[id]; if ((/^(Create|Contact |Signatory |Ash analysis)(?!.*reference$)/.test(n.name || "") || /^(Desktop|Tablet|Phone)-03-Job_orders-02-/.test(n.name || "")) || (n.name === "Row title" && /^B( ·|  )/.test(n.characters || ""))) old.push(id); }
   if (old.length) b.raw("edit.delete", { ids: old });
   // Desktop page: row B sits under row A (y 2000)
   page(b, "desktop"); TITLE(b, 0, Y0 - 90, "B · Create job order");
