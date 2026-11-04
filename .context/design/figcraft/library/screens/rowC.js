@@ -160,7 +160,7 @@ function batchRow(b, parent, t, d) {
 // the card already pads: rows inside a card keep no side padding of their own (cells keep theirs)
 const flat = (b, id, set, variant) => { const v = b.v(set, variant); b.raw("node.set", { ids: [id + v.names.Row], props: { padding: [0, 0, 0, 0] } }); return id; };
 // ---------- building blocks ----------
-const card = (b, parent, name) => b.frame(parent, { name, w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 16, pad: [16, 20, 16, 20], sizeH: "fill", sizeV: "hug", clip: true });
+const card = (b, parent, name) => b.frame(parent, { name, w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 16, pad: [16, 16, 16, 16], sizeH: "fill", sizeV: "hug", clip: true });
 const cardHead = (b, c, title, sub, right) => {
   const h = b.frame(c, { name: "Card head", w: 400, h: 56, layout: "h", gap: 12, pad: 0, cross: "center", main: "spaceBetween", sizeH: "fill", sizeV: "hug" });
   const t = b.frame(h, { name: "Titles", w: 200, h: 36, layout: "v", gap: 2, sizeH: "hug", sizeV: "hug" });
@@ -193,7 +193,7 @@ function detailHead(b, main, kind, o) {
 }
 
 function stepperCard(b, main, kind, o) {
-  const c = b.frame(main, { name: "Stepper card", w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", pad: [16, 20, 16, 20], sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
+  const c = b.frame(main, { name: "Stepper card", w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", pad: [16, 16, 16, 16], sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
   const names = ["Registered", "Samples received", "Analysis", "RoA approved", "CoA published", "Sent to client"];
   if (kind === "phone") {
     o.steps.forEach((s, i) => {
@@ -202,7 +202,7 @@ function stepperCard(b, main, kind, o) {
     });
   } else {
     // one continuous line behind six steps (Revision 2): green up to the current step, neutral after it
-    const W = WCONTENT[kind] - 42, sw = W / 6;
+    const W = WCONTENT[kind] - 32, sw = W / 6;
     const row = b.frame(c, { name: "Stepper", w: W, h: 66, layout: "h", gap: 0, sizeH: "fill", sizeV: "hug" });
     b.frame(row, { name: "Track", w: sw * 5, h: 2, fill: "Surface/border-strong", absolute: true, x: sw / 2, y: 11, sizeH: "fixed", sizeV: "fixed" });
     if (o.cur > 0) b.frame(row, { name: "Progress", w: sw * Math.min(o.cur, 5), h: 2, fill: "Feedback/success", absolute: true, x: sw / 2, y: 11, sizeH: "fixed", sizeV: "fixed" });

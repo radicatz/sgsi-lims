@@ -1110,3 +1110,5 @@ Built: `rowC.js` `tabs()` now lists Overview, Samples, Batches, Files, CoA, Hist
 Built with Batch plan Revision 3 (`../Batch/Batch_Screen_Plan.md` section 14).
 
 Built with `library/cards.js` and the changed generators (`../Batch/Batch_Screen_Plan.md` section 14.5): 21 overlines lost the "WORK" layer, 17 Table cards are padded 16, every Card head is 32 px, notes and hints sit in Card content (Samples hint, inline alert, awaiting-arrival note), and the Add batch buttons of the Batches tab are small.
+
+**Card padding (Nov 4, 2026, supersedes the 16 / 20 rule of 6.5e):** every card on every screen is padded 16 on all four sides.

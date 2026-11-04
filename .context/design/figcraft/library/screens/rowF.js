@@ -63,13 +63,13 @@ function batchFrame(b, x, y, kind, o) {
   return s;
 }
 function stepper(b, main, kind, cur, dates) {
-  const c = b.frame(main, { name: "Stepper card", w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", pad: [16, 20, 16, 20], sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
+  const c = b.frame(main, { name: "Stepper card", w: 400, h: 100, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", pad: [16, 16, 16, 16], sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
   const meta = (i, st) => dates[i] || (st === "Current" ? "Current" : "—");
   if (kind === "phone") {
     STEPS.forEach((n, i) => { const st = i < cur ? "Done" : i === cur ? "Current" : "Upcoming"; b.instV(c, "Stepper step", `State=${st}, Orientation=Vertical`, { texts: { 0: n, 1: meta(i, st) }, props: { sizingH: "fill" } }); });
     return c;
   }
-  const Wc = (kind === "desktop" ? 1128 : 698) - 42, sw = Wc / 6;
+  const Wc = (kind === "desktop" ? 1128 : 698) - 32, sw = Wc / 6;
   const row = b.frame(c, { name: "Stepper", w: Wc, h: 66, layout: "h", gap: 0, sizeH: "fill", sizeV: "hug" });
   b.frame(row, { name: "Track", w: sw * 5, h: 2, fill: "Surface/border-strong", absolute: true, x: sw / 2, y: 11, sizeH: "fixed", sizeV: "fixed" });
   if (cur > 0) b.frame(row, { name: "Progress", w: sw * Math.min(cur, 5), h: 2, fill: "Feedback/success", absolute: true, x: sw / 2, y: 11, sizeH: "fixed", sizeV: "fixed" });
@@ -141,7 +141,7 @@ function receptionCard(b, main, kind, o) {
     btn(b, a, "Primary", "Confirm reception", "check-circle", { state: o.ready ? "Default" : "Disabled" });
   }
   if (o.returned) {
-    const n = hframe(b, c, "Card content", 8, { sizeH: "fill", fill: "Accent/accent-100", r: 10, pad: [10, 14, 10, 14] });
+    const cc = vframe(b, c, "Card content", 8); const n = hframe(b, cc, "Card note", 8, { sizeH: "fill", fill: "Accent/accent-100", r: 10, pad: [0, 8, 0, 8] });
     icon(b, n, "arrow-u-up-left", "Accent/accent-text");
     txt(b, n, "2 samples returned to JO-2026-0137 when reception was confirmed: KEP-3307 and KEP-3308.", "Body small/Regular", "Accent/accent-text", "Text", { fill: true });
     btn(b, n, "Ghost", "Open the job order's samples");
@@ -155,7 +155,7 @@ function receptionChecklist(b, main, ready) {
 }
 function recPhoneCard(b, parent, d, i, o = {}) {
   const [id, arr, mass, cond, rem, ph, lab] = d;
-  const c = vframe(b, parent, "Sample card", 10, { fill: "Surface/card", stroke: o.hl ? "Action/action" : "Surface/border", sw: o.hl ? 2 : 1, r: 12, pad: 12 });
+  const c = vframe(b, parent, "Sample card", 10, { fill: "Surface/card", stroke: o.hl ? "Action/action" : "Surface/border", sw: o.hl ? 2 : 1, r: 12, pad: 16 });
   const top = hframe(b, c, "Top", 8, { sizeH: "fill", main: "spaceBetween" });
   const l = hframe(b, top, "Ids", 8); txt(b, l, id, "Data/Strong", "Text/heading", "Sample ID"); if (arr) txt(b, l, "B0422-" + String(i + 1).padStart(2, "0"), "Data", "Text/text-secondary", "Lab code");
   b.instV(top, "Checkbox", `Checked=${arr ? "On" : "Off"}, State=Default`, { texts: { Label: "Arrived" } });
@@ -269,7 +269,7 @@ function analysisCard(b, main, kind, state) {
   if (state === "entry") { btn(b, a, "Secondary", "Save all", "floppy-disk"); btn(b, a, "Primary", "Finish Analysis", "check-circle", { state: "Disabled" }); }
   if (kind === "phone") {
     ARES.slice(0, 2).forEach(([sid, vals]) => {
-      const sc = vframe(b, c, "Sample card", 10, { fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, pad: 12 });
+      const sc = vframe(b, c, "Sample card", 10, { fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, pad: 16 });
       txt(b, sc, sid, "Data/Strong", "Text/heading", "Sample ID");
       const g = b.frame(sc, { name: "Fields", w: 300, h: 100, layout: "h", gap: 10, wrap: true, sizeH: "fill", sizeV: "hug" });
       const row = vals.slice(); row[4] = fc(vals);
@@ -344,7 +344,7 @@ function prepFrame(b, x, y, kind, done) {
   const s = batchFrame(b, x, y, kind, { variant: done ? "Preparation_finished" : "Preparation_entering_ADL", batch: B0422, status: done ? "Prep finished" : "Preparation", count: "6 samples", cur: done ? 3 : 2, dates: ["27 Oct", "27 Oct", done ? "28 Oct" : "Started 28 Oct", done ? "28 Oct" : ""], tab: "Preparation", recCount: 6 });
   if (kind === "phone") {
     const list = vframe(b, s.main, "Cards", 12);
-    ADL.slice(0, 4).forEach(([v, st], i) => { const c = vframe(b, list, "Sample card", 8, { fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, pad: 12 }); const t = hframe(b, c, "Ids", 8); txt(b, t, REC[i][0], "Data/Strong", "Text/heading", "Sample ID"); txt(b, t, "B0422-0" + (i + 1), "Data", "Text/text-secondary", "Lab code"); const f = b.instV(c, "Text field", `State=${st === "Warning" ? "Error" : "Filled"}, Size=touch`, { texts: { Label: "ADL (%)", Value: v, Helper: st === "Warning" ? "Above 20 %: check the value." : "" }, setProps: { "Show helper": st === "Warning" } }); b.raw("node.set", { ids: [f], props: { sizingH: "fill" } }); const w = hframe(b, c, "Who", 6); b.instV(w, "Avatar", "Size=24", { texts: { Initials: "DK" } }); txt(b, w, "Dedi Kurniawan", "Caption/Regular", "Text/text-secondary", "Name"); txt(b, w, "28 Oct 09:" + (10 + i * 4), "Caption/Regular", "Text/text-muted", "When"); });
+    ADL.slice(0, 4).forEach(([v, st], i) => { const c = vframe(b, list, "Sample card", 8, { fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, pad: 16 }); const t = hframe(b, c, "Ids", 8); txt(b, t, REC[i][0], "Data/Strong", "Text/heading", "Sample ID"); txt(b, t, "B0422-0" + (i + 1), "Data", "Text/text-secondary", "Lab code"); const f = b.instV(c, "Text field", `State=${st === "Warning" ? "Error" : "Filled"}, Size=touch`, { texts: { Label: "ADL (%)", Value: v, Helper: st === "Warning" ? "Above 20 %: check the value." : "" }, setProps: { "Show helper": st === "Warning" } }); b.raw("node.set", { ids: [f], props: { sizingH: "fill" } }); const w = hframe(b, c, "Who", 6); b.instV(w, "Avatar", "Size=24", { texts: { Initials: "DK" } }); txt(b, w, "Dedi Kurniawan", "Caption/Regular", "Text/text-secondary", "Name"); txt(b, w, "28 Oct 09:" + (10 + i * 4), "Caption/Regular", "Text/text-muted", "When"); });
     phoneBar(b, s.root, [["Secondary", "Save all"], ["Primary", "Finish Preparation", "Disabled"]]);
     return s;
   }

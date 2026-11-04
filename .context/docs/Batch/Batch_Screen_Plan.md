@@ -72,7 +72,7 @@ Tab card     card head (title + actions), checklist, table or cards
 
 - The job order number in the meta row is a link back to the job order (the breadcrumb starts at Batches, the module of this page).
 - Header actions in the `...` menu: Edit batch number (while Created), Print labels, View batch log.
-- One card per tab, owning its padding (16 / 20, gap 16); table rows inside drop their side padding (card padding rule, job order plan 6.5e).
+- One card per tab, owning its padding (16 on all sides, gap 16); table rows inside drop their side padding (card padding rule, job order plan 6.5e).
 
 ### 4.1 Reception tab (batch Created)
 
@@ -378,7 +378,7 @@ A batch can be reached from the Batches list and from a job order's Batches tab.
 
 | # | Question | Default |
 | --- | --- | --- |
-| 15 | The reference analysis card has padding 16 on all four sides; the card padding rule says 16 / 20. Which for all cards? | Keep 16 / 20 for cards; 16 all round only for Table cards (as the feedback says) |
+| 15 | The reference analysis card has padding 16 on all four sides; the card padding rule said 16 / 20. Which for all cards? | **Answered Nov 4: 16 on all four sides for every card** |
 | 16 | Tablet heads whose actions do not fit in 32 px (Reception toolbar, Analysis) | Title and primary action in the head; search and secondary buttons on the first line of Card content |
 | 17 | Gap between Card head and Card content | 0, as in the reference (the head's 32 px carries the space) |
 
@@ -391,3 +391,5 @@ A batch can be reached from the Batches list and from a job order's Batches tab.
 - **Placement fix:** the row generators ignore the owner's reference frames and stale frames of the other rows when they choose where to start, so the canvas order is A, B, C, D, E, G (batch list), F (batch detail). The previous deploy had put D and E below G; this build puts them back in order.
 - The owner's frames "... 12-Analysis_entering_results ref" and "Reception card ref" are untouched; frames 04, 08 and 10 that the owner edited by hand were regenerated to the same structure.
 - Build chain: `build-screens.js C,D,E,G,F`, `rev8.js D`, `naming.js`, `cards.js`, `fit.js`, deploy, `export_all.js`.
+
+**Nov 4, 2026 (later):** all cards are padded 16 on all sides (Component_Library_Plan, Card anatomy). The owner also set Card content to no top padding in the Analysis and RoA frames; the generators and `library/cards.js` follow, and the returned-samples note on Reception_confirmed is a "Card note" (padding 0 / 8) inside Card content, as in the owner's edit.

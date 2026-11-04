@@ -283,10 +283,10 @@ Known gaps: the Loading spinner is a still glyph; Foundations still shows the ol
 Source: the owner's frame "Desktop-04-Batches-02-Batch_detail-12-Analysis_entering_results ref".
 
 ```
-Card (Surface/card, border, radius 16, padding 16 / 20, gap 16)
+Card (Surface/card, border, radius 16, padding 16 on all four sides, gap 16)
   Card top row (vertical, gap 0, hug)
     Card head    (horizontal, height fixed 32, space between, centered): Title, Actions, short texts (a count such as "4 of 6 saved", a status such as "Ready for analysis")
-    Card content (vertical, gap 8, hug): description line, warning or info note, header line with avatar, inline alert
+    Card content (vertical, gap 8, no padding, hug): description line, warning or info note, header line with avatar, inline alert
   Card body: table, list, grid, fields, checklist (the checklist sits inside the same card, below the table)
 ```
 
@@ -294,3 +294,5 @@ Card (Surface/card, border, radius 16, padding 16 / 20, gap 16)
 - A card with nothing but a head and a body has no Card content frame.
 - **Table card** (a card that only holds a table and its pager, as on the list pages) has padding **16 on all four sides**; table rows inside it drop their own side padding (cells keep 8).
 - On tablet and phone, when the actions do not fit in 32 px, the head keeps the title and the primary action; the other actions (search, secondary buttons) move to the first line of Card content.
+
+**Nov 4, 2026 update (owner):** every card is padded **16 on all four sides** (it was 16 / 20); Card content has no top padding (the owner removed it in the batch frames, so head and content touch, as in the reference). Applies to all cards, including the phone sample cards (were 12) and the Stepper card; the stepper track width follows (card width minus 32).

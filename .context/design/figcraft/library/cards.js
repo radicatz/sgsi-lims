@@ -2,6 +2,7 @@
 //  1. the "WORK" layer of every overline Split is removed
 //  2. a Card head followed by notes or hints gets a Card top row (Card head + Card content)
 //  3. every Card head is a fixed 32 px high
+//  5. every card is padded 16 on all four sides (card, Properties, Batches, Samples ...)
 //  4. Table cards are padded 16 on all sides, the table rows inside keep no side padding of their own
 const fs = require("fs"), cp = require("child_process");
 const { B } = require("./dsl.js");
@@ -34,12 +35,13 @@ for (const fr of frames) {
         b.raw("node.set", { ids: [head.id], props: { sizingH: "fill" } });
         const inner = after.length === 1 && after[0].name === "Card content" ? after[0].id : null;
         let content = inner;
-        if (!inner) { content = b.frame(top, { name: "Card content", w: 400, h: 40, layout: "v", gap: 8, pad: [8, 0, 0, 0], sizeH: "fill", sizeV: "hug" }); after.forEach((a) => b.raw("node.reparent", { ids: [a.id], parent: content })); }
-        else { b.raw("node.reparent", { ids: [inner], parent: top }); b.raw("node.set", { ids: [inner], props: { sizingH: "fill", padding: [8, 0, 0, 0] } }); }
+        if (!inner) { content = b.frame(top, { name: "Card content", w: 400, h: 40, layout: "v", gap: 8, pad: [0, 0, 0, 0], sizeH: "fill", sizeV: "hug" }); after.forEach((a) => b.raw("node.reparent", { ids: [a.id], parent: content })); }
+        else { b.raw("node.reparent", { ids: [inner], parent: top }); b.raw("node.set", { ids: [inner], props: { sizingH: "fill", padding: [0, 0, 0, 0] } }); }
         stats.wrap++;
       }
       b.raw("node.set", { ids: [head.id], props: { height: 32, sizingV: "fixed" } }); stats.head++;
     }
+    if ((/ card$/.test(n.name) || /^(Properties|Batches|Samples|Batch card)$/.test(n.name)) && n.layout && n.layout.mode === "vertical" && JSON.stringify(n.layout.padding) !== "[16,16,16,16]" && n.layout.padding && n.layout.padding.some((p) => p > 0)) { b.raw("node.set", { ids: [n.id], props: { padding: [16, 16, 16, 16] } }); stats.pad = (stats.pad || 0) + 1; } // 5.
     if (n.name === "Table card") {
       b.raw("node.set", { ids: [n.id], props: { padding: [16, 16, 16, 16] } });
       for (const k of kids) {
