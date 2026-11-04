@@ -11,7 +11,7 @@ function bottoms(b) {
   for (const [k, pid] of Object.entries(b.pageIds)) {
     let m = 0;
     for (const id of N[pid].children || []) {
-      const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$|^(Batch list|Batch detail) ·|-04-Batches-0[12]-/.test(n.name || "") || (n.name === "Row title" && /^[FG]( ·|  )/.test(n.characters || ""))) continue; if (DE_NAMES.test(n.name || "") || (n.name === "Row title" && /^[DE]( ·|  )/.test(n.characters || ""))) continue;
+      const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$|^(Batch list|Batch detail) ·|-04-Batches-0[12]-/.test(n.name || "") || (n.name === "Row title" && /^[FGH]( ·|  )/.test(n.characters || ""))) continue; if (DE_NAMES.test(n.name || "") || (n.name === "Row title" && /^[DE]( ·|  )/.test(n.characters || ""))) continue;
       const y = n.transform ? n.transform[5] : 0; m = Math.max(m, y + (n.height || 0));
     }
     out[k] = Math.ceil((m + 400) / 100) * 100;

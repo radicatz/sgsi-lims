@@ -1,265 +1,169 @@
 # My Work Screen — Design Plan
 
-Oct 26, 2026 · screen S-19 in `../Project/Coal_LIMS_Development_Spec.md` (sections 4.6, 4.8, 9.6, 10 S-19) · first screen outside the job order
+Nov 4, 2026 · **Revision 2: BUILT (Nov 4, 2026)** · screen S-19 in `../Project/Coal_LIMS_Development_Spec.md` (sections 1.1, 4.6, 4.8, 9.6, 10 S-19) · first written Oct 26, 2026
 
-## Why this screen now
+Written for: the product owner, and whoever builds the frames.
 
-My work is the **landing page for every staff role**. After signing in, each person sees the work waiting for them, without opening job orders one by one. Its source is Clarity's Lab View (screenshots `research/clarity-lims/screenshots/29-recording-a-standard-step/01_lab-view_work-in-progress_available-work.jpg` and `research/clarity-lims/screenshots/02-walk-through/scene_013.jpg`).
+Revision 2 rewrites the plan for v1 (report and monitoring, spec 1.1) and for the current design rules. What changed and why is listed in section 11; the Oct 26 plan is summarised there as history.
 
-| Clarity Lab View | Our My work |
-| --- | --- |
-| Work in progress (step, age, count, Continue) | **Work in progress** strip: what I started and haven't finished |
-| Available work: protocol → steps with sample counts | **Queues**: one card per queue my roles can act on, with count and oldest age |
-| Ice bucket: pick samples, Begin Work | **Multi-select** rows in a queue, then one bulk action (only where the action is the same for every row) |
-| Recent activities | **Recent activity** column: who moved what, when |
-| Hidden protocols | Not needed. A queue shows only when a role can act on it, and empty queues collapse |
+## 1 · Why this screen
 
-The Job orders screens already exist, so every queue row can link to a real screen. Reception (S-18), Input/Review ROA and Report review (S-28) are not designed yet, so their rows link to placeholders for now.
+My work is the **landing page for every staff role that acts in the system**. After signing in, each person sees the work waiting for them and opens it in one click, without searching the job order or batch lists. The pattern comes from Clarity's Lab View (`.context/research/clarity-lims/screenshots/29-recording-a-standard-step/01_lab-view_work-in-progress_available-work.jpg`): work in progress, queues with counts, recent activity.
 
-## Goal
+Every queue row now leads to a drawn screen: the job order detail (`../Job Order/Job_Order_Screen_Plan.md`), the batch page and the batch list (`../Batch/Batch_Screen_Plan.md`).
 
-Design the My work overview, an opened queue, and multi-select at three sizes: desktop 1440, tablet 834 (portrait), mobile 390. Use the existing components and tokens in `screens.pen` (including the job-order components), plus Phosphor icons. Demo data uses the personas from spec section 8.1 and the job orders and clients from the Job orders demo data.
+## 2 · Queues in v1
 
-## Who uses it
+In v1 the Analyst enters final values, the Lab admin uploads the signed RoA and completes the batch, and the Supervisor and Manager sign on paper (spec 1.1). The queues follow from that.
 
-Everyone with a staff role. Each role sees only its own queues (spec S-19 table):
+| # | Queue | Roles | Contents | Opens | Bulk action |
+| --- | --- | --- | --- | --- | --- |
+| Q1 | **Batches to receive** | CSO, Preparation, Lab admin | Batches Created or Receiving (some samples ticked arrived) | Batch page, Reception tab | None |
+| Q2 | **Samples awaiting arrival** | CSO, Preparation | Samples returned to the job order at Confirm reception and not yet in a new batch or marked not received (D-41) | Job order, Batches tab (Add batch pre-ticks them) | None |
+| Q3 | **In preparation** | Preparation | Batches in Preparation; "ADL missing" flagged | Batch page, Preparation tab | None |
+| Q4 | **Ready for data entry** | Analyst | Batches Prep finished or Analysis | Batch page, Analysis tab | None |
+| Q5 | **Signed RoA to upload** | Lab admin | Batches Analysis finished | Batch page, Analysis tab with the RoA card | None |
+| Q6 | **CoAs to generate** | Lab admin | Job orders whose batches are all Completed and that have no CoA | Job order, CoA tab | None |
+| Q7 | **CoAs to send** | CSO | Published CoAs not marked sent | Job order, CoA tab (Mark sent) | **Download PDFs** |
+| — | **Work in progress** | Everyone above | What the user started and has not finished: a reception with some samples ticked, ADL or results partly saved | The record, where it was left | Continue (per row) |
 
-| Role | Persona | Queues |
-| --- | --- | --- |
-| CSO | Rina Kartika | Job orders awaiting samples · Samples awaiting arrival (Oct 28, not yet drawn) · CoAs to send |
-| Preparation team | Dedi Kurniawan | Job orders awaiting samples · Samples awaiting arrival (Oct 28, not yet drawn) · In preparation |
-| Analyst | Fitri Handayani | Ready for analysis (assigned to me first) |
-| Supervisor | Hendra Wijaya | Results to approve · RoAs to approve · Ready for analysis (to assign, see open point 5) |
-| Lab admin | Maya Lestari | RoAs to draft · RoAs to publish · CoAs to generate |
-| Manager | Ir. Bambang Sutrisno | Manager reviews |
-| Everyone | — | Work in progress |
+**Next goal (spec keeps them, not in v1):** Results to approve, RoAs to draft, RoAs to approve, RoAs to publish, Manager reviews, and assigning analysts.
 
-The main frames are drawn for **Maya Lestari (Lab admin)**, who has the most queues. The per-role frames show how the page looks for the other roles.
+**Supervisor and Manager** have no queue in v1; they start on the Dashboard (open point 1).
 
-## Frames
+## 3 · Roles and demo personas
 
-| # | Frame | Sizes | Content |
+| Role | Persona | Queues (count, oldest) | Frames |
 | --- | --- | --- | --- |
-| 1 | `My Work · Overview` | Desktop, tablet, mobile | Work in progress, queue cards, recent activity (Maya) |
-| 2 | `My Work · Queue` | Desktop, tablet, mobile | "RoAs to draft" opened: queue tabs and the list |
-| 3 | `My Work · Queue · Multi-select` | Desktop, tablet, mobile | CSO "CoAs to send" with 3 rows selected and the bulk bar |
-| 4 | `My Work · Overview · <Role>` | Desktop only | One each for Preparation, Analyst, Supervisor, CSO, Manager |
-| 5 | `My Work · All caught up` | Desktop, mobile | Empty state when every queue is empty |
+| Lab admin | Maya Lestari | Batches to receive 2, 1 d; Signed RoA to upload 1, 6 h; CoAs to generate 1, 2 d (1 past due) | Main frames (desktop, tablet, phone) |
+| Preparation | Dedi Kurniawan | Batches to receive 2, 1 d; Samples awaiting arrival 1, 3 d; In preparation 1, 1 d (ADL missing) | Desktop |
+| Analyst | Fitri Handayani | Ready for data entry 3, 2 d (1 past due) | Desktop |
+| CSO | Rina Kartika | Batches to receive 2, 1 d; Samples awaiting arrival 1, 3 d; CoAs to send 3, 1 d | Desktop; multi-select frames |
 
-Frames 1–3 at three sizes (9), five role frames (5) and the empty state at two sizes (2) make **16 frames**. They go in a new "My Work" row group below the Job Orders rows.
+Demo records come from the drawn screens: batches B-2026-0413 to B-2026-0422 (batch list), job orders JO-2026-0133 to JO-2026-0142 (job order list), the four demo companies and the spec 8.1 personas. Example rows: B-2026-0422 (JO-2026-0137, Receiving, 6 / 8 arrived), B-2026-0413 (JO-2026-0136, Created, past due), B-2026-0418 (Analysis, 26 of 36 values saved), B-2026-0415 (Analysis finished, RoA to upload), JO-2026-0141 (CoA to send).
 
-## Sidebar
-
-**My work** stays first in the sidebar (`tray` icon) and becomes the default page after sign-in. It gets a **count badge** with the total items in the user's queues (Work in progress not counted). This needs a new `Nav Item` variant with a badge, and the collapsed sidebar shows a dot instead.
-
-## 1 · My Work · Overview
-
-### Desktop (1440, sidebar expanded)
+## 4 · Screen 01 · Overview
 
 ```
-┌ Sidebar ──┬ Top bar: search · bell · Maya Lestari (Lab admin) ────────────────────────┐
-│ ▣ My work 9│ My work                                         Mon, 26 Oct 2026          │
-│ Dashboard │ 9 items waiting · 2 past due                                              │
-│ WORK      │                                                                           │
-│ Job orders│ WORK IN PROGRESS                                     ┌ RECENT ACTIVITY ──┐ │
-│ …         │ ┌───────────────────────────────────────────────┐   │ Hendra W. approved │ │
-│           │ │ RoA B-2026-0415 · PT Kaltara…  Draft  2 h ago [Continue]│ RoA B-2026-0412  │ │
-│           │ └───────────────────────────────────────────────┘   │ 10 min ago         │ │
-│           │                                                     │ Fitri H. finished  │ │
-│           │ MY QUEUES                                            │ analysis B-0417    │ │
-│           │ ┌ RoAs to draft ─┐ ┌ RoAs to publish ┐ ┌ CoAs to gen. ┐│ 35 min ago         │ │
-│           │ │ ✎   4          │ │ ⎙   3           │ │ ▤  2         ││ Dedi K. received   │ │
-│           │ │ Oldest 3 d     │ │ Oldest 1 d      │ │ Oldest 5 h   ││ 12 samples JO-0142 │ │
-│           │ │ ⚠ 1 past due   │ │                 │ │ ⚠ 1 past due ││ …                  │ │
-│           │ │ 1 returned     │ │                 │ │              ││ (10 items)         │ │
-│           │ └────────────────┘ └─────────────────┘ └──────────────┘│ [View all]         │ │
-│           │                                                     └────────────────────┘ │
-└───────────┴───────────────────────────────────────────────────────────────────────────┘
+Sidebar      My work active, with a count pill (items in my queues)
+Header       overline date (no "WORK" layer), title "My work"; no count subtitle
+Work in progress card   WIP rows: record, state, started, Continue
+My queues    Queue cards in flow order (Q1 to Q7 order), past-due tone where any item is past due
+Right column Recent activity card (desktop): Activity items, View all
 ```
 
-| Part | Spec |
+| Part | Rule |
 | --- | --- |
-| Header | Title, today's date, summary line "9 items waiting · 2 past due" (past due in danger colour) |
-| Work in progress | One row per batch step or report the user started and hasn't finished: kind icon, record no., client, current state, last touched ("2 h ago"), item count, **Continue**. Hidden when empty. Up to 5 rows, then "Show all" |
-| Queue cards | One card per queue: icon, queue name, **count** (large), "Oldest 3 d", past-due count with `warning` icon (only when > 0), and a queue-specific note (e.g. "1 returned" on RoAs to draft). The whole card is clickable and opens frame 2. Cards with count 0 shrink to a single muted line under the grid ("Nothing in CoAs to generate"), so the grid holds only work |
-| Order | Queues in flow order (spec 9.6), not by count, so the layout stays the same each day |
-| Recent activity | Right column, 320 px: avatar, "**Hendra Wijaya** approved RoA B-2026-0412", time ago; each line links to the record. 10 items, then **View all** (opens the audit log filtered to the lab) |
-| Multi-role user | When a user has more than one role (e.g. Superadmin + CSO), the queue cards are grouped under small role headings |
+| Header | Overline with today's date ("WEDNESDAY 28 OCTOBER 2026"), title "My work". No summary line: counts live on the cards (rule of Nov 3) |
+| Work in progress | A card titled "Work in progress" (Card head 32) with **WIP row** instances: record (for example "B-2026-0418" and "Analysis" as two texts), started (time and company as two texts), **Continue**. Hidden when empty. Up to 5 rows, then "Show all" |
+| Queue cards | **Queue card** instances (Tone Default or Overdue): name, count, "Oldest waiting 1 d"; Overdue tone when at least one item is past due. The whole card is the link to the queue. Queues with count 0 collapse into one muted line under the grid ("Nothing in CoAs to generate") |
+| Order | Flow order Q1 to Q7, never by count, so the layout is the same every day |
+| Recent activity | Desktop: a 320 px card on the right with **Activity item** instances ("**Dedi Kurniawan** confirmed reception of B-2026-0421", time ago as its own text), 8 items, **View all** (audit log). Tablet: below the queues, 5 items. Phone: a "Recent activity" row that opens a bottom sheet |
+| Several roles | A user with more than one role sees the queue cards grouped under small role headings |
 
-### Tablet (834, sidebar collapsed)
+Tablet: queue cards in 2 columns, the WIP rows drop the company. Phone: Work in progress as a compact card with Continue; queues as full-width rows (name, oldest, past-due icon, count, chevron), 56 px tall.
 
-Queue cards in **2 columns**. Recent activity moves below the queues, shows 5 items and a "Show all" link. Work in progress rows drop the client column.
+## 5 · Screen 02 · Queue
 
-### Mobile (390)
-
-Top bar with menu button. Header becomes title + summary line. Work in progress becomes a compact card ("Continue RoA B-2026-0415"). Queues become **full-width list rows** (icon, name, oldest age, past-due icon, count, chevron), 56 px tall for touch. Recent activity sits behind a "Recent activity" row at the bottom that opens a sheet.
+Route `/work/:queue`. Opening a queue card shows its list; the user's other queues are tabs above it.
 
 ```
-┌──────────────────────────────┐
-│ ☰  My work               🔔  │
-│ 9 waiting · 2 past due        │
-│ ┌ Continue ─────────────────┐ │
-│ │ RoA B-2026-0415 · 2 h ago ›│ │
-│ └───────────────────────────┘ │
-│ ✎ RoAs to draft  3 d ⚠   4  › │
-│ ⎙ RoAs to publish 1 d    3  › │
-│ ▤ CoAs to generate 5 h ⚠ 2  › │
-│ ⟲ Recent activity           › │
-└──────────────────────────────┘
+Breadcrumb   My work > Batches to receive
+Tabs         Batches to receive 2 | Signed RoA to upload 1 | CoAs to generate 1     (Tab component, count pill)
+Filters      [Search batch, job order or company]  [Company]  [Past due only]
+Table card   Waiting | Batch | Job order | Samples | Status | Deadline | Note | Action
+Footer       Pager only above 25 items
 ```
 
-## 2 · My Work · Queue
-
-Route `/work/:queue`. Opening a card shows that queue's list, with the user's other queues as tabs so they can switch without going back.
-
-### Desktop
-
-```
-My work / RoAs to draft
-[RoAs to draft 4] [RoAs to publish 3] [CoAs to generate 2]      ← Status Chip Filter
-[Search no., client]  [Client ▾]  [Past due only ☐]
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ Waiting  Batch / RoA     Job order     Client            Samples  Due     Note    │
-│ ⚠ 3 d    B-2026-0409    JO-2026-0136  CV Sumber Batu…    8        23 Oct  Returned│
-│ 2 d      B-2026-0412    JO-2026-0138  PT Mahakam Coal…   20       28 Oct          │
-│ 1 d      B-2026-0414    JO-2026-0140  PT Bara Nusant…    12       30 Oct          │
-│ 4 h      B-2026-0416    JO-2026-0141  PT Kaltara Ene…    6        02 Nov          │
-└──────────────────────────────────────────────────────────────────────────────────┘
-                                                              [Open report ›] per row
-```
-
-| Part | Spec |
+| Column | Content |
 | --- | --- |
-| Header | Breadcrumb "My work / RoAs to draft"; queue tabs (`Status Chip Filter`, one per queue with its count) |
-| Filters | Search (batch, job order, client), Client, **Past due only** toggle. Kept small, since a queue is short |
-| Columns | **Waiting** (time at this status: "4 h" under a day, then "3 d") · record no. · job order (link) · client · samples · due date · queue note (Returned with the comment in a tooltip, Assigned to me, ADL missing, etc.) · row action button |
-| Sort | Past due first, then the longest waiting. Analyst queue: assigned to me first (spec S-19) |
-| Row states | Past due: `warning` icon and the due date in danger colour. Due within 24 h: warning colour. Returned RoA: `arrow-u-up-left` tag |
-| Row action | One button per row named after the queue's action (Open report, Open reception, Open Input ROA, Answer, Download…). Clicking the row does the same |
-| Checkbox column | Shown **only** in queues with a bulk action (frame 3). "RoAs to draft" has none, because each RoA needs its own check |
-| Footer | "4 items". No pagination under 25 items; above that, 25 per page |
+| Waiting | Time at this status: "4 h" under a day, then "3 d"; past due rows show the warning icon |
+| Batch (or record) | Number in mono heading colour, batch date as a second line |
+| Job order | Number in Primary/primary (link) with the company as a second line |
+| Samples | "6 / 8", as on the lists |
+| Status | Status badge |
+| Deadline | Date; past due in the error colour with a separate "Past due" text; due within 24 h in the warning colour |
+| Note | Queue note as a Tag or short text: "ADL missing", "2 not arrived", "RoA-0415 to upload" |
+| Action | One small button named after the queue's action (Open reception, Enter results, Upload RoA, Mark sent ...); the row itself opens the same place |
 
-### Tablet
+Rows sort past due first, then longest waiting. Tablet: tabs scroll sideways; Job order and Samples fold into the second line of Batch. Phone: one card per row (number and status, job order and company, waiting, deadline, the action as the tap target).
 
-Queue tabs scroll sideways. The table drops Job order and Samples columns; the job order shows as a second line under the record no.
+## 6 · Multi-select (Q7 CoAs to send)
 
-### Mobile
+Drawn for Rina Kartika in **CoAs to send**, with 2 of 3 rows selected, so the header checkbox shows its mixed state.
 
-Queue tabs scroll sideways under the title. One card per item, reusing `Card/Job Order`: record no. + waiting tag, client, job order · due date, note, and the action as the card's tap target.
-
-## 3 · My Work · Queue · Multi-select
-
-Drawn for **Rina Kartika (CSO)** in "CoAs to send", with 3 of 5 rows selected.
-
-| Part | Spec |
+| Part | Rule |
 | --- | --- |
-| Checkbox column | First column, with select-all in the header (selects the visible rows) |
-| Bulk bar | Appears when 1 or more rows are selected. Desktop and tablet: a bar fixed to the bottom of the content area. Mobile: replaces the bottom area as a sticky bar. Contents: "3 selected", **Download PDFs**, Clear |
-| Rule | A bulk action appears only when it does the same thing to every row. Marking sent stays one by one, because each CoA has its own recipient and channel (open point 4) |
+| Checkbox column | Only in queues with a bulk action (Q7 in v1); select-all in the header selects the visible rows |
+| Bulk bar | **Sticky action bar** at the bottom: "2 selected", **Download PDFs**, Clear. Phone: the sticky bar replaces the bottom area |
+| Rule | A bulk action appears only when it does the same to every row; Mark sent stays one by one (each CoA has its own recipient and channels) |
 
-Bulk actions per queue (default):
+## 7 · All caught up
 
-| Queue | Bulk action |
-| --- | --- |
-| CoAs to send | Download PDFs (one zip) |
-| Ready for analysis (Supervisor) | Assign analyst… |
-| Job orders awaiting samples | Print sample ID list |
-| Every other queue | None (no checkbox column) |
+When every queue is empty: **Empty state** (Size=Page) "All caught up" with "New work appears here as soon as it reaches you." and a secondary link to Dashboard. Recent activity stays on desktop.
 
-## 4 · Overview per role (desktop)
+## 8 · Frames
 
-The same layout as frame 1, with the role's queues and demo counts:
+Module **01 My_work** (sidebar order), names by `../Design System/Frame_Naming.md`. Canvas: a new row **H  My work** below row F.
 
-| Frame | Persona | Work in progress | Queues (count · oldest) |
-| --- | --- | --- | --- |
-| Preparation | Dedi Kurniawan | Preparation B-2026-0418 | Job orders awaiting samples 3 · 2 d · In preparation 2 · 1 d (1 "ADL missing") |
-| Analyst | Fitri Handayani | Analysis B-2026-0417 (Ultimate tab) | Ready for analysis 5 · 1 d (2 assigned to me) |
-| Supervisor | Hendra Wijaya | — | Results to approve 4 · 2 d (1 past due) · RoAs to approve 3 · 6 h · Ready for analysis 5 (3 unassigned) |
-| CSO | Rina Kartika | — | Job orders awaiting samples 3 · 2 d · CoAs to send 5 · 1 d |
-| Manager | Ir. Bambang Sutrisno | — | Manager reviews 2 · 1 d, plus a **Dashboard** shortcut card, since the Manager mostly reads |
+| SS | Screen | VV | Variant | Sizes |
+| --- | --- | --- | --- | --- |
+| 01 | Overview | 01 | Lab_admin | D, T, P |
+| 01 | Overview | 02 | Preparation | D |
+| 01 | Overview | 03 | Analyst | D |
+| 01 | Overview | 04 | CSO | D |
+| 01 | Overview | 05 | All_caught_up | D, P |
+| 02 | Queue | 01 | Batches_to_receive | D, T, P |
+| 02 | Queue | 02 | CoAs_to_send_multi_select | D, T, P |
 
-## 5 · All caught up
+Total **14 frames** (7 desktop, 2 tablet, 5 phone), for example `Desktop-01-My_work-01-Overview-01-Lab_admin`.
 
-When every queue is empty: `check-circle` icon, "All caught up", one line ("New work appears here as soon as it reaches you."), and a secondary link to **Dashboard**. Recent activity stays visible on desktop.
+## 9 · Design rules that apply
 
-## Demo data
+- Card anatomy: cards padded 16 on all sides; Card head 32 px (title, actions, short texts); notes and descriptions in Card content; Table cards padded 16 (`../Design System/Component_Library_Plan.md`).
+- No values joined with " · ": separate texts, an icon row, two lines or a sentence (Job Order plan 8.1). No count subtitles under titles.
+- Sidebar: **My work** is active on these frames, with its Count pill showing the total of the user's queues (the Nav item already has the Count; the collapsed rail shows the same pill).
+- Batch and job order numbers in their usual colours (heading for the batch, Primary/primary for the job order link); deadlines past due in red with "Past due".
+- Library components used as they are: Queue card, WIP row, Activity item, Waiting tag, Tab, Status badge, Tag, Checkbox, Sticky action bar, Empty state, Button, Icon button, Search, Select, Pager. New only if needed: a phone queue row (built from frames if no component fits).
 
-| Item | Values |
-| --- | --- |
-| Records | Batches `B-2026-0409` to `B-2026-0418`, job orders `JO-2026-0131` to `JO-2026-0142` (same as the Job orders frames) |
-| Clients | PT Bara Nusantara Mandiri, PT Kaltara Energi Prima, CV Sumber Batu Hitam, PT Mahakam Coal Resources |
-| People | Personas from spec section 8.1 only |
-| Waiting | A spread from 4 h to 5 d; 2 past due on Maya's page; one returned RoA with the comment "Recheck CV on sample 5, value outside expected range" |
+## 10 · Open points (defaults used until answered)
 
-## Components
-
-Reuse: `Sidebar/*`, `Top Bar`, `Avatar`, `Card/Panel`, `Table/Header Row`, `Table/Row`, compact table rows, `Badge/Status`, `Status Chip Filter`, `Card/Job Order`, `Performer Line`, `Channel Icon`, `Input/Search`, `Input/Select`, `IconButton/Ghost`, buttons.
-
-New reusable components:
-
-| Component | Used later by |
-| --- | --- |
-| `Queue Card` (icon, name, count, oldest, past-due, note; default, hover, zero) | Dashboard shortcuts |
-| `Queue Row/Mobile` (icon, name, oldest, past-due, count, chevron) | Mobile menus |
-| `WIP Row` (kind icon, record, state, time, count, Continue) | Batch detail "resume" banner |
-| `Activity Item` (avatar, sentence with bold actor, time) | Sample history (S-30), audit log |
-| `Waiting Tag` (normal, due soon, past due) | Batches list, Reports list |
-| `Bulk Action Bar` (count, actions, clear) | Batches, Reports, Samples grids |
-| `Nav Item` badge variant | Sidebar |
-
-## Responsive rules
-
-Same as the earlier plans: breakpoints 360–767 mobile, 768–1199 tablet, 1200+ desktop. Touch targets are 44 px on tablet and mobile, there is no horizontal page scroll, and the bulk bar is sticky at the bottom on mobile.
-
-## Prototype and interaction
-
-Once the frames are approved, the HTML prototype (artifact `73FDBne3B8rbFcXoa6dDZo`) gets a My work page that becomes its start page. It reuses the job order demo data, so a queue row opens the real job order screens.
-
-| Flow | Steps |
-| --- | --- |
-| A · Start the day | Sign-in lands on My work → see summary → open a queue card → open a row → (placeholder for Report review) → back to My work, count goes down |
-| B · Continue | Click **Continue** on a Work in progress row → opens the record at the step where it was left |
-| C · Bulk | CSO opens CoAs to send → selects 3 → **Download PDFs** → toast "3 CoAs downloaded" → selection clears |
-| D · Switch role (prototype only) | A role switcher in the prototype bar redraws My work for each persona, so the review can walk every role |
-
-| Interaction | Behaviour |
-| --- | --- |
-| Queue card | Hover lifts the border colour; the whole card is the link; keyboard Enter opens it |
-| Queue tabs | Switch the list without reloading; the URL updates (`#work.roas-to-draft`) |
-| Counts | Recomputed from the demo data, so acting on a row in the prototype lowers the count |
-| Recent activity | Time ago updates every minute; new items fade in at the top |
-| Empty queue | The tab stays, the list shows "Nothing waiting here" |
-| States | Loading skeleton for cards and rows; error banner with Retry |
-
-## Open points (defaults used in the frames)
-
-| # | Question | Default drawn |
+| # | Question | Default |
 | --- | --- | --- |
-| 1 | What does Recent activity cover: the whole lab or only my queues? | Whole lab, last 10, linked to the audit log |
-| 2 | When is a row marked "due soon"? | Due within 24 h → warning colour; past due → danger |
-| 3 | Is Waiting counted in calendar days or working days? | Calendar time ("4 h", "3 d") |
-| 4 | Can the CSO mark several CoAs sent at once? | No, one by one; bulk is Download only |
-| 5 | Does the Supervisor see Ready for analysis to assign analysts (D-36)? | Yes, with **Assign analyst…** as a bulk action |
-| 6 | Should Dashboard or My work be the start page for the Manager? | My work for everyone; the Manager's page has a Dashboard shortcut card |
+| 1 | Supervisor and Manager have no queue in v1. Start page? | Dashboard; My work stays in their sidebar and shows All caught up |
+| 2 | Recent activity: whole lab or only my queues? | Whole lab, last 8, linked to the audit log |
+| 3 | When is a row "due soon"? | Due within 24 h: warning colour; past due: error colour with "Past due" |
+| 4 | Waiting in calendar or working days? | Calendar time ("4 h", "3 d") |
+| 5 | Does Q1 Batches to receive also show to the Lab admin? | Yes (Confirm reception is CSO, Preparation, Lab admin, D-46) |
+| 6 | CoAs to generate: Lab admin or CSO? | Lab admin (spec CoA flow) |
 
-## Done when
+## 11 · What changed from the Oct 26 plan
 
-- The 16 frames are in `screens.pen` under a "My Work" row group, using components (no detached copies).
-- Every queue in the spec S-19 table appears in at least one frame.
-- Past due, due soon, returned and zero-count states are each shown at least once.
-- Desktop, tablet and mobile read correctly at 1440, 834 and 390 with no horizontal page scroll.
-- The open points are answered or the defaults are accepted.
+| Oct 26 plan | Revision 2 (Nov 4) | Why |
+| --- | --- | --- |
+| Queues RoAs to draft, RoAs to approve, RoAs to publish, Results to approve, Manager reviews; Ready for analysis with "assign analyst" | Removed (next goal); new queues Batches to receive, Ready for data entry, Signed RoA to upload | v1 scope, spec 1.1, D-44 to D-49 |
+| Main persona Maya with RoA queues; role frames for Supervisor and Manager | Maya with v1 queues; role frames for Preparation, Analyst, CSO only | Supervisor and Manager have no in-system work in v1 |
+| "Job orders awaiting samples" opens reception | Reception is per batch: **Batches to receive** opens the batch page | Batch page design, D-46 |
+| Summary line "9 items waiting · 2 past due" | No subtitle | No count subtitles, no dot joins (Nov 3) |
+| New components to draw (Queue Card, WIP Row, Activity Item, Waiting Tag, Bulk Action Bar, Nav Item badge) | Use the library's Queue card, WIP row, Activity item, Waiting tag, Sticky action bar and the Nav item Count | The component library rebuild (Oct 30) |
+| Frames in `screens.pen`, names like "My Work · Overview" | FigCraft file, names by Frame_Naming.md, canvas row H | Design source moved (Oct 29); naming rule (Nov 3) |
+| 16 frames | 14 frames | Fewer role frames |
+| Prototype section | Deferred: screens first (owner, Nov 4) | |
 
-## Build status (Oct 26, 2026)
+History: on Oct 26 frame 1 (Overview for Maya) was built at three sizes in `screens.pen`, with the components Queue Card, WIP Row, Activity Item, Waiting Tag and Queue Row/Mobile. On Oct 29 the frames moved to FigCraft and on Oct 30 they were deleted with the library rebuild; the components were rebuilt in the new library.
 
-Built in `screens.pen`, in the "My Work · Desktop Row" and "My Work Components" frames at the bottom of "v1 Screens":
+## 12 · Build steps (after go)
 
-- Frame 1 `My Work · Overview` at desktop, tablet and mobile (Maya Lestari, Lab admin).
-- New components: Queue Card, WIP Row, Activity Item, Waiting Tag, Queue Row/Mobile.
+1. Generator `library/screens/rowH.js` (14 frames), placed below row F; naming rules for module 01.
+2. Build chain: `build-screens.js C,D,E,G,F,H`, `rev8.js D`, `naming.js`, `cards.js`, `fit.js`; deploy when the open file has no unsaved edits; export.
+3. Build status here, memory, commit.
 
-Not built yet: frame 2 (queue list), frame 3 (multi-select), frame 4 (five role overviews), frame 5 (All caught up), and the sidebar count badge on My work.
+## 13 · Build status (Nov 4, 2026)
 
-## Note · v1 scope and design source (Oct 29, 2026)
+All 14 frames are in the FigCraft file, canvas row **H  My work** below row F (`library/screens/rowH.js`; naming rules for module 01 in `naming.js`; backup before: `backup/SGSI-LIMS-screens.before-mywork.figcraft`). PNGs in `.context/design/export/`.
 
-v1 is report and monitoring of job orders (Coal LIMS spec section 1.1). Queue effects for My work: the Preparation team's "Job orders awaiting samples" now also appears for the CSO and Lab admin, who can confirm reception; the Analyst's queue is "Batches ready for data entry" (the analyst inputs final values, no worksheet); the Lab admin's queue gains "Analysis finished, signed RoA to upload". The frames stay as built in `screens.pen` and in the FigCraft file (`.context/design/figcraft`); the queue changes above are not drawn yet.
-
+- **Overview** (Lab_admin D, T, P; Preparation, Analyst, CSO D; All_caught_up D, P): header with the date overline and no subtitle; Work in progress card with the library WIP row; queue cards (Queue card, Overdue tone when something is past due; the past-due text is the second part of the card's warning line); Recent activity card (8 items) on desktop, below the queues on tablet (5 items), a row on phone; the sidebar item My work shows its count pill on desktop.
+- **Queue** (Batches_to_receive D, T, P; CoAs_to_send_multi_select D, T, P): breadcrumb, queue tabs with counts, search, company, Past due only, a Table card with Waiting (warning icon and red when past due), batch or CoA, job order link, samples "n / n", status, deadline with "Past due", note and one action button. The multi-select frames show the mixed header checkbox, two of three rows ticked and the Sticky action bar ("2 selected", Clear, Download PDFs). Phone: one card per item.
+- **Placement:** rows D, F and G ignore row H; row F tells row H where it ends (`b.fEnd`). Build chain: `build-screens.js C,D,E,G,F,H`, `rev8.js D`, `naming.js`, `cards.js`, `fit.js`.
+- **Deviations:** the Activity item library component has one text, so the actor is not bold; the collapsed tablet sidebar shows no count (the Nav item rail has no pill yet); the phone queue rows and Work in progress card are built from frames (no library component).
+- Not done: the prototype page (screens first).

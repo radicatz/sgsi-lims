@@ -1289,7 +1289,9 @@ Used by the Preparation team (B-9) and, from v1 (Oct 29, 2026), by the CSO and L
 
 ### S-19 My work `/work` (Proposed, from Clarity's Lab View)
 
-The landing page for every staff role. One card per queue the user's roles can act on, each with a count and the oldest item's age.
+The landing page for every staff role.
+
+**v1 note (Nov 4, 2026):** in v1 the queues are Batches to receive (CSO, Preparation, Lab admin), Samples awaiting arrival (CSO, Preparation), In preparation (Preparation), Ready for data entry (Analyst), Signed RoA to upload (Lab admin), CoAs to generate (Lab admin), CoAs to send (CSO) and Work in progress. The RoA review queues, Results to approve and Manager reviews in the table below are next goal; Supervisor and Manager start on the Dashboard. Design: `../My Work/My_Work_Screen_Plan.md`, Revision 2. One card per queue the user's roles can act on, each with a count and the oldest item's age.
 
 | Queue | Role | Contents | Bulk action |
 | --- | --- | --- | --- |

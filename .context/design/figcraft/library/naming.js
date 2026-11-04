@@ -25,11 +25,14 @@ const RULES = [
 ];
 // module 04 Batches, screen 02 Batch_detail (Batch_Screen_Plan.md section 6)
 const BATCH_VV = { Reception_receiving: "01", Reception_print_labels: "02", Reception_photos: "03", Reception_ready: "04", Reception_confirm_with_fewer: "05", Reception_hold_sample: "06", Reception_scan_label: "07", Reception_confirmed: "08", Batch_number_edit: "09", Preparation_entering_ADL: "10", Preparation_finished: "11", Analysis_entering_results: "12", Analysis_finished_upload_RoA: "13", Completed: "14" };
+const MW_VV = { "Overview:Lab_admin": "01", "Overview:Preparation": "02", "Overview:Analyst": "03", "Overview:CSO": "04", "Overview:All_caught_up": "05", "Queue:Batches_to_receive": "01", "Queue:CoAs_to_send_multi_select": "02" };
 const LIST_VV = { Default: "01", Batches_to_prepare: "02", Empty: "03", No_results: "04", Filters: "05", Add_batch_choose_job_order: "06" };
 function newName(old, page) {
   if (NEW.test(old) || /reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(old)) return null;
   const size = SIZE[page]; if (!size) return null;
   const base = old.replace(/ · (Desktop|Tablet|Phone)$/, "");
+  const mw = /^My work · (Overview|Queue) · (.+)$/.exec(base);
+  if (mw && MW_VV[mw[1] + ":" + mw[2]]) return [size, "01", "My_work", mw[1] === "Overview" ? "01" : "02", mw[1], MW_VV[mw[1] + ":" + mw[2]], mw[2]].join("-");
   const bl = /^Batch list · (.+)$/.exec(base);
   if (bl && LIST_VV[bl[1]]) return [size, "04", "Batches", "01", "Batch_list", LIST_VV[bl[1]], bl[1]].join("-");
   const bd = /^Batch detail · (.+)$/.exec(base);

@@ -9,7 +9,7 @@ const F_NAMES = /^(Batch detail ·|(Desktop|Tablet|Phone)-04-Batches-02-)/;
 const isF = (n) => F_NAMES.test(n.name || "") || (n.name === "Row title" && /^F( ·|  )/.test(n.characters || ""));
 function bottoms(b) {
   const N = b.reg.N, out = {};
-  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(n.name || "")) continue; if (/-03-Job_orders-0[45]-|^(Add batch|CoA · Mark sent|CoA · Sent|Cancel job order) ·/.test(n.name || "") || (n.name === "Row title" && /^[DE]( ·|  )/.test(n.characters || ""))) continue; if (isF(n) || isG(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.ceil((m + 400) / 100) * 100; }
+  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(n.name || "")) continue; if (/-03-Job_orders-0[45]-|^(Add batch|CoA · Mark sent|CoA · Sent|Cancel job order) ·|-01-My_work-|^My work ·/.test(n.name || "") || (n.name === "Row title" && /^[DEH]( ·|  )/.test(n.characters || ""))) continue; if (isF(n) || isG(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.ceil((m + 400) / 100) * 100; }
   if (b.gEnd) for (const k of Object.keys(out)) out[k] = Math.max(out[k], b.gEnd[k]);
   return out;
 }
@@ -391,4 +391,5 @@ exports.build = (b) => {
   prepFrame(b, PX * 4, P1, "phone", false);
   analysisFrame(b, PX * 5, P1, "phone", "entry");
   analysisFrame(b, PX * 6, P1, "phone", "upload");
+  b.fEnd = { desktop: D3 + 1500 + 400, tablet: T1 + 1500 + 400, phone: P1 + 2800 + 400 };
 };

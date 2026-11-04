@@ -12,7 +12,7 @@ Nov 4, 2026. Plans and specifications for SGSI LIMS, one folder per screen group
 | Job Order | `Job Order/Job_Order_Screen_Plan.md` | Job order screens: list, create, detail, add batch, CoA and actions (rows A to E) | Built through Revision 10 |
 | Job Order | `Job Order/Job_Order_Prototype_Plan.md` | The clickable prototype (artifact) and what it still has to take | Section 14 waits for go |
 | Batch | `Batch/Batch_Screen_Plan.md` | The batch page: Reception, Preparation, Analysis, RoA and Complete batch | Batch page and batch list frames built Nov 4; prototype update pending |
-| My Work | `My Work/My_Work_Screen_Plan.md` | My work queues per role | Plan; to be redrawn on the new library |
+| My Work | `My Work/My_Work_Screen_Plan.md` | My work queues per role | Revision 2 (v1 queues) frames built Nov 4 |
 | Dashboard | `Dashboard/Dashboard_Screen_Plan.md` | Dashboard for go-live (SIM Lab parity) | Plan; to be redrawn |
 | Dashboard | `Dashboard/Dashboard_v2_Screen_Plan.md` | Dashboard version 2 (Operations, Quality, Client) after go-live | Plan; to be redrawn |
 | archive | `archive/Reception_Preparation_Screen_Plan.md` | The first batch-page plan with Revisions B and C | Superseded by the Batch plan; kept as history |

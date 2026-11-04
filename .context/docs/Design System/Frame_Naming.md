@@ -54,3 +54,12 @@ The screen number equals the row letter on the canvas (A 01, B 02, C 03, D 04, E
 | 02 | Batch_detail | 01 Reception_receiving, 02 Reception_print_labels, 03 Reception_photos, 04 Reception_ready, 05 Reception_confirm_with_fewer, 06 Reception_hold_sample, 07 Reception_scan_label, 08 Reception_confirmed, 09 Batch_number_edit, 10 Preparation_entering_ADL, 11 Preparation_finished, 12 Analysis_entering_results, 13 Analysis_finished_upload_RoA, 14 Completed |
 
 Canvas row G holds the batch list frames and row F the batch detail frames. `fit.js` runs after `naming.js` on every build.
+
+## My work (module 01)
+
+| SS | Screen | Variants (VV) |
+| --- | --- | --- |
+| 01 | Overview | 01 Lab_admin, 02 Preparation, 03 Analyst, 04 CSO, 05 All_caught_up |
+| 02 | Queue | 01 Batches_to_receive, 02 CoAs_to_send_multi_select |
+
+Canvas row H holds the My work frames.
