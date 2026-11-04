@@ -299,7 +299,7 @@ function batches(b, x, y, kind, empty) {
   const c = card(b, s.main, "Batches card");
   const n = empty ? 0 : 2;
   const hd = cardHead(b, c, "Batches");
-  if (kind !== "phone") b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  if (kind !== "phone") b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
   if (empty) {
     b.instV(c, "Empty state", "Size=Card", { texts: { 0: "No batches yet", 1: "Use Add batch above to group the registered samples and start preparation." }, props: { sizingH: "fill" }, hide: kind === "phone" ? [] : [] });
     if (kind === "phone") b.instV(c, "Button", "Type=Secondary, Tone=Default, Size=touch, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") }, props: { sizingH: "fill" } });
@@ -452,7 +452,7 @@ function awaiting(b, x, y) {
   const s = detailFrame(b, x, y, "desktop", { ...JO0139, name: "Batches · Samples awaiting arrival · Desktop", tab: "Batches" });
   const c = card(b, s.main, "Batches card");
   const hd = cardHead(b, c, "Batches");
-  b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
   const note = b.frame(c, { name: "Note", w: 1112, h: 44, fill: "Accent/accent-100", r: 10, layout: "h", gap: 10, pad: [10, 14, 10, 14], cross: "center", sizeH: "fill", sizeV: "hug" });
   const ic = b.instV(note, "Icon", "Glyph=hourglass, Size=14"); b.raw("node.set", { ids: [ic + 1], props: { fill: LIGHT["Accent/accent-text"] } }); b.bind(ic + 1, "fill", "Accent/accent-text");
   b.text(note, "1 sample is awaiting arrival (returned from B-2026-0421). When it arrives, add it with Add batch.", { style: "Body small/Regular", color: "Accent/accent-text", name: "Note", fill: true });

@@ -1097,3 +1097,16 @@ Owner feedback: the job order tabs read **Overview, Samples, Batches, Files, CoA
 Built together with the batch list (`../Batch/Batch_Screen_Plan.md` section 13).
 
 Built: `rowC.js` `tabs()` now lists Overview, Samples, Batches, Files, CoA, History; rows C, D and E were rebuilt, so every job order detail frame at three sizes has the new order.
+
+## Revision 12 · Desktop feedback of Nov 4, 2026 · BUILT (Nov 4, 2026)
+
+| # | Feedback | Frames |
+| --- | --- | --- |
+| 1 | **Overline without "WORK"**: the Split "WORK" + date (or "JOB ORDERS") becomes one text: "TUESDAY 21 OCTOBER 2026" on desktop, "JOB ORDERS" on tablet and phone (the owner already changed List · Desktop) | 21 frames: job order list T, P, Empty D; every Create frame behind the overlay (D 10, T 1); batch list D 6, T 1, P 2 ("BATCHES") |
+| 2 | **Table card** padding 16 on all sides; the library table rows inside drop their side padding (cells keep 8) | Job order list D 01 and the 10 Create backdrops; T 01 and the tablet Create backdrop |
+| 3 | **Card head fixed 32**; short texts stay in the head, notes and hints move to **Card content** (Card anatomy, `../Design System/Component_Library_Plan.md`) | Samples card: hint "Paste IDs from Excel ..." (D, T 06), inline alert (D 11); Batches card: awaiting-arrival note (D 05, Add batch D 02 backdrop); every other card head (Properties, Overview Batches, CoA) is set to 32 |
+| 4 | **Add batch** buttons in the Batches tab are **sm** | Batches card head D, T 03, 04, 05; the Add batch and P7 backdrops (D 04-01, 04-02, 05-03) |
+
+Built with Batch plan Revision 3 (`../Batch/Batch_Screen_Plan.md` section 14).
+
+Built with `library/cards.js` and the changed generators (`../Batch/Batch_Screen_Plan.md` section 14.5): 21 overlines lost the "WORK" layer, 17 Table cards are padded 16, every Card head is 32 px, notes and hints sit in Card content (Samples hint, inline alert, awaiting-arrival note), and the Add batch buttons of the Batches tab are small.

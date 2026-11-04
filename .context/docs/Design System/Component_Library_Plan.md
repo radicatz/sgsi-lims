@@ -277,3 +277,20 @@ Each phase ends with renders for you to approve.
 Phases 0 and A to E are built and saved in `SGSI-LIMS-screens.figcraft`: 74 component sets (about 740 variants), 28 styles, 60 variables. Frames, left to right: Foundations (now also holds the text styles list, effect-styled elevation and the Icon set), Components (test sheet made of instances), 01 Actions, 02 Status and labels, 03 Forms, 04 Navigation, 05 Data display, 06 Charts, 07 Overlays, Brand Components, Logo. The 113 old components and their frames are gone (backup: `figcraft/backup/`). Generator: `figcraft/library/` (`node build.js`, then `node finish.js`).
 
 Known gaps: the Loading spinner is a still glyph; Foundations still shows the older type and elevation specimens next to the new styles; charts are static shells; the Dashboard sample cards use fixed progress widths.
+
+## Card anatomy (Nov 4, 2026, owner rule) · built (see Batch plan 14.5)
+
+Source: the owner's frame "Desktop-04-Batches-02-Batch_detail-12-Analysis_entering_results ref".
+
+```
+Card (Surface/card, border, radius 16, padding 16 / 20, gap 16)
+  Card top row (vertical, gap 0, hug)
+    Card head    (horizontal, height fixed 32, space between, centered): Title, Actions, short texts (a count such as "4 of 6 saved", a status such as "Ready for analysis")
+    Card content (vertical, gap 8, hug): description line, warning or info note, header line with avatar, inline alert
+  Card body: table, list, grid, fields, checklist (the checklist sits inside the same card, below the table)
+```
+
+- **Card head** is always 32 px high. Anything taller than one line (a subtitle, a note, a second row of filters) goes into **Card content**, never into the head.
+- A card with nothing but a head and a body has no Card content frame.
+- **Table card** (a card that only holds a table and its pager, as on the list pages) has padding **16 on all four sides**; table rows inside it drop their own side padding (cells keep 8).
+- On tablet and phone, when the actions do not fit in 32 px, the head keeps the title and the primary action; the other actions (search, secondary buttons) move to the first line of Card content.

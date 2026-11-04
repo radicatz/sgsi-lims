@@ -10,7 +10,7 @@ const isG = (n) => G_NAMES.test(n.name || "") || (n.name === "Row title" && /^G(
 const isF = (n) => /^(Batch detail ·|(Desktop|Tablet|Phone)-04-Batches-02-)/.test(n.name || "") || (n.name === "Row title" && /^F( ·|  )/.test(n.characters || ""));
 function bottoms(b) {
   const N = b.reg.N, out = {};
-  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (isG(n) || isF(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.ceil((m + 400) / 100) * 100; }
+  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(n.name || "")) continue; if (/-03-Job_orders-0[45]-|^(Add batch|CoA · Mark sent|CoA · Sent|Cancel job order) ·/.test(n.name || "") || (n.name === "Row title" && /^[DE]( ·|  )/.test(n.characters || ""))) continue; if (isG(n) || isF(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.max(Math.ceil((m + 400) / 100) * 100, b.rowE ? b.rowE[k] + 1600 : 0); }
   return out;
 }
 const clearG = (b) => { const N = b.reg.N, old = []; for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) if (isG(N[id])) old.push(id); if (old.length) b.raw("edit.delete", { ids: old }); };
@@ -65,7 +65,7 @@ const COLS = {
   tablet: [["Batch no.", 150], ["Job order", 220], ["Status", 150], ["Deadline", 0], ["", 36]],
 };
 function tableCard(b, main, kind, rows, o = {}) {
-  const c = card(b, main, "Table card");
+  const c = card(b, main, "Table card"); b.raw("node.set", { ids: [c], props: { padding: [16, 16, 16, 16] } });
   const cols = COLS[kind];
   const t = vframe(b, c, "Table", 0);
   const head = b.frame(t, { name: "Table header", w: 800, h: 40, fill: "Primary/primary-50", r: 8, layout: "h", cross: "center", sizeH: "fill", sizeV: "fixed" });
@@ -82,7 +82,7 @@ function tableCard(b, main, kind, rows, o = {}) {
       if (k === "no") { const t2 = two(f); txt(b, t2, no, "Data/Strong", "Text/heading", "Number"); txt(b, t2, date, "Caption/Regular", "Text/text-muted", "Date"); }
       if (k === "jo") { const t2 = two(f); txt(b, t2, jo, "Data", "Primary/primary", "Job order"); txt(b, t2, co, "Caption/Regular", "Text/text-secondary", "Company"); }
       if (k === "std") { const tg = b.frame(f, { name: "Standard tag", w: 50, h: 22, fill: "Primary/primary-50", stroke: "Primary/primary-200", sw: 1, r: 6, layout: "h", pad: [0, 8, 0, 8], main: "center", cross: "center", sizeH: "hug", sizeV: "fixed" }); txt(b, tg, std, "Caption/SemiBold", "Text/text-secondary", "Standard"); }
-      if (k === "n") { txt(b, f, n, "Body small/Regular", "Text/foreground", "Samples"); if (of) txt(b, f, of, "Caption/Regular", "Text/text-muted", "Expected"); }
+      if (k === "n") txt(b, f, n + " / " + (of ? of.replace("of ", "") : n), "Body small/Regular", "Text/foreground", "Samples");
       if (k === "st") b.instV(f, "Status badge", `Status=${st}, Size=md`);
       if (k === "dl") { txt(b, f, dl, "Body small/Regular", late ? "Feedback/error" : "Text/foreground", "Deadline"); if (late) txt(b, f, "Past due", "Body small/SemiBold", "Feedback/error", "Past due"); }
       if (k === "roa") { if (roa) { icon(b, f, "file-pdf", "Primary/primary"); txt(b, f, roa, "Data", "Primary/primary", "RoA"); } else txt(b, f, "—", "Body small/Regular", "Text/text-muted", "RoA"); }
@@ -103,7 +103,7 @@ function phoneCards(b, main, rows) {
     b.instV(top, "Status badge", `Status=${st}, Size=md`);
     const j = hframe(b, c, "Job order", 8, { sizeH: "fill" }); txt(b, j, jo, "Data", "Primary/primary", "Job order"); txt(b, j, co, "Caption/Regular", "Text/text-secondary", "Company");
     const m = hframe(b, c, "Meta", 12, { sizeH: "fill", wrap: true });
-    const a = hframe(b, m, "Samples", 4); icon(b, a, "stack"); txt(b, a, n, "Body small/Regular", "Text/foreground", "Samples"); if (of) txt(b, a, of, "Caption/Regular", "Text/text-muted", "Expected");
+    const a = hframe(b, m, "Samples", 4); icon(b, a, "stack"); txt(b, a, n + " / " + (of ? of.replace("of ", "") : n), "Body small/Regular", "Text/foreground", "Samples");
     const d2 = hframe(b, m, "Deadline", 4); icon(b, d2, "calendar-blank", late ? "Feedback/error" : "Text/text-muted"); txt(b, d2, dl, "Body small/Regular", late ? "Feedback/error" : "Text/text-secondary", "Deadline"); if (late) txt(b, d2, "Past due", "Body small/SemiBold", "Feedback/error", "Past due");
     if (roa) { const r = hframe(b, m, "RoA", 4); icon(b, r, "file-pdf", "Primary/primary"); txt(b, r, roa, "Data", "Primary/primary", "RoA"); }
   });
@@ -133,9 +133,7 @@ exports.build = (b) => {
   listFrame(b, DX * 2, d, "desktop", { variant: "Empty", state: "empty", counts: { All: "0", Created: "0", Preparation: "0", "Prep finished": "0", Analysis: "0", "Analysis finished": "0", Completed: "0" } });
   listFrame(b, DX * 3, d, "desktop", { variant: "No_results", state: "none", query: "B-2025", counts: { All: "0", Created: "0", Preparation: "0", "Prep finished": "0", Analysis: "0", "Analysis finished": "0", Completed: "0" } });
   { const s = listFrame(b, 0, d + 1300, "desktop", { variant: "Filters" }); fix(b, s, "desktop", 1200);
-    const v = b.v("Side sheet", "Width=480"); const id = b.instV(s.root, "Side sheet", "Width=480", { texts: { Title: "Filters" }, props: { absolute: true, x: 1440 - 480, y: 0, height: 1200 } });
-    const bt = v.insts.filter((i) => i.name === "Button"); b.raw("node.set", { ids: [id + bt[0].pos + 3], props: { characters: "Clear all" } }); b.raw("node.set", { ids: [id + bt[1].pos + 3], props: { characters: "Show 12 batches" } });
-    filterFields(b, id + v.names.Body, false); }
+    dialogAt(b, s.root, "lg", Math.round((1440 - 800) / 2) + 64, 140, "Filters", "Narrow the batch list.", "Clear all", "Show 12 batches", (bd) => filterDialog(b, bd)); }
   { const s = listFrame(b, DX, d + 1300, "desktop", { variant: "Add_batch_choose_job_order" }); fix(b, s, "desktop", 1200);
     dialogAt(b, s.root, "sm", Math.round((1440 - 400) / 2) + 64, 260, "Add batch", "A batch is created from a job order. Choose the job order first.", "Cancel", "Next", (bd) => { const f = vframe(b, bd, "Fields", 12); b.instV(f, "Select", "State=Focused, Size=md", { texts: { Label: "Job order *", Value: "Search job order or company" }, setProps: { "Show helper": true }, props: { sizingH: "fill" } }); [["JO-2026-0137", "PT Kaltara Energi Prima"], ["JO-2026-0139", "PT Mahakam Coal Resources"], ["JO-2026-0142", "PT Bara Nusantara Mandiri"]].forEach(([jo, co], i) => b.instV(f, "Option row", `State=${i === 0 ? "Selected" : "Default"}`, { texts: { Name: jo, Detail: co }, props: { sizingH: "fill" } })); }); }
   listFrame(b, 0, t, "tablet", { variant: "Default" });
@@ -153,4 +151,12 @@ function filterFields(b, bd, phone) {
   const r = b.frame(bd, { name: "Dates", w: 400, h: 70, layout: phone ? "v" : "h", gap: 12, sizeH: "fill", sizeV: "hug" });
   [["Batch date from", "1 Oct 2026"], ["Batch date to", "4 Nov 2026"], ["Deadline from", "Any date"], ["Deadline to", "Any date"]].slice(0, phone ? 4 : 2).forEach(([l, v]) => b.instV(r, "Date field", `State=Filled, Size=${sz}`, { texts: { Label: l, Value: v }, setProps: { "Show helper": false }, props: { sizingH: "fill" } }));
   if (!phone) { const r2 = b.frame(bd, { name: "Deadline", w: 400, h: 70, layout: "h", gap: 12, sizeH: "fill", sizeV: "hug" }); [["Deadline from", "Any date"], ["Deadline to", "Any date"]].forEach(([l, v]) => b.instV(r2, "Date field", "State=Default, Size=md", { texts: { Label: l, Value: v }, setProps: { "Show helper": false }, props: { sizingH: "fill" } })); }
+}
+function filterDialog(b, bd) {
+  const f = vframe(b, bd, "Fields", 14);
+  const row = (a, c) => { const r = b.frame(f, { name: "Row", w: 700, h: 70, layout: "h", gap: 12, sizeH: "fill", sizeV: "hug" }); [a, c].forEach(([set, l, v, st]) => b.instV(r, set, `State=${st || "Filled"}, Size=md`, { texts: { Label: l, Value: v }, setProps: { "Show helper": false }, props: { sizingH: "fill" } })); };
+  row(["Select", "Company", "All companies"], ["Select", "Status", "All statuses"]);
+  row(["Select", "Standard", "ASTM"], ["Select", "Job order", "Any job order"]);
+  row(["Date field", "Batch date from", "1 Oct 2026"], ["Date field", "Batch date to", "4 Nov 2026"]);
+  row(["Date field", "Deadline from", "Any date", "Default"], ["Date field", "Deadline to", "Any date", "Default"]);
 }

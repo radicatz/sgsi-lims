@@ -9,7 +9,7 @@ const F_NAMES = /^(Batch detail ·|(Desktop|Tablet|Phone)-04-Batches-02-)/;
 const isF = (n) => F_NAMES.test(n.name || "") || (n.name === "Row title" && /^F( ·|  )/.test(n.characters || ""));
 function bottoms(b) {
   const N = b.reg.N, out = {};
-  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (isF(n) || isG(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.ceil((m + 400) / 100) * 100; }
+  for (const [k, pid] of Object.entries(b.pageIds)) { let m = 0; for (const id of N[pid].children || []) { const n = N[id]; if (/ ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(n.name || "")) continue; if (/-03-Job_orders-0[45]-|^(Add batch|CoA · Mark sent|CoA · Sent|Cancel job order) ·/.test(n.name || "") || (n.name === "Row title" && /^[DE]( ·|  )/.test(n.characters || ""))) continue; if (isF(n) || isG(n)) continue; m = Math.max(m, (n.transform ? n.transform[5] : 0) + (n.height || 0)); } out[k] = Math.ceil((m + 400) / 100) * 100; }
   if (b.gEnd) for (const k of Object.keys(out)) out[k] = Math.max(out[k], b.gEnd[k]);
   return out;
 }
@@ -51,9 +51,9 @@ function batchFrame(b, x, y, kind, o) {
   b.instV(tr, "Status badge", `Status=${o.status}, Size=md`);
   txt(b, left, bt.company, "Body/Medium", "Text/foreground", "Company");
   const mr = b.frame(left, { name: "Row", w: 400, h: 20, layout: "h", gap: kind === "phone" ? 12 : 16, wrap: kind === "phone", sizeH: "fill", sizeV: "hug" });
-  [["clipboard-text", bt.jo, "Text/text-secondary"], ["flask", bt.std], ["calendar-blank", bt.deadline], ["stack", o.count]].forEach(([g, t, c]) => {
+  [["clipboard-text", bt.jo, "Primary/primary"], ["flask", bt.std], ["calendar-blank", bt.deadline], ["stack", o.count]].forEach(([g, t, c]) => {
     if (!t) return;
-    const it = hframe(b, mr, "Item", 4); icon(b, it, g); txt(b, it, t, "Body small/Regular", c || "Text/text-muted", "Meta");
+    const it = hframe(b, mr, g === "clipboard-text" ? "Job order link" : "Item", 4); icon(b, it, g, c === "Primary/primary" ? c : "Text/text-muted"); txt(b, it, t, "Body small/Regular", c || "Text/text-muted", g === "clipboard-text" ? "Job order link" : "Meta");
   });
   const act = hframe(b, hdr, "Actions", 8);
   b.instV(act, "Icon button", "Type=Secondary, Size=36, State=Default", { swaps: [[0, "Icon", "Glyph=dots-three, Size=20"]] });
@@ -102,13 +102,13 @@ function checklist(b, parent, title, items) {
   return c;
 }
 const cardHeadF = (b, c, title, sub, kind) => {
-  const h = b.frame(c, { name: "Card head", w: 400, h: 40, layout: kind === "desktop" ? "h" : "v", gap: 12, main: "spaceBetween", cross: kind === "desktop" ? "center" : "min", sizeH: "fill", sizeV: "hug" });
-  const t = vframe(b, h, "Titles", 2, { sizeH: "hug" });
-  txt(b, t, title, "Heading/H3", "Text/heading", "Title");
-  if (sub) sub(t);
-  const a = hframe(b, h, "Actions", 8, { wrap: kind !== "desktop", sizeH: kind === "desktop" ? "hug" : "fill" });
+  const h = b.frame(c, { name: "Card head", w: 400, h: 32, layout: "h", gap: 12, main: "spaceBetween", cross: "center", sizeH: "fill", sizeV: "fixed" });
+  txt(b, h, title, "Heading/H3", "Text/heading", "Title");
+  const a = hframe(b, h, "Actions", 8);
+  if (sub) sub(vframe(b, c, "Card content", 8));
   return a;
 };
+
 
 // ---------- Reception ----------
 function recCols(kind) {
@@ -123,7 +123,7 @@ function recRow(b, kind, d, i, o = {}) {
   const lc = arr ? cText("B0422-" + String(i + 1).padStart(2, "0"), "Data", "Text/text-secondary")(b) : cDash(b);
   const ck = (f) => b.instV(f, "Checkbox", `Checked=${arr ? "On" : "Off"}, State=${locked ? "Disabled" : "Default"}`, { hide: ["Label"] });
   const ms = arr ? (f) => grid(b, f, locked ? "Locked" : "Input", mass) : cDash(b);
-  const cd = arr ? (f) => { const s = b.instV(f, "Select", `State=${locked ? "Read-only" : "Filled"}, Size=md`, { texts: { Value: cond }, hide: ["Label"], setProps: { "Show helper": false } }); b.raw("node.set", { ids: [s], props: { sizingH: "fill" } }); if (cond !== "Good") icon(b, f, "warning", "Feedback/warning"); } : cDash(b);
+  const cd = arr ? (f) => { const s = b.instV(f, "Select", `State=${locked ? "Read-only" : "Filled"}, Size=md`, { texts: { Value: cond }, hide: ["Label"], setProps: { "Show helper": false } }); b.raw("node.set", { ids: [s], props: { sizingH: "fill" } }); icon(b, f, cond === "Good" ? "check-circle" : "warning", cond === "Good" ? "Feedback/success" : "Feedback/warning"); } : cDash(b);
   const rm = rem ? cText(rem)(b) : cDash(b);
   const pt = (f) => { if (ph) { thumb(b, f, "Image"); if (ph > 1) txt(b, f, "+" + (ph - 1), "Caption/Medium", "Text/text-secondary", "More"); } else if (arr && !locked) btn(b, f, "Ghost", "Add", "plus"); else txt(b, f, "—", "Body small/Regular", "Text/text-muted", "Text"); };
   const lb = (f) => { if (!arr) return txt(b, f, "—", "Body small/Regular", "Text/text-muted", "Text"); const v = vframe(b, f, "Label", 2, { sizeH: "hug" }); b.instV(v, "Tag", `Type=${lab ? "Printed" : "Not printed"}`); if (lab && kind === "desktop") txt(b, v, lab, "Caption/Regular", "Text/text-muted", "Printed at"); };
@@ -134,13 +134,14 @@ function receptionCard(b, main, kind, o) {
   const c = card(b, main, "Reception card");
   const a = cardHeadF(b, c, "Reception", null, kind);
   if (!o.locked) {
-    const sc = b.instV(a, "Search", "Size=sm, State=" + (o.scan ? "Filled" : "Default"), { texts: { Value: o.scan || "Scan or type a label" } }); b.raw("node.set", { ids: [sc], props: { width: 240 } });
-    btn(b, a, "Secondary", "Mark all arrived", "check");
-    btn(b, a, "Secondary", o.toPrint ? `Print labels (${o.toPrint})` : "Print labels", "printer");
+    const tool = kind === "desktop" ? a : hframe(b, c, "Card content", 8, { wrap: true, sizeH: "fill" });
+    const sc = b.instV(tool, "Search", "Size=sm, State=" + (o.scan ? "Filled" : "Default"), { texts: { Value: o.scan || "Scan or type a label" } }); b.raw("node.set", { ids: [sc], props: { width: 240 } });
+    btn(b, tool, "Secondary", "Mark all arrived", "check");
+    btn(b, tool, "Secondary", o.toPrint ? `Print labels (${o.toPrint})` : "Print labels", "printer");
     btn(b, a, "Primary", "Confirm reception", "check-circle", { state: o.ready ? "Default" : "Disabled" });
   }
   if (o.returned) {
-    const n = hframe(b, c, "Returned note", 8, { sizeH: "fill", fill: "Accent/accent-100", r: 10, pad: [10, 14, 10, 14] });
+    const n = hframe(b, c, "Card content", 8, { sizeH: "fill", fill: "Accent/accent-100", r: 10, pad: [10, 14, 10, 14] });
     icon(b, n, "arrow-u-up-left", "Accent/accent-text");
     txt(b, n, "2 samples returned to JO-2026-0137 when reception was confirmed: KEP-3307 and KEP-3308.", "Body small/Regular", "Accent/accent-text", "Text", { fill: true });
     btn(b, n, "Ghost", "Open the job order's samples");
@@ -150,8 +151,7 @@ function receptionCard(b, main, kind, o) {
   return c;
 }
 function receptionChecklist(b, main, ready) {
-  const c = card(b, main, "Checklist card");
-  checklist(b, c, "Before you can confirm reception", [["Done", "At least one sample arrived"], ["Done", "Every arrived sample has a mass"], ["Done", "Every arrived sample has a condition, with a remark unless Good"], [ready ? "Done" : "Pending", ready ? "Every arrived sample has a printed label" : "Every arrived sample has a printed label (2 to print)"]]);
+  checklist(b, main, "Before you can confirm reception", [["Done", "At least one sample arrived"], ["Done", "Every arrived sample has a mass"], ["Done", "Every arrived sample has a condition, with a remark unless Good"], [ready ? "Done" : "Pending", ready ? "Every arrived sample has a printed label" : "Every arrived sample has a printed label (2 to print)"]]);
 }
 function recPhoneCard(b, parent, d, i, o = {}) {
   const [id, arr, mass, cond, rem, ph, lab] = d;
@@ -180,8 +180,9 @@ function phoneBar(b, root, buttons) {
 const ADL = [["8,42", "Saved"], ["9,10", "Saved"], ["22,40", "Warning"], ["7,95", "Saved"], ["8,61", "Dirty"], ["", "Input"]];
 function prepCard(b, main, kind, done) {
   const c = card(b, main, "Preparation card");
-  const a = cardHeadF(b, c, "Preparation", (t) => { if (!done) txt(b, t, "4 of 6 saved", "Body small/Regular", "Text/text-secondary", "Saved count"); else { const r = hframe(b, t, "Ready", 6); icon(b, r, "check-circle", "Feedback/success"); txt(b, r, "Ready for analysis", "Body small/Medium", "Feedback/success", "Ready"); } }, kind);
-  if (!done) { btn(b, a, "Secondary", "Save all", "floppy-disk"); btn(b, a, "Primary", "Finish Preparation", "check-circle", { state: "Disabled" }); }
+  const a = cardHeadF(b, c, "Preparation", null, kind);
+  if (!done) { txt(b, a, "4 of 6 saved", "Body small/Regular", "Text/text-secondary", "Saved count"); btn(b, a, "Secondary", "Save all", "floppy-disk"); btn(b, a, "Primary", "Finish Preparation", "check-circle", { state: "Disabled" }); }
+  else { const r = hframe(b, a, "Ready", 6); icon(b, r, "check-circle", "Feedback/success"); txt(b, r, "Ready for analysis", "Body small/Medium", "Feedback/success", "Ready"); }
   const cols = kind === "desktop" ? [["#", 40], ["Sample ID", 120], ["Lab code", 110], ["ADL (%)", 140], ["Entered by", 0], ["Saved", 120], ["Status", 140]] : [["#", 32], ["Sample ID", 100], ["ADL (%)", 120], ["Entered by", 0], ["Saved", 96]];
   const rows = ADL.map(([v, st], i) => {
     const saved = done || st === "Saved" || st === "Warning";
@@ -335,8 +336,8 @@ function receptionFrame(b, x, y, kind, o = {}) {
     phoneBar(b, s.root, [["Secondary", "Print labels (2)"], ["Primary", "Confirm reception", "Disabled"]]);
     return s;
   }
-  receptionCard(b, s.main, kind, { toPrint: o.ready ? 0 : 2, ready: o.ready, locked: o.locked, returned: o.locked, rows: o.locked ? REC.slice(0, 6).map((d) => [...d.slice(0, 6), d[6] || "27 Oct 11:05"]) : o.ready ? REC.map((d) => (d[1] ? [...d.slice(0, 6), d[6] || "27 Oct 11:05"] : d)) : REC });
-  if (!o.locked) receptionChecklist(b, s.main, o.ready);
+  const rcard = receptionCard(b, s.main, kind, { toPrint: o.ready ? 0 : 2, ready: o.ready, locked: o.locked, returned: o.locked, rows: o.locked ? REC.slice(0, 6).map((d) => [...d.slice(0, 6), d[6] || "27 Oct 11:05"]) : o.ready ? REC.map((d) => (d[1] ? [...d.slice(0, 6), d[6] || "27 Oct 11:05"] : d)) : REC });
+  if (!o.locked) receptionChecklist(b, rcard, o.ready);
   return s;
 }
 function prepFrame(b, x, y, kind, done) {
