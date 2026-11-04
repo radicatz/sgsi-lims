@@ -1,6 +1,6 @@
 # My Work Screen — Design Plan
 
-Oct 26, 2026 · screen S-19 in `Coal_LIMS_Development_Spec.md` (sections 4.6, 4.8, 9.6, 10 S-19) · first screen outside the job order
+Oct 26, 2026 · screen S-19 in `../Project/Coal_LIMS_Development_Spec.md` (sections 4.6, 4.8, 9.6, 10 S-19) · first screen outside the job order
 
 ## Why this screen now
 

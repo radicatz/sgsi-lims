@@ -4,7 +4,7 @@ Planning, research and prototype material for the SGSI Coal LIMS. Everything liv
 
 | Folder | What is in it |
 | --- | --- |
-| `.context/docs/` | Our written plans and specifications (research plan, development spec, screen plans, prototype plan) and `Design_Tokens.md`, the colour, radius and elevation tokens (Light and Dark) as corrected in the FigCraft file |
+| `.context/docs/` | Our written plans and specifications, one folder per screen group: `Project/` (development spec, research plan), `Design System/` (component library, design tokens, frame naming), `Job Order/`, `Batch/`, `My Work/`, `Dashboard/`, and `archive/` for superseded plans. `.context/docs/README.md` lists every file |
 | `.context/design/figcraft/` | **Current design file** (rebuilt Oct 30, 2026; pages Library, Desktop, Tablet and Mobile Phone since Nov 2): `SGSI-LIMS-screens.figcraft`, open it with FigCraft (github.com/storytold/figcraft). It holds the component library (74 component sets), 28 text and effect styles, colour tokens (Light and Dark), Foundations and the Logo set; the screens were removed to start over (the old file is in `backup/`). `library/` generates the components (`node build.js`, then `node finish.js`); `tools/` is the older pen.dev converter. Fonts needed: Noto Sans, Newsreader and JetBrains Mono (install) |
 | `.context/design/` | The pen.dev export the FigCraft file was built from: `screens-export.html` and `export/*.png` (the pen.dev plan limit was reached, so this is the last pen.dev state) |
 | `.context/screens.pen` | The earlier design file (pen.dev, up to Revision B); frozen. Its logo fills load from `.context/images/`, so keep the two together |

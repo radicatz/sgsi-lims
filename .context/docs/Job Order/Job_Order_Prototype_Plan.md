@@ -160,7 +160,7 @@ Testing: each phase is opened in the pen.dev integrated browser at the three wid
 | Add batch button | One only: **Add batch** is a secondary button in the top-right of the Batches tab panel, for CSO, Preparation and Lab admin. The detail header has no Add batch (it shows **Add samples** while a job order has none), the phone `⋯` menu has none, and the empty state points to the button above |
 | Review bar | The chevron at the far right hides the whole bar. While hidden, a small chevron-down tab stays fixed at the top edge (centered) and brings the bar back; the app then uses the full height |
 | Coking pills by standard (Oct 28) | Version 25 of the live artifact applies the standards table from the screen plan: pills follow the selected Standard (and the batch's standard in Add batch). Checked in a headless run of every Standard combination, the template and Add batch. The live page was edited in place; **`prototype/src` no longer matches it** (the live pill labels are the long names such as "Gray King Coke Type"), so rebuild from the live copy `job-order-prototype.html`, not from `src`, until the source is merged |
-| Reception and preparation (Oct 28) | Version 26 adds S-18 with flows F12 to F17 (see `Reception_Preparation_Screen_Plan.md`, section 12). `prototype/src` matches the live page again, including `reception.js` |
+| Reception and preparation (Oct 28) | Version 26 adds S-18 with flows F12 to F17 (see `../archive/Reception_Preparation_Screen_Plan.md`, section 12). `prototype/src` matches the live page again, including `reception.js` |
 | Known limits | Width switching uses CSS `zoom` to fit 1440 px into smaller screens; on very old browsers without `zoom` the desktop view scrolls instead. Saved demo state lives in each reviewer's own browser |
 
 ## 10 · Open points
@@ -178,10 +178,10 @@ The prototype (https://claude.ai/artifact/73FDBne3B8rbFcXoa6dDZo, version 28) gr
 
 | Revision | What the prototype gained | Where it is specified |
 | --- | --- | --- |
-| B (Oct 28, version 27) | Unarrived samples released to the job order (Awaiting arrival, Not received), a late batch through Add batch, the Samples awaiting arrival queue | Reception plan section 14, spec D-41 |
-| C (Oct 29, version 28) | Roles CSO, Lab admin and Preparation confirm reception; photos at reception; editable batch number; ADL-only preparation with Entered by; the Analysis tab with calculated FC and range warnings; signed RoA upload and Complete batch; five sample states; a new **Analyst** role (Fitri Handayani); a **Light / Dark** switch in the review bar; flows F18 to F23 | Reception plan section 15, spec sections 1.1 and 9.2.1 |
+| B (Oct 28, version 27) | Unarrived samples released to the job order (Awaiting arrival, Not received), a late batch through Add batch, the Samples awaiting arrival queue | archived Reception plan (`../archive/Reception_Preparation_Screen_Plan.md`; current: `../Batch/Batch_Screen_Plan.md`) section 14, spec D-41 |
+| C (Oct 29, version 28) | Roles CSO, Lab admin and Preparation confirm reception; photos at reception; editable batch number; ADL-only preparation with Entered by; the Analysis tab with calculated FC and range warnings; signed RoA upload and Complete batch; five sample states; a new **Analyst** role (Fitri Handayani); a **Light / Dark** switch in the review bar; flows F18 to F23 | archived Reception plan section 15, spec sections 1.1 and 9.2.1 |
 
-Headless checks: all earlier suites plus the C1 to C8 checks pass. The prototype and the FigCraft frames (`.context/design/figcraft`) cover the same Revision C screens; where they differ, the prototype is the behaviour reference and the frames are the visual reference. Frames still to redraw for the five sample states are listed in section 15.13 of the Reception plan.
+Headless checks: all earlier suites plus the C1 to C8 checks pass. The prototype and the FigCraft frames (`.context/design/figcraft`) cover the same Revision C screens; where they differ, the prototype is the behaviour reference and the frames are the visual reference. Frames still to redraw for the five sample states are listed in section 15.13 of the archived Reception plan.
 
 ## 13 · Revision 7 changes the prototype still has to take (Nov 2, 2026)
 
@@ -220,7 +220,9 @@ Four rounds of owner feedback on Nov 3 changed the frames (screen plan sections 
 | Overview batch list (Revision 10) | Name and date on one line; "Started" muted, date secondary, as two texts | Name above date (`app2.js` 530) |
 | Add batch (Revision 10) | Job order number and company as two texts in the modal head; "Settings copied from B-2026-0421: ASTM, TM + Prox + TS + CV and Standard priority."; "Awaiting arrival" and "from B-…" as two texts; links Select all and Clear without a dot between them; toast "B-2026-0418 created. 4 samples, ASTM."; the phone version is drawn now, so its "Not drawn yet" tag goes | `app2.js` 609 to 636 |
 | CoA tab and Mark sent (Revision 10) | Facts as separate texts (date and name, name and title, batches and samples); sent line "Sent by WhatsApp to" + recipient + date; "Built from" row: batch, RoA, "Approved by …"; dialog text "CoA-JO-2026-0141-1 for PT Kaltara Energi Prima."; Channel is a row of checkboxes (several ways can be ticked; the sent line then lists each channel); toast "CoA marked as sent. JO-2026-0141 is delivered." | `app2.js` 798 to 837 |
-| Colour tokens (Revision 10) | 11 values changed on Nov 3 (see Design_Tokens.md section 1) | `styles.css` `:root` and dark blocks still hold the older values: copy them from `tokens/sgsi-tokens.css` |
+| Colour tokens (Revision 10) | 11 values changed on Nov 3 (see ../Design System/Design_Tokens.md section 1) | `styles.css` `:root` and dark blocks still hold the older values: copy them from `tokens/sgsi-tokens.css` |
+| Tab order (Revision 11, Nov 4) | Overview, Samples, Batches, Files, CoA, History | Overview, Batches, Samples, … (`app2.js` detail tabs) |
+| Batch page and batch list (Batch plan, Nov 4) | Sidebar Batches opens the batch list; a row opens the batch page on the tab that matches its status; Batches active on both; Photos in a centered dialog on desktop and tablet | Sidebar Batches opens "Outside this prototype"; the batch page is reached from a job order only; photos in a side sheet |
 | Contact person field | Name, phone, email as separate texts, chevron at the right | Already separate spans (`app2.js` 139); only the Overview contact (`app2.js` 510) still joins phone and email |
 
 Demo data: the paste sample in `data.js` (191 to 204) keeps the tab-separated format; only the depth text loses the dot ("DH BNM-031  10.20–10.90 m" split into hole and interval columns of the preview).

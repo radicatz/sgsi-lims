@@ -259,7 +259,7 @@ Each phase ends with renders for you to approve.
 
 | Phase | Work |
 | --- | --- |
-| **0. Font in files** | Replace Montserrat with Noto Sans in: prototype `src/index.html` (Google Fonts link) and `src/styles.css` (`--f-body`), then rebuild the prototype; `README.md`; `Job_Order_Prototype_Plan.md`; `Reception_Preparation_Screen_Plan.md`; the generator tools `convert.js`, `emit.js` and `layout.js` (default family). Republishing the prototype artifact needs your go-ahead |
+| **0. Font in files** | Replace Montserrat with Noto Sans in: prototype `src/index.html` (Google Fonts link) and `src/styles.css` (`--f-body`), then rebuild the prototype; `README.md`; `../Job Order/Job_Order_Prototype_Plan.md`; `../archive/Reception_Preparation_Screen_Plan.md`; the generator tools `convert.js`, `emit.js` and `layout.js` (default family). Republishing the prototype artifact needs your go-ahead |
 | **A. Foundations** | Text styles, effect styles, Icon set (71 glyphs), Spinner |
 | **B. Actions and Status** | Button, Icon button, Segmented, Link, Status badge, Tag and the other labels |
 | **C. Forms and Navigation** | Fields, controls, chips, pills, menus, Sidebar, Top bar, Page header, Stepper, Tabs |

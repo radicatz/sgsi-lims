@@ -1,6 +1,6 @@
 # Job Orders Screen — Design Plan
 
-Oct 21, 2026 · screen S-17 in `Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
+Oct 21, 2026 · screen S-17 in `../Project/Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
 Revised Oct 27, 2026 after the first review: see **Revision 2**; **Revision 3** (contact dropdown, hint clean-up) is planned and waits for approval. It covers company and contacts, the Standard field, parameter pills, the stepper, tab order, and the new Add batch screen.
 
 Revision 7 (Nov 2, 2026, **BUILT** in the frames): the Create form follows the prototype (version 31) and three owner changes; the FigCraft file is organised by screen size. See the next section.
@@ -43,8 +43,8 @@ The screens were deleted on Oct 30 so they can be rebuilt on the new library (74
 | Item | Plan |
 | --- | --- |
 | Where | Pages by size in `SGSI-LIMS-screens.figcraft` (Revision 7: Library, Desktop, Tablet, Mobile Phone; first drawn on one page "Job orders"). The library stays on "Page 1" (renamed **Library**). A separate `.figcraft` file is not used: a second file cannot reach the components without publishing a library, so the screens would lose their link to the components (see open point R6-1) |
-| Content | The current design, which is the sum of Revisions 2, 3, 3b, 4, 5 and C (Reception plan section 15). No new features |
-| Source of truth for behaviour | This plan, `Job_Order_Prototype_Plan.md` sections 5 and 6, and Reception plan sections 14 and 15. The live prototype (artifact version 30) shows the intended interaction |
+| Content | The current design, which is the sum of Revisions 2, 3, 3b, 4, 5 and C (archived Reception plan (`../archive/Reception_Preparation_Screen_Plan.md`; current: `../Batch/Batch_Screen_Plan.md`) section 15). No new features |
+| Source of truth for behaviour | This plan, `Job_Order_Prototype_Plan.md` sections 5 and 6, and archived Reception plan sections 14 and 15. The live prototype (artifact version 30) shows the intended interaction |
 | Reference look | The old frames in `.context/design/export/*.png` (layout, density, demo data). They are not copied pixel for pixel: they become library instances, with the changes in 6.3 |
 | Sizes | Desktop 1440, tablet 834, phone 390, as before |
 | Light and dark | Frames are drawn in Light mode. One frame is switched to the Dark mode of the variables as a preview (no separate dark drawing) |
@@ -97,7 +97,7 @@ D = desktop 1440, T = tablet 834, P = phone 390.
 | # | Change | Why |
 | --- | --- | --- |
 | 1 | Every part is an instance of the library: Sidebar, Top bar, Page header, Tabs, Stepper, Filter chips, Table rows, Cards, Fields, Dialog, Side sheet, Bottom sheet, Toast | One change in a component reaches every screen |
-| 2 | **Five sample states** with real per-row badges and the counts line | Open item 1 of the Reception plan 15.13: the old frames only had the text rename |
+| 2 | **Five sample states** with real per-row badges and the counts line | Open item 1 of the archived Reception plan 15.13: the old frames only had the text rename |
 | 3 | Batches show **Completed with the RoA number and a PDF link** | Revision C |
 | 4 | Add batch: **batch number editable** with "Pattern B-YYYY-NNNN. The number must be unique." | Revision C (C1) |
 | 5 | Coking pills follow the **open point 11 rule**: Gray-King, Y value and G index are unavailable under ASTM only ("No ASTM method. Add ISO or GB/T under Standard."); pills not covered by every standard carry a tag with the standards that cover them ("ISO · GB/T") | Already in the prototype since version 25; the old frames still said "GB/T only" |
@@ -370,7 +370,7 @@ Sources checked: ISO 501 and 502 pages (iso.org, ANSI, SCC), ASTM D720, D2639, D
 
 ### Spec changes this revision needs
 
-These go into `Coal_LIMS_Development_Spec.md` once the frames are approved:
+These go into `../Project/Coal_LIMS_Development_Spec.md` once the frames are approved:
 
 | Spec item | Change |
 | --- | --- |
@@ -417,7 +417,7 @@ Mobile: the field opens a bottom sheet with the same list (name on the first lin
 | --- | --- | --- |
 | One contact or several · **answered** | **One contact per job order** (confirmed Oct 27) (the checked one is the attention contact on the RoA and the default CoA recipient). This follows your description: one field, one check mark | none; answered: one contact only |
 | Tablet | Same as desktop, panel width = field width | none |
-| Spec | `job_order_contacts` (many) is replaced by `job_orders.contact_id` (one), with phone required on the contact | To apply to `Coal_LIMS_Development_Spec.md` together with the other Revision 2 spec changes |
+| Spec | `job_order_contacts` (many) is replaced by `job_orders.contact_id` (one), with phone required on the contact | To apply to `../Project/Coal_LIMS_Development_Spec.md` together with the other Revision 2 spec changes |
 
 ### Frames to change when built
 
@@ -897,19 +897,19 @@ New frames sit at the right end of the Job Order · Create Row. `contact-dropdow
 | **Ash analysis ▸** opens a checklist popover under the pill (560 px, anchored right): title, "9 of 29 selected", search, OXIDES · 14 and RATIOS AND INDICES · 15 as three-column checkboxes, Select all / Clear, Cancel, **Apply · 9 parameters**. Apply turns the pill on and counts it as one parameter. Mobile would use a bottom sheet (not drawn) | New frame Create · Ash analysis open · Desktop. The same pattern applies to Trace elements ▸ (36 elements) |
 | **Dark mode** added to the design tokens: every colour variable now has a light value (unchanged) and a dark value under theme `mode`. The blue is darker (primary `#122B52`, primary-deep `#081B38`, tints `#0F1E36` to `#6E8EC0`); the **accent is the yellow** (`#F5B700`, soft `#FFD24D`, text `#FFD24D`, foreground `#0A1A33`); surfaces are blue-black (background `#0A1424`, card `#101F36`) | Variables in `screens.pen`; preview frame "Create · Dark mode preview · Desktop" (a copy of Create · Desktop with theme dark) |
 
-Not done: the mobile Ash analysis sheet. The dark preview showed that active elements (primary button, switch, active tab, chips, selected pill, nav item) and the logo do not stand out in dark mode. The fix is planned in `Coal_LIMS_Research_and_Project_Plan.md`, section "Dark mode": role tokens (`action`, `action-foreground`, `brand-text`, `nav-active`) with the yellow accent for active states, and a reversed logo. Built Oct 27, 2026, then revised the same day to a lighter blue accent (`#8DB4F0`) and an all-white dark logo (see that section's "Build result of Revision 2"). Dark frames: Create · Dark mode preview · Desktop and Detail · Overview · Desktop · Dark. The Properties card label "Contacts" now reads "Contact" (one contact per job order). Known issue: the sidebar on job order screens is missing the **Job orders** item, so no nav item is highlighted; to fix next.
+Not done: the mobile Ash analysis sheet. The dark preview showed that active elements (primary button, switch, active tab, chips, selected pill, nav item) and the logo do not stand out in dark mode. The fix is planned in `../Project/Coal_LIMS_Research_and_Project_Plan.md`, section "Dark mode": role tokens (`action`, `action-foreground`, `brand-text`, `nav-active`) with the yellow accent for active states, and a reversed logo. Built Oct 27, 2026, then revised the same day to a lighter blue accent (`#8DB4F0`) and an all-white dark logo (see that section's "Build result of Revision 2"). Dark frames: Create · Dark mode preview · Desktop and Detail · Overview · Desktop · Dark. The Properties card label "Contacts" now reads "Contact" (one contact per job order). Known issue: the sidebar on job order screens is missing the **Job orders** item, so no nav item is highlighted; to fix next.
 
 **Table header rows (Oct 27):** every table and grid header row now has a `primary-50` background (radius 8), matching the Samples grid: the four `Table/Header Row` components (base, Drill hole, Job order, Job order · Compact) and the hand-built headers in Samples · Tablet, Batches · Desktop and Tablet, and flows P4, P5, P7. Instances follow the components, so list, detail, flow and dashboard tables all changed.
 
 ## Revision 4 note · Sample states (Oct 28, 2026)
 
-The Samples tab status column now has four states: Registered, Received, **Awaiting arrival** (returned from a started batch, with the batch it left) and **Not received** (marked by the CSO, with the reason). Rules, frames and prototype are in section 14 of `Reception_Preparation_Screen_Plan.md`.
+The Samples tab status column now has four states: Registered, Received, **Awaiting arrival** (returned from a started batch, with the batch it left) and **Not received** (marked by the CSO, with the reason). Rules, frames and prototype are in section 14 of `../archive/Reception_Preparation_Screen_Plan.md`.
 
 ## Revision 5 note · Five sample states and the new design source (Oct 29, 2026)
 
-The Samples tab now has **five** states: **Expected** (was Registered; on the job order, not in a batch), **In batch** (reception not confirmed yet, shows the batch number), **Received** (arrival confirmed, locked), **Awaiting arrival** and **Not received**. The header counts only the states that occur, for example "8 samples · 2 expected · 4 in batch · 2 received". The Batches tab shows Completed batches with the RoA number and a PDF link. Rules, frames and prototype are in section 15 of `Reception_Preparation_Screen_Plan.md`.
+The Samples tab now has **five** states: **Expected** (was Registered; on the job order, not in a batch), **In batch** (reception not confirmed yet, shows the batch number), **Received** (arrival confirmed, locked), **Awaiting arrival** and **Not received**. The header counts only the states that occur, for example "8 samples · 2 expected · 4 in batch · 2 received". The Batches tab shows Completed batches with the RoA number and a PDF link. Rules, frames and prototype are in section 15 of `../archive/Reception_Preparation_Screen_Plan.md`.
 
-**Design source:** from Oct 29, 2026 the frames live in FigCraft (`.context/design/figcraft/SGSI-LIMS-screens.figcraft`), not in `screens.pen`; the pen.dev plan limit was reached. In the FigCraft file the job order frames carry the rename "Registered" to "Expected" as a text change only. The per-row badges and header counts for In batch and Received are still to be redrawn (see 15.13 in the Reception plan, open item 1).
+**Design source:** from Oct 29, 2026 the frames live in FigCraft (`.context/design/figcraft/SGSI-LIMS-screens.figcraft`), not in `screens.pen`; the pen.dev plan limit was reached. In the FigCraft file the job order frames carry the rename "Registered" to "Expected" as a text change only. The per-row badges and header counts for In batch and Received are still to be redrawn (see 15.13 in the archived Reception plan, open item 1).
 
 ### 6.5c Build status (Nov 2, 2026): sidebar fix and library patches for row B
 
@@ -1078,8 +1078,22 @@ Canvas order on every page: A list, B create, C detail, D add batch, E CoA and a
 
 ### 10.3 Tokens
 
-The owner changed 11 colour values (mostly dark mode, plus light `Text/text-muted` `#A4A39A`). `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` were re-exported and `Design_Tokens.md` regenerated (its section 1 lists the changes). Contrast to review: muted text is 2.5 to 1 on card in light (2.4 in dark), below 4.5, and the header now uses it for contact, PO and due date.
+The owner changed 11 colour values (mostly dark mode, plus light `Text/text-muted` `#A4A39A`). `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` were re-exported and `../Design System/Design_Tokens.md` regenerated (its section 1 lists the changes). Contrast to review: muted text is 2.5 to 1 on card in light (2.4 in dark), below 4.5, and the header now uses it for contact, PO and due date.
 
 ### 10.4 Still open
 
 Touch targets on tablet and phone (the phone checkbox list rows are 14 px apart, not 44 px tall); the tablet detail frames clip below 908 px; the prototype update (Prototype plan section 14).
+
+## Revision 11 · Tab order (Nov 4, 2026) · BUILT (Nov 4, 2026)
+
+Owner feedback: the job order tabs read **Overview, Samples, Batches, Files, CoA, History** (Samples before Batches: samples are registered first, then batched). Count pills stay on Samples, Batches and Files.
+
+| Where | Change |
+| --- | --- |
+| Frames | Every job order detail frame at three sizes: row C (Overview, Batches, Samples and their states), row D (Add batch over the Batches tab), row E (CoA frames, P7). Generator `rowC.js` (tabs) and the rows built on it |
+| Prototype | Tab order in `app2.js` (detail tabs), listed in the prototype plan section 14 |
+| Text | Earlier sections of this plan list the old order (Overview, Batches, Samples); this revision replaces it |
+
+Built together with the batch list (`../Batch/Batch_Screen_Plan.md` section 13).
+
+Built: `rowC.js` `tabs()` now lists Overview, Samples, Batches, Files, CoA, History; rows C, D and E were rebuilt, so every job order detail frame at three sizes has the new order.

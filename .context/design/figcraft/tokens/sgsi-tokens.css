@@ -4,7 +4,7 @@
   --primary-primary-deep: #0E2A4E;
   --primary-primary-hover: #15305C;
   --primary-primary-50: #F0F4FA;
-  --primary-primary-100: #E3EAF4;
+  --primary-primary-100: #E9EEF4;
   --primary-primary-200: #C5D2E6;
   --primary-primary-300: #9AB0D2;
   --primary-primary-400: #5F7FB0;
@@ -32,7 +32,7 @@
   --feedback-warning: #9A5A00;
   --feedback-warning-100: #FCEFD9;
   --feedback-error: #C04020;
-  --feedback-error-100: #F8E3DC;
+  --feedback-error-100: #FEE9E1;
   --feedback-info: #1B3A6F;
   --feedback-info-100: #E3EAF4;
   --status-st-created: #6B7385;
@@ -40,7 +40,7 @@
   --status-st-prep: #9A5A00;
   --status-st-prep-100: #FCEFD9;
   --status-st-analysis: #1B3A6F;
-  --status-st-analysis-100: #E3EAF4;
+  --status-st-analysis-100: #D9E5F7;
   --status-st-finished: #6A4BA8;
   --status-st-finished-100: #EEE8F8;
   --status-st-completed: #2E7D5B;

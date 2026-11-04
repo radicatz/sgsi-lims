@@ -1,6 +1,6 @@
 # Dashboard Screen — Design Plan
 
-Oct 19, 2026 · screen 9 of the v1 list in `Coal_LIMS_Research_and_Project_Plan.md`
+Oct 19, 2026 · screen 9 of the v1 list in `../Project/Coal_LIMS_Research_and_Project_Plan.md`
 
 ## Goal
 

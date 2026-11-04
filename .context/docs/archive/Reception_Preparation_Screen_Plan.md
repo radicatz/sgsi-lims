@@ -1,3 +1,5 @@
+> **Archived on Nov 4, 2026.** Superseded by `../Batch/Batch_Screen_Plan.md`, which restates the current design of the batch page. Kept as history; other documents cite its section numbers (12 to 15).
+
 # Reception and Preparation (S-18) — Design and Prototype Plan
 
 Written Oct 28, 2026. **Built Oct 28, 2026** (frames and prototype; see section 12). Open points 1 to 7 used their defaults.
@@ -362,7 +364,7 @@ Total: 1 updated and 8 new frames (5 desktop, 1 tablet, 2 phone). The job order 
 | Spec only list | Adds: notification to the CSO when preparation starts with fewer samples; the My work queue "Samples awaiting arrival" |
 | Tests | Headless checks for R1 to R8 through F14, F18, F19, Undo, the CoA warning and the CSO-only actions; then the existing 12 reception checks, 19 job order checks and the coking pill check |
 
-### 14.6 Spec changes (applied to `Coal_LIMS_Development_Spec.md` with the build)
+### 14.6 Spec changes (applied to `../Project/Coal_LIMS_Development_Spec.md` with the build)
 
 | Section | Change |
 | --- | --- |
@@ -387,7 +389,7 @@ Total: 1 updated and 8 new frames (5 desktop, 1 tablet, 2 phone). The job order 
 
 **Tests:** 9 new headless checks (R1 to R3, R5 to R8, F14, F18, F19, settled job order) plus the 12 reception, 19 job order, batch and coking checks all pass with no page errors.
 
-**Docs:** spec changes in 14.6 applied to `Coal_LIMS_Development_Spec.md` (9.2, F-ORD-04, S-19 queue, sample columns, decision D-41). Open point 16 (how often shipments arrive in parts) is still for the lab.
+**Docs:** spec changes in 14.6 applied to `../Project/Coal_LIMS_Development_Spec.md` (9.2, F-ORD-04, S-19 queue, sample columns, decision D-41). Open point 16 (how often shipments arrive in parts) is still for the lab.
 
 
 
@@ -552,18 +554,18 @@ The paused frames (15.7) are built. The design source is now **FigCraft** (githu
   - U4 and U5 job order frames: "Registered" renamed **Expected**; the unarrived-sample frames keep their wording. The per-row In batch, Received and Awaiting arrival badges and the header counts were **not** recomputed (text renames only). See open items.
   - U6 Add batch: hint "Pattern B-YYYY-NNNN. The number must be unique." under the batch number.
 - **New frames (row "Batch · Revision C Row"):** N6 Photos sheet (desktop and tablet side sheet, phone bottom sheet); N7 Batch number · Edit (the "already used" error); N8 Analysis · Entering results (desktop, tablet, phone: grouped parameter columns, FC as a calculated cell, a range warning, Save all, Finish Analysis, checklist); N9 Analysis · Finished · Upload RoA (desktop, phone); N10 Batch · Completed (RoA file attached).
-- **Tokens:** collection "SGSI tokens" with **Light and Dark modes** in one collection (FigCraft allows several modes; the Starter plan of Figma did not): 53 colour variables and 4 radii. The product owner then corrected ten values in the app (nine dark, light `muted`); the rebuild reads them from `.context/design/figcraft/tokens/sgsi-tokens.json` and the full set is documented in `Design_Tokens.md`. Fills and strokes whose hex matches a token are bound to it; where several tokens share a hex the first in the list wins (for example Primary/primary before Action/action).
+- **Tokens:** collection "SGSI tokens" with **Light and Dark modes** in one collection (FigCraft allows several modes; the Starter plan of Figma did not): 53 colour variables and 4 radii. The product owner then corrected ten values in the app (nine dark, light `muted`); the rebuild reads them from `.context/design/figcraft/tokens/sgsi-tokens.json` and the full set is documented in `../Design System/Design_Tokens.md`. Fills and strokes whose hex matches a token are bound to it; where several tokens share a hex the first in the list wins (for example Primary/primary before Action/action).
 - **Components and instances:** a frame **Component library** (last row of the page) holds **41 main components** found by their repeated structure: Top Bar (several variants), Sidebar variants (expanded and collapsed, one per active item), Status chips, Button/Primary, Secondary and Outline variants, Input/Search, Step/Done, Current and Upcoming, Tab/Underline (on and off), Brand and Avatar. **764 places** in the screens are instances of them; text differences (labels, names, counts) are text properties `t0`, `t1`, ... on the instance, sizes and fill-width are set per instance. Changing a main component now reaches every screen that uses it. The component sheets (names ending "Components") still hold the original specimens as components and are not used by the screens. Form inputs (select, text field) stay as plain layers, because their width follows the container.
 - **Job order states redrawn:** the awaiting-arrival and mark-as-not-received frames (desktop, tablet, phone) now show the five states: Received 4, **In batch 2** (batch B-2026-0421), Awaiting arrival 1, Not received 1, with the counts line "4 received · 2 in batch · 1 awaiting arrival · 1 not received". The Expected state is shown by the Samples frames of a job order without a batch (6 samples · 6 expected); the locked-row frame reads "12 samples · 12 received".
-- **Tokens changed after the build:** the product owner corrected ten colour values in the app; the file now uses them (see `Design_Tokens.md`). The prototype still has the earlier dark values.
+- **Tokens changed after the build:** the product owner corrected ten colour values in the app; the file now uses them (see `../Design System/Design_Tokens.md`). The prototype still has the earlier dark values.
 - **Open items:**
   1. Check the new and updated frames at the three sizes against the prototype (v28) once more; the checks so far were by screenshot of single frames.
-  2. Dark frames are unchanged (dark mode is still due for its rework; the Dark mode of the variables is a preview). Two contrast findings in dark mode are listed in `Design_Tokens.md`.
+  2. Dark frames are unchanged (dark mode is still due for its rework; the Dark mode of the variables is a preview). Two contrast findings in dark mode are listed in `../Design System/Design_Tokens.md`.
   3. Phone status chips keep their old colours on the Analysis frames; the other unarrived-sample frames were visited only for the state changes above.
   4. Update the prototype's `styles.css` tokens from `tokens/sgsi-tokens.css`.
   5. Lab confirmation points 17 to 22 (15.10) are still defaults.
   6. The FigCraft app must be restarted once after fonts are installed (it indexes fonts at start); the command-line build already sees them.
-- **Docs:** the spec changes of 15.9 are applied in `Coal_LIMS_Development_Spec.md` (section 1.1, 3.7, 8, 9.1, 9.2.1, S-09, S-18, V-29 to V-33, T-28, T-29, D-44 to D-49).
+- **Docs:** the spec changes of 15.9 are applied in `../Project/Coal_LIMS_Development_Spec.md` (section 1.1, 3.7, 8, 9.1, 9.2.1, S-09, S-18, V-29 to V-33, T-28, T-29, D-44 to D-49).
 
 ### 15.12 Status (Oct 29, 2026): prototype built, frames paused (earlier status)
 

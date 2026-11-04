@@ -1,14 +1,24 @@
 # SGSI LIMS Design Tokens
 
-Nov 3, 2026 (values updated; first written Oct 29) · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
+Nov 4, 2026 (values updated; first written Oct 29) · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
 
 Written for: designers and developers who build or restyle screens.
 
 ## 1. What changed, and where the values come from
 
-**Nov 3, 2026 update.** The product owner adjusted these colour values in the FigCraft file after the Oct 29 export. `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` were re-exported from the file and the tables below show the new values.
+**Change log after Oct 29, 2026.** The product owner adjusts values in the FigCraft file; `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` are re-exported from it and the tables below show the current values.
 
-| Token | Mode | Before (Oct 29 export) | Now |
+Nov 4, 2026 (light mode):
+
+| Token | Before | Now |
+| --- | --- | --- |
+| `Primary/primary-100` | `#E3EAF4` | `#E9EEF4` |
+| `Status/st-analysis-100` | `#E3EAF4` | `#D9E5F7` |
+| `Feedback/error-100` | `#F8E3DC` | `#FEE9E1` |
+
+Nov 3, 2026:
+
+| Token | Mode | Before | Now |
 | --- | --- | --- | --- |
 | `Text/text-muted` | Light | `#7D8699` | `#A4A39A` |
 | `Text/text-muted` | Dark | `#7F8DA6` | `#435C86` |
@@ -22,7 +32,7 @@ Written for: designers and developers who build or restyle screens.
 | `Accent/accent-text` | Dark | `#A9C6F5` | `#6D8FE7` |
 | `Surface/muted` | Dark | `#14243D` | `#1D3050` |
 
-Contrast to review (section 4): `Text/text-muted` on card is 2.5 in light and 2.4 in dark, below the 4.5 needed for body text. Since Nov 3 the job order header uses it for the contact, PO and due date, so those texts are below AA. Accent text on the amber tint is 3.6 in dark. Keep muted for placeholders and decorative text, or darken it.
+Contrast to review (section 4): `Text/text-muted` on card is 2.5 in light and 2.4 in dark, below the 4.5 needed for body text; the job order and batch headers use it for contact, PO, due date and other meta items. Keep muted for placeholders and meta, never for values the user must read.
 
 The tokens started as the `screens.pen` variables (Revision 2, mirrored in the prototype's `styles.css`). On Oct 29, 2026 the product owner corrected the colours **inside the FigCraft file**. This document records the corrected set exactly as exported from that file. Where the older documents (research plan, screen plans) or the prototype show other values, **this file wins**.
 
@@ -61,7 +71,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | `Primary/primary-deep` | `#0E2A4E` | `#588DD9` | Headings on tints, notification button, strong blue text |
 | `Primary/primary-hover` | `#15305C` | `#0E2347` | Hover and pressed state of primary |
 | `Primary/primary-50` | `#F0F4FA` | `#14243D` | Table header rows, selected pill fill |
-| `Primary/primary-100` | `#E3EAF4` | `#2A4A7D` | Secondary button fill, avatar fill, info tint |
+| `Primary/primary-100` | `#E9EEF4` | `#2A4A7D` | Secondary button fill, avatar fill, info tint |
 | `Primary/primary-200` | `#C5D2E6` | `#274C86` | Soft outlines on blue tints |
 | `Primary/primary-300` | `#9AB0D2` | `#3A5A8E` | Disabled and decorative blue |
 | `Primary/primary-400` | `#5F7FB0` | `#6E8EC0` | Chart blue, secondary icons on tints |
@@ -114,7 +124,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | `Feedback/warning` | `#9A5A00` | `#E8A93A` | Warning text and icons |
 | `Feedback/warning-100` | `#FCEFD9` | `#3A2E12` | Warning tint |
 | `Feedback/error` | `#C04020` | `#E2573A` | Error text and icons |
-| `Feedback/error-100` | `#F8E3DC` | `#3A1D16` | Error tint |
+| `Feedback/error-100` | `#FEE9E1` | `#3A1D16` | Error tint |
 | `Feedback/info` | `#1B3A6F` | `#8DB4F0` | Info text and icons |
 | `Feedback/info-100` | `#E3EAF4` | `#1E3A66` | Info tint |
 
@@ -127,7 +137,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | `Status/st-prep` | `#9A5A00` | `#E8A93A` | Batch status Preparation |
 | `Status/st-prep-100` | `#FCEFD9` | `#3A2E12` | Preparation chip background |
 | `Status/st-analysis` | `#1B3A6F` | `#8DB4F0` | Batch status Analysis |
-| `Status/st-analysis-100` | `#E3EAF4` | `#1E3A66` | Analysis chip background |
+| `Status/st-analysis-100` | `#D9E5F7` | `#1E3A66` | Analysis chip background |
 | `Status/st-finished` | `#6A4BA8` | `#B79CF0` | Batch status Analysis finished |
 | `Status/st-finished-100` | `#EEE8F8` | `#2B2244` | Finished chip background |
 | `Status/st-completed` | `#2E7D5B` | `#4FB287` | Batch status Completed |
@@ -200,7 +210,7 @@ WCAG 2 contrast ratios computed from the exported values (4.5 is the AA minimum 
 | `Accent/accent-text` on `Accent/accent-100` | 4.8 | 3.6 (below 4.5) |
 | `Status/st-created` on `Status/st-created-100` | 4.1 (below 4.5) | 1.7 (below 4.5) |
 | `Status/st-prep` on `Status/st-prep-100` | 4.8 | 6.4 |
-| `Status/st-analysis` on `Status/st-analysis-100` | 9.2 | 5.4 |
+| `Status/st-analysis` on `Status/st-analysis-100` | 8.8 | 5.4 |
 | `Status/st-finished` on `Status/st-finished-100` | 5.5 | 6.4 |
 | `Status/st-completed` on `Status/st-completed-100` | 4.3 (below 4.5) | 5.4 |
 | `Primary/primary-deep` on `Primary/primary-50` | 13.0 | 4.6 |

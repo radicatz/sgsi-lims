@@ -216,7 +216,7 @@ function stepperCard(b, main, kind, o) {
 
 function tabs(b, main, kind, sel, counts) {
   const r = b.frame(main, { name: "Tabs", w: 800, h: 34, layout: "h", gap: 16, cross: "max", sizeH: "fill", sizeV: "hug", clip: kind !== "desktop" });
-  const T = [["Overview", null], ["Batches", counts.b], ["Samples", counts.s], ["Files", counts.f], ["CoA", null], ["History", null]];
+  const T = [["Overview", null], ["Samples", counts.s], ["Batches", counts.b], ["Files", counts.f], ["CoA", null], ["History", null]];
   T.forEach(([l, n]) => b.instV(r, "Tab", `Selected=${l === sel ? "On" : "Off"}, State=Default`, { texts: n != null ? { 0: l, 1: String(n) } : { 0: l }, hide: n != null ? [] : ["Count"] }));
   return r;
 }

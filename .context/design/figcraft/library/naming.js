@@ -1,10 +1,10 @@
-// Frame naming (see .context/docs/Frame_Naming.md):  {Size}-{MM}-{Module}-{SS}-{Screen}-{VV}-{Variant}
+// Frame naming (see .context/docs/Design System/Frame_Naming.md):  {Size}-{MM}-{Module}-{SS}-{Screen}-{VV}-{Variant}
 // node naming.js <in.figcraft> <out.figcraft>   renames every screen frame of the Desktop, Tablet and Mobile Phone pages
 const fs = require("fs"), cp = require("child_process");
 const run = require("./run.js");
 const CLI = "C:/Users/pc/figcraft/app/figcraft-0.12.1-windows-x64-portable/figcraft-cli.exe";
 const SIZE = { Desktop: "Desktop", Tablet: "Tablet", "Mobile Phone": "Phone" };
-const MODULES = { Job_orders: "03" }; // sidebar order: My_work 01, Dashboard 02, Job_orders 03, Batches 04, Input_ROA 05, Review_ROA 06, Reports 07, Search 08, Clients 09, Drill_hole 10, Lithology 11, Seam 12, Users 13, Configuration 14, Audit_log 15
+const MODULES = { Job_orders: "03", Batches: "04" }; // sidebar order: My_work 01, Dashboard 02, Job_orders 03, Batches 04, Input_ROA 05, Review_ROA 06, Reports 07, Search 08, Clients 09, Drill_hole 10, Lithology 11, Seam 12, Users 13, Configuration 14, Audit_log 15
 const NEW = /^(Desktop|Tablet|Phone)-\d\d-[A-Za-z_]+-\d\d-/;
 // old name (size suffix removed) -> [screen no, screen, variant no, variant]
 const RULES = [
@@ -23,10 +23,17 @@ const RULES = [
   [/^Add batch$/, "04", "Add_batch", "01", "Dialog"], [/^Add batch · Late samples$/, "04", "Add_batch", "02", "Late_samples"], [/^Add batch · Step 1$/, "04", "Add_batch", "03", "Step_1"], [/^Add batch · Step 2$/, "04", "Add_batch", "04", "Step_2"],
   [/^CoA · Mark sent$/, "05", "CoA_and_actions", "01", "Mark_sent"], [/^CoA · Mark sent sheet$/, "05", "CoA_and_actions", "01", "Mark_sent_sheet"], [/^CoA · Sent$/, "05", "CoA_and_actions", "02", "Sent"], [/^Cancel job order · P7$/, "05", "CoA_and_actions", "03", "Cancel_job_order"],
 ];
+// module 04 Batches, screen 02 Batch_detail (Batch_Screen_Plan.md section 6)
+const BATCH_VV = { Reception_receiving: "01", Reception_print_labels: "02", Reception_photos: "03", Reception_ready: "04", Reception_confirm_with_fewer: "05", Reception_hold_sample: "06", Reception_scan_label: "07", Reception_confirmed: "08", Batch_number_edit: "09", Preparation_entering_ADL: "10", Preparation_finished: "11", Analysis_entering_results: "12", Analysis_finished_upload_RoA: "13", Completed: "14" };
+const LIST_VV = { Default: "01", Batches_to_prepare: "02", Empty: "03", No_results: "04", Filters: "05", Add_batch_choose_job_order: "06" };
 function newName(old, page) {
   if (NEW.test(old) || /reference$| edit( dark)?$|^Properties ref$|^Select reference$/.test(old)) return null;
   const size = SIZE[page]; if (!size) return null;
   const base = old.replace(/ · (Desktop|Tablet|Phone)$/, "");
+  const bl = /^Batch list · (.+)$/.exec(base);
+  if (bl && LIST_VV[bl[1]]) return [size, "04", "Batches", "01", "Batch_list", LIST_VV[bl[1]], bl[1]].join("-");
+  const bd = /^Batch detail · (.+)$/.exec(base);
+  if (bd && BATCH_VV[bd[1]]) return [size, "04", "Batches", "02", "Batch_detail", BATCH_VV[bd[1]], bd[1]].join("-");
   for (const [rx, sn, screen, vn, variant] of RULES) { const m = rx.exec(base); if (m) return [size, MODULES.Job_orders, "Job_orders", sn, screen, vn, typeof variant === "function" ? variant(m) : variant].join("-"); }
   return undefined; // no rule
 }

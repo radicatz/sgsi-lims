@@ -1,5 +1,5 @@
 /* Reception and preparation (S-18): receive samples, label them, start preparation, enter ADL, finish preparation.
-   Part of the job order prototype. Spec: Coal_LIMS_Development_Spec.md S-18, 9.2; plan: Reception_Preparation_Screen_Plan.md. */
+   Part of the job order prototype. Spec: .context/docs/Project/Coal_LIMS_Development_Spec.md S-18, 9.2; plan: .context/docs/Batch/Batch_Screen_Plan.md (history: .context/docs/archive/Reception_Preparation_Screen_Plan.md). */
 (function () {
 const { useState, useEffect, useRef, Fragment } = React;
 const J = window.__JO;
