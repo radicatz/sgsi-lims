@@ -530,7 +530,7 @@ function p4(b, x, y) {
   b.raw("node.set", { ids: [s.root], props: { sizingV: "fixed", height: 1018 } });
 }
 
-const TIPX = 960, TIPY = 513;
+const TIPX = 960, TIPY = 543; // owner moved it 30 px down, under the locked row (Nov 5, 2026)
 function p5(b, x, y) {
   const m = mixed(b, x, y, "desktop", { name: "Samples · P5 Locked row tooltip · Desktop" });
   b.instV(m.s.root, "Tooltip", "Placement=Left", { texts: { 0: "Received on 21 Oct by Dedi Kurniawan. Received samples can't be edited." }, props: { absolute: true, x: TIPX, y: TIPY } });

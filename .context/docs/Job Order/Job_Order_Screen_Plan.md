@@ -1112,3 +1112,5 @@ Built with Batch plan Revision 3 (`../Batch/Batch_Screen_Plan.md` section 14).
 Built with `library/cards.js` and the changed generators (`../Batch/Batch_Screen_Plan.md` section 14.5): 21 overlines lost the "WORK" layer, 17 Table cards are padded 16, every Card head is 32 px, notes and hints sit in Card content (Samples hint, inline alert, awaiting-arrival note), and the Add batch buttons of the Batches tab are small.
 
 **Card padding (Nov 4, 2026, supersedes the 16 / 20 rule of 6.5e):** every card on every screen is padded 16 on all four sides.
+
+**Owner edits (Nov 5, 2026, saved 14:26):** the Key-value rows of the Overview (desktop, tablet, dark preview) and of Mark sent and Sent are now top-aligned (component change, see `../Design System/Component_Library_Plan.md`, last section); in Samples_locked_row_tooltip the tooltip moved 30 px down, to y 543, under the locked row. The tooltip position is taken into `library/screens/rowC.js` (`TIPY` 543).

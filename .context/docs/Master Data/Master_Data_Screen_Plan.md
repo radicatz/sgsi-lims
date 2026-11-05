@@ -71,18 +71,24 @@ Columns: **Client** (logo and name), **Code**, **Address**, **Status** (Active, 
 
 Breadcrumb **Clients > PT Bara Nusantara Mandiri**; Clients is active in the sidebar.
 
+Layout of Revision 3 (the owner's edit of Nov 5, section 15):
+
 ```
 Clients > PT Bara Nusantara Mandiri
-[logo] PT Bara Nusantara Mandiri  [BNM] [Active]                     [Edit]
-┌ Properties ─────────────────────┐ ┌ Contacts                    [+ Add contact] ┐
-│ Code              BNM           │ │ ★ Budi Santoso   Site Geologist  budi@…  0812… ⋯ │
-│ Address           Jl. …, Samarinda│ │   Rina Ayu       Purchasing      rina@…  0813… ⋯ │
-│ Billing address   Jl. …, Jakarta │ │   …                                              │
-│ Status            Active        │ └──────────────────────────────────────────────────┘
-│ Created           12 Jan 2026   │ ┌ Master data ────────────────────────────────────┐
-│ Job orders        14  →         │ │ Drill holes 32 →   Lithologies 9 →   Seams 21 →  │
-│ Total sample      1,783         │ └──────────────────────────────────────────────────┘
-└─────────────────────────────────┘
+[logo] PT Bara Nusantara Mandiri  [BNM] [Active]                          [Edit]
+┌ Master data ─────────────────────────────────────────────────────────────────┐
+│ ┌ Drill holes       ┐ ┌ Lithologies       ┐ ┌ Seams             ┐            │
+│ │ 32      View list →│ │ 9       View list →│ │ 21      View list →│            │
+│ └───────────────────┘ └───────────────────┘ └───────────────────┘            │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌ Properties ──────────────┐ ┌ Contacts                         [+ Add contact] ┐
+│ Code             BNM     │ │ Budi Santoso [Default]  Site Geologist  budi@…  ⋯ │
+│ Address          Samarinda…│ │ Rina Ayu Lestari       Purchasing      rina@…  ⋯ │
+│ Billing address  Jl. …,  │ │ …                                                 │
+│                  Jakarta │ │                                                   │
+│ Status … Total sample    │ │                                                   │
+└──────────────────────────┘ └───────────────────────────────────────────────────┘
+          (both cards reach the bottom of the page)
 ```
 
 | Card | Content |
@@ -92,7 +98,7 @@ Clients > PT Bara Nusantara Mandiri
 | Contacts | Name, Position, Email, Phone, a **Default** tag on the default contact. **Add contact** in the card head; row menu **Edit**, **Make default**, **Archive**. The default contact is pre-filled as Attention on a new job order. The job order form's contact dropdown adds and edits the same records |
 | Master data | Drill holes, Lithologies and Seams of this client, each a count with a link to its list filtered by the client |
 
-Desktop: Properties on the left (360), Contacts and Master data on the right. Tablet and phone: stacked; on the phone the contacts are cards with call and email icon buttons.
+Desktop (Revision 3): Master data across the full width under the header; below it Properties on the left (378) and Contacts on the right, both filling the remaining height. Tablet and phone: stacked; on the phone the contacts are cards with call and email icon buttons. (Before Revision 3: Properties on the left at 360, Contacts and Master data on the right.)
 
 ### 4.3 Forms
 
@@ -208,3 +214,32 @@ Deviations:
 - The client form and the CoA history follow the owner's reference frames ("Add client modal ref", "CoA history ref"); the Properties card follows "Properties card ref": all rows Inline, also on the phone.
 - The Key text of the Key-value row is Body small/Regular now.
 - Rebuilt: the 7 modal frames (Contact_form, New_client, Logo_uploaded, New_drill_hole, History, Lithology Edit, New_seam) and the Properties card of Client_detail on desktop, tablet and phone.
+
+## 15 · Revision 3 (Nov 5, 2026, owner edits in the file, saved 14:26)
+
+The owner edited the desktop frames of row K in FigCraft after Revision 2. Found by comparing the saved file with the last generated file, layer by layer, and checked against renders. **Not yet in `library/screens/rowK.js`**: a rebuild of row K would undo them until the generator takes them over.
+
+| # | Where | Before (generated) | Now (owner) |
+| --- | --- | --- | --- |
+| M-1 | Client page, layout (Default, Contact_form, With_logo) | Properties (360) left; Contacts and Master data stacked on the right; page height hug | **Master data card first**, full width under the header. Below it a **Columns** row that fills the page height: **Properties card fixed 378**, **Contacts card fills**; both cards fill the height (Main 946 instead of 720). The old right-column wrapper is gone; Contacts sits directly in Columns |
+| M-2 | Master data card, stat tiles | Vertical tile: label, count, "View list →" under the count | Horizontal tile (Surface/muted, radius 12, padding 12 / 14, items at the bottom): a vertical **Stat** (label, count) that fills, and the **Link** "View list →" at the right. Three tiles fill the width (357 each) |
+| M-3 | Properties card, Billing address | Value on one line, clipped at the card edge ("…Jakarta Selata") | The Value fills the row and wraps (auto height): "Jl. Jenderal Sudirman 45, Jakarta / Selatan". The row grows to 40 |
+| M-4 | **Key-value row** component, Inline | Items centred vertically | Items **top-aligned** (cross align min), so the Key stays on the first line of a wrapped value. Reaches every Inline Key-value row: job order Overview (desktop, tablet, dark preview), Mark sent and Sent, the client pages (all sizes) |
+| M-5 | PT Bukit Asam logo | Image fill (PNG crop from Wikimedia Commons) in a "Logo" frame | A vector component **ptba-logo** (40 × 40, two vectors, brand yellow #FDB610 and red #E82328) on the Library page. Every use is an **Avatar** frame: round (radius 999), `Surface/card` fill, `Surface/border` stroke (1 px), padding 4, with the ptba-logo instance filling it (the mark sits 5 px from the edge). Sizes: 40 in the list rows (Clients list and the list behind New_client, Archive_confirm, Logo_uploaded), 64 in the client page header (With_logo), 100 in the Edit client dialog (Logo_uploaded) |
+| M-6 | Client form, logo slot (New_client) | Drop zone with its Title "Drop or click to add logo" and the hidden hint | Drop zone 100 × 100: **Title hidden**; the **Hint** carries "Drop or click to add logo" (Caption/Regular, centred, fixed 84 wide, two lines) under the upload icon |
+| M-7 | Client form, uploaded logo (Logo_uploaded) | **Remove** as a Ghost button sm | **Remove** as a **Secondary** button sm (outlined) |
+| M-8 | CoA history (History) | File name, Current pill and Metadata hugging, so the columns did not line up | **File name fixed 200**, **Metadata fixed 160**, then the **Current** pill; the three file rows line up in columns |
+
+Unchanged: tablet and phone client pages (they keep the Revision 2 layout, only M-4 reaches them through the component), the drill hole, lithology and seam frames, the other dialogs.
+
+The owner's reference frames ("Add client modal ref", "CoA history ref", "Properties card ref") were deleted from the canvas: their content is built.
+
+### 15.1 Points found in the check
+
+1. **Header logo sizes differ.** A client with a logo shows a 64 px round Avatar in the header (With_logo), a client without one a 56 px rounded-square initials tile (Default). Proposed: one shape and size for both (64 round, with the initials inside when there is no logo), as in the list rows, where both are 40 round.
+2. **Tablet and phone client pages** still put Master data last. Proposed: Master data first on every size; on tablet and phone the three tiles stack or scroll, the Properties and Contacts cards follow.
+3. **Same as address** is checked in Logo_uploaded while the billing address differs from the address. Proposed: unchecked when the two differ (generator data, not an owner edit).
+
+### 15.2 Next
+
+Take M-1 to M-8 into `rowK.js` (client page layout and tile anatomy, the logo as the ptba-logo instance in the Avatar frame instead of an image fill, the drop zone and Remove button, the history columns), apply 15.1, carry M-1 and M-2 to tablet and phone, rebuild row K and swap it in.
