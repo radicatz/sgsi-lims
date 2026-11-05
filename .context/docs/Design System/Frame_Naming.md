@@ -84,3 +84,20 @@ Screens outside the sidebar. Sign in, Notifications and Profile join this module
 | 03 | No_access | 01 Default (desktop, phone) |
 
 Canvas row J holds the App frames.
+
+## Master data (modules 09 to 12)
+
+| Module | SS | Screen | Variants (VV) |
+| --- | --- | --- | --- |
+| 09 Clients | 01 | Clients_list | 01 Default, 02 Empty |
+| | 02 | Client_detail | 01 Default, 02 Contact_form, 03 With_logo |
+| | 03 | Client_form | 01 New_client, 02 Archive_confirm, 03 Logo_uploaded |
+| 10 Drill_hole | 01 | Drill_hole_list | 01 Default, 02 Missing_CoA, 03 Read_only |
+| | 02 | Drill_hole_form | 01 New_drill_hole |
+| | 03 | CoA_upload | 01 Upload, 02 History |
+| 11 Lithology | 01 | Lithology_list | 01 Default |
+| | 02 | Lithology_form | 01 Edit |
+| 12 Seam | 01 | Seam_list | 01 Default |
+| | 02 | Seam_form | 01 New_seam |
+
+Canvas row K holds the master data frames; they are created under their final names.

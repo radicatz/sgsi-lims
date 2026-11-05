@@ -1140,6 +1140,7 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 - Filter: Status. Actions: add, edit, delete (blocked when the company has data; archive instead).
 - Form: name, code (unique, short), address, status, logo upload.
 - Proposed (Clarity accounts): billing address, and contact persons (name, position, email, phone) used as "Attention" on the job order and CoA.
+- Client page `/clients/:id` (designed Nov 5, 2026, `../Master Data/Master_Data_Screen_Plan.md`): a click on a list row opens it; it shows properties, the contacts table (Default tag, add, edit, make default, archive) and links to the client's job orders, drill holes, lithologies and seams. The list keeps SIM Lab's columns.
 - Open: report distribution list (the workbook has one; F-DST).
 
 ### S-04 Drill hole `/master/drill-holes` (Fixed)

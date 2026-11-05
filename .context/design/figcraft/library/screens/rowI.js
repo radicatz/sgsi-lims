@@ -48,8 +48,8 @@ const JOB_ORDERS = [["Draft", 3], ["Awaiting samples", 9], ["In progress", 21], 
 const PERDAY = [34, 52, 61, 48, 70, 12, 8, 64, 58, 77, 69, 82, 14, 9];
 const TURN = [["PT Bara Nusantara Mandiri", 4.1, "Feedback/success"], ["CV Sumber Batu Hitam", 5.6, "Feedback/warning"], ["PT Kaltara Energi Prima", 4.8, "Feedback/success"], ["PT Bukit Asam", 7.2, "Feedback/error"]];
 const DRILL = [
-  ["DH-0412", COMPANIES[0], 12, "RoA-0417", "CoA-0412.pdf", "2 Nov"], ["DH-0413", COMPANIES[0], 9, "RoA-0417", "", ""], ["DH-0420", COMPANIES[3], 36, "RoA-0415", "CoA-0420.pdf", "28 Oct"], ["DH-0421", COMPANIES[3], 14, "RoA-0415", "CoA-0421.pdf", "28 Oct"],
-  ["DH-0431", COMPANIES[2], 8, "RoA-0422", "", ""], ["DH-0432", COMPANIES[2], 12, "RoA-0420", "CoA-0432.pdf", "1 Nov"], ["DH-0440", COMPANIES[1], 6, "RoA-0421", "", ""], ["DH-0441", COMPANIES[1], 5, "RoA-0413", "CoA-0441.pdf", "30 Oct"],
+  ["DH-BNM-021", COMPANIES[0], 19, "RoA-0417", "CoA-BNM-021.pdf", "2 Nov"], ["DH-BNM-022", COMPANIES[0], 32, "RoA-0417", "CoA-BNM-022.pdf", "2 Nov"], ["DH-BKA-007", COMPANIES[3], 36, "RoA-0415", "CoA-BKA-007.pdf", "28 Oct"], ["DH-BKA-008", COMPANIES[3], 14, "RoA-0415", "CoA-BKA-008.pdf", "28 Oct"],
+  ["DH-KEP-031", COMPANIES[2], 16, "RoA-0422", "", ""], ["DH-KEP-032", COMPANIES[2], 11, "RoA-0420", "CoA-KEP-032.pdf", "1 Nov"], ["DH-SBH-040", COMPANIES[1], 6, "RoA-0421", "", ""], ["DH-SBH-041", COMPANIES[1], 5, "RoA-0413", "CoA-SBH-041.pdf", "30 Oct"],
 ];
 const QUEUES = {
   Lab: [["Batches to receive", 2, false], ["Signed RoA to upload", 1, false], ["CoAs to generate", 1, true]],

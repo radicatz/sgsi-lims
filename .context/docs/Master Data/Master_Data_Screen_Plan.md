@@ -1,6 +1,6 @@
 # Master Data — Design Plan
 
-Nov 5, 2026 · Revision 1, plan cleared with the owner, waiting for go
+Nov 5, 2026 · Revision 1, frames built Nov 5
 
 Written for: the owner and anyone building the master data screens.
 
@@ -89,7 +89,7 @@ Clients > PT Bara Nusantara Mandiri
 | --- | --- |
 | Header | Logo, name, code tag, status badge; **Edit** (edit roles) opens the client form |
 | Properties | Code, Address, Billing address, Status, Created; **Job orders** (count, link to the job order list filtered by the client); **Total sample** |
-| Contacts | Name, Position, Email, Phone, a star on the **default** contact. **Add contact** in the card head; row menu **Edit**, **Make default**, **Archive**. The default contact is pre-filled as Attention on a new job order. The job order form's contact dropdown adds and edits the same records |
+| Contacts | Name, Position, Email, Phone, a **Default** tag on the default contact. **Add contact** in the card head; row menu **Edit**, **Make default**, **Archive**. The default contact is pre-filled as Attention on a new job order. The job order form's contact dropdown adds and edits the same records |
 | Master data | Drill holes, Lithologies and Seams of this client, each a count with a link to its list filtered by the client |
 
 Desktop: Properties on the left (360), Contacts and Master data on the right. Tablet and phone: stacked; on the phone the contacts are cards with call and email icon buttons.
@@ -144,7 +144,7 @@ Names by `../Design System/Frame_Naming.md`. Canvas row **K  Master data** below
 | 12 Seam | 01 | Seam_list | 01 | Default | D, T, P |
 | | 02 | Seam_form | 01 | New_seam | D |
 
-Total **30 frames**: 16 desktop, 5 tablet, 9 phone. Example: `Desktop-09-Clients-02-Client_detail-01-Default`.
+Total **31 frames**: 18 desktop, 5 tablet, 8 phone. Example: `Desktop-09-Clients-02-Client_detail-01-Default`.
 
 ## 9 · Demo data
 
@@ -187,3 +187,17 @@ The Dashboard's drill-hole list uses codes like DH-0412. It changes to these cod
 4. Chain: build rows C to K, `rev8`, `naming`, `cards`, `fit`, then `retro.js`.
 5. Deploy (dirty check, backup, swap), commit. No export unless asked.
 6. Docs: build status here; spec S-03 gets the client page and contacts; `Frame_Naming.md` gets modules 09 to 12; README.
+
+## 13 · Build status (Nov 5, 2026)
+
+All 31 frames are built on row **K  Master data** with `library/screens/rowK.js`, under their final names, with the role sidebar of each persona. Added to the plan during the build: Client_detail 03 With_logo and Client_form 03 Logo_uploaded (desktop), the two scenarios of a client logo.
+
+**Clients and logos.** Seven demo clients: PT Bukit Asam Tbk (PTBA, SIM Lab's client), PT Bara Nusantara Mandiri, PT Kaltara Energi Prima, PT Mahakam Coal Resources, CV Sumber Batu Hitam, PT Borneo Karya Energi and PT Tambang Sentosa Abadi (inactive). Only PT Bukit Asam has a logo: its mark comes from Wikimedia Commons ("(Bukit Asam) Logo CMYK-01.png", cropped to the symbol and placed as an image fill). The other clients are demo names without a public logo, so they show the library **Avatar** with their initials (BN, KE, MC, SB, BK, TS); the client page uses a 56 px initials tile. The client form shows both: the drop zone (no logo) and the uploaded file row with Remove (Logo_uploaded).
+
+Deviations:
+
+- **Default contact** is a "Default" tag, because the icon library has no star.
+- **Kind** (Coal, Parting, No lithology) and **Active / Inactive** are small pills built from frames, not Tag or Status badge variants; the library does not have these yet.
+- **Rows per page** is drawn as a small select next to the pager (a frame, not a library component).
+- **Phone** lists show 8 to 12 cards and the mobile pager ("1 / 4"); the client form and the drill hole form are full-screen forms with the sticky bar.
+- The contact emails use the client's domain (first name only), and every client shows the same four demo contacts.

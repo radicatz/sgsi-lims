@@ -63,5 +63,6 @@ exports.build = (b) => {
   const d = Y.desktop, t = Y.tablet, p = Y.phone, DX = 1560, TX = 954, PX = 510;
   board(b, 0, d, "desktop"); noAccess(b, DX, d, "desktop");
   board(b, 0, t, "tablet");
+  b.jEnd = { desktop: d + 2000, tablet: t + 1200, phone: p + 1300 };
   drawer(b, 0, p, "Lab", "Lab_admin", "01"); drawer(b, PX, p, "CSO", "CSO", "02"); noAccess(b, PX * 2, p, "phone");
 };
