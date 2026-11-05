@@ -1,176 +1,192 @@
 # Dashboard v2 — Design Plan
 
-Oct 19, 2026 · merges `Dashboard · Desktop/Tablet/Mobile` (v1, SIM Lab parity) with `Dashboard — concept` in `screens.pen`
+Nov 5, 2026 · Revision 2, plan waiting for go · replaces the Oct 19 plan (built in pen.dev) and the deleted parity plan `Dashboard_Screen_Plan.md`
 
-"v2" here means version 2 of the dashboard screen, not release v2 of the product (shipment, CoA, QA/QC). Everything below runs on v1 data. It ships right after v1 go-live; v1 goes live with the parity dashboard.
+"v2" is the name of this dashboard design, not a product release. **v1 ships with this dashboard.** The SIM Lab parity dashboard is dropped; everything it showed is on the Quality & reports tab.
 
-v2 also introduces the **expandable sidebar**, which replaces the icon-only rail on every screen from then on (see Expandable sidebar).
+## 1 · Goal
 
-## Goal
+One dashboard with two jobs:
 
-One dashboard that serves two jobs:
+- **Operations:** what is in the lab, what is due, what is late, and how fast the lab works.
+- **Quality & reports:** what the coal looks like, and which drill holes have reports.
 
-- **Lab operations:** what is in the lab, what is due, and what is stuck. This comes from the concept.
-- **Quality and reports:** what the coal looks like and where the reports are. This comes from v1, i.e. SIM Lab parity.
+## 2 · What changed from the Oct 19 plan
 
-Everything SIM Lab shows stays, so parity is not lost. The concept's widgets are added where v1 data can feed them, and duplicates are merged.
-
-## What each source has
-
-| Widget | v1 (SIM Lab parity) | Concept |
+| Oct 19 plan | Now | Why |
 | --- | --- | --- |
-| Batch counts | In progress 6, Completed 1, Total 8 | Header stats: In progress 17, Due this week 9, RoA issued 30 d 46 |
-| Work KPIs | — | Samples received 1,284 (+12%) · Awaiting review 42 (42 of 70) · Recheck flags 7 (3 batches, lab codes) · Mean turnaround 4d 6h (On target) |
-| Status breakdown | — | Batch workflow: Created 6, Preparation 11, Analysis 17, Finished 8, Completed 4 |
-| Intake | — | Sample type mix donut (Ply, Composite, Roof/floor, Parting) · Samples received per day this week |
-| Batch list | — | Active batches table with All / Mine / Due / Late filters, progress, status, RoA ("Mine" is dropped in v2) |
-| Deadlines | — | Week calendar with batches due · Deadline alert callout |
-| Quality charts | CV vs Ash, RD vs Ash, FC vs GCV with regression; Trend CV with basis toggle | — |
-| Drill holes | Full list: code, samples, RoA downloads, CoA status, pagination | Short "Drill holes · CoA" list with Missing badge |
-| Filters | Period, Company | — (date in header only) |
+| Built in pen.dev, rows in `screens.pen` | Built in FigCraft with the library, canvas row **I** | FigCraft is the design source (Oct 29) |
+| Ships after go-live, v1 goes live with the parity dashboard | Ships in v1; the parity plan is deleted | Owner, Nov 5 |
+| Admin and Client roles | Seven staff roles; tab access per spec S-01 and `../Navigation/Navigation_Screen_Plan.md` | Spec 8.1, 8.2 |
+| Client view with My batches | **Parked** until a client portal exists | D-35 |
+| KPI "Awaiting review" with recheck flags | Replaced by **Samples received** | There is no review step or recheck in v1 (spec 9.2.1) |
+| Batch workflow: Created, Preparation, Analysis, Finished, Completed | The v1 steps: Created, Receiving, Preparation, Prep finished, Analysis, Analysis finished, Completed | Spec 9.2.1 |
+| — | **Your queues** strip, **Job orders by status**, **Turnaround by company** | S-01 additions (Clarity, AssayNet) |
+| Expandable sidebar introduced here | Already built in the library (Oct 30) and on every screen | Section 9 |
+| Old sidebar groups (Users, Companies, WORKFLOW) | The current sidebar, filtered by role | Navigation plan |
 
-## Merge rules
+## 3 · Who sees what
 
-1. **Batch numbers appear once.** v1's three cards and the concept's header stats fold into one **Batches** KPI: in progress as the main number, with completed and total underneath. The concept's Batch workflow panel gives the per-status breakdown.
-2. **One drill-hole list.** The concept's short CoA list is dropped. The v1 table gains a "Missing CoA" filter chip, which covers the same need.
-3. **Every widget obeys the Period and Company filters.** The concept had no filters; in v2 they sit in the page header and apply to every widget on both tabs.
-4. **No widget needs data v1 doesn't store.** The two concept features that would have needed new data are changed: the "Mine" filter is dropped, and the deadline alert is rule-based only.
+| Role | Tabs | Your queues strip | Notes |
+| --- | --- | --- | --- |
+| Lab admin | Operations (default), Quality & reports | ✔ | Main persona: Maya Lestari |
+| Supervisor, Manager | Operations (default), Quality & reports | | Dashboard is their start page |
+| Superadmin | Operations (default), Quality & reports | | |
+| CSO, Preparation, Analyst | Operations only, **no tab switch** | ✔ | |
 
-## Structure: two tabs
+Only Lab admin and Superadmin (`coa.upload`) see **Upload CoA** in the drill-hole list.
 
-The page header holds the title, a tab switch (**Operations | Quality & reports**) and the shared filters. Each tab fits roughly one desktop screen instead of one very long page.
-
-| Tab | Sections, top to bottom | Source |
-| --- | --- | --- |
-| **Operations** (Admin default) | KPI strip: Batches, Due this week, Awaiting review (with recheck flags), Mean turnaround | Merged |
-| | Row: Batch workflow · Sample type mix · Samples received per day | Concept |
-| | Active batches table (All / Due / Late), with a right rail: deadlines week strip, rule-based deadline alert | Concept |
-| **Quality & reports** (Client default) | KPI strip: Batches (in progress / completed / total), RoA issued, drill holes with CoA | v1 + concept |
-| | Bivariate charts: CV vs Ash, RD vs Ash, FC vs GCV | v1 |
-| | Trend CV with basis toggle | v1 |
-| | Drill-hole list with "Missing CoA" filter, RoA downloads, CoA upload (Admin) | v1 |
-
-### Client view
-
-Clients see only **Quality & reports**, with no tab switch, limited to their own company: the Company filter is locked to it and CoA upload is hidden. Above the KPI strip sits a small **My batches** list: batch no., deadline, progress and status for their open batches. It is read-only and has no workload or deadline data from other companies.
-
-### Deadline alert
-
-The alert is rule-based only: "3 batches due within 24 h; B-2026-0417 is still in preparation", plus an "Open batch" button. It makes no staffing suggestion, because that needs personnel data (release v4).
-
-### Desktop layout (1440, sidebar expanded)
+## 4 · Page header and filters
 
 ```
-┌ Sidebar 248 ──┬ Top Bar ─────────────────────────────────────────────────┐
-│ ▣ Dashboard   │ Dashboard  [Operations | Quality & reports] [30 days][Co.]│
-│ ◻ Users       │ ── Operations ─────────────────────────────────────────── │
-│ ◻ Companies   │ [Batches] [Due this week] [Awaiting review] [Turnaround]  │
-│ MASTER DATA ▾ │ [Batch workflow] [Sample type mix] [Samples/day]│Deadlines│
-│ ◻ Drill hole  │ [Active batches table ─────────────────────]    │ Alert   │
-│ ◻ Lithology   │ ── Quality & reports ──────────────────────────────────── │
-│ ◻ Seam        │ [Batches] [RoA issued] [CoA coverage]                     │
-│ WORKFLOW      │ [CV vs Ash] [RD vs Ash] [FC vs GCV]                       │
-│ ◻ Batch       │ [Trend CV (arb) · arb|ADB|DB|DAF ]                        │
-│ ◻ Input ROA   │ [List drill hole · All | Missing CoA · search · pages ]   │
-│ ◻ Review ROA  │                                                           │
-│ « Collapse    │                                                           │
-└───────────────┴───────────────────────────────────────────────────────────┘
+Dashboard                                   [Last 30 days ▾] [All companies ▾]
+[ Operations | Quality & reports ]
 ```
 
-## Expandable sidebar
+- **Title** "Dashboard". The date overline is the same as on My work. No subtitle.
+- **Tab switch:** Segmented control, Operations | Quality & reports. It shows only for roles with `dashboard.quality`.
+- **Filters:** Period (Last 7 days, Last 30 days, This month, Last month, This year, Custom range; default Last 30 days) and Company (All companies, or one). They apply to every widget on both tabs, except where a widget says "now": the queues strip, Active batches and Deadlines always show the current state.
+- **Tablet:** filters stay in the header, and the tab switch goes on its own row below the title. **Phone:** the tab switch is full width under the title and sticks when scrolling. The filters move to a **Filters** button that opens a bottom sheet.
 
-From dashboard v2 on, the icon-only rail becomes a sidebar the user can expand and collapse. It applies to every screen, not only the dashboard.
+## 5 · Operations tab
 
-| State | Width | Content |
+Desktop, 1440, sidebar expanded (content 1128 wide):
+
+```
+┌ Your queues ─────────────────────────────────────────────────────────────────┐
+│ Batches to receive 2   Signed RoA to upload 1   CoAs to generate 1   Open My work →│
+└──────────────────────────────────────────────────────────────────────────────┘
+[Batches in progress] [Due this week] [Samples received] [Mean turnaround]
+[Batch workflow            ] [Job orders by status     ] [Sample type mix    ]
+[Samples received per day                ] [Turnaround by company           ]
+┌ Active batches  All | Due | Late ───────────────┐ ┌ Deadline alert ──────┐
+│ Batch  Company  Job order  Deadline  Progress  St │ │ This week (strip)    │
+│ … 8 rows, pager                                  │ │ Deadline items       │
+└──────────────────────────────────────────────────┘ └──────────────────────┘
+```
+
+| # | Widget | Content | Library |
+| --- | --- | --- | --- |
+| O1 | **Your queues** (roles with My work) | One link per queue the user's roles have, each with the queue name and count; overdue counts in the error colour. **Open My work** at the right. Hidden when every count is 0 | Card; Queue tag or text links |
+| O2 | **Batches in progress** | Main number; "4 completed", "23 total" as two lines under it, in the period | Card KPI, Kind=Delta |
+| O3 | **Due this week** | Count of batches due by Sunday; "2 past due" in the error colour | Card KPI, Kind=Delta |
+| O4 | **Samples received** | Samples received in the period, with the change against the previous period | Card KPI, Kind=Delta, Delta Up/Down |
+| O5 | **Mean turnaround** | Days from Confirm reception to Completed. The colour band (achieved, 100–110%, 110–125%, 125–150%, 150–200%, 200–300%, >300% of the service turnaround) colours the value and a small label | Card KPI, Kind=Progress |
+| O6 | **Batch workflow** | One bar per v1 step: Created, Receiving, Preparation, Prep finished, Analysis, Analysis finished, Completed, with counts. "Now" | Workflow bars |
+| O7 | **Job orders by status** | Draft, Awaiting samples, In progress, Reported, Delivered (spec 9.3); Closed and Cancelled are left out. "Now" | Bar chart (horizontal) |
+| O8 | **Sample type mix** | Ply, Composite, Roof, Floor, Parting (categories open, R-07) | Donut, Legend item |
+| O9 | **Samples received per day** | Bars per day for the period (per week when the period is longer than 31 days) | Bar chart |
+| O10 | **Turnaround by company** | Mean days per company, bar coloured by its band; target line | Bar chart |
+| O11 | **Active batches** | Filter tabs All, Due (within 7 days), Late. Columns: Batch, Company, Job order, Deadline, Progress (values saved or samples received, by step), Status. The row's deadline is coloured by the turnaround band. Rows open the batch page. 8 rows and pager. "Now" | Table card, Status badge, Progress bar, Pager |
+| O12 | **Deadline alert** | Rule-based: "3 batches are due within 24 h. B-2026-0417 is still in preparation." with **Open batch**. No staffing advice (needs personnel data). Hidden when no batch is due within 24 h | Card callout, Tone=Alert |
+| O13 | **This week** | A week strip (Mon–Sun, today marked, days with deadlines dotted), then the deadline items of the selected day | Calendar day, Deadline item |
+
+Links: a KPI opens the batch list filtered to that set. Workflow bars and job order bars open their lists filtered by status.
+
+## 6 · Quality & reports tab
+
+```
+[Batches completed] [RoA uploaded] [Drill holes with CoA] [Determinations]
+[CV vs Ash            ] [RD vs Ash            ] [FC vs GCV            ]
+[Trend CV   basis: ADB | AR | DB | DAF                                  ]
+┌ Drill holes  All | Missing CoA   [Search drill hole]  ───────────────────┐
+│ Code  Company  Samples  RoA  CoA  Actions                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+| # | Widget | Content | Library |
+| --- | --- | --- | --- |
+| Q1 | **Batches completed** | Completed in the period; "23 total" under it | Card KPI |
+| Q2 | **RoA uploaded** | Signed RoAs uploaded in the period (Complete batch, D-49) | Card KPI |
+| Q3 | **Drill holes with CoA** | "62 of 74" with a progress bar | Card KPI, Kind=Progress |
+| Q4 | **Determinations** | Values saved in the period (one parameter of one sample = one determination), AssayNet | Card KPI, Kind=Delta |
+| Q5 | **CV vs Ash, RD vs Ash, FC vs GCV** | Scatter per pair (ADB), regression line, R² and n in the card head; tooltip on a point: lab code, sample ID, drill hole, the two values | Chart card, Scatter |
+| Q6 | **Trend CV** | CV per batch completed date, basis switch ADB, AR, DB, DAF in the card head | Chart card (Header=With basis switch), Trend |
+| Q7 | **Drill holes** | Filter tabs All and Missing CoA, search. Columns: Code, Company, Samples, RoA (downloads of the RoAs that hold its samples), CoA (file name and date, or "Missing" tag), Actions (Upload CoA for Lab admin and Superadmin). Pager, 10 rows | Table card, Tag, Button sm, Pager |
+
+Data rules (spec S-01): regression is computed on the server; values are never rounded below their stored precision; the scatter uses only Completed batches.
+
+## 7 · Tablet (834) and phone (390)
+
+| Part | Tablet | Phone |
 | --- | --- | --- |
-| Expanded | 248 px | Icon and label per item. Group labels MASTER DATA (Drill hole, Lithology, Seam) and WORKFLOW (Batch, Input ROA, Review ROA), with Dashboard, Users and Companies above them. The Master Data group folds with a caret. The active item is filled `primary-deep`. A "Collapse" button sits at the bottom |
-| Collapsed | 88 px desktop, 64 px tablet | Icons only, as the v1 rail, with dividers between groups. Labels show as tooltips on hover and focus. An "Expand" button sits at the bottom |
+| Header | Title and filters on one row; tab switch below | Title; full-width tab switch, sticky; Filters button opens a bottom sheet |
+| Your queues | One row, scrolls sideways | One row of chips, scrolls sideways |
+| KPIs | 2 × 2 | 2 × 2 |
+| Operations charts | Workflow and Job orders side by side; Sample mix and Samples per day side by side; Turnaround full width | All stacked, full width |
+| Deadline alert and week | Above Active batches, full width | Alert first, then the week strip scrolling sideways |
+| Active batches | Table without Job order and Company | Cards: batch number, company, deadline, progress bar, status badge |
+| Quality charts | Two per row, the third full width; Trend full width | Stacked; Trend scrolls sideways |
+| Drill holes | Table without Company | Cards with the RoA and CoA actions |
+
+## 8 · Frames
+
+Module **02 Dashboard**, names by `../Design System/Frame_Naming.md`. Canvas row **I  Dashboard** below row H. Every frame uses the role's sidebar from the Navigation plan; Dashboard is active.
+
+| SS | Screen | VV | Variant | Sizes | Persona |
+| --- | --- | --- | --- | --- | --- |
+| 01 | Operations | 01 | Lab_admin | D, T, P | Maya Lestari |
+| 01 | Operations | 02 | Supervisor | D | Hendra Wijaya: no queues strip; sidebar without My work |
+| 01 | Operations | 03 | CSO | D, P | Rina Kartika: no tab switch |
+| 01 | Operations | 04 | Sidebar_collapsed | D | Maya: the 88 px rail on desktop |
+| 01 | Operations | 05 | Sidebar_open | T | Maya: expanded sidebar over the content with a scrim |
+| 01 | Operations | 06 | No_data | D | Maya: a period with no batches; each card shows Empty state Size=Card |
+| 01 | Operations | 07 | Filters | P | Maya: filter bottom sheet |
+| 02 | Quality_and_reports | 01 | Default | D, T, P | Maya |
+| 02 | Quality_and_reports | 02 | Missing_CoA | D | Maya: Missing CoA tab selected |
+| 02 | Quality_and_reports | 03 | Point_tooltip | D | Maya: tooltip on a CV vs Ash point |
+
+Total **15 frames** (9 desktop, 3 tablet, 3 phone), for example `Desktop-02-Dashboard-01-Operations-01-Lab_admin`.
+
+## 9 · Expandable sidebar
+
+The sidebar is already built in the library as **Sidebar** (Collapsed=No 248 px, Collapsed=Yes 88 px) with **Nav item** (State × Collapsed, Count pill), and every built screen uses it. Which items show for each role is set by `../Navigation/Navigation_Screen_Plan.md`.
 
 | Breakpoint | Default | Behaviour |
 | --- | --- | --- |
-| Desktop ≥ 1200 | Expanded | The toggle pushes the content: main width changes and charts and tables resize. The user's choice is remembered per user |
-| Tablet 768–1199 | Collapsed | Expanding opens the sidebar over the content with a scrim. It closes when an item is chosen or the scrim is tapped, and the content does not reflow |
-| Mobile < 768 | Hidden | Unchanged: the menu button opens the drawer (the v1 `Dashboard · Mobile · Menu` frame), which already has the expanded layout |
+| Desktop ≥ 1200 | Expanded | The toggle pushes the content, so charts and tables resize. The choice is remembered per user (Profile, S-13) |
+| Tablet 768–1199 | Collapsed rail | Expanding opens the sidebar over the content with a scrim. It closes when an item is chosen or the scrim is tapped. The content does not reflow |
+| Phone < 768 | Hidden | The menu button in the top bar opens the drawer |
 
-Details:
+- Toggle icons: `caret-double-left` (Collapse) and `caret-double-right` (Expand).
+- The toggle has `aria-expanded`; items keep their accessible names when collapsed, with labels as tooltips; focus stays on the toggle.
+- Width transition about 200 ms; none when the user prefers reduced motion.
 
-- **Toggle icons:** `caret-double-left` (collapse) and `caret-double-right` (expand), both Phosphor.
-- **Accessibility:** the toggle has `aria-expanded`, items keep their accessible names when collapsed, and focus stays on the toggle after it switches.
-- **Sizes:** item height 44 px; the expanded item uses the same layout as the mobile drawer rows, so desktop, tablet and phone share one pattern.
-- **Animation:** width transition about 200 ms; none when the user prefers reduced motion.
+## 10 · Data each widget needs (v1 data model)
 
-### Tablet (834) and mobile (390)
-
-| Part | Tablet | Mobile |
+| Widget | Source | In v1 |
 | --- | --- | --- |
-| Tab switch | Segmented control in the page header | Full-width segmented control under the title, sticky when scrolling |
-| KPI strip | 2 × 2 grid | 2 × 2 grid |
-| Ops panels row | Workflow and Sample mix side by side; Samples/day full width | All stacked |
-| Right rail (deadlines, alert) | Moves above the Active batches table, full width | Alert first (most urgent), then a horizontally scrolling week strip |
-| Active batches | Table without the Batch date column | Cards: batch no., company, deadline, progress bar, status |
-| Quality tab | As in the v1 tablet frame | As in the v1 mobile frame |
+| Batches, Due this week, Workflow, Active batches, Deadline alert, This week | Batch status, step stamps and deadline | Yes |
+| Samples received, per day | Sample receipt (Confirm reception) date | Yes |
+| Mean turnaround, Turnaround by company, bands | Confirm reception and Completed stamps; service turnaround as the target | Yes; the target per service needs confirming with the lab |
+| Job orders by status | Derived job order status (spec 9.3) | Yes |
+| Your queues | The My work queue counts (S-19) | Yes |
+| Sample type mix | Ply or composite, and lithology (roof, floor, parting) | Yes, categories open (R-07) |
+| RoA uploaded, Drill holes with CoA | Batch documents (D-49); drill-hole CoA uploads | Yes |
+| Determinations, quality charts, trend | Saved final values per sample and parameter (D-47); basis conversion formulas | Yes |
+| Awaiting review, recheck flags | Review step | **Next goal**: no widget in v1 |
+| Client view, My batches | Client portal | **Parked** (D-35) |
 
-The filter sheet and drawer patterns are reused from the v1 frames. For navigation, see Expandable sidebar below.
+## 11 · Design rules that apply
 
-## Data each widget needs (v1 data model)
+- Card anatomy: every card padded 16; Card head 32 px fixed (title, actions, short texts such as R²); content in Card content; Table cards padded 16 (`../Design System/Component_Library_Plan.md`).
+- No values joined with " · ". No count subtitles under titles.
+- Chart colours come from the tokens and Legend item colours. Status colours only for statuses and turnaround bands.
+- Numbers: Data style for values, thousands separator ",", decimals per the parameter's stored precision.
 
-| Widget | Source in the data model | In v1? |
+## 12 · Open points (defaults used until answered)
+
+| # | Question | Default |
 | --- | --- | --- |
-| Batches, Batch workflow, Due this week | Batch status and deadline | Yes |
-| Awaiting review | Analysis state = submitted | Yes |
-| Recheck flags | Recheck flag per sample in Review ROA | Yes |
-| Mean turnaround | Batch created → completed timestamps | Yes |
-| Samples received / day | Sample receipt date | Yes |
-| Sample type mix | Interval ply/composite plus lithology (roof, floor, parting) | Yes, but the categories need confirming with the lab |
-| Active batches "Mine" filter | Batch assignee | **Dropped**: v1 has no assignee field |
-| Deadline alert | Batch deadline and status | Yes (rule-based; the staffing suggestion is dropped until personnel data exists in release v4) |
-| My batches (client) | Batch status, deadline, progress for the client's company | Yes |
-| RoA issued, CoA coverage | Report records, CoA uploads | Yes |
-| Quality charts, drill-hole list | Results, drill hole, reports | Yes |
+| 1 | Sample type categories (R-07) | Ply, Composite, Roof, Floor, Parting |
+| 2 | Drill-hole list: all master drill holes, or only those with samples in the period? | Only those with samples in the period, so it obeys the filters |
+| 3 | Turnaround target per service | Basic 5 days, Full 10 days until the lab gives its own |
+| 4 | Your queues strip on the dashboard repeats My work | Keep it as a one-line strip (S-01); it hides when every count is 0 |
 
-## Build approach in pen.dev
+## 13 · Build steps (after go)
 
-1. Add a "Dashboard v2" row to the "v1 Screens" region, below the existing dashboard rows, and rename the region to "Screens".
-2. Desktop, tablet and mobile each get two frames, one per tab: `Dashboard v2 · Operations · Desktop` and so on, six frames in total. Desktop frames use the expanded sidebar; tablet frames use the collapsed one.
-3. Reuse rather than redraw:
-   - The Quality tab copies the v1 frames and adds the tab switch and the new KPI strip.
-   - The Operations tab copies the concept's panels: workflow, sample mix, samples per day, active batches, deadlines and alert.
-4. The source frames stay untouched. `Dashboard — concept` and the v1 frames remain as references.
-5. New reusable components:
-   - `Sidebar/Expanded`, `Sidebar/Collapsed` and `Nav Item` (default, hover, active, collapsed) as the sidebar set.
-   - Tab switch, active-batch card (mobile), deadline item, and the My batches row.
-6. Extra frames:
-   - `Dashboard v2 · Quality · Client · Desktop`: the client view.
-   - `Dashboard v2 · Operations · Desktop · Sidebar collapsed`: the desktop collapsed state.
-   - `Dashboard v2 · Tablet · Sidebar open`: the overlay state.
-
-## Decisions (Oct 19, 2026)
-
-1. **When it ships:** right after v1 go-live. v1 goes live with the parity dashboard.
-2. **Layout:** two tabs, Operations and Quality & reports.
-3. **Client view:** Quality & reports only, plus a My batches list.
-4. **Deadline alert:** rule-based only; no staffing suggestion until personnel data exists.
-5. **"Mine" filter:** dropped.
-6. **Sidebar:** expandable on desktop and tablet, introduced with dashboard v2 and applied to all screens.
-
-## Build status (Oct 19, 2026)
-
-All frames are built in the "v1 Screens" region of `screens.pen`, in three new rows below the v1 frames:
-
-- **Desktop:** Operations, Quality & reports, Operations with the sidebar collapsed, and the client view of Quality & reports.
-- **Tablet:** Operations, Quality & reports, and Operations with the sidebar open as an overlay (drawn at a 1112 px viewport height).
-- **Mobile:** Operations and Quality & reports; the menu drawer and filter sheet are the v1 frames.
-- **New components:** `Sidebar/Expanded`, `Sidebar/Collapsed`, `Nav Item/Default`, `Nav Item/Active`, `Nav Group Label`, `Card/Batch`.
-
-Differences from the plan above:
-
-- Desktop Operations shows the Active batches table without the Batch date column, and the right rail is 280 px, so the table fits next to it.
-- The tablet Operations tab places the deadline alert and week strip above the Active batches table instead of in a right rail.
-- Tablet page headers put the tab switch on its own row under the title.
-- The Awaiting review KPI reads 28 awaiting (42 of 70 reviewed, 7 recheck flags), so its numbers add up.
-
-## Done when
-
-- Every v1 widget and every concept widget is either on a v2 frame or listed above as dropped or merged, with the reason.
-- All frames use only design-system components and tokens and Phosphor icons, and pass the same checks as v1: no clipping, 44 px touch targets on tablet and mobile, no horizontal page scroll.
-- The sidebar is drawn expanded and collapsed on desktop, and collapsed and open on tablet, and both states keep the content readable.
+1. The role sidebar helper and the retrofit of built frames (Navigation plan, section 6).
+2. `library/screens/rowI.js` builds the 15 frames from library instances. The chart data is fixed demo data from the batch list and job order list records.
+3. `naming.js` gets the `02 Dashboard` rules; `cards.js` and `fit.js` run as usual.
+4. Deploy to the open file (dirty check, backup, swap), commit. No export unless asked.
+5. Docs: this plan gets its build status; spec F-DSH-03 is marked parked; the README is updated.

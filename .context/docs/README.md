@@ -1,6 +1,6 @@
 # Docs
 
-Nov 4, 2026. Plans and specifications for SGSI LIMS, one folder per screen group. Links inside the files are relative to the file's own folder.
+Nov 5, 2026. Plans and specifications for SGSI LIMS, one folder per screen group. Links inside the files are relative to the file's own folder.
 
 | Folder | File | What it is | Status |
 | --- | --- | --- | --- |
@@ -13,8 +13,8 @@ Nov 4, 2026. Plans and specifications for SGSI LIMS, one folder per screen group
 | Job Order | `Job Order/Job_Order_Prototype_Plan.md` | The clickable prototype (artifact) and what it still has to take | Section 14 waits for go |
 | Batch | `Batch/Batch_Screen_Plan.md` | The batch page: Reception, Preparation, Analysis, RoA and Complete batch | Batch page and batch list frames built Nov 4; prototype update pending |
 | My Work | `My Work/My_Work_Screen_Plan.md` | My work queues per role | Revision 2 (v1 queues) frames built Nov 4 |
-| Dashboard | `Dashboard/Dashboard_Screen_Plan.md` | Dashboard for go-live (SIM Lab parity) | Plan; to be redrawn |
-| Dashboard | `Dashboard/Dashboard_v2_Screen_Plan.md` | Dashboard version 2 (Operations, Quality, Client) after go-live | Plan; to be redrawn |
+| Dashboard | `Dashboard/Dashboard_v2_Screen_Plan.md` | The v1 dashboard: Operations and Quality & reports tabs, per role | Revision 2 plan, waiting for go |
+| Navigation | `Navigation/Navigation_Screen_Plan.md` | Sidebar items and page access per role, No access page | Plan, waiting for go |
 | archive | `archive/Reception_Preparation_Screen_Plan.md` | The first batch-page plan with Revisions B and C | Superseded by the Batch plan; kept as history |
 
 New screen groups get their own folder and a plan named `<Group>_Screen_Plan.md`; a plan that is replaced moves to `archive/` with a banner naming its successor.

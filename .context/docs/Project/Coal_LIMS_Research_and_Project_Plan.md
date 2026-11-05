@@ -197,7 +197,7 @@ In v1, Prepare and Analyse are tracked as start/finish timestamps per batch (as 
 | 6 | Batch list | Filters status, arrival date, deadline; company, batch no., batch date, deadline, samples done/total, status, RoA downloads; delete/edit/open | Status: created → preparation → analysis → finished analysis → completed | 2 |
 | 7 | Input ROA | Pick batch; batch info; export PDF/XLSX/CSV; Preparation and Analysis start/finish with user; entry rules; tabs Information, Basic Analysis, Ultimate, AFT, Ash Analysis, Form of Sulphur, Metal in Ash, Trace Element; grid lab code, drill hole, sample ID, ply/comp, depth from/to; save per row, save-and-add | Spreadsheet-style grid; comma decimal; sample info locked after Start Preparation; Excel import; live calc preview | 2–3 |
 | 8 | Review ROA | Same batch info and tabs; select samples to flag recheck; thickness and interval lithology shown; save all; Complete Batch | Recheck sends sample back to Input ROA; Complete Batch locks results and enables RoA | 3 |
-| 9 | Dashboard | Batch counts (in progress, completed, total) for a date range; bivariate plots CV vs Ash, RD vs Ash, FC vs GCV (ADB) with regression and R²; CV (arb) trend; drill-hole list with RoA downloads and CoA status | Regression computed server-side; filters by company. Right after go-live, dashboard v2 replaces it: Operations and Quality & reports tabs, built on v1 data (`../Dashboard/Dashboard_v2_Screen_Plan.md`) | 4 |
+| 9 | Dashboard | Batch counts (in progress, completed, total) for a date range; bivariate plots CV vs Ash, RD vs Ash, FC vs GCV (ADB) with regression and R²; CV (arb) trend; drill-hole list with RoA downloads and CoA status | Regression computed server-side; filters by company. v1 ships dashboard v2 instead (Nov 5, 2026): Operations and Quality & reports tabs on v1 data (`../Dashboard/Dashboard_v2_Screen_Plan.md`) | 4 |
 | — | RoA export | PDF, XLSX, CSV per batch and per drill hole | HTML → PDF (Gotenberg); XLSX via SheetJS | 3 |
 
 The proposal's "Dashboard Pit to Port" (TM, Ash, TS bars by stage) needs production, stockpile and shipment data, so it moves to v3.
@@ -214,7 +214,7 @@ v1 is one responsive web app, not a separate mobile or tablet app: the same Reac
 | Tablet | 768–1199 px | Collapsed icon rail (64 px, icons only, labels as tooltips); Master Data group opens as a flyout. From dashboard v2: an expand button opens the full sidebar over the content | Two columns where it fits; filters inline in the page header; tables keep their columns but drop the least important ones |
 | Desktop | ≥ 1200 px | Icon rail and top bar in v1. From dashboard v2: expandable sidebar, 248 px with labels and groups, or collapsed to the 88 px rail, with the choice remembered per user | As designed at 1440 |
 
-The expandable sidebar is specified in `../Dashboard/Dashboard_v2_Screen_Plan.md` (Expandable sidebar). It arrives with dashboard v2, right after go-live, and applies to every screen.
+The expandable sidebar is specified in `../Dashboard/Dashboard_v2_Screen_Plan.md` (Expandable sidebar). It is in the component library and applies to every screen.
 
 How each v1 screen behaves on tablet and phone:
 
