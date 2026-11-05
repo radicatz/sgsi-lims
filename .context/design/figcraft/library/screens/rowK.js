@@ -119,20 +119,24 @@ function listFrame(b, x, y, kind, o) {
 
 // ---------- overlays ----------
 function overlay(b, s, kind, h) { b.raw("node.set", { ids: [s.root], props: { sizingV: "fixed", height: h } }); scrimOver(b, s.root, W[kind], h); }
+// Forms are centered dialogs (owner, Nov 5, 2026): Dialog lg or md, width and estimated height by title, no description line
+const MODAL = { "Add client": [792, "lg", 780], "Edit client": [792, "lg", 780], "Edit contact": [560, "md", 540], "Add drill hole": [560, "md", 430], "CoA history": [666, "lg", 640], "Edit lithology": [560, "md", 620], "Add seam": [560, "md", 540] };
 function sheet(b, s, kind, h, title, ok, body, cancel = "Cancel") {
   overlay(b, s, kind, h);
-  const v = b.v("Side sheet", "Width=480");
-  const id = b.instV(s.root, "Side sheet", "Width=480", { texts: { Title: title }, props: { absolute: true, x: W[kind] - 480, y: 0, height: h, sizingV: "fixed" } });
+  const [w, size, eh] = MODAL[title];
+  const v = b.v("Dialog", `Type=Default, Size=${size}`);
+  const id = b.instV(s.root, "Dialog", `Type=Default, Size=${size}`, { texts: { 0: title }, props: { absolute: true, x: Math.round((W[kind] - w) / 2), y: Math.max(40, Math.round((h - eh) / 2)), width: w, sizingH: "fixed" } });
+  b.raw("node.set", { ids: [id + v.names.Text], props: { visible: false } });
   const bt = v.insts.filter((i) => i.name === "Button");
   b.raw("node.set", { ids: [id + bt[0].pos + 3], props: { characters: cancel } }); b.raw("node.set", { ids: [id + bt[1].pos + 3], props: { characters: ok } });
-  b.raw("node.set", { ids: [id + v.names.Body], props: { sizingV: "fill", fill: "none", mainAlign: "min", crossAlign: "min", gap: 16 } });
-  body(id + v.names.Body);
+  b.raw("node.set", { ids: [id + v.names.Body], props: { gap: 16 } });
+  body(id + v.names.Body, id);
   return id;
 }
 function dialog(b, s, kind, h, size, title, text, cancel, ok, body, type = "Default") {
   overlay(b, s, kind, h);
   const v = b.v("Dialog", `Type=${type}, Size=${size}`), dw = { sm: 400, md: 560 }[size];
-  const id = b.instV(s.root, "Dialog", `Type=${type}, Size=${size}`, { texts: { 0: title, 1: text }, props: { absolute: true, x: Math.round((W[kind] - dw) / 2) + (kind === "desktop" ? 124 : 0), y: 220 } });
+  const id = b.instV(s.root, "Dialog", `Type=${type}, Size=${size}`, { texts: { 0: title, 1: text }, props: { absolute: true, x: Math.round((W[kind] - dw) / 2), y: 240 } });
   const bt = v.insts.filter((i) => i.name === "Button");
   b.raw("node.set", { ids: [id + bt[0].pos + 3], props: { characters: cancel } }); b.raw("node.set", { ids: [id + bt[1].pos + 3], props: { characters: ok } });
   if (body) body(id + v.names.Body);
@@ -158,15 +162,16 @@ const CL = (kind, o = {}) => ({ module: "09-Clients", screen: "01-Clients_list",
 
 function clientFormBody(b, bd, kind, o = {}) {
   const t = !!o.touch;
+  // logo slot: a 100 x 100 drop zone, or the uploaded logo with its file name and Remove
+  if (o.logo) { const f = hframe(b, bd, "Logo file", 16, { sizeH: "fill" }); const tile = avatar(b, f, CLIENTS[0], 100); const t2 = vframe(b, f, "Text", 4, { sizeH: "hug" }); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, t2, "Ghost", "Remove", "trash", { size: "sm" }); }
+  else { const dz = b.instV(bd, "Drop zone", "State=Default", { texts: { Title: "Drop or click to add logo" }, hide: ["Hint"], props: { width: 100, height: 100, sizingH: "fixed", sizingV: "fixed", cornerRadius: 1000 } }); }
   field(b, bd, "Name *", o.name || "", { touch: t, ph: "Client name" });
   const r = hframe(b, bd, "Row", 12, { sizeH: "fill", cross: "min" }); field(b, r, "Code *", o.code || "", { touch: t, ph: "Short, unique, e.g. BNM", helper: false });
   select(b, r, "Status", "Active", { touch: t });
   field(b, bd, "Address", o.address || "", { area: true, touch: t, ph: "Street, city, province" });
-  field(b, bd, "Billing address", o.billing || "", { area: true, touch: t, ph: "Street, city, province" });
-  b.instV(bd, "Checkbox", "Checked=On, State=Default", { texts: { Label: "Same as address" } });
-  txt(b, bd, "Logo", "Body small/SemiBold", "Text/text-secondary", "Logo label");
-  if (o.logo) { const f = hframe(b, bd, "Logo file", 12, { sizeH: "fill", stroke: "Surface/border", sw: 1, r: 12, pad: [12, 12, 12, 12] }); avatar(b, f, CLIENTS[0], 40); const t2 = vframe(b, f, "Text", 0); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, f, "Ghost", "Remove", "trash", { size: "sm" }); }
-  else b.instV(bd, "Drop zone", "State=Default", { texts: { Title: "Drop the logo here, or click to browse", Hint: "PNG or JPG, up to 2 MB. Optional: without it the initials show" }, props: { sizingH: "fill" } });
+  const bl = vframe(b, bd, "Billing address", 6); txt(b, bl, "Billing address", "Caption/Medium", "Text/text-secondary", "Label");
+  b.instV(bl, "Checkbox", "Checked=On, State=Default", { texts: { Label: "Same as address" } });
+  b.instV(bl, "Textarea", `State=${o.billing ? "Filled" : "Default"}, Size=${t ? "touch" : "md"}`, { texts: { Value: o.billing || "Street, city, province" }, hide: ["Label"], setProps: { "Show helper": false }, props: { sizingH: "fill" } });
 }
 function contactFormBody(b, bd) {
   field(b, bd, "Name *", "Sari Wulandari"); field(b, bd, "Position", "Finance"); field(b, bd, "Email", "sari"); field(b, bd, "Phone", "+62 812 5554 0166");
@@ -190,7 +195,7 @@ function clientDetail(b, x, y, kind, o = {}) {
   // properties
   const pc = card(b, cols || m, "Properties card"); if (cols) b.raw("node.set", { ids: [pc], props: { width: 360, sizingH: "fixed" } });
   cardTop(b, pc, "Properties");
-  const kv = (k, v, link) => b.instV(pc, "Key-value row", `Layout=${kind === "phone" || /address/i.test(k) ? "Stacked" : "Inline"}`, { texts: { Key: k, Value: v }, fills: link ? { Value: "Primary/primary" } : undefined, props: { sizingH: "fill" } });
+  const kv = (k, v, link) => b.instV(pc, "Key-value row", "Layout=Inline", { texts: { Key: k, Value: v }, fills: link ? { Value: "Primary/primary" } : undefined, props: { sizingH: "fill" } });
   kv("Code", c0[1]); kv("Address", c0[4]); kv("Billing address", "Jl. Jenderal Sudirman 45, Jakarta Selatan"); kv("Status", c0[5]); kv("Created", c0[7]); kv("Job orders", o.jobs || "14 job orders", true); kv("Total sample", c0[6]);
   // right column
   const right = cols ? vframe(b, cols, "Right column", 20) : m;
@@ -248,10 +253,15 @@ const DL = (o = {}) => ({ module: "10-Drill_hole", screen: "01-Drill_hole_list",
 function drillForm(b, bd, touch) { field(b, bd, "Code *", "DH-BNM-023", { touch }); field(b, bd, "Description", "Batch 7", { touch }); select(b, bd, "Company *", "PT Bara Nusantara Mandiri", { touch }); }
 function uploadBody(b, bd) { b.instV(bd, "Drop zone", "State=Default", { texts: { Title: "Drop the CoA here, or click to browse", Hint: "PDF, up to 10 MB" }, props: { sizingH: "fill" } }); const f = hframe(b, bd, "File", 12, { sizeH: "fill", stroke: "Surface/border", sw: 1, r: 12, pad: [10, 12, 10, 12] }); icon(b, f, "file-pdf", "Feedback/error", 20); const t = vframe(b, f, "Text", 0); txt(b, t, "CoA-BNM-031.pdf", "Body small/SemiBold", "Text/heading", "File"); txt(b, t, "1.3 MB", "Caption/Regular", "Text/text-muted", "Size"); icon(b, f, "x", "Text/text-muted", 14); }
 function historyBody(b, bd) {
-  [["CoA-BNM-021.pdf", "1.4 MB", "Maya Lestari", "2 Nov 2026, 09:14", true], ["CoA-BNM-021-v1.pdf", "1.3 MB", "Maya Lestari", "28 Oct 2026, 15:40", false], ["CoA-BNM-021-draft.pdf", "1.1 MB", "Maya Lestari", "21 Oct 2026, 11:02", false]].forEach(([f, s, by, at, cur]) => {
+  const sub = b.frame(bd, { name: "Subtitle", w: 400, h: 22, layout: "h", sizeH: "fill", sizeV: "hug" }); txt(b, sub, "DH-BNM-021", "Data/Strong", "Text/heading", "Title");
+  [["CoA-BNM-021.pdf", "1.4 MB", "Maya Lestari", "2 Nov 2026, 09:14", true], ["CoA-BNM-021-v1.pdf", "1.3 MB", "Maya Lestari", "28 Oct 2026, 15:40", false], ["CoA-BNM-021-draft.pdf", "1.1 MB", "Maya Lestari", "21 Oct 2026, 11:02", false]].forEach(([f, sz, by, at, cur]) => {
     const r = hframe(b, bd, "File row", 12, { sizeH: "fill", stroke: "Surface/border", sw: 1, r: 12, pad: [12, 12, 12, 12] });
-    icon(b, r, "file-pdf", "Feedback/error", 20); const t = vframe(b, r, "Text", 2); const n = hframe(b, t, "Name", 8); txt(b, n, f, "Body small/SemiBold", "Text/heading", "File"); if (cur) pill(b, n, "Current", "Feedback/success-100", "Feedback/success", false);
-    txt(b, t, s, "Caption/Regular", "Text/text-muted", "Size"); txt(b, t, "Uploaded by " + by, "Caption/Regular", "Text/text-secondary", "By"); txt(b, t, at, "Caption/Regular", "Text/text-secondary", "When"); b.instV(r, "Icon button", "Type=Ghost, Size=32, State=Default", { swaps: [[0, "Icon", "Glyph=download-simple, Size=14"]] });
+    icon(b, r, "file-pdf", "Feedback/error", 20);
+    const tx = hframe(b, r, "Text", 16, { sizeH: "fill" });
+    const fn = vframe(b, tx, "File name", 0, { sizeH: "hug" }); txt(b, fn, f, "Body small/SemiBold", "Text/heading", "File"); txt(b, fn, sz, "Caption/Regular", "Text/text-muted", "Size");
+    if (cur) pill(b, tx, "Current", "Feedback/success-100", "Feedback/success", false);
+    const md = vframe(b, tx, "Metadata", 0, { sizeH: "hug" }); txt(b, md, "Uploaded by " + by, "Caption/Regular", "Text/text-secondary", "By"); txt(b, md, at, "Caption/Regular", "Text/text-secondary", "When");
+    b.instV(r, "Icon button", "Type=Ghost, Size=32, State=Default", { swaps: [[0, "Icon", "Glyph=download-simple, Size=14"]] });
   });
 }
 
@@ -287,7 +297,7 @@ exports.build = (b) => {
   listFrame(b, ...D(10), "desktop", { ...DL(), vv: "03", variant: "Read_only", role: "Supervisor", readOnly: true, cell: drillCell(true), phone: drillPhone(true), cols: { ...dcols, desktop: dcols.desktop.slice(0, 5) } });
   { const s = listFrame(b, ...D(11), "desktop", { ...DL(), screen: "02-Drill_hole_form", vv: "01", variant: "New_drill_hole" }); sheet(b, s, "desktop", HH, "Add drill hole", "Save drill hole", (bd) => drillForm(b, bd, false)); }
   { const s = listFrame(b, ...D(12), "desktop", { ...DL(), screen: "03-CoA_upload", vv: "01", variant: "Upload" }); dialog(b, s, "desktop", HH, "md", "Upload CoA for DH-BNM-031", "The file is attached to the drill hole and shown in the CoA column.", "Cancel", "Upload", (bd) => uploadBody(b, bd)); }
-  { const s = listFrame(b, ...D(13), "desktop", { ...DL(), screen: "03-CoA_upload", vv: "02", variant: "History" }); sheet(b, s, "desktop", HH, "CoA history, DH-BNM-021", "Done", (bd) => historyBody(b, bd), "Close"); }
+  { const s = listFrame(b, ...D(13), "desktop", { ...DL(), screen: "03-CoA_upload", vv: "02", variant: "History" }); sheet(b, s, "desktop", HH, "CoA history", "Done", (bd) => historyBody(b, bd), "Close"); }
   // ---- Lithology (11) and Seam (12)
   listFrame(b, ...D(14), "desktop", { ...LI(), vv: "01", variant: "Default" });
   { const s = listFrame(b, ...D(15), "desktop", { ...LI(), screen: "02-Lithology_form", vv: "01", variant: "Edit" }); sheet(b, s, "desktop", HH, "Edit lithology", "Save lithology", (bd) => { field(b, bd, "Name *", "Carbonaceous Claystone"); txt(b, bd, "Kind *", "Body small/SemiBold", "Text/text-secondary", "Kind label"); radio(b, bd, "Coal", false); radio(b, bd, "Parting", true); radio(b, bd, "No lithology", false); select(b, bd, "Company *", "PT Kaltara Energi Prima"); }); }
