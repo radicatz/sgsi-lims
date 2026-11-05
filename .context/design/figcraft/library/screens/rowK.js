@@ -16,7 +16,6 @@ function bottoms(b) {
 const clearK = (b) => { const N = b.reg.N, old = []; for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) if (isK(N[id])) old.push(id); if (old.length) b.raw("edit.delete", { ids: old }); };
 const KIND = (k) => (k === "desktop" ? "Desktop" : k === "tablet" ? "Tablet" : "Phone");
 const W = { desktop: 1440, tablet: 834, phone: 390 }, CW = { desktop: 1128, tablet: 698, phone: 358 };
-const LOGO = "C:/Users/pc/AppData/Local/Temp/claude/1587ada5b64dc4a0/47836466-5a4a-49c3-8dbb-f21a1e9d2c68/scratchpad/logos/ptba-mark.png";
 const icon = (b, parent, glyph, tok = "Text/text-muted", size = 14) => { const ic = b.instV(parent, "Icon", `Glyph=${glyph}, Size=${size}`); b.raw("node.set", { ids: [ic + 1], props: { fill: LIGHT[tok] } }); b.bind(ic + 1, "fill", tok); return ic; };
 const txt = (b, parent, t, style, color, name, o = {}) => b.text(parent, t, { style, color, name: name || t, ...o });
 const hframe = (b, parent, name, gap = 8, o = {}) => b.frame(parent, { name, w: o.w || 200, h: o.h || 24, layout: "h", gap, cross: o.cross || "center", main: o.main, wrap: o.wrap, pad: o.pad, sizeH: o.sizeH || "hug", sizeV: o.sizeV || "hug", fill: o.fill, r: o.r, stroke: o.stroke, sw: o.sw, clip: o.clip });
@@ -59,10 +58,12 @@ const pill = (b, parent, label, bg, fg, dot) => { const p = hframe(b, parent, "P
 const statusPill = (b, parent, s) => (s === "Active" ? pill(b, parent, "Active", "Feedback/success-100", "Feedback/success", true) : pill(b, parent, "Inactive", "Surface/muted", "Text/text-muted", true));
 const KINDS = { Coal: ["Primary/primary-100", "Primary/primary"], Parting: ["Accent/accent-100", "Accent/accent-text"], "No lithology": ["Surface/muted", "Text/text-muted"] };
 const kindPill = (b, parent, k) => pill(b, parent, k, KINDS[k][0], KINDS[k][1], false);
+// Client avatar (owner, Nov 5, 2026): always round. A logo is the ptba-logo component in an Avatar frame
+// (Surface/card, Surface/border 1 px, padding 4); no logo shows the initials. 40 in tables and lists, 64 on the client page, 100 in the client form.
 function avatar(b, parent, c, size = 40) {
-  if (c[3]) { const f = b.frame(parent, { name: "Logo", w: size, h: size, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: Math.round(size / 4), sizeH: "fixed", sizeV: "fixed", clip: true }); b.raw("image.place", { path: LOGO, target: f, mode: "fit" }); return f; }
+  if (c[3]) { const f = b.frame(parent, { name: "Avatar", w: size, h: size, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 999, layout: "h", pad: [4, 4, 4, 4], sizeH: "fixed", sizeV: "fixed", clip: true }); b.comp(f, "ptba-logo", { props: { sizingH: "fill", sizingV: "fill" } }); return f; }
   if (size === 40) return b.instV(parent, "Avatar", "Size=40", { texts: { Initials: c[2] } });
-  const f = b.frame(parent, { name: "Initials avatar", w: size, h: size, fill: "Accent/accent-100", r: Math.round(size / 4), layout: "h", main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed" }); txt(b, f, c[2], "Heading/H2", "Accent/accent-text", "Initials"); return f;
+  const f = b.frame(parent, { name: "Avatar", w: size, h: size, fill: "Accent/accent-100", r: 999, layout: "h", main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed" }); txt(b, f, c[2], "Heading/H2", "Accent/accent-text", "Initials"); return f;
 }
 const editLink = (b, parent) => b.instV(parent, "Link button", "State=Default", { texts: { Label: "Edit" }, hide: ["Icon"] });
 const menu = (b, parent) => b.instV(parent, "Icon button", "Type=Ghost, Size=32, State=Default", { swaps: [[0, "Icon", "Glyph=dots-three, Size=14"]] });
@@ -163,14 +164,14 @@ const CL = (kind, o = {}) => ({ module: "09-Clients", screen: "01-Clients_list",
 function clientFormBody(b, bd, kind, o = {}) {
   const t = !!o.touch;
   // logo slot: a 100 x 100 drop zone, or the uploaded logo with its file name and Remove
-  if (o.logo) { const f = hframe(b, bd, "Logo file", 16, { sizeH: "fill" }); const tile = avatar(b, f, CLIENTS[0], 100); const t2 = vframe(b, f, "Text", 4, { sizeH: "hug" }); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, t2, "Ghost", "Remove", "trash", { size: "sm" }); }
-  else { const dz = b.instV(bd, "Drop zone", "State=Default", { texts: { Title: "Drop or click to add logo" }, hide: ["Hint"], props: { width: 100, height: 100, sizingH: "fixed", sizingV: "fixed", cornerRadius: 1000 } }); }
+  if (o.logo) { const f = hframe(b, bd, "Logo file", 16, { sizeH: "fill" }); const tile = avatar(b, f, CLIENTS[0], 100); const t2 = vframe(b, f, "Text", 4, { sizeH: "hug" }); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, t2, "Secondary", "Remove", "trash", { size: "sm" }); }
+  else { const dv = b.v("Drop zone", "State=Default"); const dz = b.instV(bd, "Drop zone", "State=Default", { texts: { Hint: "Drop or click to add logo" }, hide: ["Title"], props: { width: 100, height: 100, sizingH: "fixed", sizingV: "fixed", cornerRadius: 1000 } }); b.raw("node.set", { ids: [dz + dv.names.Hint], props: { width: 84, sizingH: "fixed", textAutoResize: "height", textAlign: "center" } }); }
   field(b, bd, "Name *", o.name || "", { touch: t, ph: "Client name" });
   const r = hframe(b, bd, "Row", 12, { sizeH: "fill", cross: "min" }); field(b, r, "Code *", o.code || "", { touch: t, ph: "Short, unique, e.g. BNM", helper: false });
   select(b, r, "Status", "Active", { touch: t });
   field(b, bd, "Address", o.address || "", { area: true, touch: t, ph: "Street, city, province" });
   const bl = vframe(b, bd, "Billing address", 6); txt(b, bl, "Billing address", "Caption/Medium", "Text/text-secondary", "Label");
-  b.instV(bl, "Checkbox", "Checked=On, State=Default", { texts: { Label: "Same as address" } });
+  b.instV(bl, "Checkbox", `Checked=${o.billing && o.billing !== o.address ? "Off" : "On"}, State=Default`, { texts: { Label: "Same as address" } });
   b.instV(bl, "Textarea", `State=${o.billing ? "Filled" : "Default"}, Size=${t ? "touch" : "md"}`, { texts: { Value: o.billing || "Street, city, province" }, hide: ["Label"], setProps: { "Show helper": false }, props: { sizingH: "fill" } });
 }
 function contactFormBody(b, bd) {
@@ -187,19 +188,23 @@ function clientDetail(b, x, y, kind, o = {}) {
   b.instV(m, "Breadcrumb", "Levels=2", { texts: { 0: "Clients", 1: c0[0] } });
   const h = hframe(b, m, "Header", 16, { sizeH: "fill", main: "spaceBetween", cross: "center" });
   const l = hframe(b, h, "Identity", 16, kind === "phone" ? { sizeH: "fill" } : {});
-  avatar(b, l, c0, 56);
+  avatar(b, l, c0, 64);
   const t = vframe(b, l, "Text", 6, { sizeH: kind === "phone" ? "fill" : "hug" }); const ti = txt(b, t, c0[0], kind === "phone" ? "Heading/H1" : "Display/XL", "Text/heading", "Title"); if (kind === "phone") b.raw("node.set", { ids: [ti], props: { sizingH: "fill", textAutoResize: "height" } });
   const tg = hframe(b, t, "Tags", 8); pill(b, tg, c0[1], "Surface/muted", "Text/text-secondary", false); statusPill(b, tg, c0[5]);
   if (kind !== "phone") btn(b, h, "Secondary", "Edit", "pencil-simple");
-  const cols = kind === "desktop" ? b.frame(m, { name: "Columns", w: 1128, h: 600, layout: "h", gap: 20, cross: "min", sizeH: "fill", sizeV: "hug" }) : null;
+  // master data first, across the full width
+  const mc = card(b, m, "Master data card"); cardTop(b, mc, "Master data");
+  const row = b.frame(mc, { name: "Stats", w: 400, h: 70, layout: kind === "phone" ? "v" : "h", gap: 12, sizeH: "fill", sizeV: "hug" });
+  [["Drill holes", "32"], ["Lithologies", "9"], ["Seams", "21"]].forEach(([l, n]) => { const st = hframe(b, row, "Stat", 4, { sizeH: "fill", main: "center", cross: "max", fill: "Surface/muted", r: 12, pad: [12, 14, 12, 14] }); const tx = vframe(b, st, "Stat", 4); txt(b, tx, l, "Caption/Regular", "Text/text-secondary", "Label"); txt(b, tx, n, "Heading/H2", "Text/heading", "Count"); const lk = hframe(b, st, "Link", 4); txt(b, lk, "View list", "Body small/Medium", "Primary/primary", "Link"); icon(b, lk, "arrow-right", "Primary/primary", 14); });
+  const cols = kind === "desktop" ? b.frame(m, { name: "Columns", w: 1128, h: 600, layout: "h", gap: 20, cross: "min", sizeH: "fill", sizeV: "fill" }) : null;
+  if (cols) b.raw("node.set", { ids: [m], props: { sizingV: "fill" } });
   // properties
-  const pc = card(b, cols || m, "Properties card"); if (cols) b.raw("node.set", { ids: [pc], props: { width: 360, sizingH: "fixed" } });
+  const pc = card(b, cols || m, "Properties card"); if (cols) b.raw("node.set", { ids: [pc], props: { width: 378, sizingH: "fixed", sizingV: "fill" } });
   cardTop(b, pc, "Properties");
-  const kv = (k, v, link) => b.instV(pc, "Key-value row", "Layout=Inline", { texts: { Key: k, Value: v }, fills: link ? { Value: "Primary/primary" } : undefined, props: { sizingH: "fill" } });
+  const kvv = b.v("Key-value row", "Layout=Inline");
+  const kv = (k, v, link) => { const id = b.instV(pc, "Key-value row", "Layout=Inline", { texts: { Key: k, Value: v }, fills: link ? { Value: "Primary/primary" } : undefined, props: { sizingH: "fill" } }); b.raw("node.set", { ids: [id + kvv.names.Value], props: { sizingH: "fill", textAutoResize: "height" } }); return id; };
   kv("Code", c0[1]); kv("Address", c0[4]); kv("Billing address", "Jl. Jenderal Sudirman 45, Jakarta Selatan"); kv("Status", c0[5]); kv("Created", c0[7]); kv("Job orders", o.jobs || "14 job orders", true); kv("Total sample", c0[6]);
-  // right column
-  const right = cols ? vframe(b, cols, "Right column", 20) : m;
-  const cc = card(b, right, "Contacts card");
+  const cc = card(b, cols || m, "Contacts card"); if (cols) b.raw("node.set", { ids: [cc], props: { sizingH: "fill", sizingV: "fill" } });
   const ch = cardTop(b, cc, "Contacts"); btn(b, ch, "Secondary", "Add contact", "plus", { size: "sm" });
   if (kind === "phone") {
     CONTACTS.slice(0, 3).forEach((c) => { const it = vframe(b, cc, "Contact", 4, { fill: "Surface/muted", r: 12, pad: [12, 12, 12, 12] }); const top = hframe(b, it, "Top", 6, { sizeH: "fill", main: "spaceBetween" }); const nm = hframe(b, top, "Name", 6); txt(b, nm, c[0], "Body small/SemiBold", "Text/heading", "Name"); if (c[4]) pill(b, it, "Default", "Feedback/warning-100", "Feedback/warning", false); menu(b, top); txt(b, it, c[1], "Caption/Regular", "Text/text-secondary", "Position"); const ac = hframe(b, it, "Actions", 8); icon(b, ac, "envelope-simple", "Primary/primary", 14); txt(b, ac, c[2] + "@" + DOMAIN[c0[1]], "Caption/Regular", "Primary/primary", "Email"); txt(b, it, c[3], "Caption/Regular", "Text/foreground", "Phone"); });
@@ -219,9 +224,6 @@ function clientDetail(b, x, y, kind, o = {}) {
       b.frame(r, { name: "Divider", w: 800, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" });
     });
   }
-  const mc = card(b, right, "Master data card"); cardTop(b, mc, "Master data");
-  const row = b.frame(mc, { name: "Stats", w: 400, h: 90, layout: "h", gap: 12, wrap: kind === "phone", sizeH: "fill", sizeV: "hug" });
-  [["Drill holes", "32"], ["Lithologies", "9"], ["Seams", "21"]].forEach(([l, n]) => { const st = vframe(b, row, "Stat", 4, { fill: "Surface/muted", r: 12, pad: [12, 14, 12, 14] }); txt(b, st, l, "Caption/Regular", "Text/text-secondary", "Label"); txt(b, st, n, "Heading/H2", "Text/heading", "Count"); const lk = hframe(b, st, "Link", 4); txt(b, lk, "View list", "Body small/Medium", "Primary/primary", "Link"); icon(b, lk, "arrow-right", "Primary/primary", 14); });
   return s;
 }
 
@@ -258,9 +260,9 @@ function historyBody(b, bd) {
     const r = hframe(b, bd, "File row", 12, { sizeH: "fill", stroke: "Surface/border", sw: 1, r: 12, pad: [12, 12, 12, 12] });
     icon(b, r, "file-pdf", "Feedback/error", 20);
     const tx = hframe(b, r, "Text", 16, { sizeH: "fill" });
-    const fn = vframe(b, tx, "File name", 0, { sizeH: "hug" }); txt(b, fn, f, "Body small/SemiBold", "Text/heading", "File"); txt(b, fn, sz, "Caption/Regular", "Text/text-muted", "Size");
+    const fn = vframe(b, tx, "File name", 0, { w: 200, sizeH: "fixed" }); txt(b, fn, f, "Body small/SemiBold", "Text/heading", "File"); txt(b, fn, sz, "Caption/Regular", "Text/text-muted", "Size");
+    const md = vframe(b, tx, "Metadata", 0, { w: 160, sizeH: "fixed" }); txt(b, md, "Uploaded by " + by, "Caption/Regular", "Text/text-secondary", "By"); txt(b, md, at, "Caption/Regular", "Text/text-secondary", "When");
     if (cur) pill(b, tx, "Current", "Feedback/success-100", "Feedback/success", false);
-    const md = vframe(b, tx, "Metadata", 0, { sizeH: "hug" }); txt(b, md, "Uploaded by " + by, "Caption/Regular", "Text/text-secondary", "By"); txt(b, md, at, "Caption/Regular", "Text/text-secondary", "When");
     b.instV(r, "Icon button", "Type=Ghost, Size=32, State=Default", { swaps: [[0, "Icon", "Glyph=download-simple, Size=14"]] });
   });
 }

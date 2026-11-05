@@ -204,35 +204,32 @@ Deviations from the plan:
 - **Active batches** shows 8 rows with the pager; the Progress column is plain text ("26 / 36") instead of the Progress bar component.
 - **Phone** Active batches and Drill holes show four cards each.
 
-## 15 · Owner edits in the file (Nov 5, 2026, saved 14:26)
+## 15 · Owner edits in the file (Nov 5, 2026) · BUILT
 
-The owner edited the desktop frames of row I in FigCraft after the build. These edits are the design from now on. They were found by comparing the saved file with the last generated file, layer by layer (layout, sizing, components, tokens), and checked against renders. **They are not yet in `library/screens/rowI.js`**: a rebuild of row I would undo them until the generator takes them over (section 15.3).
+The owner edited the desktop frames of row I in FigCraft (saved 14:26, fixes at 14:52). These edits are the design from now on. They were found by comparing the saved file with the last generated file, layer by layer (layout, sizing, components, tokens), and checked against renders. They are now in `library/screens/rowI.js`, carried to tablet and phone, rebuilt and swapped into the main file (backup `backup/SGSI-LIMS-screens.before-owner-edits-port.figcraft`).
 
 ### 15.1 What changed
 
-| # | Where | Before (generated) | Now (owner) |
+| # | Where | Before | Now |
 | --- | --- | --- | --- |
-| D-1 | Tab switch, all desktop frames with tabs (Lab_admin, Supervisor, Sidebar_collapsed, No_data, the three Quality_and_reports frames) | **Segmented item** pair ("Operations", "Quality & reports") | A **Tabs** frame (horizontal, gap 16, fill width, items at the bottom) of two library **Tab** instances: `Selected=On` and `Selected=Off`, `Show count` off. The first label is **Operation** (singular) |
-| D-2 | Bar charts: Batch workflow, Job orders by status, Turnaround by company | Bar row = Label (120) + Bar (width = value) + Value right after the bar | Bar row = Label (120 fixed) + **Bar container** (fill, height 14, clips) holding the **Bar** at its value width + **Value** (hug). The values line up in one column at the right edge of the card |
-| D-3 | Samples received per day | Column = Bar + Day | Column = **Bar container** (22 wide, fills the height) + Day; the bars stand on one baseline |
-| D-4 | Sample type mix | Donut with the legend wrapped below it, centred | **Mix** is horizontal (gap 12, centred): Donut 200 on the left, **Legend** on the right as a vertical list (Legend frame fill, wrap) |
-| D-5 | Chart card heights | Charts row 1 hug (340), Charts row 2 hug (240); empty space under the bars | Charts row 1 **fixed 282**, Charts row 2 hug (**192**); no empty space under the bars |
-| D-6 | Active batches row | Row hug; table card 800, Right rail 308 hug | Row **fixed 594**; table card fills (743); **Right rail fixed 365, fills the height**; Card callout and **This week** card fill the rail's width, This week also fills its height, so the rail ends level with the table |
-| D-7 | Supervisor and CSO | Own chart layout | Charts row 1, Charts row 2 and Active batches row were copied from Lab_admin, so the three Operations frames match |
-| D-8 | No_data | Rows 340 and 240 | Both chart rows **292**, every empty-state card the same height |
-| D-9 | Frame heights | Lab_admin 1714, Supervisor 1628, CSO 1658, Sidebar_collapsed 1714 | 1606, 1522, 1552, 1608 (shorter charts) |
+| D-1 | Page tabs, every frame with tabs, all sizes | **Segmented item** pair | A **Tabs** frame (horizontal, gap 16, fill width, items at the bottom) of two library **Tab** instances, Selected On/Off, count hidden: **Operations** and **Quality & reports**. Same pattern as the job order and batch pages. The Segmented item stays for the metric switch inside the Trend CV card |
+| D-2 | Bar charts: Batch workflow, Job orders by status, Turnaround by company | Bar row = Label (120) + Bar (width = value) + Value right after the bar | Bar row = Label (120 fixed) + **Bar container** (fills, height 14, clips, no fill) holding the **Bar** at its value width + **Value** (hug). The values line up in one column at the right edge of the card |
+| D-3 | Samples received per day | Column = Bar + Day | Column = **Bar container** (fixed width, 92 high on desktop) with the Bar standing on its bottom, then Day |
+| D-4 | Sample type mix | Donut with the legend wrapped below it | Desktop and tablet: **Mix** is horizontal, Donut 200 on the left, **Legend** a vertical list (gap 10) on the right. Phone keeps the legend below the donut |
+| D-5 | Chart rows, desktop | Three equal cards (365) at 340; Samples per day 2/3 and Turnaround 1/3 at 240 | Row 1 **282**: Batch workflow and Job orders by status **fill**, Sample type mix **365**. Row 2 **192**: Samples received per day **fills**, Turnaround by company **365**. The same rule fits the 1128 and the 1288 (Sidebar_collapsed) content widths |
+| D-6 | Active batches row, desktop | Row hug; table card 800, Right rail 308 | Row **fixed 594**; table card fills; **Right rail 365**, filling the row's height; Deadline alert and **This week** fill the rail's width, This week also its height, so the rail ends level with the table |
+| D-7 | Active batches, Company column | One line, clipped at the column edge | The company name **fills the column and wraps** to two lines ("PT Bara Nusantara / Mandiri") |
+| D-8 | No_data | Rows 340 and 240 | Empty-state cards hug (both chart rows the same height); the rail is 365 |
+| D-9 | Tablet | Row 1 at 300, row 2 at 340 | Both chart rows **282**; Sample type mix with the legend on the right |
 
-Tablet and phone frames were not edited: they still use the Segmented switch and the earlier chart layout.
+Supervisor and CSO were already built with the same function as Lab_admin; in the owner's file their chart rows were replaced by copies of the Lab_admin rows, which only gave the layers new ids. The three Operations frames match, as before.
 
-### 15.2 Points found in the check (to settle before the generator takes the edits)
+### 15.2 Points found in the check, and how they were settled
 
-1. **Active batches, Company column (Lab_admin, Supervisor, CSO).** With the table at 743, the Company column fills only 149 px; "PT Bara Nusantara Mandiri" is 152 px and runs into the Job order column ("…MandiriJO-2026-0138"). Proposed fix: let the company text truncate with an ellipsis, or narrow Status from 140 to 110 px. On Sidebar_collapsed the table is 903 wide and the names fit.
-2. **Sidebar_collapsed, chart rows.** The rows copied from Lab_admin keep their cards at a fixed 365 px. In the 1288 px content area this leaves 161 px empty at the right of Charts row 1 and Charts row 2. Proposed fix: the chart cards fill (1:1:1 in row 1, 2:1 in row 2).
-3. **No_data tab.** This frame belongs to the Operations tab, but its Tabs show **Quality & reports** as selected (it was Operations before). Proposed fix: select Operation.
-4. **Bar container fill.** The new Bar containers have a hard-coded white fill (#FFFFFF), not a token, so they would stay white in dark mode. Proposed fix: no fill (the card shows through), or `Surface/card` if a fill is needed.
-5. **Tab label.** "Operation" vs the plan's "Operations" (sections 1 and 5). The owner's label is used; the plan text is to follow if this is the intended name.
+1. **Company column overlap** (Lab_admin, Supervisor, CSO): fixed by the owner (14:52): the name wraps (D-7).
+2. **Sidebar_collapsed chart rows** left 161 px empty: fixed by the owner (14:52) with filling bar cards; the generator uses that rule on every desktop frame (D-5).
+3. **No_data tab** showed Quality & reports selected: the rebuilt frame selects **Operations**.
+4. **Bar container fill**: the owner's containers had a hard-coded #FFFFFF; the generator draws them without a fill, so dark mode works.
+5. **Tab label** "Operation" was a typo: the label is **Operations** (owner, Nov 5).
 
-### 15.3 Next
-
-- Take D-1 to D-8 into `rowI.js` on desktop and carry them to tablet and phone: Tabs instead of Segmented item; the Bar container anatomy; legend to the right of the donut where the card is wide enough (tablet; the phone keeps the legend below); the fixed 594 Active batches row with the rail filling the height.
-- Apply the answers to 15.2, rebuild row I, swap it in.
+Not changed: the tablet's Your queues strip clips "Open My work" at the right edge, as before this revision.

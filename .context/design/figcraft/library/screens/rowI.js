@@ -62,20 +62,26 @@ const segmented = (b, parent, labels, on, o = {}) => {
   labels.forEach((l, i) => { const id = b.instV(bar, "Segmented item", `Selected=${i === on ? "On" : "Off"}, State=Default`, { texts: { Label: l }, props: o.fill ? { sizingH: "fill" } : undefined }); });
   return bar;
 };
+// page tabs (owner, Nov 5, 2026): library Tab instances in a Tabs frame, as on the job order and batch pages
+const pageTabs = (b, main, kind, sel) => {
+  const r = b.frame(main, { name: "Tabs", w: 800, h: 34, layout: "h", gap: 16, cross: "max", sizeH: "fill", sizeV: "hug", clip: kind === "phone" });
+  ["Operations", "Quality & reports"].forEach((l, i) => b.instV(r, "Tab", `Selected=${i === sel ? "On" : "Off"}, State=Default`, { texts: { 0: l }, hide: ["Count"] }));
+  return r;
+};
 function header(b, main, kind, o) {
   const cw = o.cw;
   const filters = (parent) => { b.instV(parent, "Select", "State=Filled, Size=md", { texts: { Label: "Period", Value: "Last 30 days" }, setProps: { "Show helper": false }, props: { width: 200, sizingH: "fixed" } }); b.instV(parent, "Select", "State=Filled, Size=md", { texts: { Label: "Company", Value: "All companies" }, setProps: { "Show helper": false }, props: { width: 220, sizingH: "fixed" } }); };
   const tb = (parent) => { const h = vframe(b, parent, "Title block", 4, { sizeH: kind === "desktop" ? "hug" : "fill" }); txt(b, h, kind === "phone" ? "DASHBOARD" : OVERLINE, "Overline", "Text/text-muted", "Overline"); txt(b, h, "Dashboard", kind === "phone" ? "Heading/H1" : "Display/XL", "Text/heading", "Title"); return h; };
   if (kind === "desktop") {
     const r = hframe(b, main, "Header", 16, { sizeH: "fill", main: "spaceBetween", cross: "max" }); tb(r); const f = hframe(b, r, "Filters", 12, { cross: "max" }); filters(f);
-    if (o.tabs) segmented(b, main, ["Operations", "Quality & reports"], o.tab === "Quality" ? 1 : 0);
+    if (o.tabs) pageTabs(b, main, kind, o.tab === "Quality" ? 1 : 0);
   } else if (kind === "tablet") {
     tb(b.frame(main, { name: "Title row", w: cw, h: 60, layout: "h", sizeH: "fill", sizeV: "hug" }));
     const f = hframe(b, main, "Filters", 12, { sizeH: "fill", cross: "max" }); filters(f);
-    if (o.tabs) segmented(b, main, ["Operations", "Quality & reports"], o.tab === "Quality" ? 1 : 0);
+    if (o.tabs) pageTabs(b, main, kind, o.tab === "Quality" ? 1 : 0);
   } else {
     const r = hframe(b, main, "Header", 12, { sizeH: "fill", main: "spaceBetween", cross: "max" }); tb(r); btn(b, r, "Secondary", "Filters", "funnel", { size: "touch" });
-    if (o.tabs) segmented(b, main, ["Operations", "Quality & reports"], o.tab === "Quality" ? 1 : 0, { fill: true });
+    if (o.tabs) pageTabs(b, main, kind, o.tab === "Quality" ? 1 : 0);
   }
 }
 function queuesStrip(b, parent, kind, key) {
@@ -105,57 +111,69 @@ function kpis(b, parent, kind, list) {
   });
   return row;
 }
-// horizontal bars: rows [label, value, color, text]; max is the full-bar value
-function hbars(b, parent, rows, max, barMax, labelW = 120) {
+// horizontal bars (owner, Nov 5, 2026): Label 120 | Bar container (fill, clips, no fill) holding the Bar | Value (hug).
+// The values line up at the right edge of the card. w is the card width, used to size the bars.
+const charW = (t) => t.length * 8;
+function hbars(b, parent, rows, max, w, labelW = 120) {
   const list = vframe(b, parent, "Bars", 10);
+  const valW = Math.max(...rows.map(([l, v, c, t]) => charW(t || String(v))));
+  const cont = w - 32 - labelW - 20 - valW;
   rows.forEach(([l, v, col, t]) => {
     const r = hframe(b, list, "Bar row", 10, { sizeH: "fill" });
     const lf = b.frame(r, { name: "Label", w: labelW, h: 16, layout: "h", cross: "center", sizeH: "fixed", sizeV: "hug" }); txt(b, lf, l, "Caption/Regular", "Text/text-secondary", "Label");
-    b.frame(r, { name: "Bar", w: Math.max(6, Math.round((v / max) * barMax)), h: 14, fill: col, r: 4, sizeH: "fixed", sizeV: "fixed" });
+    const bc = b.frame(r, { name: "Bar container", w: cont, h: 14, clip: true, sizeH: "fill", sizeV: "fixed" });
+    b.frame(bc, { name: "Bar", w: Math.max(6, Math.round((v / max) * cont)), h: 14, fill: col, r: 4 });
     txt(b, r, t || String(v), "Data", "Text/foreground", "Value");
   });
 }
-function vbars(b, parent, data, maxH, w) {
+// vertical bars (owner, Nov 5, 2026): Column = Bar container (fixed width, height ch) with the Bar standing on its bottom, then Day
+function vbars(b, parent, data, ch, w) {
   const cols = hframe(b, parent, "Bars", 6, { sizeH: "fill", main: "spaceBetween", cross: "max" });
   const mx = Math.max(...data);
-  data.forEach((v, i) => { const c = vframe(b, cols, "Column", 4, { sizeH: "hug", cross: "center" }); b.frame(c, { name: "Bar", w, h: Math.max(4, Math.round((v / mx) * maxH)), fill: "Primary/primary", r: 4, sizeH: "fixed", sizeV: "fixed" }); txt(b, c, String(i + 23 > 30 ? i - 7 : i + 23), "Caption/Regular", "Text/text-muted", "Day"); });
+  data.forEach((v, i) => {
+    const c = vframe(b, cols, "Column", 4, { sizeH: "hug", cross: "center" });
+    const bc = b.frame(c, { name: "Bar container", w, h: ch, clip: true, sizeH: "fixed", sizeV: "fixed" });
+    const h = Math.max(4, Math.round((v / mx) * ch)); b.frame(bc, { name: "Bar", w, h, y: ch - h, fill: "Primary/primary", r: 4 });
+    txt(b, c, String(i + 23 > 30 ? i - 7 : i + 23), "Caption/Regular", "Text/text-muted", "Day");
+  });
 }
-const panel = (b, parent, title, w, h) => { const c = card(b, parent, title + " card"); b.raw("node.set", { ids: [c], props: w ? { width: w, sizingH: "fixed", ...(h ? { sizingV: "fixed", height: h } : {}) } : { sizingH: "fill" } }); const hd = cardTop(b, c, title); return { c, hd }; };
+const panel = (b, parent, title, w, h, fill) => { const c = card(b, parent, title + " card"); b.raw("node.set", { ids: [c], props: { ...(w && !fill ? { width: w, sizingH: "fixed" } : { ...(w ? { width: w } : {}), sizingH: "fill" }), ...(h ? { sizingV: "fixed", height: h } : {}) } }); const hd = cardTop(b, c, title); return { c, hd }; };
 const emptyCard = (b, c) => b.instV(c, "Empty state", "Size=Card", { texts: { Title: "No data for this period", Text: "Try a longer period or another company.", Label: "Last 90 days" }, props: { sizingH: "fill" } });
 
 // ---------- Operations widgets (plan O6 to O13) ----------
 function workflowCard(b, parent, w, o) {
-  const { c } = panel(b, parent, "Batch workflow", w, o.h);
+  const { c } = panel(b, parent, "Batch workflow", w, o.empty ? undefined : o.h, o.fill);
   if (o.empty) return emptyCard(b, c);
-  hbars(b, c, WORKFLOW.map(([l, v, col]) => [l, v, col]), 9, (w || FULLW) - 32 - 120 - 40);
+  hbars(b, c, WORKFLOW.map(([l, v, col]) => [l, v, col]), 9, w || FULLW);
 }
 function jobOrdersCard(b, parent, w, o) {
-  const { c } = panel(b, parent, "Job orders by status", w, o.h);
+  const { c } = panel(b, parent, "Job orders by status", w, o.empty ? undefined : o.h, o.fill);
   if (o.empty) return emptyCard(b, c);
-  hbars(b, c, JOB_ORDERS.map(([l, v]) => [l, v, "Primary/primary"]), 87, (w || FULLW) - 32 - 120 - 40);
+  hbars(b, c, JOB_ORDERS.map(([l, v]) => [l, v, "Primary/primary"]), 87, w || FULLW);
 }
 function mixCard(b, parent, w, o) {
-  const { c } = panel(b, parent, "Sample type mix", w, o.h);
+  const { c } = panel(b, parent, "Sample type mix", w, o.empty ? undefined : o.h, o.fill);
   if (o.empty) return emptyCard(b, c);
-  const row = vframe(b, c, "Mix", 12, { cross: "center" });
+  const side = !o.phone;
+  const row = side ? hframe(b, c, "Mix", 12, { sizeH: "fill", cross: "center" }) : vframe(b, c, "Mix", 12, { cross: "center" });
   const d = b.comp(row, "Donut");
   const pos = compPos(b, "Donut"); b.raw("node.set", { ids: [d + pos.Total[0]], props: { characters: "1,284" } });
-  const lg = hframe(b, row, "Legend", 12, { sizeH: "fill", main: "center", wrap: true });
+  const lg = side ? vframe(b, row, "Legend", 10) : hframe(b, row, "Legend", 12, { sizeH: "fill", main: "center", wrap: true });
   [["Primary", "Ply", "46%"], ["Accent", "Composite", "27%"], ["Success", "Roof, floor", "19%"], ["Purple", "Parting", "8%"]].forEach(([col, l, v]) => b.instV(lg, "Legend item", `Color=${col}`, { texts: { Label: l, Value: v } }));
 }
 function perDayCard(b, parent, w, o) {
-  const { c } = panel(b, parent, "Samples received per day", w, o.h);
+  const { c } = panel(b, parent, "Samples received per day", w, o.empty ? undefined : o.h, o.fill);
   if (o.empty) return emptyCard(b, c);
-  vbars(b, c, PERDAY, 110, w && w < 500 ? 16 : 22);
+  vbars(b, c, PERDAY, o.h ? o.h - 100 : 92, w && w < 500 ? 16 : 22);
 }
 function turnCard(b, parent, w, o) {
-  const { c, hd } = panel(b, parent, "Turnaround by company", w, o.h);
+  const { c, hd } = panel(b, parent, "Turnaround by company", w, o.empty ? undefined : o.h, o.fill);
   if (o.empty) return emptyCard(b, c);
   txt(b, hd, "Target 5 days", "Caption/Regular", "Text/text-muted", "Target");
-  hbars(b, c, TURN.map(([l, v, col]) => [l.replace("PT ", "").replace("CV ", ""), v, col, v.toFixed(1) + " d"]), 8, (w || FULLW) - 32 - 120 - 50);
+  hbars(b, c, TURN.map(([l, v, col]) => [l.replace("PT ", "").replace("CV ", ""), v, col, v.toFixed(1) + " d"]), 8, w || FULLW);
 }
-function weekCard(b, parent, kind) {
-  const { c } = panel(b, parent, "This week", kind === "desktop" ? 308 : undefined);
+function weekCard(b, parent, kind, o = {}) {
+  const { c } = panel(b, parent, "This week"); if (kind === "desktop" && !o.empty) b.raw("node.set", { ids: [c], props: { sizingV: "fill" } });
   const strip = hframe(b, c, "Week strip", kind === "phone" ? 6 : 8, { sizeH: "fill", main: "spaceBetween", clip: true });
   [["Mon", 2], ["Tue", 3], ["Wed", 4], ["Thu", 5], ["Fri", 6], ["Sat", 7], ["Sun", 8]].forEach(([d, n]) => { const st = n === 5 ? "Today" : [6, 7].includes(n) ? "Has due" : "Default"; b.instV(strip, "Calendar day", `State=${st}`, { texts: { Weekday: d, Date: String(n) } }); });
   const di = compPos(b, "Deadline item");
@@ -166,7 +184,7 @@ function weekCard(b, parent, kind) {
   return c;
 }
 function alertCard(b, parent, kind) {
-  return b.instV(parent, "Card callout", "Tone=Alert", { texts: { Overline: "DEADLINE ALERT", Title: "3 batches are due within 24 h", Text: "B-2026-0417 is still in preparation." }, props: kind === "desktop" ? { width: 308, sizingH: "fixed" } : { sizingH: "fill" } });
+  return b.instV(parent, "Card callout", "Tone=Alert", { texts: { Overline: "DEADLINE ALERT", Title: "3 batches are due within 24 h", Text: "B-2026-0417 is still in preparation." }, props: { sizingH: "fill" } });
 }
 function tableHead(b, t, cols) {
   const head = b.frame(t, { name: "Table header", w: 800, h: 40, fill: "Primary/primary-50", r: 8, layout: "h", cross: "center", sizeH: "fill", sizeV: "fixed" });
@@ -200,7 +218,7 @@ function activeTable(b, parent, kind, o) {
   ROWS.forEach(([no, co, jo, dl, flag, st, pr]) => {
     tableLine(b, t, cols).forEach(({ h, f }) => {
       if (h === "Batch") { if (kind === "desktop") txt(b, f, no, "Data/Strong", "Text/heading", "Number"); else { const t2 = vframe(b, f, "Two lines", 0); txt(b, t2, no, "Data/Strong", "Text/heading", "Number"); txt(b, t2, co, "Caption/Regular", "Text/text-secondary", "Company"); } }
-      if (h === "Company") txt(b, f, co, "Body small/Regular", "Text/foreground", "Company");
+      if (h === "Company") txt(b, f, co, "Body small/Regular", "Text/foreground", "Company", { fill: true });
       if (h === "Job order") txt(b, f, jo, "Data", "Primary/primary", "Job order");
       if (h === "Deadline") { txt(b, f, dl, "Body small/Regular", flag === "late" ? "Feedback/error" : flag === "due" ? "Feedback/warning" : "Text/foreground", "Deadline"); if (flag === "late") icon(b, f, "warning", "Feedback/error"); }
       if (h === "Progress") txt(b, f, pr, "Body small/Regular", "Text/text-secondary", "Progress");
@@ -280,24 +298,26 @@ function operations(b, x, y, kind, variant, o = {}) {
   kpis(b, m, kind, e
     ? [{ label: "Batches in progress", number: "0", caption: "0 completed · 0 total" }, { label: "Due this week", number: "0", caption: "0 past due · 0 on time" }, { label: "Samples received", number: "0", caption: "Last 30 days · 0 batches" }, { label: "Mean turnaround", number: "No data", caption: "Target 5 d" }]
     : [{ label: "Batches in progress", number: "23", caption: "4 completed · 27 total" }, { label: "Due this week", number: "9", caption: "2 past due · 7 on time", fill: "Feedback/error" }, { label: "Samples received", number: "1,284", delta: "+12%", caption: "Last 30 days · 46 batches" }, { label: "Mean turnaround", number: "4.6 d", caption: "Target 5 d · On target" }]);
-  const cw3 = Math.floor((cw - 32) / 3), cw2 = Math.floor((cw - 16) / 2);
+  const cw2 = Math.floor((cw - 16) / 2);
   const mk = (n) => b.frame(m, { name: n, w: cw, h: 300, layout: kind === "phone" ? "v" : "h", gap: kind === "phone" ? 12 : 16, cross: "min", sizeH: "fill", sizeV: "hug" });
   if (kind === "desktop") {
-    const r1 = mk("Charts row 1"); workflowCard(b, r1, cw3, { empty: e, h: 340 }); jobOrdersCard(b, r1, cw3, { empty: e, h: 340 }); mixCard(b, r1, cw3, { empty: e, h: 340 });
-    const r2 = mk("Charts row 2"); perDayCard(b, r2, cw3 * 2 + 16, { empty: e, h: 240 }); turnCard(b, r2, cw3, { empty: e, h: 240 });
-    const r3 = b.frame(m, { name: "Active batches row", w: cw, h: 300, layout: "h", gap: 20, cross: "min", sizeH: "fill", sizeV: "hug" });
+    // owner, Nov 5, 2026: the bar cards fill, Sample type mix and Turnaround stay 365; the right rail is 365 and fills the row's height
+    const SIDE = 365, half = Math.floor((cw - 32 - SIDE) / 2), wide = cw - 16 - SIDE;
+    const r1 = mk("Charts row 1"); workflowCard(b, r1, half, { empty: e, h: 282, fill: true }); jobOrdersCard(b, r1, half, { empty: e, h: 282, fill: true }); mixCard(b, r1, SIDE, { empty: e, h: 282 });
+    const r2 = mk("Charts row 2"); perDayCard(b, r2, wide, { empty: e, h: 192, fill: true }); turnCard(b, r2, SIDE, { empty: e, h: 192 });
+    const r3 = b.frame(m, { name: "Active batches row", w: cw, h: 594, layout: "h", gap: 20, cross: "min", sizeH: "fill", sizeV: e ? "hug" : "fixed" });
     activeTable(b, r3, kind, { empty: e });
-    const rail = vframe(b, r3, "Right rail", 16); b.raw("node.set", { ids: [rail], props: { width: 308, sizingH: "fixed" } });
-    if (!e) alertCard(b, rail, kind); weekCard(b, rail, kind);
+    const rail = vframe(b, r3, "Right rail", 16); b.raw("node.set", { ids: [rail], props: { width: SIDE, sizingH: "fixed", ...(e ? {} : { sizingV: "fill" }) } });
+    if (!e) alertCard(b, rail, kind); weekCard(b, rail, kind, { empty: e });
   } else if (kind === "tablet") {
-    const r1 = mk("Charts row 1"); workflowCard(b, r1, cw2, { empty: e, h: 300 }); jobOrdersCard(b, r1, cw2, { empty: e, h: 300 });
-    const r2 = mk("Charts row 2"); mixCard(b, r2, cw2, { empty: e, h: 340 }); perDayCard(b, r2, cw2, { empty: e, h: 340 });
+    const r1 = mk("Charts row 1"); workflowCard(b, r1, cw2, { empty: e, h: 282 }); jobOrdersCard(b, r1, cw2, { empty: e, h: 282 });
+    const r2 = mk("Charts row 2"); mixCard(b, r2, cw2, { empty: e, h: 282 }); perDayCard(b, r2, cw2, { empty: e, h: 282 });
     turnCard(b, m, undefined, { empty: e });
     if (!e) alertCard(b, m, kind); weekCard(b, m, kind);
     activeTable(b, m, kind, { empty: e });
   } else {
     if (!e) alertCard(b, m, kind); weekCard(b, m, kind);
-    workflowCard(b, m, undefined, { empty: e }); jobOrdersCard(b, m, undefined, { empty: e }); mixCard(b, m, undefined, { empty: e }); perDayCard(b, m, undefined, { empty: e }); turnCard(b, m, undefined, { empty: e });
+    workflowCard(b, m, undefined, { empty: e }); jobOrdersCard(b, m, undefined, { empty: e }); mixCard(b, m, undefined, { empty: e, phone: true }); perDayCard(b, m, undefined, { empty: e }); turnCard(b, m, undefined, { empty: e });
     activeTable(b, m, kind, { empty: e });
   }
   return s;

@@ -98,7 +98,7 @@ Clients > PT Bara Nusantara Mandiri
 | Contacts | Name, Position, Email, Phone, a **Default** tag on the default contact. **Add contact** in the card head; row menu **Edit**, **Make default**, **Archive**. The default contact is pre-filled as Attention on a new job order. The job order form's contact dropdown adds and edits the same records |
 | Master data | Drill holes, Lithologies and Seams of this client, each a count with a link to its list filtered by the client |
 
-Desktop (Revision 3): Master data across the full width under the header; below it Properties on the left (378) and Contacts on the right, both filling the remaining height. Tablet and phone: stacked; on the phone the contacts are cards with call and email icon buttons. (Before Revision 3: Properties on the left at 360, Contacts and Master data on the right.)
+Header avatar: round 64, logo or initials (Revision 3). Desktop (Revision 3): Master data across the full width under the header; below it Properties on the left (378) and Contacts on the right, both filling the remaining height. Tablet and phone: Master data first, then Properties and Contacts, stacked; on the phone the contacts are cards with call and email icon buttons. (Before Revision 3: Properties on the left at 360, Contacts and Master data on the right.)
 
 ### 4.3 Forms
 
@@ -215,9 +215,9 @@ Deviations:
 - The Key text of the Key-value row is Body small/Regular now.
 - Rebuilt: the 7 modal frames (Contact_form, New_client, Logo_uploaded, New_drill_hole, History, Lithology Edit, New_seam) and the Properties card of Client_detail on desktop, tablet and phone.
 
-## 15 · Revision 3 (Nov 5, 2026, owner edits in the file, saved 14:26)
+## 15 · Revision 3 (Nov 5, 2026, owner edits in the file, saved 14:26) · BUILT
 
-The owner edited the desktop frames of row K in FigCraft after Revision 2. Found by comparing the saved file with the last generated file, layer by layer, and checked against renders. **Not yet in `library/screens/rowK.js`**: a rebuild of row K would undo them until the generator takes them over.
+The owner edited the desktop frames of row K in FigCraft after Revision 2. Found by comparing the saved file with the last generated file, layer by layer, and checked against renders. They are now in `library/screens/rowK.js`, carried to tablet and phone, rebuilt and swapped into the main file (backup `backup/SGSI-LIMS-screens.before-owner-edits-port.figcraft`).
 
 | # | Where | Before (generated) | Now (owner) |
 | --- | --- | --- | --- |
@@ -234,12 +234,10 @@ Unchanged: tablet and phone client pages (they keep the Revision 2 layout, only 
 
 The owner's reference frames ("Add client modal ref", "CoA history ref", "Properties card ref") were deleted from the canvas: their content is built.
 
-### 15.1 Points found in the check
+### 15.1 Points found in the check, and how they were settled
 
-1. **Header logo sizes differ.** A client with a logo shows a 64 px round Avatar in the header (With_logo), a client without one a 56 px rounded-square initials tile (Default). Proposed: one shape and size for both (64 round, with the initials inside when there is no logo), as in the list rows, where both are 40 round.
-2. **Tablet and phone client pages** still put Master data last. Proposed: Master data first on every size; on tablet and phone the three tiles stack or scroll, the Properties and Contacts cards follow.
-3. **Same as address** is checked in Logo_uploaded while the billing address differs from the address. Proposed: unchecked when the two differ (generator data, not an owner edit).
+1. **Avatar sizes** (owner, Nov 5): every client avatar is **round**. **64** on the client page header (desktop, tablet, phone), with the logo or, without a logo, the initials (Heading/H2 on `Accent/accent-100`); **40** in tables and lists (library Avatar Size=40, or the logo frame); 100 in the client form.
+2. **Tablet and phone client pages** now put the Master data card first too. On the phone the three stat tiles stack; each tile keeps the count on the left and "View list →" on the right.
+3. **Same as address** is unchecked in Logo_uploaded, where the billing address differs from the address.
 
-### 15.2 Next
-
-Take M-1 to M-8 into `rowK.js` (client page layout and tile anatomy, the logo as the ptba-logo instance in the Avatar frame instead of an image fill, the drop zone and Remove button, the history columns), apply 15.1, carry M-1 and M-2 to tablet and phone, rebuild row K and swap it in.
+Carried to every Inline Key-value row of the client page: the Value fills the row and wraps (auto height), not only Billing address.
