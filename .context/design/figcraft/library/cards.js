@@ -13,7 +13,7 @@ cp.execFileSync(CLI, ["convert", i, "C:/Users/pc/AppData/Local/Temp/cards.json"]
 const J = JSON.parse(fs.readFileSync("C:/Users/pc/AppData/Local/Temp/cards.json")), N = J.nodes;
 const b = new B(J.next_id);
 const SKIP = /reference$| edit( dark)?$| ref$|^Properties ref$|^Select reference$/;
-const CONTENT = new Set(["Card content", "Hint", "Inline alert", "Note", "Returned note"]);
+const CONTENT = new Set(["Card content", "Hint", "Inline alert", "Note", "Returned note", "Fields", "File"]);
 const frames = [];
 for (const p of J.pages) { const pg = N[p]; if (pg.name === "Library") continue; for (const c of pg.children) if (N[c].type === "frame" && !SKIP.test(N[c].name)) frames.push(c); }
 const stats = { work: 0, wrap: 0, head: 0, table: 0 };
@@ -35,7 +35,9 @@ for (const fr of frames) {
         b.raw("node.set", { ids: [head.id], props: { sizingH: "fill" } });
         const inner = after.length === 1 && after[0].name === "Card content" ? after[0].id : null;
         let content = inner;
-        if (!inner) { content = b.frame(top, { name: "Card content", w: 400, h: 40, layout: "v", gap: 8, pad: [0, 0, 0, 0], sizeH: "fill", sizeV: "hug" }); after.forEach((a) => b.raw("node.reparent", { ids: [a.id], parent: content })); }
+        const cc = after.find((x) => x.name === "Card content");
+        if (!inner && cc) { content = cc.id; b.raw("node.reparent", { ids: [cc.id], parent: top }); b.raw("node.set", { ids: [cc.id], props: { sizingH: "fill", padding: [0, 0, 0, 0] } }); after.filter((x) => x !== cc).forEach((x) => b.raw("node.reparent", { ids: [x.id], parent: cc.id })); }
+        else if (!inner) { content = b.frame(top, { name: "Card content", w: 400, h: 40, layout: "v", gap: 8, pad: [0, 0, 0, 0], sizeH: "fill", sizeV: "hug" }); after.forEach((a) => b.raw("node.reparent", { ids: [a.id], parent: content })); }
         else { b.raw("node.reparent", { ids: [inner], parent: top }); b.raw("node.set", { ids: [inner], props: { sizingH: "fill", padding: [0, 0, 0, 0] } }); }
         stats.wrap++;
       }

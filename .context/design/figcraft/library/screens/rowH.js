@@ -77,7 +77,7 @@ function queueGrid(b, parent, kind, queues, colW) {
   const g = b.frame(parent, { name: "Queue cards", w: 400, h: 140, layout: "h", gap: 16, wrap: true, sizeH: "fill", sizeV: "hug" });
   queues.forEach(([q, n, meta, warn]) => {
     const [glyph, name] = QN[q];
-    const id = b.instV(g, "Queue card", `Tone=${warn ? "Overdue" : "Default"}`, { texts: { Title: name, Count: String(n), Meta: meta, ...(warn ? { Warning: warn } : {}) }, swaps: [[0, "Icon", `Glyph=${glyph}, Size=20`]], props: { width: colW, sizingH: "fixed" } });
+    const id = b.instV(g, "Queue card", `Tone=${warn ? "Overdue" : "Default"}`, { texts: { Title: name, Count: String(n), Meta: meta, ...(warn ? { Warning: warn } : {}) }, swaps: [[0, "Icon", `Glyph=${glyph}, Size=20`]], props: { width: colW, sizingH: "fixed", sizingV: "fill" } });
   });
 }
 function activityCard(b, parent, kind, items) {
