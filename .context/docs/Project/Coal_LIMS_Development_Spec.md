@@ -1131,7 +1131,7 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 | Actions    | Add New User, View, Deactivate (shown as Hapus; Proposed: deactivate rather than delete)            |
 | Add form   | Name, Email, **Roles** (several, as chips, as in Clarity), Company (required only for Client), initial password or invite link |
 | Rules      | Email unique; Client requires a company; staff must not have one; last Superadmin cannot be removed; Role column shows every role |
-| Responsive | Cards on mobile; add and view in a side sheet on tablet, full screen on mobile                      |
+| Responsive | Cards on mobile; add and view in a centered dialog on tablet, full screen on mobile                      |
 | Open       | Edit user, password reset by admin                                                                  |
 
 ### S-03 Companies `/companies` (Fixed)

@@ -147,7 +147,7 @@ One card per sample with a sticky action bar (Print labels, Confirm reception; o
 | Condition select | The Select component with a warning-dot variant (no new set if the Select's Error state fits) |
 | Label preview | Exists (05 Data display); check its text against the no-dot rule |
 | Scan field | The Search component with the barcode glyph (add `barcode` to the Icon set if missing) |
-| Checklist item, Grid cell, Photo thumbnail, Drop zone, Side sheet, Bottom sheet, Stepper step | Exist; used as they are |
+| Checklist item, Grid cell, Photo thumbnail, Drop zone, Bottom sheet (the Side sheet was removed Nov 5), Stepper step | Exist; used as they are |
 
 ## 6 · Frames
 

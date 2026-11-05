@@ -222,7 +222,7 @@ These are chart **shells**: the card, header, legend, axes and an example plot. 
 | **Toast** | Success, Error, Info · Action |
 | **Tooltip** | Top, Bottom, Left, Right (Locked row tooltip) |
 | **Dialog** | Default, Destructive × Size (sm 400, md 560, lg 800 for Paste from Excel) · Title, Body slot, Footer buttons |
-| **Side sheet** | 480, 640 · Header, Body slot, sticky Footer (New job order, Add batch) |
+| ~~Side sheet~~ | **Removed Nov 5, 2026.** Every form, confirmation and list of files is a centered **Dialog** (sm 400, md 560, lg 800); phones keep the Bottom sheet |
 | **Bottom sheet** | Handle, Title, Close, Body slot, Footer (Contact, Mark CoA as sent) |
 | **Scrim** | — |
 
@@ -296,3 +296,8 @@ Card (Surface/card, border, radius 16, padding 16 on all four sides, gap 16)
 - On tablet and phone, when the actions do not fit in 32 px, the head keeps the title and the primary action; the other actions (search, secondary buttons) move to the first line of Card content.
 
 **Nov 4, 2026 update (owner):** every card is padded **16 on all four sides** (it was 16 / 20); Card content has no top padding (the owner removed it in the batch frames, so head and content touch, as in the reference). Applies to all cards, including the phone sample cards (were 12) and the Stepper card; the stepper track width follows (card width minus 32).
+
+## Centered dialogs only, Key-value row text (Nov 5, 2026, owner)
+
+- **No side sheet.** The Side sheet component was deleted from the library. Add and edit forms (client, contact, drill hole, lithology, seam), the CoA history and every confirmation are a centered **Dialog**: lg (800, drawn at 792 for the client form) for long forms, md (560) for short ones. The description line of the Dialog is hidden when the dialog holds a form. Phones keep full-screen forms and the **Bottom sheet**.
+- **Key-value row, Key text:** the **Key** layer now uses the text style **Body small/Regular** (12 px, line height 20, `Text/text-muted`) instead of Caption/Medium (10 px, line height 14), in both layouts. The owner's "Properties card ref" shows the result: every row is Inline (Key 110 wide, wrapped values), also for Address and Billing address, on every size. The change touches every Key-value row: the Properties card of the job order, the batch page and the client page. `Design_Tokens.md` is not affected: no colour, radius or elevation token changed.

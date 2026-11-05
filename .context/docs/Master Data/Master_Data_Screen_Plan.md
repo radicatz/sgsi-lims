@@ -55,7 +55,7 @@ Drill hole                                          [Import] [+ Add drill hole]
 | Table | Table card padded 16; sortable headers; 25 rows per page |
 | Row actions | **Edit** link, then a row menu (⋯) with **Archive** (or **Restore** on archived rows) and **Delete**. Delete shows only when nothing uses the record: no samples, no job orders, no CoA |
 | Archive | Confirm dialog (sm): "Archive DH-BNM-021? It stays on its samples and reports, but you can no longer pick it." The **Archived** chip lists archived rows |
-| Add and edit | Side sheet (480) on desktop and tablet; full-screen form on the phone with a sticky Save bar |
+| Add and edit | **Centered dialog** (lg 792 for the client form, md 560 for the others) on desktop and tablet; full-screen form on the phone with a sticky Save bar |
 | Errors | Inline on the field: "DH-BNM-021 already exists for PT Bara Nusantara Mandiri." |
 | Phone | Cards instead of rows; Search plus a **Filters** button (bottom sheet with Company and the chips) |
 | Empty | Empty state Size=Page with Add and Import: "No drill holes yet" |
@@ -96,8 +96,8 @@ Desktop: Properties on the left (360), Contacts and Master data on the right. Ta
 
 ### 4.3 Forms
 
-- **Client form** (side sheet): Name, Code (short, unique, upper case), Address, Billing address (with "Same as address"), Status, Logo (optional upload).
-- **Contact form** (side sheet 480): Name, Position, Email, Phone, Default contact (switch).
+- **Client form** (centered dialog, as the owner's "Add client modal ref"): a round 100 px logo slot at the top (Drop or click to add logo; once uploaded it shows the logo with its file name and Remove), then Name, Code with Status, Address, and Billing address with the "Same as address" checkbox between the label and the field.
+- **Contact form** (centered dialog md): Name, Position, Email, Phone, Default contact (switch).
 
 ## 5 · Drill hole (module 10)
 
@@ -107,7 +107,7 @@ Desktop: Properties on the left (360), Contacts and Master data on the right. Ta
 
 **Upload CoA** (dialog md on desktop and tablet, bottom sheet on the phone): Drop zone (PDF, up to 10 MB), the chosen file as a row with name and size, **Upload**. When a CoA exists the dialog is **Replace CoA** and says the current file moves to the history.
 
-**CoA history** (side sheet 480): every file, newest first, with name, size, uploaded by and date; the newest has a **Current** tag; each row has Download. Files are never deleted (D-30).
+**CoA history** (centered dialog 666, as the owner's "CoA history ref"): the drill hole code under the title; every file, newest first, as a row with the file name and size, the **Current** tag (newest only), uploaded by and date, and Download. Files are never deleted (D-30).
 
 ## 6 · Lithology (module 11)
 
@@ -161,7 +161,7 @@ The Dashboard's drill-hole list uses codes like DH-0412. It changes to these cod
 
 - Card anatomy: cards padded 16; Card head 32 px; Table cards padded 16.
 - No values joined with " · "; no count subtitles under titles.
-- Library components as they are: Search, Select, Filter chip, Tag, Status badge, Side sheet, Dialog, Bottom sheet, Drop zone, Key-value row, Breadcrumb, Card drill hole (phone), Pager, Empty state, Sticky action bar, Radio, Switch, Text field.
+- Library components as they are: Search, Select, Filter chip, Tag, Status badge, Dialog, Bottom sheet, Drop zone, Key-value row, Breadcrumb, Card drill hole (phone), Pager, Empty state, Sticky action bar, Radio, Switch, Text field.
 - Library additions, only these: **Tag** types Coal, Parting, No lithology, Current; a **Contact row** (star, name, position, email, phone, menu); a rows-per-page select in the **Pager** if it has none.
 
 ## 11 · Decisions (Nov 5, 2026)
@@ -201,3 +201,10 @@ Deviations:
 - **Rows per page** is drawn as a small select next to the pager (a frame, not a library component).
 - **Phone** lists show 8 to 12 cards and the mobile pager ("1 / 4"); the client form and the drill hole form are full-screen forms with the sticky bar.
 - The contact emails use the client's domain (first name only), and every client shows the same four demo contacts.
+
+## 14 · Revision 2 (Nov 5, 2026, owner feedback)
+
+- Add client, Edit client, Add drill hole, Edit lithology, Add seam, Edit contact and CoA history are **centered dialogs**; the Side sheet component is deleted (see `../Design System/Component_Library_Plan.md`, last section).
+- The client form and the CoA history follow the owner's reference frames ("Add client modal ref", "CoA history ref"); the Properties card follows "Properties card ref": all rows Inline, also on the phone.
+- The Key text of the Key-value row is Body small/Regular now.
+- Rebuilt: the 7 modal frames (Contact_form, New_client, Logo_uploaded, New_drill_hole, History, Lithology Edit, New_seam) and the Properties card of Client_detail on desktop, tablet and phone.
