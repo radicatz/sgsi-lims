@@ -113,3 +113,14 @@ Canvas row K holds the master data frames; they are created under their final na
 
 Sizes: the list CoA_tab on Desktop, Tablet and Phone; CoA Draft and Published on all three; RoA Default on Desktop and Phone; the rest Desktop only. Canvas row L holds the Reports frames; they are created under their final names.
 
+## Search (module 08)
+
+| Module | SS | Screen | Variants (VV) |
+| --- | --- | --- | --- |
+| 08 Search | 01 | Quick_search | 01 Recent, 02 Typing (desktop, tablet), 03 Exact_match, 04 No_match |
+| | 02 | Search_results | 01 All (desktop, tablet, phone), 02 One_type, 03 CSO, 04 No_results, 05 Phone_start |
+| | 03 | Advanced_search | 01 Empty, 02 Sample_query (desktop, tablet, phone), 03 Results_query, 04 Columns_menu, 05 Save_query, 06 Over_limit |
+| | 04 | Sample_history | 01 Default (desktop, tablet, phone), 02 CSO, 03 In_progress, 04 Held |
+
+Canvas row M holds the Search frames; they are created under their final names.
+

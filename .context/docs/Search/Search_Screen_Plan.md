@@ -1,6 +1,6 @@
 # Search screen plan
 
-Written Nov 5, 2026. **Status: plan, waiting for go.** Module 08 Search, canvas row **M**. Builds on spec S-29 (advanced search), S-30 (sample history), F-SRCH-01 and F-GEN-01 (`../Project/Coal_LIMS_Development_Spec.md`), the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`, section 4: the CSO never sees result values or RoA files) and the Clarity LIMS search videos 03 and 08 (frames in `../../research/clarity-lims/screenshots/03-advanced-search/` and `08-search-functionality/`).
+Written Nov 5, 2026. **Status: BUILT Nov 5, 2026** (section 14). Module 08 Search, canvas row **M**. Builds on spec S-29 (advanced search), S-30 (sample history), F-SRCH-01 and F-GEN-01 (`../Project/Coal_LIMS_Development_Spec.md`), the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`, section 4: the CSO never sees result values or RoA files) and the Clarity LIMS search videos 03 and 08 (frames in `../../research/clarity-lims/screenshots/03-advanced-search/` and `08-search-functionality/`).
 
 ## 1 · Goal
 
@@ -230,3 +230,22 @@ Card anatomy (padding 16, Card head 32); centered dialogs, Bottom sheet on the p
 3. `naming.js` needs no rules (final names); `cards.js` and `fit.js` run as usual.
 4. Deploy (dirty check, backup, swap), commit. No export unless asked.
 5. Docs: build status here; spec S-29 and S-30 v1 notes; `Frame_Naming.md` module 08; README.
+
+## 14 · Build status (Nov 5, 2026)
+
+All 26 frames are built on row **M  Search** with `library/screens/rowM.js` (module 08, final names, role sidebar per persona): Quick_search 5, Search_results 7, Advanced_search 8, Sample_history 6. Deployed to the main file (backup `backup/SGSI-LIMS-screens.before-search.figcraft`). The open points of section 12 were used with their defaults.
+
+Built from library instances: Search, Select, Text field, Segmented item, Filter chip, Checkbox, Switch, Status badge, Tag, Card KPI, Pager, Inline alert, Empty state, Dialog, Option and Key-value rows, Avatar, Breadcrumb. The quick-search panel, the condition row and the timeline entry are frame patterns in `rowM.js`, not library components.
+
+Deviations from the plan:
+
+- **Quick search** is drawn over a short Dashboard (header, KPI strip, an Active batches card), because the panel opens over whatever page the user is on. The tablet frame shows the Typing state only.
+- **Top bar search field** shows the typed text in the placeholder style; the library Search field has no separate "typed" colour.
+- **Exact match** marks the first hit with a tinted row and the word "Go to"; the footer reads "Open JO-2026-0137" instead of "See all".
+- **Match** is the All / Any segmented switch next to "Searching for"; no grouping, as decided.
+- **Results query** (Supervisor frame) shows the same query as Samples with the Results columns (parameter, value, basis, entered by, date).
+- **Columns menu** is a popover under the Columns button (checkbox list); **Save query** is a centered Dialog md with the Share with staff switch.
+- **Sample history** shows the timeline as dots without a connecting line, the person as Avatar 24 and name with the date as a separate text, and **View values** as a small ghost button. The **Audit** link for Supervisor, Manager and Superadmin is not drawn (the Audit log is built with Admin); the **History** entry in the job order and batch row menus is not drawn.
+- **Phone:** the start frame (field, Recent records and searches, Scan a label) is the entry; quick search has no phone frame, as planned.
+- **Tablet and phone** exist for Search results (All), Advanced search (Sample_query) and Sample history (Default), plus the tablet Typing frame and the phone start frame.
+

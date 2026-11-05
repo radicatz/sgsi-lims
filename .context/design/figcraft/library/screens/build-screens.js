@@ -13,7 +13,7 @@ const reg = loadReg(J);
 // rows H, I and J are always rebuilt last, in that order: delete their old frames here and hide them from the other rows' placement
 const b = new B(J.next_id).useReg(reg).regSets();
 b.logo = {};
-const STALE = [[/(^|,)L(,|$)/, /^(Desktop|Tablet|Phone)-07-Reports-/, /^L  /], [/(^|,)K(,|$)/, /^(Desktop|Tablet|Phone)-(09-Clients|10-Drill_hole|11-Lithology|12-Seam)-/, /^K  /], [/(^|,)H(,|$)/, /^(Desktop|Tablet|Phone)-01-My_work-/, /^H  /], [/(^|,)[IJ](,|$)/, /^(Desktop|Tablet|Phone)-(02-Dashboard|00-App)-/, /^[IJ]  /]];
+const STALE = [[/(^|,)M(,|$)/, /^(Desktop|Tablet|Phone)-08-Search-/, /^M  /], [/(^|,)L(,|$)/, /^(Desktop|Tablet|Phone)-07-Reports-/, /^L  /], [/(^|,)K(,|$)/, /^(Desktop|Tablet|Phone)-(09-Clients|10-Drill_hole|11-Lithology|12-Seam)-/, /^K  /], [/(^|,)H(,|$)/, /^(Desktop|Tablet|Phone)-01-My_work-/, /^H  /], [/(^|,)[IJ](,|$)/, /^(Desktop|Tablet|Phone)-(02-Dashboard|00-App)-/, /^[IJ]  /]];
 const staleIds = [];
 for (const [on, nameRx, titleRx] of STALE) if (on.test(process.argv[2] || "")) for (const pid of J.pages) { const n = J.nodes[pid]; n.children = (n.children || []).filter((id) => { const x = J.nodes[id], hit = nameRx.test(x.name || "") || (x.name === "Row title" && titleRx.test(x.characters || "")); if (hit) staleIds.push(id); return !hit; }); }
 const rows = (process.argv[2] || "A").split(",");

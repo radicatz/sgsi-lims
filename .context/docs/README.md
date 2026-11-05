@@ -17,7 +17,7 @@ Nov 5, 2026. Plans and specifications for SGSI LIMS, one folder per screen group
 | Navigation | `Navigation/Navigation_Screen_Plan.md` | Sidebar items and page access per role, No access page | Role sidebar and App frames built Nov 5 |
 | Master Data | `Master Data/Master_Data_Screen_Plan.md` | Clients, Drill hole, Lithology and Seam: lists, forms, client page with contacts, CoA upload and history | 31 frames built Nov 5; Revision 3 (owner edits, section 15) built Nov 5 |
 | Reports | `Reports/Reports_Screen_Plan.md` | Reports list (RoA and CoA), the report page, building and publishing the CoA, revise and void | 28 frames built Nov 5 |
-| Search | `Search/Search_Screen_Plan.md` | Quick search in the top bar, search results, advanced search with saved queries, sample history | Plan, waiting for go |
+| Search | `Search/Search_Screen_Plan.md` | Quick search in the top bar, search results, advanced search with saved queries, sample history | 26 frames built Nov 5 |
 | archive | `archive/Reception_Preparation_Screen_Plan.md` | The first batch-page plan with Revisions B and C | Superseded by the Batch plan; kept as history |
 
 New screen groups get their own folder and a plan named `<Group>_Screen_Plan.md`; a plan that is replaced moves to `archive/` with a banner naming its successor.

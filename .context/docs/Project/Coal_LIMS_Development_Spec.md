@@ -1351,6 +1351,8 @@ The landing page for every staff role.
 
 ### S-29 Advanced search `/search` (Proposed, from Clarity)
 
+**v1 note (Nov 5, 2026):** one Match all / any switch instead of per-row AND/OR and grouping; the Preparation team and the CSO get no result values. Quick search in the top bar and the results page are part of it. Layout and frames: `../Search/Search_Screen_Plan.md`, built Nov 5, 2026.
+
 - "Searching for" job orders, batches, samples or results.
 - Conditions as rows: field, operator (is, contains, between, greater than, less than, is empty), value; joined by AND or OR.
 - Results grid with column chooser, export (CSV, XLSX), and a link from each row to its record or to the sample history (S-30).
@@ -1358,6 +1360,8 @@ The landing page for every staff role.
 - Results respect permissions: the CSO search never returns RoA values.
 
 ### S-30 Sample history `/samples/:id/history` (Proposed, from Clarity's genealogy)
+
+**v1 note (Nov 5, 2026):** v1 shows the events the lab records (registration, reception, hold, batch, ADL, values, RoA upload, CoA publish, revise, send); result rounds, rechecks, escalations and approvals are next goal. Built Nov 5, 2026: `../Search/Search_Screen_Plan.md`.
 
 - Header: lab code, sample ID, job order, batch, client, current status.
 - Timeline: registered on the job order (CSO) → received and labelled (who, mass, condition) → preparation start and finish, ADL (performer) → analyst assignment if any → each result round per tab (performer, entering user, values, method) → recheck flags with scope and reason → escalations → results approved → RoA versions (approved, printed, signatory) → CoA revisions and sent record.
