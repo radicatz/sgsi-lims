@@ -46,7 +46,7 @@ function sampleChecklist(b, parent, o, W) {
   b.text(hd, o.sel + " of " + o.ids.length + " selected", { style: "Caption/Regular", color: "Text/text-muted", name: "Count" });
   if (o.late) help(b, s, "Awaiting arrival comes first and is ticked for you.");
   const ln = b.frame(s, { name: "Links", w: W, h: 32, layout: "h", gap: 4, cross: "center", sizeH: "fill", sizeV: "hug" });
-  ["Select all (" + o.ids.length + ")", "Clear"].forEach((t) => b.instV(ln, "Button", "Type=Ghost, Tone=Default, Size=sm, State=Default", { texts: { Label: t }, setProps: { "Leading icon": false } }));
+  ["Select all (" + o.ids.length + ")", "Clear"].forEach((t) => b.instV(ln, "Button", "Type=Ghost, Tone=Default, Size=md, State=Default", { texts: { Label: t }, setProps: { "Leading icon": false } }));
   const grid = b.frame(s, { name: "Checklist", w: W, h: 100, layout: o.list ? "v" : "h", gap: o.list ? 14 : 8, wrap: !o.list, sizeH: "fill", sizeV: "hug" });
   o.ids.forEach((id, i) => {
     const on = i < o.sel;

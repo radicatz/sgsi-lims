@@ -48,7 +48,7 @@ function work(b, s, o) {
   b.text(ph, (ck ? "15" : "8") + " selected", { style: "Caption/Regular", color: "Text/text-muted", name: "Selected count" });
   const q = b.frame(s, { name: "Quick select", w: 600, h: 36, layout: "h", gap: 4, wrap: true, cross: "center", sizeH: "fill", sizeV: "hug" });
   b.text(q, "Quick select", { style: "Caption/SemiBold", color: "Text/text-muted", name: "Quick label" });
-  ["TM + Prox + TS + CV", "Prox only", "Full analysis", "Coking coal", "Preparation only", "Clear"].forEach((t) => b.instV(q, "Button", "Type=Ghost, Tone=Default, Size=sm, State=Default", { texts: { Label: t }, setProps: { "Leading icon": false } }));
+  ["TM + Prox + TS + CV", "Prox only", "Full analysis", "Coking coal", "Preparation only", "Clear"].forEach((t) => b.instV(q, "Button", "Type=Ghost, Tone=Default, Size=md, State=Default", { texts: { Label: t }, setProps: { "Leading icon": false } }));
   b.instV(s, "Search", `Size=${o.phone ? "lg" : "md"}, State=Default`, { texts: { Value: "Search parameters…" }, props: { sizingH: "fill" }, hide: ["Scan"] });
   const grid = col(b, s, "Parameter groups", 10, W);
   { const pr = b.frame(grid, { name: "Group row", w: W, h: 32, layout: "h", gap: 8, cross: "center", sizeH: "fill", sizeV: "hug", wrap: true });
@@ -145,7 +145,7 @@ function optionRows(b, parent, list, mode, signer) {
     if (signer) { T(2, "Name"); T(4, "Marta Simanjuntak, M.Sc."); T(8, "Title"); T(10, "Senior Chemist"); b.raw("node.set", { ids: [id + 12], props: { visible: false } }); }
     else { T(4, "Dewi Anggraini"); T(10, "+62 811 5550 0192"); T(15, "dewi@baranusa.id"); }
   }
-  b.instV(parent, "Button", `Type=Tertiary, Tone=Default, Size=md, State=${mode === "edit" ? "Disabled" : "Default"}`, { texts: { Label: signer ? "Add signatory" : "Add contact" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  b.instV(parent, "Button", `Type=Tertiary, Tone=Default, Size=lg, State=${mode === "edit" ? "Disabled" : "Default"}`, { texts: { Label: signer ? "Add signatory" : "Add contact" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
 }
 
 function dropdown(b, x, y, o) {
@@ -168,8 +168,8 @@ function ashPopover(b, x, y) {
   const items = [["SiO₂", 1], ["Al₂O₃", 1], ["Fe₂O₃", 1], ["CaO", 1], ["MgO", 1], ["Na₂O", 1], ["K₂O", 1], ["TiO₂", 1], ["P₂O₅", 1], ["SO₃", 0], ["Mn₃O₄", 0], ["BaO", 0], ["SrO", 0], ["Cr₂O₃", 0]];
   items.forEach(([t, on]) => b.instV(list, "Checkbox", `Checked=${on ? "On" : "Off"}, State=Default`, { texts: { Label: t } }));
   const ft = b.frame(p, { name: "Footer", w: 364, h: 48, layout: "h", gap: 8, pad: [8, 8, 8, 8], main: "max", cross: "center", sizeH: "fill", sizeV: "hug" });
-  b.instV(ft, "Button", "Type=Tertiary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Clear" }, setProps: { "Leading icon": false } });
-  b.instV(ft, "Button", "Type=Primary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Done" }, setProps: { "Leading icon": false } });
+  b.instV(ft, "Button", "Type=Tertiary, Tone=Default, Size=md, State=Default", { texts: { Label: "Clear" }, setProps: { "Leading icon": false } });
+  b.instV(ft, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { texts: { Label: "Done" }, setProps: { "Leading icon": false } });
   return m;
 }
 

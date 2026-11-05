@@ -1105,7 +1105,7 @@ Built: `rowC.js` `tabs()` now lists Overview, Samples, Batches, Files, CoA, Hist
 | 1 | **Overline without "WORK"**: the Split "WORK" + date (or "JOB ORDERS") becomes one text: "TUESDAY 21 OCTOBER 2026" on desktop, "JOB ORDERS" on tablet and phone (the owner already changed List · Desktop) | 21 frames: job order list T, P, Empty D; every Create frame behind the overlay (D 10, T 1); batch list D 6, T 1, P 2 ("BATCHES") |
 | 2 | **Table card** padding 16 on all sides; the library table rows inside drop their side padding (cells keep 8) | Job order list D 01 and the 10 Create backdrops; T 01 and the tablet Create backdrop |
 | 3 | **Card head fixed 32**; short texts stay in the head, notes and hints move to **Card content** (Card anatomy, `../Design System/Component_Library_Plan.md`) | Samples card: hint "Paste IDs from Excel ..." (D, T 06), inline alert (D 11); Batches card: awaiting-arrival note (D 05, Add batch D 02 backdrop); every other card head (Properties, Overview Batches, CoA) is set to 32 |
-| 4 | **Add batch** buttons in the Batches tab are **sm** | Batches card head D, T 03, 04, 05; the Add batch and P7 backdrops (D 04-01, 04-02, 05-03) |
+| 4 | **Add batch** buttons in the Batches tab are **sm** (32 px; this size is called **md** since Nov 5, 2026, see `../Design System/Component_Library_Plan.md`, last section) | Batches card head D, T 03, 04, 05; the Add batch and P7 backdrops (D 04-01, 04-02, 05-03) |
 
 Built with Batch plan Revision 3 (`../Batch/Batch_Screen_Plan.md` section 14).
 

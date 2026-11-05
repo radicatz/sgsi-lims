@@ -107,7 +107,7 @@ Header avatar: round 64, logo or initials (Revision 3). Desktop (Revision 3): Ma
 
 ## 5 · Drill hole (module 10)
 
-**List** columns as SIM Lab: Code, Description, Total sample, Company, CoA, then Edit and the row menu. Chips: All, Missing CoA, Archived. The CoA cell shows the CoA uploaded tag and the file name, or the CoA missing tag with **Upload CoA** (sm) for `coa.upload` roles. The row menu adds **CoA history**.
+**List** columns as SIM Lab: Code, Description, Total sample, Company, CoA, then Edit and the row menu. Chips: All, Missing CoA, Archived. The CoA cell shows the CoA uploaded tag and the file name, or the CoA missing tag with **Upload CoA** (Button md, 32 px) for `coa.upload` roles. The row menu adds **CoA history**.
 
 **Form:** Code (unique per company), Description (free text; SIM Lab uses it for a batch label such as "Batch 5"), Company.
 
@@ -227,7 +227,7 @@ The owner edited the desktop frames of row K in FigCraft after Revision 2. Found
 | M-4 | **Key-value row** component, Inline | Items centred vertically | Items **top-aligned** (cross align min), so the Key stays on the first line of a wrapped value. Reaches every Inline Key-value row: job order Overview (desktop, tablet, dark preview), Mark sent and Sent, the client pages (all sizes) |
 | M-5 | PT Bukit Asam logo | Image fill (PNG crop from Wikimedia Commons) in a "Logo" frame | A vector component **ptba-logo** (40 × 40, two vectors, brand yellow #FDB610 and red #E82328) on the Library page. Every use is an **Avatar** frame: round (radius 999), `Surface/card` fill, `Surface/border` stroke (1 px), padding 4, with the ptba-logo instance filling it (the mark sits 5 px from the edge). Sizes: 40 in the list rows (Clients list and the list behind New_client, Archive_confirm, Logo_uploaded), 64 in the client page header (With_logo), 100 in the Edit client dialog (Logo_uploaded) |
 | M-6 | Client form, logo slot (New_client) | Drop zone with its Title "Drop or click to add logo" and the hidden hint | Drop zone 100 × 100: **Title hidden**; the **Hint** carries "Drop or click to add logo" (Caption/Regular, centred, fixed 84 wide, two lines) under the upload icon |
-| M-7 | Client form, uploaded logo (Logo_uploaded) | **Remove** as a Ghost button sm | **Remove** as a **Secondary** button sm (outlined) |
+| M-7 | Client form, uploaded logo (Logo_uploaded) | **Remove** as a Ghost button 32 px | **Remove** as a **Secondary** button md, 32 px (outlined; md was called sm before Nov 5) |
 | M-8 | CoA history (History) | File name, Current pill and Metadata hugging, so the columns did not line up | **File name fixed 200**, **Metadata fixed 160**, then the **Current** pill; the three file rows line up in columns |
 
 Unchanged: tablet and phone client pages (they keep the Revision 2 layout, only M-4 reaches them through the component), the drill hole, lithology and seam frames, the other dialogs.

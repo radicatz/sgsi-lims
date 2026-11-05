@@ -187,7 +187,7 @@ function detailHead(b, main, kind, o) {
     if (bad) b.text(it, "Past due", { style: "Body small/SemiBold", color: "Feedback/error", name: "Past due" });
   });
   const act = b.frame(hdr, { name: "Actions", w: 100, h: 40, layout: "h", gap: 8, cross: "center", sizeH: "hug", sizeV: "hug" });
-  if (o.primary && kind !== "phone") b.instV(act, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { texts: { Label: o.primary }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  if (o.primary && kind !== "phone") b.instV(act, "Button", "Type=Primary, Tone=Default, Size=lg, State=Default", { texts: { Label: o.primary }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
   b.instV(act, "Icon button", "Type=Secondary, Size=36, State=Default", { swaps: [[0, "Icon", "Glyph=dots-three, Size=20"]] });
   return hdr;
 }
@@ -244,7 +244,7 @@ function overview(b, x, y, kind) {
   const pc = card(b, grid, "Properties");
   if (kind === "desktop") b.raw("node.set", { ids: [pc], props: { width: 560, sizingH: "fixed" } });
   const ph = cardHead(b, pc, "Properties");
-  b.instV(ph, "Button", "Type=Ghost, Tone=Default, Size=sm, State=Default", { texts: { Label: "Edit" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("pencil-simple") } });
+  b.instV(ph, "Button", "Type=Ghost, Tone=Default, Size=md, State=Default", { texts: { Label: "Edit" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("pencil-simple") } });
   const kvs = b.frame(pc, { name: "Rows", w: 400, h: 400, layout: "v", gap: 12, pad: 0, sizeH: "fill", sizeV: "hug" });
   const KV = [["Company", "PT Bara Nusantara Mandiri"], ["Address", "Jl. Mulawarman No. 12, Samarinda"], ["Contact", kind === "phone" ? "Budi Hartono · +62 812 5550 1844" : "Budi Hartono · +62 812 5550 1844 · budi@baranusa.co.id"], ["Client reference", "PO 4500-2231"]];
   const kv = (k, v) => b.instV(kvs, "Key-value row", kind === "phone" ? "Layout=Stacked" : "Layout=Inline", { texts: { Key: k, Value: v }, props: { sizingH: "fill" } });
@@ -299,7 +299,7 @@ function batches(b, x, y, kind, empty) {
   const c = card(b, s.main, "Batches card");
   const n = empty ? 0 : 2;
   const hd = cardHead(b, c, "Batches");
-  if (kind !== "phone") b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  if (kind !== "phone") b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
   if (empty) {
     b.instV(c, "Empty state", "Size=Card", { texts: { 0: "No batches yet", 1: "Use Add batch above to group the registered samples and start preparation." }, props: { sizingH: "fill" }, hide: kind === "phone" ? [] : [] });
     if (kind === "phone") b.instV(c, "Button", "Type=Secondary, Tone=Default, Size=touch, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") }, props: { sizingH: "fill" } });
@@ -332,7 +332,7 @@ function samples(b, x, y, kind) {
   const hd = cardHead(b, c, "Registered Samples");
   if (kind !== "phone") {
     const bt = b.frame(hd, { name: "Buttons", w: 400, h: 36, layout: "h", gap: 8, sizeH: "hug", sizeV: "hug" });
-    const bn = (l, g, ty = "Secondary") => b.instV(bt, "Button", `Type=${ty}, Tone=Default, Size=sm, State=${l === "Save" ? "Disabled" : "Default"}`, { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(g) } });
+    const bn = (l, g, ty = "Secondary") => b.instV(bt, "Button", `Type=${ty}, Tone=Default, Size=md, State=${l === "Save" ? "Disabled" : "Default"}`, { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(g) } });
     bn("Add row", "plus"); if (kind === "desktop") { bn("Paste from Excel", "copy"); bn("Import list", "upload-simple"); } bn("Save", "floppy-disk", "Primary");
     b.text(c, "Paste IDs from Excel, or type them. The Preparation team receives samples by these IDs.", { style: "Caption/Regular", color: "Text/text-secondary", name: "Hint", fill: true });
   }
@@ -380,8 +380,8 @@ function mixed(b, x, y, kind, o = {}) {
   const hd = cardHead(b, c, "Registered Samples");
   if (kind !== "phone") {
     const bt = b.frame(hd, { name: "Buttons", w: 400, h: 36, layout: "h", gap: 8, sizeH: "hug", sizeV: "hug" });
-    ["Add row", "Paste from Excel", "Import list"].slice(0, kind === "desktop" ? 3 : 1).forEach((l, i) => b.instV(bt, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(["plus", "copy", "upload-simple"][i]) } }));
-    b.instV(bt, "Button", "Type=Primary, Tone=Default, Size=sm, State=Disabled", { texts: { Label: "Save" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("floppy-disk") } });
+    ["Add row", "Paste from Excel", "Import list"].slice(0, kind === "desktop" ? 3 : 1).forEach((l, i) => b.instV(bt, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(["plus", "copy", "upload-simple"][i]) } }));
+    b.instV(bt, "Button", "Type=Primary, Tone=Default, Size=md, State=Disabled", { texts: { Label: "Save" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("floppy-disk") } });
   }
   if (kind === "phone") {
     const list = b.frame(c, { name: "List", w: 358, h: 200, layout: "v", gap: 0, sizeH: "fill", sizeV: "hug" });
@@ -452,7 +452,7 @@ function awaiting(b, x, y) {
   const s = detailFrame(b, x, y, "desktop", { ...JO0139, name: "Batches · Samples awaiting arrival · Desktop", tab: "Batches" });
   const c = card(b, s.main, "Batches card");
   const hd = cardHead(b, c, "Batches");
-  b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
+  b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Add batch" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") } });
   const note = b.frame(c, { name: "Note", w: 1112, h: 44, fill: "Accent/accent-100", r: 10, layout: "h", gap: 10, pad: [10, 14, 10, 14], cross: "center", sizeH: "fill", sizeV: "hug" });
   const ic = b.instV(note, "Icon", "Glyph=hourglass, Size=14"); b.raw("node.set", { ids: [ic + 1], props: { fill: LIGHT["Accent/accent-text"] } }); b.bind(ic + 1, "fill", "Accent/accent-text");
   b.text(note, "1 sample is awaiting arrival (returned from B-2026-0421). When it arrives, add it with Add batch.", { style: "Body small/Regular", color: "Accent/accent-text", name: "Note", fill: true });
@@ -516,8 +516,8 @@ function p4(b, x, y) {
   const c = card(b, s.main, "Samples card");
   const hd = cardHead(b, c, "Registered Samples");
   const bt = b.frame(hd, { name: "Buttons", w: 400, h: 36, layout: "h", gap: 8, sizeH: "hug", sizeV: "hug" });
-  ["Add row", "Paste from Excel", "Import list"].forEach((l, i) => b.instV(bt, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(["plus", "copy", "upload-simple"][i]) } }));
-  b.instV(bt, "Button", "Type=Primary, Tone=Default, Size=sm, State=Default", { texts: { Label: "Save (3)" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("floppy-disk") } });
+  ["Add row", "Paste from Excel", "Import list"].forEach((l, i) => b.instV(bt, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: l }, setProps: { "Leading icon": true, "Leading glyph": b.iconId(["plus", "copy", "upload-simple"][i]) } }));
+  b.instV(bt, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { texts: { Label: "Save (3)" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("floppy-disk") } });
   b.instV(c, "Inline alert", "Tone=Error", { texts: { 0: "Fix 1 duplicate ID before saving", 1: "BNM-3602 is already in row 2." }, hide: ["Action"], props: { sizingH: "fill" } });
   const wrap = b.frame(c, { name: "Grid", w: 1112, h: 200, layout: "v", pad: 0, sizeH: "fill", sizeV: "hug" });
   sHead(b, wrap, "desktop");

@@ -15,7 +15,7 @@ function head(b, main, kind, count) {
   const left = b.frame(hdr, { name: "Title block", w: 500, h: 90, layout: "v", gap: 4, sizeH: kind === "phone" ? "fill" : "hug", sizeV: "hug" });
   b.text(left, kind === "desktop" ? "WORK · TUESDAY 21 OCTOBER 2026" : "WORK · JOB ORDERS", { style: "Overline", color: "Text/text-muted", name: "Overline" });
   b.text(left, "Job orders", { style: kind === "phone" ? "Heading/H1" : "Display/XL", color: "Text/heading", name: "Title" });
-  if (kind !== "phone") b.instV(hdr, "Button", "Type=Primary, Tone=Default, Size=md, State=Default", { texts: { Label: "New job order" }, setProps: { "Leading icon": true } });
+  if (kind !== "phone") b.instV(hdr, "Button", "Type=Primary, Tone=Default, Size=lg, State=Default", { texts: { Label: "New job order" }, setProps: { "Leading icon": true } });
   return hdr;
 }
 function filters(b, main, kind) {
@@ -27,7 +27,7 @@ function filters(b, main, kind) {
     b.instV(r, "Date field", "State=Default, Size=md", { texts: { Label: "Due date", Value: "Any date" }, props: { width: 200 }, setProps: { "Show helper": false } });
     b.frame(r, { name: "Spacer", w: 10, h: 10, sizeH: "fill", sizeV: "fixed" });
   }
-  b.instV(r, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Filters" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("funnel") } });
+  b.instV(r, "Button", "Type=Secondary, Tone=Default, Size=lg, State=Default", { texts: { Label: "Filters" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("funnel") } });
   return r;
 }
 function card(b, main) { return b.frame(main, { name: "Table card", w: 800, h: 400, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 16, layout: "v", gap: 0, pad: 0, sizeH: "fill", sizeV: "hug", clip: true }); }

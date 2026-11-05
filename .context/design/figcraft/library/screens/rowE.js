@@ -6,7 +6,7 @@ const { TITLE, page, card, detailFrame, batches, scrimOver, dialogAt } = H;
 
 const JO0141 = { no: "JO-2026-0141", meta: "PT Kaltara Energi Prima · Attn. Sari Wulandari · PO KEP-118 · Due 23 Oct 2026", counts: { b: 1, s: 8, f: 2 } };
 const icon = (b, parent, glyph, tok) => { const ic = b.instV(parent, "Icon", "Glyph=" + glyph + ", Size=14"); b.raw("node.set", { ids: [ic + 1], props: { fill: LIGHT[tok] } }); b.bind(ic + 1, "fill", tok); return ic; };
-const btn = (b, parent, type, label, glyph, size = "sm") => b.instV(parent, "Button", `Type=${type}, Tone=Default, Size=${size}, State=Default`, { texts: { Label: label }, setProps: glyph ? { "Leading icon": true, "Leading glyph": b.iconId(glyph) } : { "Leading icon": false } });
+const btn = (b, parent, type, label, glyph, size = "md") => b.instV(parent, "Button", `Type=${type}, Tone=Default, Size=${size}, State=Default`, { texts: { Label: label }, setProps: glyph ? { "Leading icon": true, "Leading glyph": b.iconId(glyph) } : { "Leading icon": false } });
 
 function coaCard(b, main, kind, sent) {
   const phone = kind === "phone";

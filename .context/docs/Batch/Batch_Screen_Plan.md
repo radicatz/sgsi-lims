@@ -312,7 +312,7 @@ Total **9 frames** (6 desktop, 1 tablet, 2 phone). Canvas: row **F** gets a seco
 
 | Change | Use |
 | --- | --- |
-| **Search, Size=sm** (32 px), all five states | Card toolbars next to sm buttons: the Reception scan field and any search inside a card. Page filters keep md, phone keeps lg |
+| **Search, Size=sm** (32 px), all five states | Card toolbars next to 32 px buttons (Button md; called sm before Nov 5, 2026): the Reception scan field and any search inside a card. Page filters keep md, phone keeps lg |
 | Tokens (light): `Feedback/error-100` `#F8E3DC` to `#FEE9E1`; `Status/st-analysis-100` `#E3EAF4` to `#D9E5F7`; `Primary/primary-100` `#E3EAF4` to `#E9EEF4` | Re-export `tokens/sgsi-tokens.json` and `.css`, regenerate `../Design System/Design_Tokens.md`, recheck contrast. Note: the message named `st-success-100`, but the file shows `st-analysis-100` changed; the plan follows the file |
 
 ### 13.7 Build steps (after go)

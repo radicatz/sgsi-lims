@@ -34,7 +34,7 @@ const inst = (comp, texts = []) => {
   return at;
 };
 raw("transform.scale", { ids: [inst(variant("Logo", "Type=Icon, Color=White"))], factor: 36 / 354 });
-inst(variant("Button", "Type=Primary, Tone=Default, Size=md, State=Default"), [[3, "New batch"]]);
+inst(variant("Button", "Type=Primary, Tone=Default, Size=lg, State=Default"), [[3, "New batch"]]);
 inst(variant("Switch", "On=On, State=Default"));
 inst(variant("Tab", "Selected=On, State=Default"));
 inst(variant("Filter chip", "Selected=On, State=Default"));

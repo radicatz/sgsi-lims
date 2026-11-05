@@ -183,8 +183,8 @@ function page(b, pan) {
   for (const bp of ["Desktop", "Mobile"]) sb.push({ name: `Breakpoint=${bp}`, w: bp === "Desktop" ? 1100 : 390, h: 68, frame: { fill: "Surface/card", stroke: "Surface/border", sw: 1, layout: "h", gap: 12, pad: [0, bp === "Desktop" ? 24 : 16, 0, bp === "Desktop" ? 24 : 16], cross: "center", main: "max", sizeH: "fixed", sizeV: "fixed" },
     build(cid) {
       const note = b.text(cid, bp === "Desktop" ? "2 labels still to print" : "2 to print", { style: "Body small/Regular", color: "Text/text-secondary", name: "Note", fill: true });
-      const s = b.inst(cid, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default"); setText(b, s + 3, "Print labels");
-      const p = b.inst(cid, "Button", "Type=Primary, Tone=Default, Size=md, State=Default"); setText(b, p + 3, "Start Preparation");
+      const s = b.inst(cid, "Button", "Type=Secondary, Tone=Default, Size=lg, State=Default"); setText(b, s + 3, "Print labels");
+      const p = b.inst(cid, "Button", "Type=Primary, Tone=Default, Size=lg, State=Default"); setText(b, p + 3, "Start Preparation");
       return { Note: note };
     } });
   b.set(pan, "Sticky action bar", sb, { cols: 1, cw: 1200, ch: 100, W: 1240, H: 232, textProps: ["Note"] });

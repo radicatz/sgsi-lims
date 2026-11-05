@@ -18,7 +18,7 @@ const TS = {
   "Body/Regular": [NS, "Regular", 14, 22], "Body/Medium": [NS, "Medium", 14, 22], "Body/SemiBold": [NS, "SemiBold", 14, 22],
   "Body small/Regular": [NS, "Regular", 13, 20], "Body small/Medium": [NS, "Medium", 13, 20], "Body small/SemiBold": [NS, "SemiBold", 13, 20],
   "Caption/Regular": [NS, "Regular", 12, 16], "Caption/Medium": [NS, "Medium", 12, 16], "Caption/SemiBold": [NS, "SemiBold", 12, 16],
-  "Label/Button md": [NS, "SemiBold", 14, 20], "Label/Button sm": [NS, "SemiBold", 13, 18],
+  "Label/Button lg": [NS, "SemiBold", 14, 20], "Label/Button md": [NS, "SemiBold", 13, 18], "Label/Button sm": [NS, "SemiBold", 12, 16],
   "Overline": [JM, "Medium", 11, 16, 1.5, "upper"], "Data": [JM, "Regular", 13, 20], "Data/Strong": [JM, "SemiBold", 13, 20],
 };
 

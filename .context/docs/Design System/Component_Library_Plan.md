@@ -57,7 +57,7 @@ Taken from the Foundations type specimen.
 | Body/Regular, Medium, SemiBold | Noto Sans | 14 / 22 |
 | Body small/Regular, Medium, SemiBold | Noto Sans | 13 / 20 |
 | Caption/Regular, Medium | Noto Sans | 12 / 16 |
-| Label/Button md, sm | Noto Sans SemiBold | 14 / 20, 13 / 18 |
+| Label/Button lg, md, sm | Noto Sans SemiBold | 14 / 20, 13 / 18, 12 / 16 (renamed Nov 5, 2026: lg was md, md was sm; sm is new) |
 | Overline (uppercase, +1.5) | JetBrains Mono Medium | 11 / 16 |
 | Data | JetBrains Mono Regular | 13 / 20 |
 | Data/Strong | JetBrains Mono SemiBold | 13 / 20 |
@@ -115,7 +115,7 @@ Grouped by the frame they live in. Every set gets a short usage note beside it. 
 
 | Set | Properties |
 | --- | --- |
-| **Button** | Type × State × Size (md 40, sm 32, touch 44) × Tone (Default, Danger, Accent) · Label, Leading icon (bool + swap), Trailing icon (bool + swap), Count (bool, "Print labels (2)") |
+| **Button** | Type × State × Size (lg 40, md 32, sm 28, touch 44; renamed Nov 5, 2026, see the last section) × Tone (Default, Danger, Accent) · Label, Leading icon (bool + swap), Trailing icon (bool + swap), Count (bool, "Print labels (2)") |
 | **Icon button** | Type × State × Size (28, 32, 36, 44) × Shape (Square, Circle) · Icon (swap), Dot (bool) |
 | **Segmented control** (New as a set) | Item: State (Default, Hover, Selected, Disabled); bar: 2–5 items · "Operations / Quality & reports", "ADB / AR / DB / DAF", "WhatsApp / Email / Print / Other", "All / Due / Late" |
 | **Link button** | State · Label, Leading icon ("+ Add a row…", "View all →", "Download template") |
@@ -232,7 +232,7 @@ These are chart **shells**: the card, header, legend, axes and an example plot. 
 | --- | --- |
 | **Logo** | Yours, unchanged. Sidebar and Top bar use instances of it |
 
-**Size:** about 85 component sets, about 600 variants (Button alone is 4 types × 6 states × 3 sizes, about 72, plus the Tone variants), and 142 icon variants (71 glyphs × 2 sizes).
+**Size:** about 85 component sets, about 600 variants (Button alone is 4 types × 6 states × 3 sizes, about 72, plus the Tone variants; 192 since the sm size of Nov 5, 2026), and 142 icon variants (71 glyphs × 2 sizes).
 
 ## 6. Layout in the file
 
@@ -240,7 +240,7 @@ These are chart **shells**: the card, header, legend, axes and an example plot. 
 - One frame per group, in a row: `01 Icons`, `02 Actions`, `03 Status`, `04 Forms`, `05 Navigation`, `06 Data`, `07 Charts`, `08 Feedback & overlays`, `09 Brand` (your Logo frame moves in here).
 - Each set sits in a panel with its name, a one-line rule for when to use it, and the token roles it binds.
 - The **Components** documentation sheet is rebuilt from instances of the new sets, so it also tests them.
-- Naming: set `Button`, variant `Type=Primary, State=Hover, Size=md, Tone=Default`. Helper layers that should not be published start with `_`.
+- Naming: set `Button`, variant `Type=Primary, State=Hover, Size=lg, Tone=Default`. Helper layers that should not be published start with `_`.
 
 ## 7. Build route (what "headless" means)
 
@@ -269,7 +269,7 @@ Each phase ends with renders for you to approve.
 ## 9. Open points
 
 1. **Button type mapping (section 4):** Primary = navy fill, Secondary = white with border, Tertiary = soft tint, Ghost = text only; Destructive and Accent become a `Tone` property. Is that right?
-2. **Sizes:** md 40, sm 32 and touch 44 for every button type, or fewer?
+2. **Sizes:** md 40, sm 32 and touch 44 for every button type, or fewer? (Since Nov 5, 2026: lg 40, md 32, sm 28, touch 44.)
 3. **Phase 0, prototype:** change the prototype's font and republish the artifact now, or only at its next release?
 
 ## 10. Build status (Oct 30, 2026)
@@ -311,3 +311,18 @@ Found by comparing the saved file with the last generated file. Screen-level det
 - **Tabs for page tabs:** the dashboard's Operations / Quality & reports switch uses the library **Tab** (Selected On/Off, Show count off) in a Tabs frame, as on the job order and batch pages, instead of **Segmented item**, on every size, labelled **Operations** and **Quality & reports**. Segmented item stays for small switches inside a card (the Quality & reports metric switch).
 - **Drop zone as a logo slot:** at 100 × 100 the Title is hidden and the Hint carries the label ("Drop or click to add logo").
 - **Bar container** (screen pattern, not a component): a fill-width frame that clips, holding the bar at its value width, so the values of a bar chart line up at the right. The owner's containers had a hard-coded #FFFFFF fill; the generator draws them without a fill, so dark mode works.
+
+## Button sizes renamed, new sm (Nov 5, 2026, owner)
+
+| Size | Height | Padding (left, right) | Gap | Label text style | Before Nov 5 |
+| --- | --- | --- | --- | --- | --- |
+| **sm** | 28 | 10 | 6 | Label/Button sm (Noto Sans SemiBold 12 / 16, new) | did not exist |
+| **md** | 32 | 12 | 8 | Label/Button md (13 / 18) | called **sm** (style Label/Button sm) |
+| **lg** | 40 | 16 | 8 | Label/Button lg (14 / 20) | called **md** (style Label/Button md) |
+| touch | 44 | 20 | 8 | Label/Button lg (14 / 20) | unchanged (style was Label/Button md) |
+
+- The Button set has 192 variants: 8 Type/Tone combinations × 4 sizes × 6 states. On the canvas each combination shows its rows in the order lg, md, sm, touch; columns are the states.
+- The rename kept every instance linked: no screen changed size (598 buttons in 144 generated frames checked against a rebuild with the renamed generators, plus the rows A and B frames, which are not regenerated).
+- The two text styles were renamed the same way, and Label/Button sm is new. Built with `library/buttonsizes.js`; the library and screen generators use the new names (`actions.js`, `dsl.js`, `screens/row*.js`).
+- **sm (28)** is not used on any screen yet. It is for dense places: table cells, card heads with several actions, inline actions in a list row. Other components that have their own sm/md sizes (Search, Text field, Select, Dialog, Status badge) are not affected.
+

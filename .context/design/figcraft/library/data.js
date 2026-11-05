@@ -125,7 +125,7 @@ function cards(b, pan) {
       const o = b.text(cid, k === "Alert" ? "DEADLINE ALERT" : "NOTE", { style: "Overline", color: k === "Alert" ? "Accent/accent-soft" : "Accent/accent-text", name: "Overline" });
       const t = b.text(cid, "3 batches due within 24 h", { style: "Heading/H3", color: fg, name: "Title", fill: true });
       const d = b.text(cid, "Batch 0417 is still in preparation. Move two analysts to Proximate to keep the deadline.", { style: "Body small/Regular", color: k === "Alert" ? "Text/text-inverse" : "Text/text-secondary", name: "Text", fill: true });
-      b.instT(cid, "Button", "Type=Primary, Tone=Accent, Size=md, State=Default", { Label: "Open batch" }, { sizingH: "fill" });
+      b.instT(cid, "Button", "Type=Primary, Tone=Accent, Size=lg, State=Default", { Label: "Open batch" }, { sizingH: "fill" });
       return { Title: t, Text: d };
     } }));
   b.set(pan, "Card callout", cv, { cols: 2, cw: 440, ch: 280, W: 912, H: 312, textProps: ["Title", "Text"] });
@@ -147,7 +147,7 @@ function cards(b, pan) {
       const ic = b.frame(cid, { name: "Icon", w: 36, h: 36, fill: "Accent/accent-100", r: 10, layout: "h", main: "center", cross: "center", sizeH: "fixed", sizeV: "fixed" }); b.icon(ic, "file-text", 20, "Accent/accent-text");
       const c = b.frame(cid, { name: "Text", w: 300, h: 36, layout: "v", gap: 0, sizeH: "fill", sizeV: "hug" });
       const t = b.text(c, "RoA B-2026-0415 · draft", { style: "Body small/SemiBold", name: "Title", fill: true }); const m = b.text(c, "Started 2 h ago · PT Bukit Asam", { style: "Caption/Regular", color: "Text/text-secondary", name: "Meta", fill: true });
-      b.instT(cid, "Button", "Type=Secondary, Tone=Default, Size=sm, State=Default", { Label: "Continue" });
+      b.instT(cid, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { Label: "Continue" });
       return { Title: t, Meta: m };
     } }];
   b.set(pan, "WIP row", wv, { cols: 1, cw: 600, ch: 100, W: 632, H: 132, textProps: ["Title", "Meta"] });

@@ -5,11 +5,11 @@ function sheet(b, host) {
   const row = (pan, name) => b.frame(pan, { name, w: 1400, h: 60, layout: "h", gap: 16, wrap: true, cross: "center", sizeH: "fill", sizeV: "hug" });
   const p1 = section(b, host, "Buttons", "Primary, Secondary, Tertiary, Ghost; Danger and Accent tones; every state of the Primary button.");
   let r = row(p1, "Types");
-  ["Primary", "Secondary", "Tertiary", "Ghost"].forEach((t) => b.instT(r, "Button", `Type=${t}, Tone=Default, Size=md, State=Default`, { Label: t }));
-  b.instT(r, "Button", "Type=Primary, Tone=Danger, Size=md, State=Default", { Label: "Delete" });
-  b.instT(r, "Button", "Type=Primary, Tone=Accent, Size=md, State=Default", { Label: "Open batch" });
+  ["Primary", "Secondary", "Tertiary", "Ghost"].forEach((t) => b.instT(r, "Button", `Type=${t}, Tone=Default, Size=lg, State=Default`, { Label: t }));
+  b.instT(r, "Button", "Type=Primary, Tone=Danger, Size=lg, State=Default", { Label: "Delete" });
+  b.instT(r, "Button", "Type=Primary, Tone=Accent, Size=lg, State=Default", { Label: "Open batch" });
   r = row(p1, "States");
-  ["Default", "Hover", "Pressed", "Focused", "Disabled", "Loading"].forEach((s) => b.instT(r, "Button", `Type=Primary, Tone=Default, Size=md, State=${s}`, { Label: s }));
+  ["Default", "Hover", "Pressed", "Focused", "Disabled", "Loading"].forEach((s) => b.instT(r, "Button", `Type=Primary, Tone=Default, Size=lg, State=${s}`, { Label: s }));
   r = row(p1, "Icon buttons");
   ["Primary", "Secondary", "Tertiary", "Ghost"].forEach((t) => b.inst(r, "Icon button", `Type=${t}, Size=36, State=Default`));
   const p2 = section(b, host, "Badges and status", "Status badge, Tag, Delta, Count pill, Role badge, File chip.");

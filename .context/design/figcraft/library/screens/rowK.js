@@ -20,7 +20,7 @@ const icon = (b, parent, glyph, tok = "Text/text-muted", size = 14) => { const i
 const txt = (b, parent, t, style, color, name, o = {}) => b.text(parent, t, { style, color, name: name || t, ...o });
 const hframe = (b, parent, name, gap = 8, o = {}) => b.frame(parent, { name, w: o.w || 200, h: o.h || 24, layout: "h", gap, cross: o.cross || "center", main: o.main, wrap: o.wrap, pad: o.pad, sizeH: o.sizeH || "hug", sizeV: o.sizeV || "hug", fill: o.fill, r: o.r, stroke: o.stroke, sw: o.sw, clip: o.clip });
 const vframe = (b, parent, name, gap = 8, o = {}) => b.frame(parent, { name, w: o.w || 200, h: o.h || 24, layout: "v", gap, pad: o.pad, cross: o.cross, sizeH: o.sizeH || "fill", sizeV: "hug", fill: o.fill, r: o.r, stroke: o.stroke, sw: o.sw });
-const btn = (b, parent, type, label, glyph, o = {}) => b.instV(parent, "Button", `Type=${type}, Tone=${o.tone || "Default"}, Size=${o.size || "md"}, State=Default`, { texts: { Label: label }, setProps: glyph ? { "Leading icon": true, "Leading glyph": b.iconId(glyph) } : { "Leading icon": false }, props: o.fill ? { sizingH: "fill" } : undefined });
+const btn = (b, parent, type, label, glyph, o = {}) => b.instV(parent, "Button", `Type=${type}, Tone=${o.tone || "Default"}, Size=${o.size || "lg"}, State=Default`, { texts: { Label: label }, setProps: glyph ? { "Leading icon": true, "Leading glyph": b.iconId(glyph) } : { "Leading icon": false }, props: o.fill ? { sizingH: "fill" } : undefined });
 const cardTop = (b, c, title) => { const hd = b.frame(c, { name: "Card head", w: 400, h: 32, layout: "h", gap: 12, main: "spaceBetween", cross: "center", sizeH: "fill", sizeV: "fixed" }); txt(b, hd, title, "Heading/H3", "Text/heading", "Title"); return hd; };
 const OVERLINE = { clients: "CLIENTS", drill: "DRILL HOLE", lith: "LITHOLOGY", seam: "SEAM" };
 
@@ -75,7 +75,7 @@ function header(b, main, kind, o) {
   const r = hframe(b, main, "Header", 16, { sizeH: "fill", main: "spaceBetween", cross: "max" });
   const t = vframe(b, r, "Title block", 4, { sizeH: kind === "desktop" ? "hug" : "fill" });
   txt(b, t, OVERLINE[o.key], "Overline", "Text/text-muted", "Overline"); txt(b, t, o.title, kind === "phone" ? "Heading/H1" : "Display/XL", "Text/heading", "Title");
-  if (!o.readOnly) { const a = hframe(b, r, "Actions", 8); if (o.imp && kind !== "phone") btn(b, a, "Secondary", "Import", "upload-simple"); btn(b, a, "Primary", o.add, "plus", { size: kind === "phone" ? "sm" : "md" }); }
+  if (!o.readOnly) { const a = hframe(b, r, "Actions", 8); if (o.imp && kind !== "phone") btn(b, a, "Secondary", "Import", "upload-simple"); btn(b, a, "Primary", o.add, "plus", { size: kind === "phone" ? "md" : "lg" }); }
 }
 function toolbar(b, main, kind, o) {
   const f = b.frame(main, { name: "Filters", w: CW[kind], h: 44, layout: "h", gap: 12, wrap: kind === "tablet", cross: "max", sizeH: "fill", sizeV: "hug" });
@@ -164,7 +164,7 @@ const CL = (kind, o = {}) => ({ module: "09-Clients", screen: "01-Clients_list",
 function clientFormBody(b, bd, kind, o = {}) {
   const t = !!o.touch;
   // logo slot: a 100 x 100 drop zone, or the uploaded logo with its file name and Remove
-  if (o.logo) { const f = hframe(b, bd, "Logo file", 16, { sizeH: "fill" }); const tile = avatar(b, f, CLIENTS[0], 100); const t2 = vframe(b, f, "Text", 4, { sizeH: "hug" }); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, t2, "Secondary", "Remove", "trash", { size: "sm" }); }
+  if (o.logo) { const f = hframe(b, bd, "Logo file", 16, { sizeH: "fill" }); const tile = avatar(b, f, CLIENTS[0], 100); const t2 = vframe(b, f, "Text", 4, { sizeH: "hug" }); txt(b, t2, "bukit-asam-logo.png", "Body small/SemiBold", "Text/heading", "File"); txt(b, t2, "960 × 270, 48 KB", "Caption/Regular", "Text/text-muted", "Meta"); btn(b, t2, "Secondary", "Remove", "trash", { size: "md" }); }
   else { const dv = b.v("Drop zone", "State=Default"); const dz = b.instV(bd, "Drop zone", "State=Default", { texts: { Hint: "Drop or click to add logo" }, hide: ["Title"], props: { width: 100, height: 100, sizingH: "fixed", sizingV: "fixed", cornerRadius: 1000 } }); b.raw("node.set", { ids: [dz + dv.names.Hint], props: { width: 84, sizingH: "fixed", textAutoResize: "height", textAlign: "center" } }); }
   field(b, bd, "Name *", o.name || "", { touch: t, ph: "Client name" });
   const r = hframe(b, bd, "Row", 12, { sizeH: "fill", cross: "min" }); field(b, r, "Code *", o.code || "", { touch: t, ph: "Short, unique, e.g. BNM", helper: false });
@@ -205,7 +205,7 @@ function clientDetail(b, x, y, kind, o = {}) {
   const kv = (k, v, link) => { const id = b.instV(pc, "Key-value row", "Layout=Inline", { texts: { Key: k, Value: v }, fills: link ? { Value: "Primary/primary" } : undefined, props: { sizingH: "fill" } }); b.raw("node.set", { ids: [id + kvv.names.Value], props: { sizingH: "fill", textAutoResize: "height" } }); return id; };
   kv("Code", c0[1]); kv("Address", c0[4]); kv("Billing address", "Jl. Jenderal Sudirman 45, Jakarta Selatan"); kv("Status", c0[5]); kv("Created", c0[7]); kv("Job orders", o.jobs || "14 job orders", true); kv("Total sample", c0[6]);
   const cc = card(b, cols || m, "Contacts card"); if (cols) b.raw("node.set", { ids: [cc], props: { sizingH: "fill", sizingV: "fill" } });
-  const ch = cardTop(b, cc, "Contacts"); btn(b, ch, "Secondary", "Add contact", "plus", { size: "sm" });
+  const ch = cardTop(b, cc, "Contacts"); btn(b, ch, "Secondary", "Add contact", "plus", { size: "md" });
   if (kind === "phone") {
     CONTACTS.slice(0, 3).forEach((c) => { const it = vframe(b, cc, "Contact", 4, { fill: "Surface/muted", r: 12, pad: [12, 12, 12, 12] }); const top = hframe(b, it, "Top", 6, { sizeH: "fill", main: "spaceBetween" }); const nm = hframe(b, top, "Name", 6); txt(b, nm, c[0], "Body small/SemiBold", "Text/heading", "Name"); if (c[4]) pill(b, it, "Default", "Feedback/warning-100", "Feedback/warning", false); menu(b, top); txt(b, it, c[1], "Caption/Regular", "Text/text-secondary", "Position"); const ac = hframe(b, it, "Actions", 8); icon(b, ac, "envelope-simple", "Primary/primary", 14); txt(b, ac, c[2] + "@" + DOMAIN[c0[1]], "Caption/Regular", "Primary/primary", "Email"); txt(b, it, c[3], "Caption/Regular", "Text/foreground", "Phone"); });
   } else {
@@ -246,7 +246,7 @@ function drillCell(readOnly) {
     if (h === "Description") txt(b, f, d[1], "Body small/Regular", "Text/text-secondary", "Description");
     if (h === "Total sample") txt(b, f, d[2], "Body small/Regular", "Text/foreground", "Total sample");
     if (h === "Company") txt(b, f, COMP[d[3]], "Body small/Regular", "Text/foreground", "Company");
-    if (h === "CoA") { if (d[4]) { b.instV(f, "Tag", "Type=CoA uploaded"); txt(b, f, d[4], "Caption/Regular", "Text/text-secondary", "File"); } else { b.instV(f, "Tag", "Type=CoA missing"); if (!readOnly) btn(b, f, "Secondary", "Upload CoA", "upload-simple", { size: "sm" }); } }
+    if (h === "CoA") { if (d[4]) { b.instV(f, "Tag", "Type=CoA uploaded"); txt(b, f, d[4], "Caption/Regular", "Text/text-secondary", "File"); } else { b.instV(f, "Tag", "Type=CoA missing"); if (!readOnly) btn(b, f, "Secondary", "Upload CoA", "upload-simple", { size: "md" }); } }
     if (h === "" && !readOnly) { editLink(b, f); menu(b, f); }
   };
 }

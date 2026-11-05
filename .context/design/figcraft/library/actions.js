@@ -17,7 +17,8 @@ function look(type, tone, st) {
   if (dis) { o.text = "Text/text-muted"; if (type === "Primary" || tone === "Accent") o.fill = "Surface/muted"; if (o.stroke) { o.stroke = "Surface/border"; o.fill = "Surface/muted"; } if (tone === "Danger") { o.fill = type === "Primary" ? "Surface/muted" : o.fill; } if (type === "Tertiary") o.fill = "Surface/muted"; if (type === "Ghost") o.fill = "none"; delete o.fillOp; }
   return o;
 }
-const SIZES = { md: { h: 40, px: 16, st: "Label/Button md" }, sm: { h: 32, px: 12, st: "Label/Button sm" }, touch: { h: 44, px: 20, st: "Label/Button md" } };
+// Button sizes (owner, Nov 5, 2026): sm 28 (new), md 32 (was sm), lg 40 (was md), touch 44
+const SIZES = { lg: { h: 40, px: 16, st: "Label/Button lg" }, md: { h: 32, px: 12, st: "Label/Button md" }, sm: { h: 28, px: 10, gap: 6, st: "Label/Button sm" }, touch: { h: 44, px: 20, st: "Label/Button lg" } };
 const COMBOS = [["Primary", "Default"], ["Secondary", "Default"], ["Tertiary", "Default"], ["Ghost", "Default"], ["Primary", "Danger"], ["Secondary", "Danger"], ["Ghost", "Danger"], ["Primary", "Accent"]];
 
 function button(b, host) {
@@ -27,7 +28,7 @@ function button(b, host) {
     const z = SIZES[size], lk = look(type, tone, st);
     variants.push({
       name: `Type=${type}, Tone=${tone}, Size=${size}, State=${st}`, w: 120, h: z.h,
-      frame: { fill: lk.fill, stroke: lk.stroke, sw: lk.stroke ? 1 : undefined, r: 999, opacity: undefined, layout: "h", gap: 8, pad: [0, z.px, 0, z.px], main: "center", cross: "center", sizeH: "hug", sizeV: "fixed", effects: undefined },
+      frame: { fill: lk.fill, stroke: lk.stroke, sw: lk.stroke ? 1 : undefined, r: 999, opacity: undefined, layout: "h", gap: z.gap || 8, pad: [0, z.px, 0, z.px], main: "center", cross: "center", sizeH: "hug", sizeV: "fixed", effects: undefined },
       build(cid) {
         let spin;
         if (st === "Loading") spin = b.icon(cid, "spinner", 14, lk.text);

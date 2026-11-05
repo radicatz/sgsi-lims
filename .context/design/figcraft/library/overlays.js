@@ -32,7 +32,7 @@ function feedback(b, pan) {
 }
 
 function sheets(b, pan) {
-  const footer = (cid, w, danger, a, c) => { const f = b.frame(cid, { name: "Footer", w, h: 56, layout: "h", gap: 12, main: "max", cross: "center", sizeH: "fill", sizeV: "hug" }); b.instT(f, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { Label: c }); b.instT(f, "Button", danger ? "Type=Primary, Tone=Danger, Size=md, State=Default" : "Type=Primary, Tone=Default, Size=md, State=Default", { Label: a }); return f; };
+  const footer = (cid, w, danger, a, c) => { const f = b.frame(cid, { name: "Footer", w, h: 56, layout: "h", gap: 12, main: "max", cross: "center", sizeH: "fill", sizeV: "hug" }); b.instT(f, "Button", "Type=Secondary, Tone=Default, Size=lg, State=Default", { Label: c }); b.instT(f, "Button", danger ? "Type=Primary, Tone=Danger, Size=md, State=Default" : "Type=Primary, Tone=Default, Size=md, State=Default", { Label: a }); return f; };
   const head = (cid, w, title) => { const h = b.frame(cid, { name: "Header", w, h: 32, layout: "h", gap: 8, cross: "center", sizeH: "fill", sizeV: "hug" }); const t = b.text(h, title, { style: "Heading/H3", color: "Text/heading", name: "Title", fill: true }); b.inst(h, "Icon button", "Type=Ghost, Size=32, State=Default"); return t; };
   const dv = [];
   for (const type of ["Default", "Destructive"]) for (const [sz, W] of [["sm", 400], ["md", 560], ["lg", 800]]) {
