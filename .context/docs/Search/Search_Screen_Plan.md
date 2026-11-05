@@ -41,17 +41,17 @@ A hit the role cannot open is not shown at all, so counts are per role.
 Desktop and tablet. Focusing the field opens a panel under it (width 560, Elevation/md):
 
 ```
-[🔍 b0422|                                   (scan)]
+[🔍 b0417|                                   (scan)]
 ┌──────────────────────────────────────────────────┐
 │ SAMPLES                                           │
-│  B0422-01  BNM-3507    PT Bara Nusantara M.  Received │
-│  B0422-02  BNM-3508    PT Bara Nusantara M.  Received │
+│  B0417-01  BNM-3601    PT Bara Nusantara M.  In batch │
+│  B0417-02  BNM-3602    PT Bara Nusantara M.  In batch │
 │ BATCHES                                           │
-│  B-2026-0422  JO-2026-0137  Receiving             │
+│  B-2026-0417  JO-2026-0138  Preparation           │
 │ JOB ORDERS                                        │
 │  …                                                │
 │ ─────────────────────────────────────────────────│
-│ See all 14 results for "b0422"              Enter │
+│ See all 14 results for "b0417"              Enter │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -74,7 +74,7 @@ Desktop and tablet. Focusing the field opens a panel under it (width 560, Elevat
 SEARCH
 Results for "BNM-35"                                  [Advanced search]
 ┌ Types ─────────┐ ┌ Samples  12 ─────────────────────────────────────┐
-│ All        31  │ │ BNM-3507  B0422-07  JO-2026-0137  PT Bara N.  Received  → │
+│ All        31  │ │ BNM-3507  B0410-07  JO-2026-0131  PT Bara N.  In batch  → │
 │ Samples    12  │ │ …  (5 rows)                          Show all 12 │
 │ Batches     3  │ └──────────────────────────────────────────────────┘
 │ Job orders  2  │ ┌ Batches  3 ──────────────────────────────────────┐
@@ -139,20 +139,20 @@ Tablet: the saved queries move into a **Saved queries** select above the query c
 One sample's story, newest last, as a timeline. In v1 the steps are the ones the lab records (spec 1.1).
 
 ```
-Job orders > JO-2026-0137 > BNM-3507
-BNM-3507   [Received]                                   [Export PDF]
-B0422-07   JO-2026-0137   B-2026-0422   PT Bara Nusantara Mandiri
-┌ Sample ──────────────┐ ┌ History ───────────────────────────────────────────┐
-│ Drill hole DH-BNM-021 │ │ ● Registered on JO-2026-0137      Rina Kartika  14 Oct │
-│ Seam       EN2        │ │ ● Received, labelled B0422-07     Dedi K.  21 Oct 09:12│
-│ Lithology  Coal       │ │   Mass 2.41 kg   Condition Good   2 photos          │
-│ Depth      41.2–42.0 m│ │ ● Added to batch B-2026-0422      Maya L.  21 Oct      │
-│ Mass       2.41 kg    │ │ ● Preparation finished, ADL 6.42 %  Dedi K.  22 Oct    │
-│ Status     In batch   │ │ ● Values entered (8 parameters)   Fitri H.  23 Oct     │
-└──────────────────────┘ │   TM 14.20  IM 8.10  Ash 5.42  …   [View values]       │
-                         │ ● Batch completed, RoA-0422 uploaded  Maya L.  24 Oct  │
-                         │ ● CoA-JO-2026-0137-1 published        Maya L.  25 Oct  │
-                         │ ● CoA sent by WhatsApp to Budi Santoso Rina K. 25 Oct  │
+Job orders > JO-2026-0131 > BNM-3507
+BNM-3507   [In batch]                                   [Export PDF]
+B0410-07   JO-2026-0131   B-2026-0410   PT Bara Nusantara Mandiri
+┌ Sample ───────────────┐ ┌ History ─────────────────────────────────────────────┐
+│ Drill hole DH-BNM-021 │ │ ● Registered on JO-2026-0131        Rina Kartika  20 Oct │
+│ Seam       EN2        │ │ ● Received, labelled B0410-07       Dedi K.  22 Oct 09:12│
+│ Lithology  Coal       │ │   Mass 2.41 kg   Condition Good   2 photos            │
+│ Depth      41.2–42.0 m│ │ ● Added to batch B-2026-0410        Maya L.  22 Oct      │
+│ Mass       2.41 kg    │ │ ● Preparation finished, ADL 6.42 %  Dedi K.  23 Oct      │
+│ Status     In batch   │ │ ● Values entered (8 parameters)     Fitri H.  25 Oct     │
+└───────────────────────┘ │   TM 14.20  IM 8.10  Ash 5.42  …   [View values]         │
+                          │ ● Batch completed, RoA-0410 uploaded  Maya L.  28 Oct    │
+                          │ ● CoA-JO-2026-0131-1 published        Maya L.  28 Oct    │
+                          │ ● CoA revised: revision 2 published   Maya L.  1 Nov     │
                          └─────────────────────────────────────────────────────┘
 ```
 
@@ -175,7 +175,7 @@ Next goal (kept in the spec): result rounds per tab, rechecks with scope and rea
 | SS | Screen | VV Variant | Sizes | Persona | Content |
 | --- | --- | --- | --- | --- | --- |
 | 01 | Quick_search | 01 Recent | D | Maya Lestari | Panel on focus: recent records and searches, over the Dashboard |
-| | | 02 Typing | D, T | Maya Lestari | "b0422": samples, batch, job order hits, See all 14 |
+| | | 02 Typing | D, T | Maya Lestari | "b0417": samples, batch, job order hits, See all 14 |
 | | | 03 Exact_match | D | Rina Kartika | "JO-2026-0137": Go to first |
 | | | 04 No_match | D | Dedi Kurniawan | "XK-77", Open advanced search |
 | 02 | Search_results | 01 All | D, T, P | Maya Lestari | "BNM-35", sections per type |
@@ -189,17 +189,17 @@ Next goal (kept in the spec): result rounds per tab, rechecks with scope and rea
 | | | 04 Columns_menu | D | Maya Lestari | Columns menu open |
 | | | 05 Save_query | D | Maya Lestari | Save query dialog with Share with staff |
 | | | 06 Over_limit | D | Bambang Sutrisno | Info alert, 500 of 2,318 |
-| 04 | Sample_history | 01 Default | D, T, P | Maya Lestari | BNM-3507, every v1 event up to CoA sent |
+| 04 | Sample_history | 01 Default | D, T, P | Maya Lestari | BNM-3507, every v1 event up to the CoA revision |
 | | | 02 CSO | D | Rina Kartika | Values hidden, no View values |
 | | | 03 In_progress | D | Fitri Handayani | A sample in analysis: pending steps grey |
 | | | 04 Held | D | Dedi Kurniawan | Held at reception with the reason, then released |
 
-Totals: 19 desktop, 3 tablet and 4 phone frames: **26 frames**. Job order Samples tab and batch page row menus get a **History** entry when those rows are next rebuilt; no new frames there.
+Totals: 18 desktop, 4 tablet and 4 phone frames: **26 frames**. Job order Samples tab and batch page row menus get a **History** entry when those rows are next rebuilt; no new frames there.
 
 ## 9 · Demo data
 
-- Samples of JO-2026-0137 (PT Bara Nusantara Mandiri, batch B-2026-0422, lab codes B0422-01 to B0422-12, sample IDs BNM-3501 to BNM-3512); BNM-3507 is the history sample (drill hole DH-BNM-021, seam EN2, depth 41.2 to 42.0 m).
-- People and dates from the batch frames: Rina Kartika registers (14 Oct), Dedi Kurniawan receives and prepares (21 and 22 Oct), Fitri Handayani enters values (23 Oct), Maya Lestari completes and publishes (24 and 25 Oct).
+- History sample BNM-3507 of JO-2026-0131 (PT Bara Nusantara Mandiri, completed batch B-2026-0410, lab code B0410-07, drill hole DH-BNM-021, seam EN2, depth 41.2 to 42.0 m), matching the Reports frames (RoA-0410, CoA-JO-2026-0131-1 superseded by revision 2). The In_progress sample is BNM-3602 in B-2026-0417 (JO-2026-0138, in preparation on the Dashboard). Quick search types "b0417" (lab codes B0417-01 to B0417-12).
+- People and dates: Rina Kartika registers (20 Oct), Dedi Kurniawan receives and prepares (22 and 23 Oct), Fitri Handayani enters values (25 Oct), Maya Lestari completes the batch and publishes the CoA (28 Oct), revision 2 on 1 Nov.
 - Values from the Reports preview (TM 14.20, IM 8.10, Ash 5.42, VM 39.85, FC 46.63, TS 0.42, GCV 5,980 on ADB).
 - Saved queries: "High-ash BNM samples" (mine), "Held this month" (mine), "Late batches" (shared by Hendra Wijaya).
 
