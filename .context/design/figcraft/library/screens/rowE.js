@@ -29,6 +29,7 @@ function coaCard(b, main, kind, sent) {
     b.text(n, "Sari Wulandari", { style: "Body small/SemiBold", color: "Text/foreground", name: "Recipient" });
     b.text(n, "25 Oct 2026", { style: "Body small/Regular", color: "Text/text-secondary", name: "Date" });
   }
+  btn(b, c, "Ghost", "Open in Reports", "arrow-right");
   b.text(c, "Built from", { style: "Body small/SemiBold", color: "Text/text-secondary", name: "Section" });
   const r = b.frame(c, { name: "Batch", w: 400, h: 40, fill: "Primary/primary-50", r: 10, layout: "h", gap: 10, pad: [10, 14, 10, 14], cross: "center", wrap: phone, sizeH: "fill", sizeV: "hug" });
   icon(b, r, "check-circle", "Status/st-completed");
@@ -36,6 +37,26 @@ function coaCard(b, main, kind, sent) {
   b.text(r, "RoA-0416", { style: "Data", color: "Text/text-secondary", name: "RoA" }); // plain text: the CSO cannot open the RoA file
   b.text(r, "Approved by Hendra Wijaya, S.T.", { style: "Body small/Regular", color: "Text/text-secondary", name: "Approved" });
   return c;
+}
+// Reports plan section 6: the two states before a CoA is published
+function coaStateCard(b, main, kind, state) {
+  const phone = kind === "phone";
+  const c = card(b, main, "CoA card");
+  const hd = b.frame(c, { name: "Card head", w: 400, h: 32, layout: "h", gap: 12, cross: "center", main: "spaceBetween", sizeH: "fill", sizeV: "fixed" });
+  const t = b.frame(hd, { name: "Titles", w: 200, h: 26, layout: "h", gap: 10, cross: "center", sizeH: "hug", sizeV: "hug" });
+  b.text(t, "Certificate of Analysis", { style: "Heading/H3", color: "Text/heading", name: "Title" });
+  if (state !== "ready") b.instV(t, "Status badge", "Status=Draft, Size=md");
+  const n = b.frame(c, { name: "Note", w: 400, h: 44, fill: "Primary/primary-50", r: 10, layout: "h", gap: 8, pad: [10, 14, 10, 14], cross: "center", wrap: true, sizeH: "fill", sizeV: "hug" });
+  icon(b, n, state === "ready" ? "check-circle" : "pencil-simple", state === "ready" ? "Status/st-completed" : "Text/text-secondary");
+  b.text(n, state === "ready" ? "All 2 batches are completed." : "Draft started by", { style: "Body small/Regular", color: "Text/foreground", name: "Text" });
+  if (state !== "ready") { b.text(n, "Maya Lestari", { style: "Body small/SemiBold", color: "Text/foreground", name: "By" }); b.text(n, "4 Nov 2026", { style: "Body small/Regular", color: "Text/text-secondary", name: "Date" }); }
+  btn(b, c, "Primary", state === "ready" ? "Generate CoA" : "Continue draft", state === "ready" ? "file-text" : "pencil-simple", "lg");
+  return c;
+}
+function coaStateFrame(b, x, y, kind, name, state) {
+  const s = detailFrame(b, x, y, kind, { ...JO0141, name, status: "In progress", steps: ["14 Oct", "15 Oct", "16 Oct", "22 Oct", "", ""], cur: 4, tab: "CoA", role: "Lab" });
+  coaStateCard(b, s.main, kind, state);
+  return s;
 }
 function coaFrame(b, x, y, kind, name, sent) {
   const s = detailFrame(b, x, y, kind, { ...JO0141, name, status: sent ? "Delivered" : "Reported", steps: ["14 Oct", "15 Oct", "16 Oct", "22 Oct", "24 Oct", sent ? "25 Oct" : ""], cur: sent ? 6 : 5, tab: "CoA" });
@@ -90,6 +111,8 @@ exports.build = (b) => {
   markSentDesktop(b, 0, Y.desktop);
   page(b, "desktop"); coaFrame(b, 1560, Y.desktop, "desktop", "CoA · Sent · Desktop", true);
   page(b, "desktop"); cancelP7(b, 3120, Y.desktop);
+  page(b, "desktop"); coaStateFrame(b, 4680, Y.desktop, "desktop", "CoA · Ready to generate · Desktop", "ready");
+  page(b, "desktop"); coaStateFrame(b, 6240, Y.desktop, "desktop", "CoA · Draft in progress · Desktop", "draft");
   page(b, "phone"); TITLE(b, 0, Y.phone - 90, "E · CoA and actions");
   markSentPhone(b, 0, Y.phone);
 };

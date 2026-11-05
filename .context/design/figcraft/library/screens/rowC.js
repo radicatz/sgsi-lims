@@ -226,7 +226,7 @@ const minipill = (b, parent, t) => { const f = b.frame(parent, { name: "Param", 
 // ---------- frames ----------
 function detailFrame(b, x, y, kind, o) {
   page(b, kind);
-  const s = b.shell({ name: o.name, x, y, kind, active: "Job orders" });
+  const s = b.shell({ name: o.name, x, y, kind, active: "Job orders", role: o.role });
   detailHead(b, s.main, kind, o);
   if (o.steps) stepperCard(b, s.main, kind, o);
   tabs(b, s.main, kind, o.tab, o.counts);

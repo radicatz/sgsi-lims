@@ -1,6 +1,6 @@
 # Reports screen plan
 
-Written Nov 5, 2026. **Status: plan, waiting for go.** Module 07 Reports, canvas row **L**. Builds on spec S-11, S-28, 9.5 and 9.8 (`../Project/Coal_LIMS_Development_Spec.md`), the job order CoA tab (`../Job Order/Job_Order_Screen_Plan.md` sections 2 and 5), the batch RoA card (`../Batch/Batch_Screen_Plan.md`), the My work queues Q6 and Q7 (`../My Work/My_Work_Screen_Plan.md`) and the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`).
+Written Nov 5, 2026. **Status: BUILT Nov 5, 2026** (section 14). Module 07 Reports, canvas row **L**. Builds on spec S-11, S-28, 9.5 and 9.8 (`../Project/Coal_LIMS_Development_Spec.md`), the job order CoA tab (`../Job Order/Job_Order_Screen_Plan.md` sections 2 and 5), the batch RoA card (`../Batch/Batch_Screen_Plan.md`), the My work queues Q6 and Q7 (`../My Work/My_Work_Screen_Plan.md`) and the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`).
 
 ## 1 · Goal
 
@@ -242,3 +242,23 @@ Total: 18 desktop, 3 tablet and 5 phone frames in row L, plus 2 desktop frames i
 3. `naming.js` gets the module 07 rules; `cards.js` and `fit.js` run as usual.
 4. Deploy to the open file (dirty check, backup, swap), commit. No export unless asked.
 5. Docs: this plan gets its build status; spec S-28 gets a v1 note (CoA only; RoA is the uploaded file), S-11 marked next goal for v1; `Frame_Naming.md` gets module 07; README.
+
+## 14 · Build status (Nov 5, 2026)
+
+All 28 frames are built: 26 on row **L  Reports** with `library/screens/rowL.js` (module 07, final names, role sidebar per persona) and 2 on row E (`rowE.js`, module 03 screen 05, 04 Ready_to_generate and 05 Draft_in_progress, built as Lab admin Maya Lestari). The open points of section 12 were used with their defaults. Deployed to the main file (backup `backup/SGSI-LIMS-screens.before-reports.figcraft`).
+
+What was built, from library instances: Tab, Filter chip, Search, Select, Checkbox, Status badge, Pager, Sticky action bar, Empty state, Inline alert, Key-value row (Inline), Parameter pill, Option row, Dialog, Bottom sheet, Icon button, Avatar (and the `ptba-logo` frame for PT Bukit Asam). The **document page** (A4, 560 × 792, header, client block, standards statement, two sample tables on four bases, signature block, footer, DRAFT watermark) is a drawing helper in `rowL.js`, not a library component.
+
+Deviations from the plan:
+
+- **No zoom controls** under the preview: the icon library has no minus glyph. The preview shows **‹ Page 1 of 2 ›** only.
+- **CoA status badge** reuses the job order Status badge colours with its own label: Published (the Reported colour), Sent (Delivered), Superseded and Void (Cancelled). A dedicated badge set is not needed yet.
+- **Download PDFs** on the multi-select frame is the library **Sticky action bar** (note "2 selected", Clear, Download PDFs), as in My work.
+- **Details** shows the person next to the date as a second text (Value 2), and the signatory's title as its own row, so no value joins two facts with a separator.
+- **Draft** shows "Number on publish" where the certificate number goes, because a draft has none. Demo sample IDs follow the client's initials and the job order number (BA-0142-01, BN-0131-01).
+- **Persona per frame:** Lab admin on the lists, Draft, Published and Revise; CSO on the CSO list, multi-select, Mark sent and Sent (desktop) and on the phone Published frame (sticky bar Download and Mark sent); Superadmin on Void; Analyst on the Analyst frames.
+- **Row menu** is not drawn open; its entries are in section 4. A frame can be added when the menu component is wanted.
+- **Tablet and phone** frames exist for the CoA list, CoA draft and CoA published, plus the phone Filters sheet and the phone RoA page; the RoA tab, CSO, Analyst, Empty and No_results states are desktop only, as planned.
+- **Job order CoA card:** the published and sent cards got an **Open in Reports** ghost button; the two new states (Ready with **Generate CoA**, Draft with **Continue draft**) follow section 6.
+- **Dates:** the demo CoA list uses job orders JO-2026-0126 to 0132 and 0141 to 0142, so it does not collide with the job orders that are still in progress on the Dashboard.
+

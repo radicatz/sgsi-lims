@@ -1239,6 +1239,8 @@ Responsive: tablet grid with frozen sample columns; mobile cards with key result
 
 ### S-11 RoA export (dialog and files) (Fixed formats)
 
+**v1 note (Nov 5, 2026, D-44):** next goal. In v1 the RoA is the signed paper file uploaded on the batch page; Reports lists it for download and print only (`../Reports/Reports_Screen_Plan.md`).
+
 - The RoA is internal (B-3): every page carries "Internal — not for distribution", and roles without `roa.download` (CSO) cannot open it. The client document is the CoA (S-28).
 - Triggers: icons on the batch list, buttons on Input and Review, per drill hole on the dashboard.
 - PDF: header block, then one table per sample with Air Dried, Dry, Dry Ash Free and As Received columns and the method on each row (from the sample RoA). Header fields: job or batch number, date received, mass, date issued, attention, email, principal, reference, signature, form code (R-10).
@@ -1334,6 +1336,8 @@ The landing page for every staff role.
 - Right column: **Recent activity** for the user's lab (who moved what, when), as in Clarity.
 
 ### S-28 Report review and CoA `/reports/:id` (Fixed steps, Proposed layout)
+
+**v1 note (Nov 5, 2026):** v1 builds the CoA half (draft with contents and signatory, publish, download, print, mark sent, revise, void) and shows the uploaded signed RoA read-only. The RoA draft, supervisor review and publish steps below are next goal. Layout and frames: `../Reports/Reports_Screen_Plan.md`, built Nov 5, 2026.
 
 - Left: rendered preview of the RoA or CoA (PDF view). Right: header fields, status, version, history and comments.
 - RoA draft (lab admin): edit header fields only (attention, reference, remarks); values come from the snapshot. **Submit for review**.

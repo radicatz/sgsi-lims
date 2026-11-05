@@ -101,3 +101,15 @@ Canvas row J holds the App frames.
 | | 02 | Seam_form | 01 New_seam |
 
 Canvas row K holds the master data frames; they are created under their final names.
+
+## Reports (module 07)
+
+| Module | SS | Screen | Variants (VV) |
+| --- | --- | --- | --- |
+| 07 Reports | 01 | Reports_list | 01 CoA_tab, 02 RoA_tab, 03 CSO, 04 Analyst, 05 Multi_select, 06 Empty, 07 No_results, 08 Filters (phone) |
+| | 02 | CoA | 01 Draft, 02 Draft_signatory, 03 Publish_confirm, 04 Published, 05 Mark_sent, 06 Sent, 07 Revise, 08 Superseded, 09 Void_confirm |
+| | 03 | RoA | 01 Default, 02 Analyst |
+| 03 Job_orders | 05 | CoA_and_actions | 04 Ready_to_generate, 05 Draft_in_progress (added with Reports) |
+
+Sizes: the list CoA_tab on Desktop, Tablet and Phone; CoA Draft and Published on all three; RoA Default on Desktop and Phone; the rest Desktop only. Canvas row L holds the Reports frames; they are created under their final names.
+

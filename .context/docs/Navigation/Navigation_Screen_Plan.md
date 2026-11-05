@@ -62,7 +62,7 @@ The sidebar is only the first layer. These rules hide information inside the pag
 | Batch page, Analysis tab | Values are hidden. The tab shows progress ("26 of 36 values saved") and status only | CSO |
 | Batch page, RoA card, and Reports | The signed RoA file cannot be opened or downloaded. Its number and status stay as plain text, not links | CSO, Prep |
 | Job order, CoA tab, "Built from" list | The RoA number is plain text, not a link | CSO |
-| Reports | The list holds only the document types the role can download | CSO sees CoAs; Analyst sees RoAs |
+| Reports | The list holds only the document types the role can download (built Nov 5, see `../Reports/Reports_Screen_Plan.md`) | CSO sees CoAs; Analyst sees RoAs |
 | Search | Results never include result values or RoA files | CSO |
 | Job orders | Prep, Analyst, Lab admin, Supervisor and Manager see job orders read-only. Prep and Lab admin still add batches on the Batches tab (`batch.create`) | — |
 | Links to a hidden page | A link to a page the role cannot open is shown as plain text | All |
