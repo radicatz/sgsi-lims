@@ -1,6 +1,6 @@
 # Dashboard v2 — Design Plan
 
-Nov 5, 2026 · Revision 2, plan waiting for go · replaces the Oct 19 plan (built in pen.dev) and the deleted parity plan `Dashboard_Screen_Plan.md`
+Nov 5, 2026 · Revision 2, frames built Nov 5 · replaces the Oct 19 plan (built in pen.dev) and the deleted parity plan `Dashboard_Screen_Plan.md`
 
 "v2" is the name of this dashboard design, not a product release. **v1 ships with this dashboard.** The SIM Lab parity dashboard is dropped; everything it showed is on the Quality & reports tab.
 
@@ -74,7 +74,7 @@ Desktop, 1440, sidebar expanded (content 1128 wide):
 | O5 | **Mean turnaround** | Days from Confirm reception to Completed. The colour band (achieved, 100–110%, 110–125%, 125–150%, 150–200%, 200–300%, >300% of the service turnaround) colours the value and a small label | Card KPI, Kind=Progress |
 | O6 | **Batch workflow** | One bar per v1 step: Created, Receiving, Preparation, Prep finished, Analysis, Analysis finished, Completed, with counts. "Now" | Workflow bars |
 | O7 | **Job orders by status** | Draft, Awaiting samples, In progress, Reported, Delivered (spec 9.3); Closed and Cancelled are left out. "Now" | Bar chart (horizontal) |
-| O8 | **Sample type mix** | Ply, Composite, Roof, Floor, Parting (categories open, R-07) | Donut, Legend item |
+| O8 | **Sample type mix** | Ply, Composite, Roof and floor, Parting (categories open, R-07) | Donut, Legend item |
 | O9 | **Samples received per day** | Bars per day for the period (per week when the period is longer than 31 days) | Bar chart |
 | O10 | **Turnaround by company** | Mean days per company, bar coloured by its band; target line | Bar chart |
 | O11 | **Active batches** | Filter tabs All, Due (within 7 days), Late. Columns: Batch, Company, Job order, Deadline, Progress (values saved or samples received, by step), Status. The row's deadline is coloured by the turnaround band. Rows open the batch page. 8 rows and pager. "Now" | Table card, Status badge, Progress bar, Pager |
@@ -136,7 +136,7 @@ Module **02 Dashboard**, names by `../Design System/Frame_Naming.md`. Canvas row
 | 02 | Quality_and_reports | 02 | Missing_CoA | D | Maya: Missing CoA tab selected |
 | 02 | Quality_and_reports | 03 | Point_tooltip | D | Maya: tooltip on a CV vs Ash point |
 
-Total **15 frames** (9 desktop, 3 tablet, 3 phone), for example `Desktop-02-Dashboard-01-Operations-01-Lab_admin`.
+Total **15 frames** (8 desktop, 3 tablet, 4 phone), for example `Desktop-02-Dashboard-01-Operations-01-Lab_admin`.
 
 ## 9 · Expandable sidebar
 
@@ -178,7 +178,7 @@ The sidebar is already built in the library as **Sidebar** (Collapsed=No 248 px,
 
 | # | Question | Default |
 | --- | --- | --- |
-| 1 | Sample type categories (R-07) | Ply, Composite, Roof, Floor, Parting |
+| 1 | Sample type categories (R-07) | Ply, Composite, Roof and floor, Parting |
 | 2 | Drill-hole list: all master drill holes, or only those with samples in the period? | Only those with samples in the period, so it obeys the filters |
 | 3 | Turnaround target per service | Basic 5 days, Full 10 days until the lab gives its own |
 | 4 | Your queues strip on the dashboard repeats My work | Keep it as a one-line strip (S-01); it hides when every count is 0 |
@@ -190,3 +190,16 @@ The sidebar is already built in the library as **Sidebar** (Collapsed=No 248 px,
 3. `naming.js` gets the `02 Dashboard` rules; `cards.js` and `fit.js` run as usual.
 4. Deploy to the open file (dirty check, backup, swap), commit. No export unless asked.
 5. Docs: this plan gets its build status; spec F-DSH-03 is marked parked; the README is updated.
+
+## 14 · Build status (Nov 5, 2026)
+
+All 15 frames are built on row **I  Dashboard** with `library/screens/rowI.js`, from library instances (Card KPI, Card callout, Calendar day, Deadline item, Legend item, Donut, Scatter, Trend, Status badge, Tag, Filter chip, Pager, Select, Search, Empty state, Tooltip, Bottom sheet, Segmented item).
+
+Deviations from the plan:
+
+- **Charts** are demo drawings: the three scatter cards share one Scatter drawing, and the bars for Batch workflow, Job orders by status, Samples per day and Turnaround are built from frames with token fills. The library Workflow bars and Bar chart components were not used because they have five fixed bars and no editable labels.
+- **Batch workflow** shows the seven v1 steps; the library Workflow bars has five.
+- **Mean turnaround** has no delta pill. The library Delta has no "down is good" colour.
+- **Sidebar_open** (tablet) is drawn as a drawer over a long frame: the scrim and the sidebar cover the first viewport height, and the page below is not dimmed in a viewport crop.
+- **Active batches** shows 8 rows with the pager; the Progress column is plain text ("26 / 36") instead of the Progress bar component.
+- **Phone** Active batches and Drill holes show four cards each.

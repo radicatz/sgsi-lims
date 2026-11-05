@@ -1,6 +1,6 @@
 # Navigation by Role — Design Plan
 
-Nov 5, 2026 · plan, waiting for go
+Nov 5, 2026 · frames built Nov 5
 
 Each role sees only the sidebar items it can use. This plan sets the rule for every screen: which items each role sees, what happens at a page the role cannot open, and which frames change.
 
@@ -125,3 +125,11 @@ Content changes from section 3 that touch built frames:
 | 3 | Analyst and Prep: see Job orders? | **Read-only.** They can see the client's parameters, standard and due date. The job order link in the batch header keeps working |
 | 4 | Audit log: spec S-14 says Superadmin only, but the grid in 8.2 adds Supervisor and Manager | Follow the grid |
 | 5 | Lab admin and Clients | Read-only. Client defaults such as the signatory are saved from the report flow, not on the Clients page |
+
+## 8 · Build status (Nov 5, 2026)
+
+- **Role sidebar:** `shell.js` hides the items of the frame's persona (`VISIBLE` table, `hideNav`), so every frame built by rows C to I gets the right sidebar. The shell knows seven personas: Rina Kartika (CSO), Maya Lestari (Lab admin), Dedi Kurniawan (Preparation), Fitri Handayani (Analyst), Hendra Wijaya (Supervisor), Bambang Sutrisno (Manager) and Wahyu Pratama (Superadmin; invented, an IT staff persona). Rows A and B are not in the build chain, so `library/retro.js` applies the CSO sidebar to their 13 desktop and tablet frames.
+- **Row J App** (`rowJ.js`): 6 frames, the board of seven expanded sidebars (desktop), the board of collapsed rails (tablet), two phone drawers (Lab admin, CSO) and the No access page (desktop, phone).
+- **Content change:** the CoA Sent frames show the RoA number in Text/text-secondary instead of a Primary link.
+- **Deviations:** the phone drawer shows the 248 px sidebar without a user chip; the Prep and Analyst start pages (My work) are unchanged.
+- The page-level rules in section 3 (hidden values and links) are applied only where a built frame shows them. Nothing else in the built frames showed a CSO an RoA file or result values.

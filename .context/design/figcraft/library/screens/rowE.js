@@ -33,7 +33,7 @@ function coaCard(b, main, kind, sent) {
   const r = b.frame(c, { name: "Batch", w: 400, h: 40, fill: "Primary/primary-50", r: 10, layout: "h", gap: 10, pad: [10, 14, 10, 14], cross: "center", wrap: phone, sizeH: "fill", sizeV: "hug" });
   icon(b, r, "check-circle", "Status/st-completed");
   b.text(r, "B-2026-0416", { style: "Data/Strong", color: "Text/heading", name: "Batch" });
-  b.text(r, "RoA-0416", { style: "Data", color: "Primary/primary", name: "RoA" });
+  b.text(r, "RoA-0416", { style: "Data", color: "Text/text-secondary", name: "RoA" }); // plain text: the CSO cannot open the RoA file
   b.text(r, "Approved by Hendra Wijaya, S.T.", { style: "Body small/Regular", color: "Text/text-secondary", name: "Approved" });
   return c;
 }

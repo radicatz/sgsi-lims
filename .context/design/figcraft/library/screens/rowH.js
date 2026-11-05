@@ -200,4 +200,5 @@ exports.build = (b) => {
   overviewFrame(b, 0, p, "phone", "Lab", "Lab_admin"); overviewFrame(b, PX, p, "phone", "Lab", "All_caught_up", { empty: true });
   queueFrame(b, PX * 2, p, "phone", { key: "Lab", variant: "Batches_to_receive", title: "Batches to receive", data: "receive", action: "Open reception" });
   queueFrame(b, PX * 3, p, "phone", { key: "CSO", variant: "CoAs_to_send_multi_select", title: "CoAs to send", data: "coa", action: "Mark sent", multi: true });
+  b.hEnd = { desktop: d + 1700 + 1100 + 400, tablet: t + 1200 + 400, phone: p + 1000 + 400 };
 };

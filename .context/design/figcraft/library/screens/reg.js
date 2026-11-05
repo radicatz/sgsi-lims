@@ -84,7 +84,7 @@ B.prototype.instV = function (parent, setName, variant, o = {}) {
 B.prototype.comp = function (parent, name, o = {}) {
   const c = this.reg.comps[name]; if (!c) throw new Error("no component " + name);
   const id = this.step("instance.create", { component: c.id, parent }, c.size);
-  if (o.props) this.raw("node.set", { ids: [id], props: o.props });
+  if (o.props && Object.keys(o.props).length) this.raw("node.set", { ids: [id], props: o.props });
   return id;
 };
 module.exports = { loadReg };

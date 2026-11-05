@@ -130,7 +130,7 @@ Total **14 frames** (7 desktop, 2 tablet, 5 phone), for example `Desktop-01-My_w
 
 | # | Question | Default |
 | --- | --- | --- |
-| 1 | Supervisor and Manager have no queue in v1. Start page? | Dashboard; My work stays in their sidebar and shows All caught up |
+| 1 | Supervisor and Manager have no queue in v1. Start page? | **Settled Nov 5:** Dashboard. My work is hidden from their sidebar (it would always be empty), per `../Navigation/Navigation_Screen_Plan.md` |
 | 2 | Recent activity: whole lab or only my queues? | Whole lab, last 8, linked to the audit log |
 | 3 | When is a row "due soon"? | Due within 24 h: warning colour; past due: error colour with "Past due" |
 | 4 | Waiting in calendar or working days? | Calendar time ("4 h", "3 d") |

@@ -143,7 +143,7 @@ Built on the page **Job orders** (the library page is renamed **Library**): List
 | --- | --- | --- |
 | R6-1 | "New page file": a new **page** in the same file, or a separate `.figcraft` file? | New page "Job orders" in the same file, because a separate file loses the link to the components |
 | R6-2 | Job order stepper in v1: the fourth step is "RoA approved", but in v1 the batch completes when the lab's signed RoA is uploaded | Keep "RoA approved" (the signature on the uploaded RoA is the approval) |
-| R6-3 | Sidebar in v1: **Input ROA** and **Review ROA** describe the worksheet flow, which is out of v1 (results are entered in the batch's Analysis tab) | Keep both items for now; to settle when the batch screens are redrawn |
+| R6-3 | Sidebar in v1: **Input ROA** and **Review ROA** describe the worksheet flow, which is out of v1 (results are entered in the batch's Analysis tab) | **Settled Nov 5:** hidden from every role in v1 (Navigation plan, section 1) |
 | R6-4 | Tablet dropdown frames dropped (6.2) | Dropped |
 
 ## Why this screen first

@@ -903,6 +903,26 @@ Rules:
 - `report.sign` marks the users offered in the signatory list; it gives no approval step (D-42). A typed signatory (name and title entered at publish, B-15) needs no user account and is recorded as typed text with who typed it.
 - The CSO sees job orders, batch status and CoAs, never the internal RoA or raw results (B-3).
 
+### 8.3 Navigation by role (Proposed, Nov 5, 2026)
+
+The sidebar shows only the items a role can use, and a group label shows only when one of its items does. Roles add up (D-02). The full rules, the information hidden inside pages and the No access page are in `../Navigation/Navigation_Screen_Plan.md`.
+
+| Item | Superadmin | CSO | Prep | Analyst | Lab admin | Supervisor | Manager |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| My work (has a v1 queue) |  | ✔ | ✔ | ✔ | ✔ |  |  |
+| Dashboard | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Job orders | ✔ | ✔ | read | read | read | read | read |
+| Batches | ✔ | ✔ | ✔ | ✔ | ✔ | read | read |
+| Input ROA, Review ROA | next goal: hidden from every role in v1 |  |  |  |  |  |  |
+| Reports | ✔ | CoA only |  | RoA only | ✔ | ✔ | ✔ |
+| Search | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Clients | ✔ | ✔ |  |  | read |  | ✔ |
+| Drill hole, Lithology, Seam | ✔ |  |  |  | ✔ | read | read |
+| Users, Configuration | ✔ |  |  |  |  |  |  |
+| Audit log | ✔ |  |  |  |  | ✔ | ✔ |
+
+Start page: My work for roles that have it, otherwise Dashboard. A page the role cannot open shows No access inside the app shell.
+
 ## 9. User flows
 
 ### 9.0 Two meanings of "workflow"
@@ -1235,7 +1255,7 @@ Name, email (read-only), change password, sidebar preference, language (D-24).
 
 ### S-14 Audit log `/audit` (Proposed)
 
-Superadmin only. Filters: table, record, user, date, action. Rows show before and after in a diff view. Read-only; export CSV.
+Superadmin, Supervisor and Manager (`audit.read`, section 8.2). Filters: table, record, user, date, action. Rows show before and after in a diff view. Read-only; export CSV.
 
 ### S-15 Configuration hub `/config` (Proposed)
 

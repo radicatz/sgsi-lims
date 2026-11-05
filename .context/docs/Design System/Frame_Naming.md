@@ -24,7 +24,7 @@ Sorted by name, the frames group by size, then module, then screen, then state.
 
 ## Module numbers (sidebar order)
 
-My_work 01, Dashboard 02, Job_orders 03, Batches 04, Input_ROA 05, Review_ROA 06, Reports 07, Search 08, Clients 09, Drill_hole 10, Lithology 11, Seam 12, Users 13, Configuration 14, Audit_log 15. The sidebar Batches item (04) is the batch module across job orders and is not designed yet; the Batches tab of a job order is a state of Job_order_detail, so its frames keep the Job orders item active in the sidebar.
+App 00 (screens outside the sidebar), My_work 01, Dashboard 02, Job_orders 03, Batches 04, Input_ROA 05, Review_ROA 06, Reports 07, Search 08, Clients 09, Drill_hole 10, Lithology 11, Seam 12, Users 13, Configuration 14, Audit_log 15. The sidebar Batches item (04) is the batch module across job orders and is not designed yet; the Batches tab of a job order is a state of Job_order_detail, so its frames keep the Job orders item active in the sidebar.
 
 ## Job orders screens
 
@@ -63,3 +63,24 @@ Canvas row G holds the batch list frames and row F the batch detail frames. `fit
 | 02 | Queue | 01 Batches_to_receive, 02 CoAs_to_send_multi_select |
 
 Canvas row H holds the My work frames.
+
+## Dashboard (module 02)
+
+| SS | Screen | Variants (VV) |
+| --- | --- | --- |
+| 01 | Operations | 01 Lab_admin, 02 Supervisor, 03 CSO, 04 Sidebar_collapsed, 05 Sidebar_open (tablet), 06 No_data, 07 Filters (phone) |
+| 02 | Quality_and_reports | 01 Default, 02 Missing_CoA, 03 Point_tooltip |
+
+Canvas row I holds the Dashboard frames. These frames are created under their final names.
+
+## App (module 00)
+
+Screens outside the sidebar. Sign in, Notifications and Profile join this module later.
+
+| SS | Screen | Variants (VV) |
+| --- | --- | --- |
+| 01 | Sidebar_by_role | 01 Expanded (desktop), 02 Collapsed (tablet) |
+| 02 | Menu_drawer | 01 Lab_admin, 02 CSO (phone) |
+| 03 | No_access | 01 Default (desktop, phone) |
+
+Canvas row J holds the App frames.
