@@ -1,6 +1,6 @@
 # SGSI LIMS — Clickable Prototype Plan (v2): shared plan
 
-Written Nov 6, 2026. **Status: plan, waiting for go.**
+Written Nov 6, 2026. **Status: BUILT Nov 6, 2026 as a private preview** (section 12). The shared link still shows version 31 until the owner's go.
 
 The prototype plan is split the same way as the screen plans. **This file** holds what every group shares: the goal, the decisions, the review bar, the app shell, the rules, the build phases and the checks. **Each group's plan** sits next to its screen plan and holds that group's screens, links, gaps, flows and demo data:
 
@@ -179,3 +179,18 @@ Each group plan has its own open points as well.
 | 4 | Differences D1 to D8: also fix the frames to match the prototype data? | Yes, in one FigCraft pass after the prototype, together with E1 |
 | 5 | Should the Flows panel also hold a short guided tour for first-time reviewers? | No; Flows and Start are enough |
 | 6 | D7: should the status filters of the other lists also become page Tabs, like Notifications? | No; keep Filter chips as drawn |
+
+## 12 · Build status (Nov 6, 2026)
+
+Every phase is built in one pass. The open points used their defaults: private preview first, sign-in start, SVG charts, phase order as planned, gaps built from patterns, frame fixes after the prototype, filter chips as drawn, no guided tour.
+
+| Item | Result |
+| --- | --- |
+| Preview link | https://claude.ai/artifact/SPepzodQgNhFaSNwenYbao (private). The shared artifact https://claude.ai/artifact/73FDBne3B8rbFcXoa6dDZo still shows version 31; it is updated after the owner's go |
+| Source | `prototype/src/`: `ui.js` (components), `data.js` (demo data with D1 to D8 settled), `shell.js` (state, routes, review bar, shell), `modules/*.js` (one per group), `styles.css` (tokens are injected from `design/figcraft/tokens/sgsi-tokens.css`), `index.html`, `main.js`. `python prototype/build.py` writes `prototype/sgsi-lims-prototype.html` (about 500 KB) |
+| Archive | Version 31 source in `prototype/archive/src_v31/`, its page in `prototype/archive/job-order-prototype-v31.html` |
+| Routes | Plain hash names, because the artifact host passes only `#name`: `#dashboard`, `#order-JO-2026-0142-samples`, `#batch-B-2026-0422-reception`, `#report-CoA-JO-2026-0130-1`, `#sample-BNM-3507`, `#audit-BNM-3507`, `#config-lookups` and so on. The group plans' `#/path` routes map to these names |
+| Flows | 49 flows in the review bar: AP1 to AP8, MW1 and MW2, DB1 and DB2, JO1 to JO12, BA1 to BA8, RE1 to RE3, SE1 to SE3, MD1 to MD3, AD1 to AD4 |
+| Checks | Headless (jsdom) suites: phase 1 and 2 checks, 77 checks over every route for Superadmin, the hidden-information rules and the main flows at 1440 and 834, phone paths at 390 (two-step forms, drawer, bottom sheets); all pass with no console errors; no " · " in any view. Headless Chrome screenshots of the dashboard, job order, batch analysis, tablet reception, phone list and dark mode were compared with the frames |
+| Print | Print buttons show a toast: the artifact frame cannot open the print dialog |
+| Not yet | Pixel comparison of every screen against its frame (section 10, check 4) was done for the main screens only; the rest is for the owner's review of the preview |
