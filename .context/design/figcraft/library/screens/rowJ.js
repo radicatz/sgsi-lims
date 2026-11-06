@@ -5,7 +5,7 @@ require("./shell.js");
 const { H } = require("./rowC.js");
 const { TITLE, page, scrimOver } = H;
 
-const J_NAMES = /^(Desktop|Tablet|Phone)-00-App-/;
+const J_NAMES = /^(Desktop|Tablet|Phone)-00-App-0[1-3]-/; // screens 04 to 10 are row N
 const isJ = (n) => J_NAMES.test(n.name || "") || (n.name === "Row title" && /^J( ·|  )/.test(n.characters || ""));
 const REFS = / ref$|reference$| edit( dark)?$|^Properties ref$|^Select reference$/;
 function bottoms(b) {
@@ -34,9 +34,9 @@ function board(b, x, y, kind) {
     b.hideNav(id, v, key, col);
   });
 }
-function drawer(b, x, y, key, variant, vv) {
+function drawer(b, x, y, key, variant, vv, nameOverride) {
   page(b, "phone");
-  const name = `Phone-00-App-02-Menu_drawer-${vv}-${variant}`;
+  const name = nameOverride || `Phone-00-App-02-Menu_drawer-${vv}-${variant}`;
   const s = b.shell({ name, x, y, kind: "phone", active: "Dashboard", role: key });
   txt(b, s.main, "Dashboard", "Heading/H1", "Text/heading", "Title");
   const H0 = 844;
@@ -45,7 +45,23 @@ function drawer(b, x, y, key, variant, vv) {
   const v = b.v("Sidebar", "Collapsed=No");
   const id = b.instV(s.root, "Sidebar", "Collapsed=No", { props: { absolute: true, x: 0, y: 0, width: 300, sizingV: "fixed", height: H0 } });
   b.hideNav(id, v, key, "No");
+  profileBlock(b, s.root, H0, key);
 }
+// App plan section 4: the profile block at the bottom of the phone menu drawer
+const PEOPLE = { Lab: ["Maya Lestari", "maya@sgsi.co.id", "ML", "Lab Admin"], CSO: ["Rina Kartika", "rina@sgsi.co.id", "RK", "CSO"] };
+function profileBlock(b, root, H0, key) {
+  const [nm, em, ini, role] = PEOPLE[key] || PEOPLE.Lab;
+  const p = b.frame(root, { name: "Profile block", w: 300, h: 160, fill: "Surface/card", layout: "v", gap: 4, pad: [12, 16, 16, 16], sizeH: "fixed", sizeV: "hug", absolute: true, x: 0, y: H0 - 176 });
+  b.frame(p, { name: "Divider", w: 268, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" });
+  const r = b.frame(p, { name: "Person", w: 268, h: 56, layout: "h", gap: 12, cross: "center", pad: [8, 0, 8, 0], sizeH: "fill", sizeV: "hug" });
+  b.instV(r, "Avatar", "Size=40", { texts: { Initials: ini } });
+  const t = b.frame(r, { name: "Text", w: 200, h: 40, layout: "v", gap: 2, sizeH: "fill", sizeV: "hug" }); txt(b, t, nm, "Body small/SemiBold", "Text/heading", "Name"); txt(b, t, em, "Caption/Regular", "Text/text-secondary", "Email"); b.instV(t, "Role badge", "Property 1=Default", { texts: { Label: role } });
+  b.instV(p, "Menu item", "State=Default", { texts: { Label: "Profile" }, setProps: { Icon: true }, swaps: [[0, "Icon", "Glyph=user, Size=14"]], props: { sizingH: "fill" } });
+  b.instV(p, "Menu item", "State=Default", { texts: { Label: "Sign out" }, setProps: { Icon: true }, swaps: [[0, "Icon", "Glyph=sign-out, Size=14"]], props: { sizingH: "fill" } });
+  return p;
+}
+exports.profileBlock = profileBlock;
+exports.drawer = drawer;
 function noAccess(b, x, y, kind) {
   page(b, kind);
   const name = `${KIND(kind)}-00-App-03-No_access-01-Default`;

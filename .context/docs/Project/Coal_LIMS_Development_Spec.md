@@ -1105,6 +1105,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-00 Sign in `/login` (Fixed)
 
+**v1 note (Nov 6, 2026):** built with Forgot password and Set password (reset and invite), lockout after 5 failures for 15 minutes, idle sign-out after 30 minutes: `../App/App_Screen_Plan.md`.
+
 - Fields: Email, Password. Link: "Lupa Password?". Button: Login.
 - Errors: wrong credentials (generic message), locked account (shows when it unlocks), inactive user.
 - Reset: email entry → link → set password.
@@ -1250,9 +1252,13 @@ Responsive: tablet grid with frozen sample columns; mobile cards with key result
 
 ### S-12 Notifications `/notifications` (Fixed bell, Open content)
 
+**v1 note (Nov 6, 2026):** in-app only; one event per v1 queue hand-off (App plan section 5.1, events N1 to N8), panel under the bell and a page. Built: `../App/App_Screen_Plan.md`.
+
 Bell with unread badge opens a list: title, text, time, link, mark read, mark all read. Events and recipients per D-28.
 
 ### S-13 Profile `/profile` (Proposed)
+
+**v1 note (Nov 6, 2026):** built with Personal, Password, Preferences (sidebar, language, start page) and Notification switches: `../App/App_Screen_Plan.md`.
 
 Name, email (read-only), change password, sidebar preference, language (D-24).
 

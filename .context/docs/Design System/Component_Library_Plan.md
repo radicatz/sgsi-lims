@@ -330,3 +330,11 @@ Found by comparing the saved file with the last generated file. Screen-level det
 
 - **New component: Segmented control.** Until now each screen drew the bar around the **Segmented item**s itself (a frame with radius 10 or 12). The owner made the Match conditions toggle fully rounded, so the bar became a component: `Segmented control` with **Items** (2, 3, 4 or 5) × **Selected** (position of the selected item), 14 variants. The bar is `Surface/muted`, radius 999, padding 4, gap 2, hugging; the items are Segmented item instances (28 high, radius 999). Replace the item labels in the instance. Used for Match all / any (Advanced search) and the ADB / AR / DB / DAF switch of the Trend CV card; the Dashboard Operations / Quality & reports switch is a Tabs frame since Nov 5. Added by `library/segcontrol.js`; the Library page shows it in the Segmented control section.
 - **Count pill** (owner edit): the three tones now hug a 14 px height (padding 0 left and right 7, minimum width 20) instead of a fixed 20; the Primary tone's text is `Text/text-secondary` (was `Primary/primary-deep`). Used in the Search results card heads. `status.js` follows.
+
+## App screens additions (Nov 6, 2026)
+
+- **Password field**: State (Default, Filled, Error, Disabled) × Size (md, touch); Label, Value, Helper, Show helper; show/hide eye as a Ghost Icon button 32. Set the dots or the placeholder through the **Value** property.
+- **Notification item**: State (Unread, Read); Title, Text, Time; the event icon in a round `Primary/primary-50` tint (swap the Icon); Unread adds a `Primary/primary` dot and a SemiBold title.
+- **Top bar**: a hidden **Unread** layer (Count pill, Tone=Alert) on the bell of every breakpoint, pinned right; show it and set its label for unread notifications.
+- **Icons**: `eye-slash` and `sign-out` (Phosphor Regular, 14 and 20); the Icon set has 76 glyphs.
+Added by `library/applib.js`.

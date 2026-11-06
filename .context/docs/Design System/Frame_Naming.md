@@ -124,3 +124,16 @@ Sizes: the list CoA_tab on Desktop, Tablet and Phone; CoA Draft and Published on
 
 Canvas row M holds the Search frames; they are created under their final names.
 
+## App screens 04 to 10 (module 00, row N)
+
+| SS | Screen | Variants (VV) |
+| --- | --- | --- |
+| 04 | Sign_in | 01 Default (desktop, tablet, phone), 02 Wrong_credentials (desktop, phone), 03 Locked, 04 Signed_out |
+| 05 | Forgot_password | 01 Email, 02 Link_sent (desktop, phone) |
+| 06 | Set_password | 01 Reset (desktop, phone), 02 Invite, 03 Link_expired |
+| 07 | User_menu | 01 Open (desktop), 02 Drawer (phone) |
+| 08 | Notifications | 01 Panel (desktop, tablet), 02 Panel_unread, 03 Page (desktop, phone), 04 Empty |
+| 09 | Profile | 01 Default (desktop, tablet, phone), 02 Change_password (desktop, phone), 03 Password_error |
+| 10 | Session_timeout | 01 Warning |
+
+Screens 01 to 03 stay on row J; screens 04 to 10 are on row N, created under their final names.

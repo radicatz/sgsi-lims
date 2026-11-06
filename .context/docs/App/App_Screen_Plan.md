@@ -1,6 +1,6 @@
 # App screens plan: sign in, notifications, profile
 
-Written Nov 6, 2026. **Status: plan, waiting for go.** Module 00 App (screens outside the sidebar), new screens 04 to 10, canvas row **N**. Builds on spec S-00 (sign in), S-12 (notifications), S-13 (profile), D-23 (authentication), D-24 (language), D-28 (notification events), F-AUTH-01 to 03 and F-NTF-01 to 02 (`../Project/Coal_LIMS_Development_Spec.md`), the SIM Lab login (`source-documents/simlab view.pptx`, slide 1), the role sidebar and No access page (`../Navigation/Navigation_Screen_Plan.md`) and the v1 queues (`../My Work/My_Work_Screen_Plan.md`, section 2).
+Written Nov 6, 2026. **Status: BUILT Nov 6, 2026** (section 16). Module 00 App (screens outside the sidebar), new screens 04 to 10, canvas row **N**. Builds on spec S-00 (sign in), S-12 (notifications), S-13 (profile), D-23 (authentication), D-24 (language), D-28 (notification events), F-AUTH-01 to 03 and F-NTF-01 to 02 (`../Project/Coal_LIMS_Development_Spec.md`), the SIM Lab login (`source-documents/simlab view.pptx`, slide 1), the role sidebar and No access page (`../Navigation/Navigation_Screen_Plan.md`) and the v1 queues (`../My Work/My_Work_Screen_Plan.md`, section 2).
 
 ## 1 · Goal
 
@@ -244,3 +244,18 @@ Card anatomy (padding 16 in the app; the sign-in card uses 32 as a standalone ca
 3. `naming.js` needs no rules (final names); `cards.js`, `fit.js` as usual.
 4. Deploy (dirty check, backup, swap), commit. No export unless asked.
 5. Docs: build status here; spec S-00, S-12, S-13 v1 notes and D-28 v1 events; `Frame_Naming.md` module 00 screens 04 to 10; Navigation plan; README.
+
+## 16 · Build status (Nov 6, 2026)
+
+All 30 frames are built on row **N** with `library/screens/rowN.js` (module 00, screens 04 to 10, final names), plus the profile block at the bottom of both phone Menu drawers on row J. The open points of section 14 were used with their defaults. Deployed to the main file (backup `backup/SGSI-LIMS-screens.before-app-screens.figcraft`).
+
+**Library additions** (`library/applib.js`, three passes on the main file): icons `eye-slash` and `sign-out` (Phosphor Regular, 14 and 20); **Password field** (State Default, Filled, Error, Disabled × Size md, touch; Label, Value, Helper, Show helper; the eye as a Ghost Icon button); **Notification item** (State Unread, Read; Title, Text, Time; icon in a round `Primary/primary-50` tint; unread dot); the **Top bar** got a hidden **Unread** Count pill (Tone=Alert) on the bell of each breakpoint, pinned to the right edge. Screens show it and set the count.
+
+Deviations from the plan:
+
+- **Password values** are set through the component's Value property (the text follows the property, not the variant).
+- **Inline alert and Notification item** texts are set by position, because both have a frame and a text named "Text".
+- **Logo** on the sign-in pages is scaled with its vectors (`transform.scale`); resizing the instance distorted it.
+- **Phone profile** stacks the header (avatar and name, then a full-width Sign out).
+- **Tablet** frames: Sign in, Notifications panel and Profile; the other states are desktop or phone only, as planned.
+- **Row J** filter now matches screens 01 to 03 only, so rebuilding row J never removes row N.
