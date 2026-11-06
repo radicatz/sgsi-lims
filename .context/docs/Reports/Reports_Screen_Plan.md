@@ -262,3 +262,6 @@ Deviations from the plan:
 - **Job order CoA card:** the published and sent cards got an **Open in Reports** ghost button; the two new states (Ready with **Generate CoA**, Draft with **Continue draft**) follow section 6.
 - **Dates:** the demo CoA list uses job orders JO-2026-0126 to 0132 and 0141 to 0142, so it does not collide with the job orders that are still in progress on the Dashboard.
 
+## 15 · Owner edits (Nov 6, 2026)
+
+The search field in the Reports list toolbar is 360 wide on desktop (was 300); the Status, Period and Company controls move with it. Built into `rowL.js`. The tablet and phone lists keep their width.

@@ -249,3 +249,19 @@ Deviations from the plan:
 - **Phone:** the start frame (field, Recent records and searches, Scan a label) is the entry; quick search has no phone frame, as planned.
 - **Tablet and phone** exist for Search results (All), Advanced search (Sample_query) and Sample history (Default), plus the tablet Typing frame and the phone start frame.
 
+## 15 · Owner edits in the file (Nov 6, 2026) · BUILT
+
+The owner edited the Reports and Search desktop frames in FigCraft (saved Nov 6, 10:07). Found by comparing the saved file with the last build, layer by layer; now in `rowM.js` and `rowL.js`, carried to tablet and phone where the pattern applies, and rebuilt (backup `backup/SGSI-LIMS-screens.before-segmented-control.figcraft`).
+
+| # | Where | Before | Now |
+| --- | --- | --- | --- |
+| S-1 | **Match conditions** toggle (Advanced search, all sizes) | A frame with radius 10 holding two Segmented items | Fully rounded (radius 999), and now the library **Segmented control** component (`Items=2, Selected=1`); see `../Design System/Component_Library_Plan.md`, last section |
+| S-2 | Search results, card head | Title, then a text count and "Show all 12" in a Count frame | A **Title section** (Title and a **Count pill**, Tone=Primary) on the left; **Show all** (no number) as the Ghost button on the right |
+| S-3 | Search results, Types card | Hugged its content | Fills the height of the results column (the row has a fixed height, the tallest card) |
+| S-4 | Advanced search, Saved queries card | Hugged its content | Fills the height of the row |
+| S-5 | Advanced search, condition row | Number, field, operator, value, basis, remove as siblings | Number, a **Select container** (field, operator, value, basis; fills), then the remove button |
+| S-6 | Sample history, History card | Entries as siblings with 12 gap, a 12 dot | A **History list** (gap 12) with a **Divider** between entries; each entry has gap 6 and a **Dot container** (20 × 20) with an 8 px dot centred in it; Sample card, History card and the row fill the page height |
+| S-7 | Reports list (desktop), search field | 300 wide | 360 wide |
+| S-8 | Save query frame | Height 1500 | Height 1156, as high as the page needs |
+
+Pages shorter than the viewport let Main and the two-column row fill it; longer pages give the row a fixed height and the left card fills it (`library/colsfill.js`, a post-pass after the build chain).

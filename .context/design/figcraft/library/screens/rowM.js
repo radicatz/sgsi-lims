@@ -18,7 +18,7 @@ function bottoms(b) {
 const clearM = (b) => { const N = b.reg.N, old = []; for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) if (isM(N[id])) old.push(id); if (old.length) b.raw("edit.delete", { ids: old }); };
 const sel = (b, p, value, w, o = {}) => b.instV(p, "Select", "State=Filled, Size=md", { texts: { Value: value, Label: o.label || "" }, hide: o.label ? [] : ["Label"], setProps: { "Show helper": false }, props: w ? { width: w, sizingH: "fixed" } : { sizingH: "fill" } });
 const field = (b, p, value, w, o = {}) => b.instV(p, "Text field", `State=${value ? "Filled" : "Default"}, Size=md`, { texts: { Value: value || o.ph || "", Label: o.label || "" }, hide: o.label ? [] : ["Label"], setProps: { "Show helper": false }, props: w ? { width: w, sizingH: "fixed" } : { sizingH: "fill" } });
-const segmented = (b, parent, labels, on) => { const bar = hframe(b, parent, "Match", 2, { fill: "Surface/muted", r: 10, pad: [4, 4, 4, 4] }); labels.forEach((l, i) => b.instV(bar, "Segmented item", `Selected=${i === on ? "On" : "Off"}, State=Default`, { texts: { Label: l } })); return bar; };
+const segmented = (b, parent, labels, on) => b.instV(parent, "Segmented control", `Items=${labels.length}, Selected=${on + 1}`, { texts: Object.fromEntries(labels.map((l, i) => [i, l])) });
 const searchField = (b, p, value, kind, o = {}) => b.instV(p, "Search", `Size=${kind === "phone" ? "lg" : "md"}, State=${value ? "Filled" : "Default"}`, { texts: { Value: value || o.ph || "Search by batch, lab code, or drill hole…" }, props: o.w ? { width: o.w, sizingH: "fixed" } : { sizingH: "fill" }, hide: o.scan ? [] : ["Scan"] });
 function header(b, main, kind, title, o = {}) {
   const r = hframe(b, main, "Header", 16, { sizeH: "fill", main: "spaceBetween", cross: "max" });
@@ -79,7 +79,7 @@ function quick(b, x, y, kind, vv, variant, role, mode, o = {}) {
 const TYPES = [["All", 28], ["Samples", 12], ["Batches", 3], ["Job orders", 2], ["Drill holes", 4], ["Reports", 6], ["Clients", 1]];
 function sectionCard(b, p, type, count, rows, kind, o = {}) {
   const c = card(b, p, type + " card"); b.raw("node.set", { ids: [c], props: { sizingH: "fill" } });
-  const hd = cardTop(b, c, type); const cn = hframe(b, hd, "Count", 8); txt(b, cn, String(count), "Body small/SemiBold", "Text/text-muted", "Count"); if (!o.all) btn(b, cn, "Ghost", "Show all " + count, null, { size: "md" });
+  const hd = b.frame(c, { name: "Card head", w: 400, h: 32, layout: "h", gap: 12, main: "spaceBetween", cross: "center", sizeH: "fill", sizeV: "fixed" }); const ts = hframe(b, hd, "Title section", 8); txt(b, ts, type, "Heading/H3", "Text/heading", "Title"); b.instV(ts, "Count pill", "Tone=Primary", { texts: { Label: String(count) } }); if (!o.all) btn(b, hd, "Ghost", "Show all", null, { size: "md" });
   rows.forEach((r) => { const rr = vframe(b, c, "Row", 0); const line = hframe(b, rr, "Cells", 12, { sizeH: "fill", pad: [10, 0, 10, 0], wrap: kind === "phone" }); r(line); b.frame(rr, { name: "Divider", w: 400, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" }); });
   if (o.pager) b.instV(c, "Pager", kind === "phone" ? "Breakpoint=Mobile" : "Breakpoint=Desktop", kind === "phone" ? { texts: { Page: "1 / 2" }, props: { sizingH: "fill" } } : { texts: { Summary: "Showing 1–10 of 12" }, props: { sizingH: "fill" } });
   return c;
@@ -140,11 +140,12 @@ function savedQueries(b, p, kind) {
   return c;
 }
 function condRow(b, p, kind, n, field, op, val, o = {}) {
-  const r = hframe(b, p, "Condition", 8, { sizeH: "fill", wrap: kind !== "desktop" }); txt(b, r, String(n), "Body small/SemiBold", "Text/text-muted", "Number");
+  const row = hframe(b, p, "Condition", 8, { sizeH: "fill" }); txt(b, row, String(n), "Body small/SemiBold", "Text/text-muted", "Number");
+  const r = hframe(b, row, "Select container", 8, { sizeH: "fill", wrap: kind !== "desktop" });
   sel(b, r, field, kind === "desktop" ? 210 : kind === "tablet" ? 200 : undefined); sel(b, r, op, kind === "desktop" ? 170 : kind === "tablet" ? 170 : undefined);
   if (o.between) { field_(b, r, val[0], 120, kind); txt(b, r, "to", "Body small/Regular", "Text/text-muted", "To"); field_(b, r, val[1], 120, kind); } else if (o.select) sel(b, r, val, kind === "desktop" ? 220 : undefined); else field_(b, r, val, kind === "desktop" ? 220 : undefined, kind);
   if (o.basis) sel(b, r, o.basis, 90);
-  iconBtn(b, r, "x");
+  iconBtn(b, row, "x");
 }
 const field_ = (b, p, v, w, kind) => field(b, p, v, w);
 function queryCard(b, p, kind, o) {
@@ -186,8 +187,9 @@ function columnsMenu(b, s) {
 
 // ---------- sample history (plan 7) ----------
 function histEntry(b, p, o) {
-  const r = hframe(b, p, "Entry", 12, { sizeH: "fill", cross: "min" });
-  const dot = b.frame(r, { name: "Dot", w: 12, h: 12, fill: o.pending ? "Surface/border-strong" : o.tone || "Status/st-completed", r: 6, sizeH: "fixed", sizeV: "fixed" });
+  const r = hframe(b, p, "Entry", 6, { sizeH: "fill", cross: "min" });
+  const dc = b.frame(r, { name: "Dot container", w: 20, h: 20, sizeH: "fixed", sizeV: "fixed" });
+  b.frame(dc, { name: "Ellipse", x: 6, y: 6, w: 8, h: 8, fill: o.pending ? "Surface/border-strong" : o.tone || "Status/st-completed", r: 4, sizeH: "fixed", sizeV: "fixed" });
   const t = vframe(b, r, "Text", 4, { sizeH: "fill" });
   txt(b, t, o.text, "Body small/SemiBold", o.pending ? "Text/text-muted" : "Text/heading", "Event");
   if (o.person) { const w = hframe(b, t, "Who", 8, { wrap: true }); b.instV(w, "Avatar", "Size=24", { texts: { Initials: o.person[1] } }); txt(b, w, o.person[0], "Body small/Regular", "Text/foreground", "Person"); txt(b, w, o.when, "Body small/Regular", "Text/text-secondary", "When"); }
@@ -208,7 +210,8 @@ function history(b, x, y, kind, vv, variant, role, o = {}) {
   const sampleCard = (p) => { const c = card(b, p, "Sample card"); cardTop(b, c, "Sample"); const v = b.v("Key-value row", "Layout=Inline"); [["Drill hole", "DH-BNM-021"], ["Seam", "EN2"], ["Lithology", "Coal"], ["Depth", "41.2 to 42.0 m"], ["Mass", "2.41 kg"], ["Condition", "Good"], ["Status", o.status === "Held" ? "Held" : o.badge || "In batch"]].concat(o.status === "Held" ? [["Held reason", "Wet, label unreadable"]] : []).forEach(([k, val]) => { const i = b.instV(c, "Key-value row", "Layout=Inline", { texts: { Key: k, Value: val }, props: { sizingH: "fill" } }); b.raw("node.set", { ids: [i + v.names.Value], props: { sizingH: "fill", textAutoResize: "height" } }); }); return c; };
   const histCard = (p) => {
     const c = card(b, p, "History card"); b.raw("node.set", { ids: [c], props: { sizingH: "fill" } }); cardTop(b, c, "History");
-    const E = (e) => histEntry(b, c, e);
+    const list = vframe(b, c, "History list", 12); let n = 0;
+    const E = (e) => { if (n++) b.frame(list, { name: "Divider", w: 400, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" }); return histEntry(b, list, e); };
     E({ text: "Registered on " + (o.jo || "JO-2026-0131"), person: P.rina, when: "20 Oct 2026" });
     if (o.held) { E({ text: "Received and labelled B0410-07", person: P.dedi, when: "22 Oct 2026, 09:12", sub: ["Mass 2.41 kg", "Condition Wet", "2 photos"] }); E({ text: "Held at reception", tone: "Feedback/warning", person: P.dedi, when: "22 Oct 2026, 09:15", sub: ["Reason: wet, label unreadable"] }); E({ text: "Released after relabelling", person: P.maya, when: "22 Oct 2026, 14:40" }); }
     else E({ text: "Received and labelled B0410-07", person: P.dedi, when: "22 Oct 2026, 09:12", sub: ["Mass 2.41 kg", "Condition Good", "2 photos"] });
@@ -252,7 +255,7 @@ exports.build = (b) => {
   advanced(b, ...D(9), "desktop", "02", "Sample_query", "Lab");
   advanced(b, ...D(10), "desktop", "03", "Results_query", "Supervisor", { target: "Results" });
   { const s = advanced(b, ...D(11), "desktop", "04", "Columns_menu", "Lab"); columnsMenu(b, s); }
-  { const s = advanced(b, ...D(12), "desktop", "05", "Save_query", "Lab"); dialog(b, s, "desktop", 1500, "md", "Save query", "Saved queries appear on the left and can be run again.", "Cancel", "Save", (bd) => { b.instV(bd, "Text field", "State=Filled, Size=md", { texts: { Label: "Name *", Value: "High-ash BNM samples" }, setProps: { "Show helper": false }, props: { sizingH: "fill" } }); b.instV(bd, "Switch", "On=Off, State=Default", { texts: { Label: "Share with staff (they can run and duplicate it)" } }); }); }
+  { const s = advanced(b, ...D(12), "desktop", "05", "Save_query", "Lab"); dialog(b, s, "desktop", 1156, "md", "Save query", "Saved queries appear on the left and can be run again.", "Cancel", "Save", (bd) => { b.instV(bd, "Text field", "State=Filled, Size=md", { texts: { Label: "Name *", Value: "High-ash BNM samples" }, setProps: { "Show helper": false }, props: { sizingH: "fill" } }); b.instV(bd, "Switch", "On=Off, State=Default", { texts: { Label: "Share with staff (they can run and duplicate it)" } }); }); }
   advanced(b, ...D(13), "desktop", "06", "Over_limit", "Manager", { over: true });
   advanced(b, TX * 2, t, "tablet", "02", "Sample_query", "Lab");
   advanced(b, PX * 2, p, "phone", "02", "Sample_query", "Lab");

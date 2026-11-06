@@ -239,7 +239,7 @@ function scatterCard(b, parent, w, title, r2, kind) {
 }
 function trendCard(b, parent, kind) {
   const { c, hd } = panel(b, parent, "Trend CV");
-  segmented(b, hd, ["ADB", "AR", "DB", "DAF"], 1);
+  b.instV(hd, "Segmented control", "Items=4, Selected=2", { texts: { 0: "ADB", 1: "AR", 2: "DB", 3: "DAF" } });
   const row = hframe(b, c, "Plot", 0, { sizeH: "fill", main: "center", clip: true });
   const W = kind === "desktop" ? 1096 : kind === "tablet" ? 666 : 520, tp = compPos(b, "Trend");
   const t = b.comp(row, "Trend", { props: { width: W } });

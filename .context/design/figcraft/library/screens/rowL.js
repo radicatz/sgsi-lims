@@ -123,7 +123,7 @@ function reportsList(b, x, y, kind, o) {
   if (kind === "phone") { phoneCards(b, m, tab, rows, o); return s; }
   const c = card(b, m, "Table card");
   const bar = b.frame(c, { name: "Filters", w: CW[kind] - 32, h: 40, layout: "h", gap: 12, wrap: true, cross: "max", sizeH: "fill", sizeV: "hug" });
-  b.instV(bar, "Search", "Size=md, State=Default", { texts: { Value: o.noResults ? "CoA-JO-2026-9999" : tab === "coa" ? "Search number, job order, client" : "Search RoA number, batch, job order, client" }, props: { width: kind === "desktop" ? 300 : 260, sizingH: "fixed" }, hide: ["Scan"] });
+  b.instV(bar, "Search", "Size=md, State=Default", { texts: { Value: o.noResults ? "CoA-JO-2026-9999" : tab === "coa" ? "Search number, job order, client" : "Search RoA number, batch, job order, client" }, props: { width: kind === "desktop" ? 360 : 260, sizingH: "fixed" }, hide: ["Scan"] });
   b.instV(bar, "Select", "State=Filled, Size=md", { texts: { Label: "Period", Value: "Last 90 days" }, setProps: { "Show helper": false }, props: { width: 170, sizingH: "fixed" } });
   b.instV(bar, "Select", "State=Filled, Size=md", { texts: { Label: "Company", Value: "All companies" }, setProps: { "Show helper": false }, props: { width: 220, sizingH: "fixed" } });
   if (tab === "coa") { const ch = hframe(b, c, "Chips", 8, { sizeH: "fill", wrap: true }); CHIPS_COA(o.role).forEach(([l, n, on]) => b.instV(ch, "Filter chip", `Selected=${on ? "On" : "Off"}, State=Default`, { texts: { Label: l, Count: n } })); }
