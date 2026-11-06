@@ -25,6 +25,8 @@ const alert = (b, p, tone, title, text, action) => b.instV(p, "Inline alert", `T
 const link = (b, p, label) => b.instV(p, "Link button", "State=Default", { texts: { Label: label }, hide: ["Icon"] });
 const check = (b, p, label, st) => b.instV(p, "Checklist item", `State=${st}`, { texts: { Label: label } });
 const role = (b, p, label) => b.instV(p, "Role badge", "Property 1=Default", { texts: { Label: label } });
+// filter tabs (owner, Nov 6, 2026): the page Tabs of the Dashboard (Tab instances, count pill), not a Segmented control
+const tabs = (b, p, items, on, o = {}) => { const r = b.frame(p, { name: "Tabs", w: 360, h: 34, layout: "h", gap: 16, cross: "max", sizeH: "fill", sizeV: "hug", pad: o.pad }); items.forEach(([l, n], i) => b.instV(r, "Tab", `Selected=${i + 1 === on ? "On" : "Off"}, State=Default`, n ? { texts: { 0: l, 1: String(n) } } : { texts: { 0: l }, hide: ["Count"] })); return r; };
 const seg = (b, p, labels, on) => b.instV(p, "Segmented control", `Items=${labels.length}, Selected=${on}`, { texts: Object.fromEntries(labels.map((l, i) => [i, l])) });
 const bigBtn = (b, p, type, label, o = {}) => b.instV(p, "Button", `Type=${type}, Tone=Default, Size=${o.size || "lg"}, State=${o.disabled ? "Disabled" : "Default"}`, { texts: { Label: label }, setProps: { "Leading icon": false }, props: o.fill === false ? undefined : { sizingH: "fill" } });
 
@@ -132,7 +134,7 @@ function notifPanel(b, x, y, kind, vv, variant, unreadOnly) {
   const pw_ = 400, px = kind === "desktop" ? 882 : 304; // right edge under the bell
   const p = panelFrame(b, s.root, "Notifications panel", px, 64, pw_);
   const hd = hframe(b, p, "Header", 8, { sizeH: "fill", main: "spaceBetween", pad: [8, 16, 8, 16] }); txt(b, hd, "Notifications", "Heading/H3", "Text/heading", "Title"); link(b, hd, "Mark all read");
-  const sg = hframe(b, p, "Filter", 0, { sizeH: "fill", pad: [0, 16, 8, 16] }); seg(b, sg, ["All", "Unread 3"], unreadOnly ? 2 : 1);
+  tabs(b, p, [["All"], ["Unread", 3]], unreadOnly ? 2 : 1, { pad: [0, 16, 0, 16] });
   const list = vframe(b, p, "List", 0); (unreadOnly ? NOTE.lab.slice(0, 3) : NOTE.lab).forEach((n, i) => { if (i) divider(b, list); item(b, list, n); });
   divider(b, p); const ft = hframe(b, p, "Footer", 0, { sizeH: "fill", main: "center", pad: [10, 16, 4, 16] }); link(b, ft, "See all notifications");
 }
@@ -142,7 +144,7 @@ function notifPage(b, x, y, kind, vv, variant, role, empty) {
   const hd = hframe(b, m, "Header", 16, { sizeH: "fill", main: "spaceBetween", cross: "max", wrap: kind === "phone" });
   const t = vframe(b, hd, "Title block", 4, { sizeH: kind === "phone" ? "fill" : "hug" }); txt(b, t, "NOTIFICATIONS", "Overline", "Text/text-muted", "Overline"); txt(b, t, "Notifications", kind === "phone" ? "Heading/H1" : "Display/XL", "Text/heading", "Title");
   if (!empty) b.instV(hd, "Button", "Type=Secondary, Tone=Default, Size=md, State=Default", { texts: { Label: "Mark all read" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("check") } });
-  seg(b, m, ["All", empty ? "Unread" : "Unread 2"], 1);
+  tabs(b, m, [["All"], ["Unread", empty ? 0 : 2]], 1);
   if (empty) { b.instV(m, "Empty state", "Size=Page", { texts: { Title: "You're all caught up", Text: "New hand-offs to your queues appear here." }, hide: ["Button"], swaps: [[0, "Icon", "Glyph=bell, Size=20"]], props: { sizingH: "fill" } }); return s; }
   for (const [g, rows] of Object.entries(NOTE.cso)) { const c = card(b, m, g + " card"); cardTop(b, c, g); const l = vframe(b, c, "List", 0); rows.forEach((n, i) => { if (i) divider(b, l); item(b, l, n); }); b.raw("node.set", { ids: [c], props: { padding: [16, 0, 8, 0] } }); }
   btn(b, m, "Ghost", "Load more", null, { size: "md" });

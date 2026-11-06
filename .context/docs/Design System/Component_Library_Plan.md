@@ -338,3 +338,5 @@ Found by comparing the saved file with the last generated file. Screen-level det
 - **Top bar**: a hidden **Unread** layer (Count pill, Tone=Alert) on the bell of every breakpoint, pinned right; show it and set its label for unread notifications.
 - **Icons**: `eye-slash` and `sign-out` (Phosphor Regular, 14 and 20); the Icon set has 76 glyphs.
 Added by `library/applib.js`.
+
+- **Top bar, Bell frame (Nov 6, 2026, owner):** the bell Icon button and its **Unread** badge sit in a 36 × 36 **Bell** frame (no fill, no auto layout); the badge is at x 22, y -4 with **Elevation/xs**. Elevation follows `Design_Tokens.md`: xs is for raised elements that sit on another surface. Patch `library/topbell.js`.

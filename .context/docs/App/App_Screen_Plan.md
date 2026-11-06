@@ -259,3 +259,8 @@ Deviations from the plan:
 - **Phone profile** stacks the header (avatar and name, then a full-width Sign out).
 - **Tablet** frames: Sign in, Notifications panel and Profile; the other states are desktop or phone only, as planned.
 - **Row J** filter now matches screens 01 to 03 only, so rebuilding row J never removes row N.
+
+## 17 · Revision (Nov 6, 2026, owner)
+
+- **Notifications filter:** All / Unread uses the page **Tabs** of the Dashboard (the "Point_tooltip" frame): library Tab instances, underlined when selected, the unread count in the tab's Count pill ("Unread 3"). It replaces the Segmented control in the panel, the panel's Unread state, the page and the empty page.
+- **Bell badge:** the Unread badge now has the **Elevation/xs** effect style. It also moved with the bell: the Top bar's bell and badge share a 36 × 36 **Bell** frame, so the badge stays on the bell's top-right corner however wide the user chip is (before, Rina Kartika's longer role put it on her avatar). Patch: `library/topbell.js`.
