@@ -284,7 +284,7 @@ No subtitle under the title and no count lines (rule of Nov 3). Page-level filte
 | 02 | Batches_to_prepare | D | Preparation role: chips Created and Preparation on, 4 rows |
 | 03 | Empty | D | No batches yet: empty state, "Batches are added from a job order", Add batch |
 | 04 | No_results | D | Search "B-2025" with no match: "No batches match", Clear filters |
-| 05 | Filters | D, P | Desktop: filter panel (side sheet 480: company, status, standard, batch date and deadline ranges, job order); phone: bottom sheet |
+| 05 | Filters | D, P | Desktop: a centered Dialog (company, status, standard, batch date and deadline ranges, job order; changed from a side sheet 480, see owner feedback item 8 below); phone: bottom sheet |
 | 06 | Add_batch_choose_job_order | D | Dialog sm "Add batch": job order select (number and company as two texts per option), Next |
 
 Total **9 frames** (6 desktop, 1 tablet, 2 phone). Canvas: row **F** gets a second line, or a row **G  Batch list** above row F (default: **G above F**, because the list comes first in the flow; the row letters stay in build order).

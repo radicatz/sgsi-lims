@@ -116,7 +116,7 @@ Module **01 My_work** (sidebar order), names by `../Design System/Frame_Naming.m
 | 02 | Queue | 01 | Batches_to_receive | D, T, P |
 | 02 | Queue | 02 | CoAs_to_send_multi_select | D, T, P |
 
-Total **14 frames** (7 desktop, 2 tablet, 5 phone), for example `Desktop-01-My_work-01-Overview-01-Lab_admin`.
+Total **14 frames** (7 desktop, 3 tablet, 4 phone), for example `Desktop-01-My_work-01-Overview-01-Lab_admin`.
 
 ## 9 · Design rules that apply
 

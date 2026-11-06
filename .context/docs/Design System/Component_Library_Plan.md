@@ -33,7 +33,7 @@ Your `Logo` component set (Type = Full / Icon × Color = Default / Secondary / W
 
 - many are duplicates, for example 17 `Status · v1–v17`, 4 Sidebars and 3 Top bars;
 - each state is its own component;
-- Side sheet, Dialog, Queue card, WIP row and Activity item are plain frames;
+- Side sheet, Dialog, Queue card, WIP row and Activity item are plain frames (the Side sheet was later removed, Nov 5);
 - there are no text styles, and only one effect style;
 - the 269 icons are loose vectors;
 - many fills are raw hex.
@@ -125,11 +125,11 @@ Grouped by the frame they live in. Every set gets a short usage note beside it. 
 
 | Set | Properties |
 | --- | --- |
-| **Status badge** | Status = Batch (Created, Receiving, Preparation, Analysis, Finished analysis, Completed) · Job order (Draft, Registered, Awaiting samples, In progress, Reported, Delivered, Cancelled) · Sample (Expected, Registered, Received, In batch, Awaiting arrival, Not received, Held) · Size md, sm |
+| **Status badge** | Status = Batch (Created, Receiving, Preparation, **Prep finished**, Analysis, **Analysis finished**, Completed) · Job order (Draft, Registered, Awaiting samples, In progress, Reported, Delivered, Cancelled) · Sample (Expected, Received, In batch, Awaiting arrival, Not received, Held) · Size md, sm. 40 variants (Nov 4: Prep finished added, Finished analysis renamed Analysis finished) |
 | **Tag** | Type = Recheck, CoA uploaded, CoA missing, No CoA, Due today, Overdue, Late, Locked, Saved, Pending, Not printed, Printed, Check warning, New, Duplicate · each has an icon |
 | **Delta** | Up, Down, Flat · "+12%", "1 today" |
 | **On-target pill** (New) | Good, Warning, Bad ("On target") |
-| **Role badge** | Superadmin, Lab admin, Analyst, Preparation, Reception, Customer service, Client |
+| **Role badge** | One variant; the label is the role name. v1 roles: Superadmin, CSO, Preparation, Analyst, Lab admin, Supervisor, Manager (spec 8.1). The first draft listed Reception, Customer service and Client, which are not v1 roles |
 | **Avatar** | Size 24, 28, 32, 40 · Initials |
 | **Person chip** (New) | Avatar + name, optional caret ("DK Dedi Kurniawan ▾", performer cells) |
 | **Count pill** | Neutral, Primary, Alert (tab counts, "Active batches 12") |
@@ -221,7 +221,7 @@ These are chart **shells**: the card, header, legend, axes and an example plot. 
 | **Info note** (New) | One-line hint with info icon ("These IDs are printed on the labels…") |
 | **Toast** | Success, Error, Info · Action |
 | **Tooltip** | Top, Bottom, Left, Right (Locked row tooltip) |
-| **Dialog** | Default, Destructive × Size (sm 400, md 560, lg 800 for Paste from Excel) · Title, Body slot, Footer buttons |
+| **Dialog** | Default, Destructive × Size (sm 400, md 560, lg 800 for Paste from Excel), plus Default **xl 720** for the New job order and Add batch forms · Title, Body slot, Footer buttons |
 | ~~Side sheet~~ | **Removed Nov 5, 2026.** Every form, confirmation and list of files is a centered **Dialog** (sm 400, md 560, lg 800); phones keep the Bottom sheet |
 | **Bottom sheet** | Handle, Title, Close, Body slot, Footer (Contact, Mark CoA as sent) |
 | **Scrim** | — |
@@ -324,7 +324,7 @@ Found by comparing the saved file with the last generated file. Screen-level det
 - The Button set has 192 variants: 8 Type/Tone combinations × 4 sizes × 6 states. On the canvas each combination shows its rows in the order lg, md, sm, touch; columns are the states.
 - The rename kept every instance linked: no screen changed size (598 buttons in 144 generated frames checked against a rebuild with the renamed generators, plus the rows A and B frames, which are not regenerated).
 - The two text styles were renamed the same way, and Label/Button sm is new. Built with `library/buttonsizes.js`; the library and screen generators use the new names (`actions.js`, `dsl.js`, `screens/row*.js`).
-- **sm (28)** is not used on any screen yet. It is for dense places: table cells, card heads with several actions, inline actions in a list row. Other components that have their own sm/md sizes (Search, Text field, Select, Dialog, Status badge) are not affected.
+- **sm (28)** is used for **View values** on Sample history (4 frames, Search). It is for dense places: table cells, card heads with several actions, inline actions in a list row. Other components that have their own sm/md sizes (Search, Text field, Select, Dialog, Status badge) are not affected.
 
 ## Segmented control, Count pill (Nov 6, 2026, owner)
 
@@ -340,3 +340,21 @@ Found by comparing the saved file with the last generated file. Screen-level det
 Added by `library/applib.js`.
 
 - **Top bar, Bell frame (Nov 6, 2026, owner):** the bell Icon button and its **Unread** badge sit in a 36 × 36 **Bell** frame (no fill, no auto layout); the badge is at x 22, y -4 with **Elevation/xs**. Elevation follows `Design_Tokens.md`: xs is for raised elements that sit on another surface. Patch `library/topbell.js`.
+
+## Library as built (Nov 6, 2026)
+
+Checked against the Library page of the main file: 97 component sets and single components. The inventory in section 5 was written before the build, so some names and splits differ from the file. The file is the reference.
+
+| Section 5 says | The file has |
+| --- | --- |
+| Card/KPI, Card/Panel, Card/Callout, Card/Batch, Card/Drill hole, Card/Sample entry, Card/CoA, Card/Job order | **Card KPI**, **Card panel**, **Card callout**, **Card batch**, **Card batch compact**, **Card drill hole**, **Card sample entry**, **Card CoA**, **Card job order** |
+| Card/Queue | **Queue card** (Default, Overdue) |
+| Inline cell input | **Cell input** (5 states) |
+| Table header cell, Table cell | Not sets. Tables use whole-row sets: **Table header row** (7), **Table row** (35 templates and states), and the variants **Table header row compact**, **Table row compact**, **Table header row samples**, **Table row samples**, **Table header row batches**, **Table row batches** |
+| Mini calendar | **Mini calendar** plus **Calendar day** (4 states) |
+| Segmented control | **Segmented control** (bar, 14 variants) and **Segmented item** (10) |
+| — | **Coverage tag** (4): the amber per-standard tag on parameter pills (Job order Revision 9) |
+| Overflow menu button | Not a set: the Icon button with `dots-three` (or `dots-three-vertical`) and a Dropdown menu |
+| Field label, Parameter group row, Quick-pick chips | Not sets: field labels are part of each field; group rows are frames of Parameter pills; quick picks are Ghost Buttons |
+| Logo | **Logo** (6) and **ptba-logo** (the client logo used on the client page and in tables) |
+

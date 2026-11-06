@@ -92,7 +92,7 @@ Gather the resource (section 3.3) → decide in the register (section 5) → rec
 | `source-documents/52. OL.294_MV ZHONGHAIHUARUN 1_MELAWAN COAL (1).xlsm` (17 sheets)                        | Parameter catalogue (`Surveyor_Template`), rapid and final tiers, contract spec table, distribution list, CoA sheet, formulas                                                                                                           | Exploration data; it is a shipment workbook                            |
 | `source-documents/pdf-p-COA contoh.pdf`, `source-documents/pdf-roa-contoh.pdf`                        | Certificate and report layout, method editions, header and footer fields                                                                                                                                                                | Numbering rules, signature rules                                       |
 | `research/inspiration/dashboard-concept.webp`                                                    | Visual inspiration for the operations dashboard (another industry's product)                                                                                                                                                            | Nothing about coal                                                     |
-| `screens.pen`                                                       | Design file for the screens (encrypted; use the pencil tools)                                                                                                                                                                           | —                                                                      |
+| `screens.pen`                                                       | The first design file (pen.dev), replaced on Oct 29, 2026 by the FigCraft main file `design/figcraft/SGSI-LIMS-screens.figcraft`, which is the design source now                                                                                                         | —                                                                      |
 | AssayNet and CCLAS public documentation                             | Feature and workflow reference (section 4)                                                                                                                                                                                              | Coal-specific behaviour                                                |
 | `research/assaynet/` (16 frames from a [LIMS 4 demo video](https://www.youtube.com/watch?v=s734aLAzxg8)) | LIMS 4 browser screens: shell, dashboard, sample batches, results, export, lab jobs, data capture, instrument runs, control charts, sample login (section 4.3) | Configuration, reports, security screens; demo data is metals assay, not coal |
 | Product owner brief, Oct 20, 2026 (conversation)                    | Industry (coal), outputs (RoA internal, CoA to client), no instrument integration, nine-step role flow (section 3.4)                                                                                                                    | Who receives samples, approval position, signatories, numbering        |
@@ -780,7 +780,7 @@ Status refers to how well the feature is specified, not when it is built.
 | F-BAN-01  | System banner                       | Superadmin message shown to every user                                               | Proposed                            | Clarity admin            |
 | F-BAT-01  | Batch list                          | Filters, counters, status, RoA downloads, actions                                   | Fixed                               | Proposal p. 21           |
 | F-BAT-02  | Create and edit batch               | Company, batch number (**editable while Created**, pattern `B-YYYY-NNNN` and unique until the lab fixes its format, D-45), dates, deadline, expected count, service, notes | Proposed (fields)                   | Proposal p. 21, AssayNet |
-| F-BAT-03  | Batch workflow                      | Created → Preparation → Analysis → Finished Analysis → Completed (v1 steps in section 9.2: Confirm reception, Finish Preparation, Finish Analysis, Complete batch with the signed RoA) | Fixed                               | Proposal p. 21           |
+| F-BAT-03  | Batch workflow                      | Created → Preparation → Analysis → Finished Analysis → Completed (v1 names: Created, Receiving, Preparation, Prep finished, Analysis, Analysis finished, Completed; v1 steps in section 9.2: Confirm reception, Finish Preparation, Finish Analysis, Complete batch with the signed RoA) | Fixed                               | Proposal p. 21           |
 | F-BAT-07  | Signed RoA and Complete batch (v1)  | After Finish Analysis the Lab admin uploads the lab's signed RoA (PDF) with its number; **Complete batch** is enabled only then and locks the batch | Proposed (D-49)                     | Lab meeting Oct 29       |
 | F-BAT-04  | Preparation and analysis timestamps | Start and finish, with user                                                         | Fixed                               | Proposal p. 21           |
 | F-BAT-05  | Delete rule                         | Sample rows cannot be deleted after Start Preparation                               | Fixed                               | Rule 5                   |
@@ -1115,6 +1115,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-01 Dashboard `/` (Fixed for Quality tab; Proposed for Operations)
 
+**v1 note (Nov 6, 2026):** built Nov 5 with the Operations and Quality & reports tabs (Tabs, shown only with `dashboard.quality`), the Your queues strip, the deadline alert and the week strip; 15 frames: `../Dashboard/Dashboard_v2_Screen_Plan.md`.
+
 - Roles: every staff role sees Operations (default); Superadmin, Lab admin, Supervisor and Manager also see Quality. The Client view in the dashboard plans is parked until a portal is built (D-35).
 - Operations additions (Proposed, from Clarity's dashboards): job orders by status (section 9.3), batches by status (section 9.2), and a strip of the signed-in user's queue counts linking to My work (S-19).
 - Filters: period (default last 30 days), company. Apply to every widget.
@@ -1140,6 +1142,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-03 Companies `/companies` (Fixed)
 
+**v1 note (Nov 6, 2026):** named **Clients** in the sidebar and on the screens (`/clients`); built Nov 5 with the client page, contacts, logo and archive: `../Master Data/Master_Data_Screen_Plan.md`.
+
 - Columns: Name (with logo), Code, Address, Status, Total Sample (computed), Created.
 - Filter: Status. Actions: add, edit, delete (blocked when the company has data; archive instead).
 - Form: name, code (unique, short), address, status, logo upload.
@@ -1149,6 +1153,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-04 Drill hole `/master/drill-holes` (Fixed)
 
+**v1 note (Nov 6, 2026):** built Nov 5 with the Missing CoA chip, Upload CoA and CoA history dialogs, archive instead of delete when used, and a read-only view for Supervisor and Manager: `../Master Data/Master_Data_Screen_Plan.md`.
+
 - Columns: Code, Description, Total Sample, Company, CoA. Actions: Edit, Upload COA, Delete (archive when used).
 - Form: code (unique per company), description, company.
 - CoA: PDF upload with a size limit; shows file name and date; replace with history (D-30 related).
@@ -1157,11 +1163,15 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-05 Lithology `/master/lithologies` (Fixed)
 
+**v1 note (Nov 6, 2026):** built Nov 5 (list and edit dialog with the kind): `../Master Data/Master_Data_Screen_Plan.md`.
+
 - Columns: Name, Kind (coal, parting, no lithology), Total Sample, Company.
 - Form: name, kind, company. Unique per company.
 - Open: some names look like groups (Coal vs Silicified Coal); confirm with R-08.
 
 ### S-06 Seam `/master/seams` (Fixed)
+
+**v1 note (Nov 6, 2026):** built Nov 5 (list and add dialog): `../Master Data/Master_Data_Screen_Plan.md`.
 
 - Columns: Code, Description, Company. 62 rows in SIM Lab.
 - Form: code, description, company. Unique per company.
@@ -1169,10 +1179,12 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-07 Batch list `/batches` (Fixed)
 
+**v1 note (Nov 6, 2026):** built Nov 4 with status chips (Created, Preparation, Prep finished, Analysis, Analysis finished, Completed), a filter dialog, a per-role pre-filter and Add batch through a job order; a row opens the batch page: `../Batch/Batch_Screen_Plan.md` section 13.
+
 - Columns: Company, Batch No., Batch Date, Deadline, Samples (registered / expected), Status, RoA downloads, Actions (delete, edit, open).
 - Filters: search by number, Status, arrival date, Deadline.
 - Create batch dialog (Proposed fields): **job order** (required; company and service come from it, D-01), batch number (suggested next), batch date (arrival), deadline (defaults from the job order due date or service turnaround), expected sample count, COC no (D-17), priority, notes.
-- Columns gain Job order and a status set from section 9.2 (created, preparation, analysis, finished analysis, completed) plus the status of its RoA and of the job order's CoA.
+- Columns gain Job order and a status set from section 9.2 (created, preparation, prep finished, analysis, analysis finished, completed) plus the status of its RoA and of the job order's CoA.
 - Row states: past deadline highlighted; `on_hold` badge.
 - Add (Proposed, from LIMS 4's Add dialog): **Create manually** or **Copy from a previous batch** (company, service, deadline offset, expected count). Client submittals stay Extended.
 - Master–detail (Proposed, from LIMS 4): selecting a row opens a resizable bottom pane with tabs Samples, Status log, Reports. The Open arrow still goes to Input ROA.
@@ -1182,6 +1194,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 - Open: relation between "Tanggal Batch" and the "Tanggal Kedatangan" filter (treated as the same date until R-01).
 
 ### S-08 Batch detail `/batches/:id` (Proposed)
+
+**v1 note (Nov 6, 2026):** in v1 the batch page **is** the batch detail: the Reception, Preparation and Analysis tabs of S-18, built Nov 4: `../Batch/Batch_Screen_Plan.md`.
 
 SIM Lab opens a batch in the Input ROA screen; this is the read-only summary page behind the Open arrow if the team wants one.
 
@@ -1296,6 +1310,8 @@ Steps: choose target (samples, results, masters) → upload → map columns (rem
 
 ### S-17 Job orders `/orders` and `/orders/:id` (Fixed need, Proposed layout)
 
+**v1 note (Nov 6, 2026):** built through Revision 12 (list, New job order, detail with Overview, Samples, Batches, Files, CoA and History tabs, Add batch, CoA actions), 55 frames: `../Job Order/Job_Order_Screen_Plan.md`. The Files and History tab contents are not drawn yet.
+
 Modelled on Clarity's Projects & Samples page: list on the left or top, details beside it.
 
 | Part | Spec |
@@ -1311,11 +1327,13 @@ Modelled on Clarity's Projects & Samples page: list on the left or top, details 
 
 ### S-18 Reception and preparation `/batches/:id/receive` (Fixed need, Proposed layout)
 
+**v1 note (Nov 6, 2026):** built Nov 4 as the batch page tabs, 24 frames: `../Batch/Batch_Screen_Plan.md` (it replaces `../archive/Reception_Preparation_Screen_Plan.md`). Photos open in a centered dialog on desktop and tablet.
+
 Used by the Preparation team (B-9) and, from v1 (Oct 29, 2026), by the CSO and Lab admin for **Confirm reception** (D-46). The batch page has three tabs: **Reception**, **Preparation** and **Analysis** (F-RES-07), under a six-step stepper (section 9.2.1).
 
 - Header: job order, client, expected count, received count. The batch number is shown with a pencil while the batch is Created (dialog with the pattern hint and the "already used" error, D-45). The performer chip is withdrawn; actions are stamped with the signed-in account.
 - Reception grid: the job order's samples, pre-filled with their IDs, plus arrived (tick), mass received, condition (good, damaged, wet, short, no tag) using sample issue codes (T-10), remarks, **Photos** and label status. The Photos cell shows a paperclip, the count and the first thumbnail, or **Add** (D-48).
-- **Photos sheet**: opens from the Photos cell (side sheet on desktop and tablet, bottom sheet on phone): the sample's photos with tag (Condition, Weighing, Other), taken by and time; **Add photo** (file picker on desktop, camera on tablet and phone); remove until Confirm reception, then read-only. Photos are optional and not paired with the condition.
+- **Photos sheet**: opens from the Photos cell (a centered dialog on desktop and tablet since Nov 4, bottom sheet on phone): the sample's photos with tag (Condition, Weighing, Other), taken by and time; **Add photo** (file picker on desktop, camera on tablet and phone); remove until Confirm reception, then read-only. Photos are optional and not paired with the condition.
 - **Print labels**: one label per sample with the job order sample ID, lab code, barcode, job order no. and date received; select rows to reprint, each reprint logged (F-LBL-01). Label size and printer are settings.
 - **Confirm reception** (shown to CSO, Lab admin, Preparation) runs the guard in section 9.2.1; the checklist title reads "Before you can confirm reception". Then the Preparation tab opens for ADL, and **Finish Preparation** moves the batch on.
 - **Preparation tab (v1)**: ADL only, columns #, Sample ID, Lab code, ADL (%), Entered by, Saved, Status; ADL is entered by the Preparation team only.

@@ -189,7 +189,7 @@ Six steps, **2xs** to **2xl**. Each step stacks one to three drop shadows whose 
 
 Colours: Light mode navy at 12 %, 5 % and 2 % (`deep`, `mid`, `light`); Dark mode near-black `#06071A` at 25 %, 20 % and 15 %, because a navy shadow disappears on dark surfaces.
 
-Suggested use (confirm against the screens): **2xs** resting cards and inputs; **xs** raised cards and sticky bars; **md** menus, popovers, dropdowns; **lg** dialogs; **xl** side sheets and bottom sheets; **2xl** the largest overlays.
+Use (owner rule, Nov 6, 2026): **2xs** resting cards and inputs; **xs** raised elements that sit on another surface: raised cards, sticky bars, and floating badges such as the top bar's unread Count pill; **md** menus, popovers, dropdowns, tooltips; **lg** dialogs; **xl** bottom sheets (the Side sheet was removed Nov 5); **2xl** the largest overlays. A floating badge shares a wrapper frame with the element it follows (the top bar's Bell frame), so it moves with it.
 
 ## 4. Contrast of the main pairs
 

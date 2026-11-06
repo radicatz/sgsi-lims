@@ -1,5 +1,7 @@
 # Job Orders Screen — Design Plan
 
+> **Current state (Nov 6, 2026):** 53 frames in module 03 of the FigCraft main file (`../../design/figcraft/SGSI-LIMS-screens.figcraft`, rows A to E), plus the 2 CoA states added with Reports (55 in all). Revisions 7 to 12 below are the latest and are built; the sections from Oct 21 to Oct 29 are kept as history and still mention `screens.pen`, the Side sheet and earlier layouts, which are replaced. Frame names: `../Design System/Frame_Naming.md`. Prototype: `Job_Order_Prototype_Plan.md`.
+
 Oct 21, 2026 · screen S-17 in `../Project/Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
 Revised Oct 27, 2026 after the first review: see **Revision 2**; **Revision 3** (contact dropdown, hint clean-up) is planned and waits for approval. It covers company and contacts, the Standard field, parameter pills, the stepper, tab order, and the new Add batch screen.
 
@@ -51,7 +53,7 @@ The screens were deleted on Oct 30 so they can be rebuilt on the new library (74
 
 ### 6.2 Frames
 
-Grouped in rows on the new page; each row has a title. **52 frames.**
+Grouped in rows on the new page; each row has a title. **52 frames** in this plan; the file has **53** since Samples · Mark as not received got a tablet frame (see the current state at the top).
 
 | Row | Frame | Sizes | State and demo data |
 | --- | --- | --- | --- |
@@ -74,8 +76,8 @@ Grouped in rows on the new page; each row has a title. **52 frames.**
 | | Batches · Empty | D, T | JO-2026-0137, **+ Add batch** |
 | | Batches · Samples awaiting arrival | D | Revision B: the line about samples waiting, with the link to Add batch |
 | | Samples | D, T, P | JO-2026-0134: 6 expected, editable grid (phone: cards) |
-| | Samples · Mixed states | D, T, P | JO-2026-0137: 4 received, 2 in batch (B-2026-0421), 1 awaiting arrival, 1 not received; counts line "8 samples · 4 received · 2 in batch · 1 awaiting arrival · 1 not received" |
-| | Samples · Mark as not received | D, P | Dialog with the required reason |
+| | Samples · Mixed states | D, T, P | JO-2026-0137: 4 received, 2 in batch (B-2026-0421), 1 awaiting arrival, 1 not received; counts line with "8 samples", "4 received", "2 in batch", "1 awaiting arrival" and "1 not received" as separate texts (rule 8.1) |
+| | Samples · Mark as not received | D, T, P | Dialog with the required reason (phone: bottom sheet) |
 | | P2 Submitted toast | D | Empty Samples tab with "JO-2026-0143 submitted. Add the sample IDs next." |
 | | P3 Paste preview | D | 12 rows found, 11 new, 1 duplicate |
 | | P4 Unsaved rows | D | Unsaved dots, duplicate message |
