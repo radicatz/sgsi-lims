@@ -1126,6 +1126,8 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-02 Users `/users` (Fixed)
 
+**v1 note (Nov 6, 2026):** built with a user page, an email invite (no typed initial password), fixed roles shown as a read-only grid, deactivate instead of delete, and no Company field (staff only): `../Admin/Admin_Screen_Plan.md`.
+
 | Part       | Spec                                                                                                |
 | ---------- | --------------------------------------------------------------------------------------------------- |
 | Columns    | Company, Email, Name, Role, Status, Registration Date, Actions                                      |
@@ -1264,9 +1266,13 @@ Name, email (read-only), change password, sidebar preference, language (D-24).
 
 ### S-14 Audit log `/audit` (Proposed)
 
+**v1 note (Nov 6, 2026):** built with filters, expandable before and after rows, a view filtered to one record and CSV export: `../Admin/Admin_Screen_Plan.md`.
+
 Superadmin, Supervisor and Manager (`audit.read`, section 8.2). Filters: table, record, user, date, action. Rows show before and after in a diff view. Read-only; export CSV.
 
 ### S-15 Configuration hub `/config` (Proposed)
+
+**v1 note (Nov 6, 2026):** built with Parameters, Services, Methods and standards, Validation rules, Lookups, Report templates, Laboratory, Security and Formulas (view only); Result tabs and Field definitions are next goal: `../Admin/Admin_Screen_Plan.md`.
 
 A single searchable page (the pattern AssayNet moved to) with sections:
 

@@ -137,3 +137,24 @@ Canvas row M holds the Search frames; they are created under their final names.
 | 10 | Session_timeout | 01 Warning |
 
 Screens 01 to 03 stay on row J; screens 04 to 10 are on row N, created under their final names.
+
+## Admin (modules 13 to 15, row O)
+
+| Module | SS | Screen | Variants (VV) |
+| --- | --- | --- | --- |
+| 13 Users | 01 | Users_list | 01 Default (desktop, tablet, phone), 02 Roles |
+| | 02 | User_detail | 01 Default (desktop, tablet, phone), 02 Locked, 03 Invited |
+| | 03 | User_form | 01 Add_user (desktop, phone), 02 Edit_user, 03 Deactivate_confirm, 04 Last_superadmin |
+| 14 Configuration | 01 | Configuration_hub | 01 Overview (desktop, tablet, phone), 02 Search |
+| | 02 | Parameters | 01 List (desktop, tablet, phone), 02 Edit |
+| | 03 | Services | 01 List (desktop, tablet), 02 Edit |
+| | 04 | Methods_and_standards | 01 Matrix, 02 Edit |
+| | 05 | Validation_rules | 01 List, 02 Edit |
+| | 06 | Report_templates | 01 List, 02 New_version |
+| | 07 | Lookups | 01 List, 02 Edit |
+| | 08 | Laboratory | 01 Default |
+| | 09 | Security | 01 Default |
+| | 10 | Formulas | 01 View |
+| 15 Audit_log | 01 | Audit_log | 01 Default (desktop, tablet, phone), 02 Row_expanded, 03 Filtered_by_record, 04 Filters (phone) |
+
+Canvas row O holds the Admin frames; they are created under their final names.

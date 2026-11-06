@@ -383,4 +383,4 @@ function phoneBar(b, s, left, right) {
   b.raw("node.set", { ids: [bar + v.texts[1].pos], props: { characters: left } }); b.raw("node.set", { ids: [bar + v.texts[2].pos], props: { characters: right } });
   b.raw("node.set", { ids: [bar + v.names.Note], props: { visible: false } });
 }
-exports.U = { icon, txt, hframe, vframe, btn, iconBtn, cardTop, pill, avatar, badge, CLIENT, dialog, overlay, KIND, W, CW };
+exports.U = { icon, txt, hframe, vframe, btn, iconBtn, cardTop, pill, avatar, badge, CLIENT, dialog, overlay, KIND, W, CW, docPage };

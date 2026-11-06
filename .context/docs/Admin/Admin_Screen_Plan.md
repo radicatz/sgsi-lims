@@ -1,6 +1,6 @@
 # Admin screen plan: users, audit log, configuration
 
-Written Nov 6, 2026. **Status: plan, waiting for go.** Modules 13 Users, 14 Configuration, 15 Audit_log (the ADMIN group of the sidebar), canvas row **O**. Builds on spec S-02 (users), S-14 (audit log), S-15 (configuration hub), sections 8.1 and 8.2 (roles and permissions), 11 (parameters), 12.3 (validation rules), D-11, D-16, D-23, D-29 (`../Project/Coal_LIMS_Development_Spec.md`), the job order parameter pills and quick-select templates (`../Job Order/Job_Order_Screen_Plan.md`), the reception conditions and hold reasons (`../Batch/Batch_Screen_Plan.md`), the App screens' security defaults (`../App/App_Screen_Plan.md`, section 14) and the Clarity LIMS videos 04 (System Settings) and 07 (Add a New User), frames in `../../research/clarity-lims/screenshots/04-system-settings/` and `07-add-user/`.
+Written Nov 6, 2026. **Status: BUILT Nov 6, 2026** (section 14). Modules 13 Users, 14 Configuration, 15 Audit_log (the ADMIN group of the sidebar), canvas row **O**. Builds on spec S-02 (users), S-14 (audit log), S-15 (configuration hub), sections 8.1 and 8.2 (roles and permissions), 11 (parameters), 12.3 (validation rules), D-11, D-16, D-23, D-29 (`../Project/Coal_LIMS_Development_Spec.md`), the job order parameter pills and quick-select templates (`../Job Order/Job_Order_Screen_Plan.md`), the reception conditions and hold reasons (`../Batch/Batch_Screen_Plan.md`), the App screens' security defaults (`../App/App_Screen_Plan.md`, section 14) and the Clarity LIMS videos 04 (System Settings) and 07 (Add a New User), frames in `../../research/clarity-lims/screenshots/04-system-settings/` and `07-add-user/`.
 
 ## 1 · Goal
 
@@ -253,3 +253,17 @@ Card anatomy (padding 16, Card head 32); centered dialogs (lg for Add user, md f
 2. `naming.js` needs no rules (final names); `cards.js` and `fit.js` as usual.
 3. Deploy (dirty check, backup, swap), commit. No export unless asked.
 4. Docs: build status here; spec S-02, S-14, S-15 v1 notes; `Frame_Naming.md` modules 13 to 15; Navigation plan; README.
+
+## 14 · Build status (Nov 6, 2026)
+
+All 42 frames are built on row **O** with `library/screens/rowO.js` (modules 13, 14, 15, final names, role sidebar per persona). The open points of section 12 were used with their defaults. No library changes were needed. Deployed to the main file (backup `backup/SGSI-LIMS-screens.before-admin.figcraft`).
+
+Deviations from the plan:
+
+- **Users list:** shows 10 of the 12 demo users with a pager (Joko Santoso and Dewi Lestiani are on page 2).
+- **Role options** in Add user and Edit user are tiles (checkbox, role, one-line description), two per row, the selected ones tinted.
+- **Last Superadmin:** the destructive dialog shows the Error alert and a dimmed **Remove role** button (the Dialog footer button has no disabled override).
+- **Audit log:** the Changes column carries a caret for rows with a diff; the expanded row shows Field, Before (struck through) and After, with a note naming the screen the change came from. Filtered_by_record also opens the first row.
+- **Configuration sections list** is a card of rows (not Menu items), with counts and a "Next goal" pill for the two sections that are not in v1.
+- **Report template version** shows the fields above a full-size preview of the certificate (the Reports drawing), not side by side.
+- **Tablet and phone:** Users list, user page (tablet, phone), Add user (phone, full screen), Audit log (tablet, phone, phone filters), Configuration hub (tablet, phone), Parameters (tablet, phone) and Services (tablet), as planned.
