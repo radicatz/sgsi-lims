@@ -43,7 +43,7 @@ The screen number equals the row letter on the canvas (A 01, B 02, C 03, D 04, E
 - `library/naming.js` holds the rules and renames all frames of the three pages (`node naming.js <in> <out>`); run it at the end of every build, after the row generators, and before exporting.
 - The generators (`rowB.js` to `rowE.js`) still create frames under their short working names and find their earlier frames under either name.
 - Frames the owner keeps as references (names ending in "reference", "edit", "edit dark", and "Select reference", "Properties ref") are not renamed and not exported.
-- Exports go to `.context/design/export/`, one PNG per frame, file name = frame name.
+- Exports go to `.context/design/export/desktop/`, `tablet/` or `phone/` (by the size prefix), one PNG per frame, file name = frame name. `library/scratch/export_all.js` writes them.
 - A new screen or state gets the next free number; a new module takes its sidebar number.
 
 ## Batches screens (module 04)

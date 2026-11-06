@@ -8,7 +8,7 @@ Written for: the product owner, and whoever builds the screens from this library
 
 | # | Decision |
 | --- | --- |
-| 1 | The old 113 components are **deleted** once the new library exists. The backup file `figcraft/backup/SGSI-LIMS-screens.backup-before-reset.figcraft` keeps them. The component list comes from the 93 frames in `.context/design/export/` |
+| 1 | The old 113 components are **deleted** once the new library exists. They are kept in git: `SGSI-LIMS-screens.figcraft` at commit `313b17c` is the file before the reset (the local backup file was removed in the Nov 6 clean-up). The component list comes from the 93 pen.dev frames, now in `.context/design/export/v1/` |
 | 2 | Interactive components get **Type** = Primary, Secondary, Tertiary, Ghost (where a type applies) and **State** = Default, Hover, Pressed, Focused (active), Disabled, Loading (processing) |
 | 3 | Build route: headless, from scripts (section 7) |
 | 4 | The icon set is every glyph the exported frames use: 71 Phosphor icons (section 3.3) |
