@@ -29,6 +29,7 @@ Nov 5, 2026. Plans and specifications for SGSI LIMS, one folder per screen group
 | Admin | `Admin/Admin_Screen_Plan.md` | Users and roles, audit log, configuration hub (parameters, services, methods, rules, lookups, report templates, laboratory, security, formulas) | 42 frames built Nov 6 |
 | Admin | `Admin/Admin_Prototype_Plan.md` | Prototype v2: users, audit log, configuration and what it feeds, flows AD1 to AD4 | Plan, waiting for go |
 | Prototype | `Prototype/Prototype_Plan.md` | Prototype v2 shared plan: decisions, review bar, shell, rules, demo data basics, the list of differences found in the frames, phases, checks; links to the group prototype plans | Built Nov 6 as a private preview; shared link waits for go |
+| Prototype | `Prototype/Prototype_Demo_Guide.md` | Presenter's guide: every screen group and feature, what it does, who can see and use it, and a 40-minute demo running order | Nov 9 |
 | archive | `archive/Job_Order_Prototype_Plan_v31.md` | The version 31 prototype plan (job orders and batches) | Replaced by the prototype v2 plans; kept as history |
 | archive | `archive/Reception_Preparation_Screen_Plan.md` | The first batch-page plan with Revisions B and C | Superseded by the Batch plan; kept as history |
 
