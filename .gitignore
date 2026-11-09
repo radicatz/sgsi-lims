@@ -18,3 +18,7 @@ desktop.ini
 .context/design/figcraft/backup/
 .context/design/figcraft/library/scratch/*
 !.context/design/figcraft/library/scratch/*.js
+
+# Demo video: rendered clips and npm packages (local only)
+.context/demo-video/out/
+.context/demo-video/node_modules/
