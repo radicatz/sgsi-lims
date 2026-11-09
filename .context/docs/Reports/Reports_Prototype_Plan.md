@@ -23,7 +23,7 @@ What the frames show, and what the prototype does with it.
 | Reports list | `#/reports` | See below |
 | CoA page, Draft | `#/reports/:no` | Preview with page arrows (caret left and right). Bases **ADB / DB / DAF / AR**, parameter pills, Attention select, Signatory select, Client reference or PO. **Publish** opens the confirm dialog ("It gets the number CoA-JO-2026-0132-1…"); **Publish** gives the number, and a toast offers to save the bases and signatory as the client's default. ⋯ **Delete draft**. Phone: **Open PDF**, **Preview PDF**, **Publish** |
 | CoA page, Published | `#/reports/:no` | **Download**, **Print**, **Mark sent** (the same dialog as the job order: date, channels, recipient, note), then Sent with **Add another send**. ⋯ **Revise** (Lab admin): a dialog, then **Create revision** makes revision 2, and revision 1 shows the Superseded alert. ⋯ **Void** (Superadmin): a destructive dialog with **Keep CoA** and **Void CoA**. Phone: **Open PDF**, **Download**, **Mark sent** in a sticky bar |
-| RoA page | `#/reports/roa/:no` | The "Internal, not for distribution" alert, **Download**, **Print**. The Analyst version |
+| RoA page | `#/reports/roa/:no` | Badge **Signed copy**, the "Internal, not for distribution" info alert, **Download**, **Print**. **Preview** card with the RoA document drawn from the batch's values (screen plan 5.5), a page pager, **Details** (batch, job order, client, samples, standard, uploaded, batch completed, file with size) and **Used in** (the CoA revisions built from this batch, with their status). The Analyst version |
 
 **Reports list:**
 
@@ -53,6 +53,8 @@ What the frames show, and what the prototype does with it.
 | Row menus drawn closed | Items as listed in section 2 (screen plan, section 4) |
 | **Delete draft** (screen plan) | A destructive dialog, then back to the job order CoA tab |
 | Page arrows on the preview | Pages 1 and 2 of the sample certificate image |
+| D7: the RoA frame (Desktop-07-Reports-03-RoA-01-Default) shows the signed paper RoA as a document, but the first prototype only drew a grey "scanned document" box | Built Nov 9: the preview draws the RoA document from the batch's stored values (screen plan 5.5), two samples per page, so the pager reads "Page 1 of 6" for a 12-sample batch where the frame shows "Page 1 of 2". The lab address line comes from the frame because the prototype's Laboratory settings have no address |
+| Used in (RoA page) | Lists every CoA revision of the job order (for example a Superseded and a Void one) with its status; the frame shows one Published CoA |
 | D1: CoA-JO-2026-0142-1 is drawn for PT Bukit Asam Tbk, but JO-2026-0142 is a PT Bara Nusantara Mandiri job order | The Bukit Asam CoA becomes CoA-JO-2026-0130-1, on a Bukit Asam job order JO-2026-0130 with its batch and RoA-0412. JO-2026-0142 gets its own CoA once its batches complete |
 | D6: Draft_signatory shows **Type manually** next to the signatory; the job order form removed manual entry in Revision 3b | As the job order: pick from the list or **Add signatory** |
 

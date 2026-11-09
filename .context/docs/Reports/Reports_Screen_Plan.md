@@ -124,7 +124,7 @@ A superseded or void version shows a banner over the preview ("Superseded by rev
 
 ### 5.3 RoA (uploaded signed file)
 
-Same layout, read-only. Header: RoA number, badge **Signed copy**, the batch, job order and client as texts. Note in Card content: "Internal, not for distribution. This is the lab's signed paper RoA, uploaded when the batch was completed." Preview: the uploaded PDF. Actions: **Download**, **Print**.
+Same layout, read-only. Header: RoA number, badge **Signed copy**, the batch, job order and client as texts. Note in Card content: "Internal, not for distribution. This is the lab's signed paper RoA, uploaded when the batch was completed." Preview: the uploaded signed PDF (section 5.5 shows what it contains). Actions: **Download**, **Print**.
 
 | Card | Content |
 | --- | --- |
@@ -146,6 +146,19 @@ The preview is a drawing of the PDF the system renders (spec 14.3), so its layou
 7. **Footer**: "Issued at Samarinda on 2 Nov 2026", "This certificate may not be reproduced except in full", page n of m, verification code, form code.
 
 No specification column (D-43).
+
+### 5.5 RoA document (what the RoA preview draws)
+
+The RoA is the lab's paper report (form FM-LAB-021 rev 1), signed by the Technical Supervisor and uploaded as a PDF when the batch is completed. The preview on the RoA page shows it, so its content is part of this plan:
+
+1. **Header**: SGSI logo, laboratory name and address; RoA number, "Internal, not for distribution" in red, and the issue date.
+2. **Title and client block**: "Report of Analysis"; principal, attention, reference (PO), job order, date received, and the number of coal samples (held samples excluded).
+3. **Statement**: "Results as entered by the Analyst and signed by the Supervisor. The values are reported on four bases."
+4. **Results**: one block per sample (sample ID and lab ID), a table with parameter, unit, one column per basis (ADB, DB, DAF, AR) and the method with edition. Total moisture is reported on AR only, inherent moisture on ADB only, and ash on ADB, DB and AR. Fixed carbon is "By calculation". A held sample shows "Not analysed" with its hold reason.
+5. **Signature block**: "Issued at Samarinda", the date, and the Technical Supervisor's name and title.
+6. **Footer**: "Internal, not for distribution. Signed copy kept in the laboratory file.", page n of m, and the form code.
+
+The preview shows a page pager; the prototype draws two samples per page.
 
 ## 6 · Where a CoA starts (changes to the job order CoA tab)
 

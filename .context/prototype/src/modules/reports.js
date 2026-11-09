@@ -134,17 +134,65 @@
       <${TextField} id="void-reason" label="Reason" req value=${r} onChange=${(v) => { setR(v); setE(null); }} error=${e} /></${Confirm}>`;
   }
 
+  /* ---------- RoA page (Desktop-07-Reports-03-RoA-01-Default): signed copy preview, details, used in ---------- */
+  const ROA_ROWS = ["TM", "IM", "Ash", "VM", "FC", "TS", "GCV"];
+  // which bases each parameter prints on (values are stored on their measured basis: TM as received, the rest air-dried)
+  const ROA_BASES = { TM: ["AR"], IM: ["ADB"], Ash: ["ADB", "DB", "AR"] };
+  function roaCell(v, p, basis) {
+    const x = v[p]; if (x == null) return null;
+    const bases = ROA_BASES[p] || ["ADB", "DB", "DAF", "AR"]; if (!bases.includes(basis)) return null;
+    if (p === "TM") return x;
+    const im = v.IM, ash = v.Ash, tm = v.TM;
+    if (basis === "ADB") return x;
+    if (basis === "DB") return im == null ? null : (x * 100) / (100 - im);
+    if (basis === "DAF") return im == null || ash == null ? null : (x * 100) / (100 - im - ash);
+    if (basis === "AR") return im == null || tm == null ? null : (x * (100 - tm)) / (100 - im);
+    return null;
+  }
+  const roaNum = (x, dec) => (x == null ? "—" : (+x).toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }));
+  function RoaDoc({ b, o, page, pages, per }) {
+    const { db } = useApp(); const lab = db.config.lab, cl = S.client(db, o.client), ct = S.contact(db, o), sg = D.PERSONA.supervisor;
+    const ps = ROA_ROWS.filter((p) => b.params.includes(p));
+    const method = (p) => { if (p === "FC") return "By calculation"; const m = db.config.methods.find((x) => x.p === p && x.s === b.std); return m ? b.std + " " + m.m : b.std; };
+    const list = b.samples.slice((page - 1) * per, page * per), active = b.samples.filter((s) => !b.rows[s].hold).length;
+    const muted = { color: "#8A8478" }, th = { textAlign: "right", padding: "2px 4px", fontWeight: 600, color: "#4A4A4A", fontSize: "10.5px", lineHeight: 1.4, whiteSpace: "nowrap", background: "none", height: "auto" }, td = { padding: "1px 4px", fontSize: "10.5px", lineHeight: 1.4, whiteSpace: "nowrap", height: "auto", border: 0 };
+    return html`<div style=${{ background: "#fff", color: "#1A1A1A", border: "1px solid var(--surface-border)", borderRadius: "4px", padding: "28px 32px 20px", fontSize: "10.5px", lineHeight: 1.45, boxShadow: "var(--e-xs)", minHeight: "760px", display: "flex", flexDirection: "column", minWidth: 0 }} id="roa-doc">
+      <div style=${{ display: "flex", gap: "10px", alignItems: "flex-start" }}><span class="logo paperlogo" style=${{ width: "34px", height: "34px", flex: "none" }}></span>
+        <div style=${{ flex: 1 }}><b style=${{ fontSize: "12px" }}>${lab.name.replace(/^PT /, "")}</b><div style=${muted}>${lab.address || "Jl. Pangeran Antasari 12, " + lab.place}</div></div>
+        <div style=${{ textAlign: "right" }}><b style=${{ fontFamily: "var(--f-mono)", fontSize: "12px" }}>${b.roa.no}</b><div style=${{ color: "#B42318" }}>Internal, not for distribution</div><div style=${muted}>Issued ${fmtDate(b.roa.at)}</div></div></div>
+      <div style=${{ textAlign: "center", fontFamily: "var(--f-display)", fontSize: "20px", fontWeight: 600, margin: "12px 0 10px", color: "#0E2A4E" }}>Report of Analysis</div>
+      <div style=${{ borderTop: "1px solid #E5E0D6", paddingTop: "10px", display: "grid", gridTemplateColumns: "70px 1fr 70px 1fr", gap: "2px 8px" }}>
+        <span style=${muted}>Principal</span><b>${cl.name}</b><span style=${muted}>Job order</span><b>${o.no}</b>
+        <span style=${muted}>Attention</span><b>${ct ? ct.name : "—"}</b><span style=${muted}>Received</span><b>${b.confirmed ? fmtDate(b.confirmed.at) : "—"}</b>
+        <span style=${muted}>Reference</span><b>${o.po || "—"}</b><span style=${muted}>Samples</span><b>${active} coal samples</b></div>
+      <div style=${{ margin: "10px 0 8px" }}>Results as entered by the Analyst and signed by the Supervisor. The values are reported on four bases.</div>
+      ${list.map((s) => { const r = b.rows[s]; return html`<div key=${s} style=${{ marginBottom: "10px" }}>
+        <div style=${{ background: "#EEF2F8", padding: "3px 8px", borderRadius: "3px" }}><b>Sample ${s}</b><span style=${{ ...muted, marginLeft: "10px" }}>Lab ID ${r.lab}</span></div>
+        ${r.hold ? html`<div style=${{ padding: "4px 8px", color: "#B42318" }}>Not analysed. Held: ${r.hold}.</div>` : html`<table style=${{ width: "100%", borderCollapse: "collapse", fontVariantNumeric: "tabular-nums" }}><thead><tr><th style=${{ ...th, textAlign: "left" }}>Parameter</th><th style=${{ ...th, textAlign: "left" }}>Unit</th>${["ADB", "DB", "DAF", "AR"].map((x) => html`<th key=${x} style=${th}>${x}</th>`)}<th style=${{ ...th, textAlign: "left", paddingLeft: "10px" }}>Method</th></tr></thead>
+          <tbody>${ps.map((p) => { const info = D.PARAM_INFO[p]; return html`<tr key=${p}><td style=${td}>${info[0]}</td><td style=${td}>${info[1]}</td>${["ADB", "DB", "DAF", "AR"].map((x) => html`<td key=${x} style=${{ ...td, textAlign: "right" }}>${roaNum(roaCell(r.values, p, x), info[3])}</td>`)}<td style=${{ ...td, ...muted, paddingLeft: "10px" }}>${method(p)}</td></tr>`; })}</tbody></table>`}</div>`; })}
+      <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "18px" }}><div><div style=${muted}>Issued at ${lab.place}</div><b>${fmtDate(b.roa.at)}</b></div>
+        <div style=${{ borderTop: "1px solid #1A1A1A", paddingTop: "4px", minWidth: "150px" }}><b>${sg.name}</b><div style=${muted}>Technical Supervisor</div></div></div>
+      <div style=${{ flex: 1 }}></div>
+      <div style=${{ ...muted, display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "24px", fontSize: "9.5px" }}><div>Internal, not for distribution. Signed copy kept in the laboratory file.<br />Page ${page} of ${pages}</div><div>FM-LAB-021 rev 1</div></div></div>`;
+  }
   function RoaPage({ no }) {
     const { db, go, toast, bp } = useApp();
+    const [page, setPage] = useState(1);
     const b = db.batches.find((x) => x.roa && x.roa.no === no);
     if (!b) return html`<${Page}><${Card}><${Empty} icon="question" title=${no + " was not found"} /></${Card}></${Page}>`;
-    const o = S.order(db, b.jo);
-    return html`<${Page}><${PageHead} crumb=${[["Reports", "reports"], [no]]} title=${no} actions=${html`<${Button} icon="download-simple" onClick=${() => toast(b.roa.file + " downloaded (sample file)")}>Download</${Button}><${Button} icon="printer" onClick=${() => toast("Printing is not available in the prototype", { tone: "info" })}>Print</${Button}>`}
-        meta=${html`<div class="row g12 wrap t-sm c-sec"><${RecLink} to=${"batch-" + b.no} cls="t-data">${b.no}</${RecLink}><${RecLink} to=${"order-" + o.no} cls="t-data">${o.no}</${RecLink}><span>${S.client(db, o.client).name}</span></div>`} />
-      <${Alert} tone="warning" title="Internal, not for distribution" text="This is the lab's signed paper RoA, uploaded to complete the batch. Clients receive the CoA." />
-      <div class="grid" style=${{ gridTemplateColumns: bp === "desktop" ? "minmax(0,1.3fr) minmax(0,1fr)" : "1fr", alignItems: "start" }}>
-        <div style=${{ background: "#fff", border: "1px solid var(--surface-border)", borderRadius: "6px", minHeight: "360px", padding: "24px", color: "#333", fontFamily: "var(--f-mono)", fontSize: "11px" }}><b>REPORT OF ANALYSIS ${no}</b><br />Batch ${b.no}, ${b.samples.length} samples, ${b.std}<br /><br />[Scanned signed document: ${b.roa.file}]</div>
-        <${Card} title="Details"><div><${KV} k="Batch">${b.no}</${KV}><${KV} k="Uploaded">${fmtDate(b.roa.at)}</${KV}><${KV} k="Uploaded by">${b.roa.by}</${KV}><${KV} k="File">${b.roa.file}</${KV}></div></${Card}></div></${Page}>`;
+    const o = S.order(db, b.jo), cl = S.client(db, o.client);
+    const per = 2, pages = Math.max(1, Math.ceil(b.samples.length / per)), pg = Math.min(page, pages);
+    const used = o.coas.filter((c) => c.rev > 0);
+    const pager = html`<div class="row g8"><${IconBtn} n="caret-left" label="Previous page" disabled=${pg === 1} onClick=${() => setPage(pg - 1)} /><span class="t-cap c-sec">Page ${pg} of ${pages}</span><${IconBtn} n="caret-right" label="Next page" disabled=${pg === pages} onClick=${() => setPage(pg + 1)} /></div>`;
+    return html`<${Page}><${PageHead} crumb=${[["Reports", "reports"], [no]]} title=${no} badge=${html`<${Badge} label="Signed copy" tone="blue" />`} actions=${html`<${Button} icon="download-simple" onClick=${() => toast(b.roa.file + " downloaded (sample file)")}>Download</${Button}><${Button} icon="printer" onClick=${() => toast("Printing is not available in the prototype", { tone: "info" })}>Print</${Button}>`}
+        meta=${html`<div class="row g12 wrap t-sm c-sec"><${RecLink} to=${"order-" + o.no} cls="t-data">${o.no}</${RecLink}><span>${cl.name}</span><${RecLink} to=${"batch-" + b.no} cls="t-data">${b.no}</${RecLink}></div>`} />
+      <${Alert} tone="info" title="Internal, not for distribution" text="This is the lab's signed paper RoA, uploaded when the batch was completed." />
+      <div class="grid" style=${{ gridTemplateColumns: bp === "desktop" ? "minmax(0,1.85fr) minmax(0,1fr)" : "1fr", alignItems: "start" }}>
+        <${Card} title="Preview" actions=${pager} id="roa-preview"><div style=${{ background: "var(--surface-sand)", borderRadius: "12px", padding: bp === "phone" ? "10px" : "24px 48px", overflowX: "auto" }}><${RoaDoc} b=${b} o=${o} page=${pg} pages=${pages} per=${per} /></div></${Card}>
+        <div class="col g20"><${Card} title="Details"><div><${KV} k="Batch"><${RecLink} to=${"batch-" + b.no} cls="t-data">${b.no}</${RecLink}></${KV}><${KV} k="Job order"><${RecLink} to=${"order-" + o.no} cls="t-data">${o.no}</${RecLink}></${KV}><${KV} k="Client">${cl.name}</${KV}>
+          <${KV} k="Samples">${plural(b.samples.length, "sample")}</${KV}><${KV} k="Standard">${b.std}</${KV}><${KV} k="Uploaded"><span class="row g10"><span>${fmtDate(b.roa.at)}</span><span class="c-brand">${b.roa.by}</span></span></${KV}>
+          ${b.completed && html`<${KV} k="Batch completed"><span class="row g10"><span>${fmtDate(b.completed.at)}</span><span class="c-brand">${b.completed.by}</span></span></${KV}>`}<${KV} k="File"><span class="row g10"><span>${b.roa.file}</span>${b.roa.size && html`<span class="c-sec">${fileSize(b.roa.size)}</span>`}</span></${KV}></div></${Card}>
+          <${Card} title="Used in" id="roa-used">${used.length ? html`<div class="col g8">${used.map((c) => html`<div key=${c.no} class="row g10 wrap"><${RecLink} to=${"report-" + c.no} cls="t-data">${c.no}</${RecLink}><${Badge} label=${CS[c.status][0]} tone=${CS[c.status][1]} sm /></div>`)}</div>` : html`<span class="t-sm c-mut">Not in a CoA yet. It is used when the job order's CoA is published.</span>`}</${Card}></div></div></${Page}>`;
   }
 
   ROUTES.push({ re: /^reports$/, nav: "reports", render: () => html`<${List} />` },

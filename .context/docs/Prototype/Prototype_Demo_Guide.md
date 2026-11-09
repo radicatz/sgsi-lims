@@ -171,7 +171,7 @@ Phone: cards instead of tables, sheets for labels and photos. Flows: **BA1 to BA
 | Mark sent | Date, channels (Hard copy, Email, WhatsApp, Other; several allowed), recipient, note. The job order becomes Delivered | CSO |
 | Revise | Makes a new revision with a reason. The old one shows "Superseded" | Lab admin |
 | Void | Voids the CoA with a reason; the number is never reused | Superadmin |
-| RoA page | The lab's signed RoA, marked "Internal, not for distribution" | Superadmin, Lab admin, Supervisor, Manager, Analyst |
+| RoA page | The lab's signed RoA, marked "Signed copy" and "Internal, not for distribution". A paper preview of the RoA (results per sample on ADB, DB, DAF and AR, methods, the supervisor's signature) with a page arrow, a Details card, and a **Used in** card that lists the CoAs built from it. **Download** gives a sample file and **Print** shows a message | Superadmin, Lab admin, Supervisor, Manager, Analyst |
 
 Flows: **RE1 to RE3**.
 
