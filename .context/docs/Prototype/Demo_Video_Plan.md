@@ -9,7 +9,7 @@ Written Nov 9, 2026. A recorded, captioned demo of the clickable prototype v2, b
 | Audio | Silent, captions only |
 | Language | Captions and title cards in Indonesian. The app stays in English as built; on-screen names (**Submit**, **Samples**) stay in English, in bold, so viewers can match them |
 | Coverage | All features, all 45 flows, about 47 minutes in 21 clips |
-| Location | Tooling in `.context/demo-video/` (tracked); videos in `.context/demo-video/out/` (gitignored) |
+| Location | Tooling in `.context/demo-video/`; the 21 clips in `.context/demo-video/out/clips/` are tracked by git (plain files); the merged video is rebuilt with `node merge.js` and is not tracked |
 | Size | Page laid out at 1440 × 810 (the prototype's Desktop 1440 layout), captured at 1920 × 1080, 30 fps, H.264 MP4 |
 
 ## Tools
@@ -58,7 +58,7 @@ Clips 00 to 13 and 99 follow the guide's running order; 14 to 19 add the flows a
   package.json, render.js, merge.js
   overlay/    cursor, caption bar, title card
   chapters/   00-pembuka.js … 99-penutup.js (steps and Indonesian captions)
-  out/        gitignored
+  out/        only out/clips is tracked by git
     clips/    00-pembuka.mp4 … 99-penutup.mp4
     SGSI-LIMS-Demo-ID.mp4   merged, with chapter markers
     chapters.txt            timestamps for YouTube or Drive

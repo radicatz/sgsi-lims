@@ -11,7 +11,7 @@ node render.js all           # every chapter
 node merge.js                # joins out/clips/*.mp4 into out/SGSI-LIMS-Demo-ID.mp4 with chapter markers
 ```
 
-Output goes to `out/` (not tracked by git): `out/clips/<nn>-<name>.mp4`, `out/SGSI-LIMS-Demo-ID.mp4`, `out/chapters.txt` (timestamps for YouTube or Drive).
+Output goes to `out/`: `out/clips/<nn>-<name>.mp4` (the 21 clips, tracked by git as plain files, each well under GitHub's 100 MB limit), and `out/SGSI-LIMS-Demo-ID.mp4` with `out/chapters.txt` (timestamps for YouTube or Drive). The merged video is 327 MB, over that limit, so it is not tracked: rebuild it with `node merge.js` after pulling. The rest of `out/` (scratch frames, temp files) is ignored.
 
 ## Files
 
