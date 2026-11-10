@@ -76,16 +76,17 @@ export async function sessionRoutes(app: FastifyInstance) {
   });
 
   r.get("/me", { preHandler: authenticate }, async (req): Promise<Me> => {
-    const sec = await getSetting<Security>("security");
-    const tz = await getSetting<string>("timezone");
-    return asUser(req.user!, { requestId: req.id }, async (tx) => {
-      const [p] = await tx`select id, email, full_name, title, prefs from profiles where id = auth.uid()`;
-      const roles = await tx`select r.code from user_roles ur join roles r on r.id = ur.role_id where ur.user_id = auth.uid() order by r.sort_order`;
-      const [n] = await tx`select count(*)::int as unread from notifications where user_id = auth.uid() and read_at is null`;
-      return { id: p!.id, email: p!.email, fullName: p!.full_name, title: p!.title, roles: roles.map((x) => x.code as string),
-        permissions: req.user!.permissions, prefs: p!.prefs ?? {}, unread: n!.unread,
-        settings: { timezone: tz ?? env.LAB_TIMEZONE, idleSignOutMinutes: sec.idle_sign_out_minutes, warnBeforeSeconds: sec.warn_before_seconds } };
-    });
+    // the two settings and the profile queries are independent, so they run at the same time
+    const [sec, tz, mine] = await Promise.all([getSetting<Security>("security"), getSetting<string>("timezone"),
+      asUser(req.user!, { requestId: req.id }, async (tx) => {
+        const [p] = await tx`select id, email, full_name, title, prefs from profiles where id = auth.uid()`;
+        const roles = await tx`select r.code from user_roles ur join roles r on r.id = ur.role_id where ur.user_id = auth.uid() order by r.sort_order`;
+        const [n] = await tx`select count(*)::int as unread from notifications where user_id = auth.uid() and read_at is null`;
+        return { p: p!, roles, unread: n!.unread as number };
+      })]);
+    return { id: mine.p.id, email: mine.p.email, fullName: mine.p.full_name, title: mine.p.title, roles: mine.roles.map((x) => x.code as string),
+      permissions: req.user!.permissions, prefs: mine.p.prefs ?? {}, unread: mine.unread,
+      settings: { timezone: tz ?? env.LAB_TIMEZONE, idleSignOutMinutes: sec.idle_sign_out_minutes, warnBeforeSeconds: sec.warn_before_seconds } };
   });
 
   r.patch("/me", { preHandler: authenticate, schema: { body: z.object({ fullName: z.string().trim().min(2).optional(), prefs: z.record(z.unknown()).optional() }) } }, async (req, reply) => {

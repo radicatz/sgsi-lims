@@ -2,6 +2,7 @@
 // (Stack_Decision_Record S-7, S-8). Ported from the prototype (.context/prototype/src/ui.js); more sets arrive with each module.
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router";
 import { Icon } from "./Icon";
 
 export { Icon };
@@ -27,7 +28,7 @@ export function useOutside(ref: React.RefObject<HTMLElement | null>, fn: () => v
     return () => { clearTimeout(t); document.removeEventListener("mousedown", h); };
   }, [active]);
 }
-const toFrame = (node: ReactNode) => { const host = document.querySelector(".frame"); return host ? createPortal(node, host) : node; };
+export const toFrame = (node: ReactNode) => { const host = document.querySelector(".frame"); return host ? createPortal(node, host) : node; };
 
 /* ---------- actions ---------- */
 type BtnType = "primary" | "secondary" | "tertiary" | "ghost";
@@ -37,15 +38,15 @@ export function Button({ type = "secondary", size = "md", tone, icon, trail, blo
   return <button id={id} type={submit ? "submit" : "button"} className={cx("btn", type, size, tone, block && "block")} disabled={disabled} title={disabled ? why : undefined} onClick={onClick}>
     {icon && <Icon n={icon} />}{children}{trail && <Icon n={trail} />}</button>;
 }
-export function IconBtn({ n, label, type, size = 32, onClick, disabled }: { n: string; label: string; type?: "secondary" | "tertiary" | "primary"; size?: 28 | 32 | 36 | 44; onClick?: () => void; disabled?: boolean }) {
-  return <button type="button" className={cx("ib", type, size !== 32 && `s${size}`)} aria-label={label} title={label} disabled={disabled} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+export function IconBtn({ n, label, type, size = 32, onClick, disabled }: { n: string; label: string; type?: "secondary" | "tertiary" | "primary"; size?: 28 | 32 | 36 | 44; onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void; disabled?: boolean }) {
+  return <button type="button" className={cx("ib", type, size !== 32 && `s${size}`)} aria-label={label} title={label} disabled={disabled} onClick={(e) => { e.stopPropagation(); onClick?.(e); }}>
     <Icon n={n} s={size === 44 ? 20 : 14} /></button>;
 }
 
 /* ---------- labels ---------- */
-export function Avatar({ name, size = 32 }: { name: string; size?: 24 | 28 | 32 | 40 | 64 }) {
-  const ini = name.replace(/^(Ir\.|Dr\.)\s+/, "").split(/[\s,]+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
-  return <span className={cx("av", size !== 32 && `s${size}`)} title={name}>{ini}</span>;
+export function Avatar({ name, size = 32, logo }: { name: string; size?: 24 | 28 | 32 | 40 | 64; logo?: string | null }) {
+  const ini = name.replace(/^(Ir\.|Dr\.|PT|CV)\s+/, "").split(/[\s,]+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
+  return <span className={cx("av", size !== 32 && `s${size}`, logo && "logo")} title={name} style={logo ? { backgroundImage: `url("${logo}")` } : undefined}>{logo ? "" : ini}</span>;
 }
 export function Alert({ tone = "info", title, text, action }: { tone?: "error" | "warning" | "info" | "success"; title: string; text?: ReactNode; action?: ReactNode }) {
   const ic = { error: "warning-circle", warning: "warning", info: "info", success: "check-circle" }[tone];
@@ -57,8 +58,11 @@ export function Empty({ icon = "question", title, text, action }: { icon?: strin
 export function Card({ title, actions, children, className }: { title?: string; actions?: ReactNode; children: ReactNode; className?: string }) {
   return <section className={cx("card", className)}>{(title || actions) && <div className="card-head">{title && <h2 className="t-h3">{title}</h2>}{actions && <div className="row g8 wrap">{actions}</div>}</div>}{children}</section>;
 }
-export function PageHead({ overline, title, actions }: { overline?: string; title: string; actions?: ReactNode }) {
-  return <div className="page-head"><div className="tt">{overline && <span className="t-over">{overline}</span>}<h1 className="t-display">{title}</h1></div>{actions && <div className="row g10 wrap">{actions}</div>}</div>;
+export function PageHead({ overline, title, actions, crumb, badge }: { overline?: string; title: ReactNode; actions?: ReactNode; crumb?: Array<[string, string?]>; badge?: ReactNode }) {
+  return <div className="col g12">
+    {crumb && <nav className="crumb" aria-label="Breadcrumb">{crumb.map(([label, to], i) => <span key={label} className="row g6">{i > 0 && <Icon n="caret-right" />}{to ? <Link to={to}>{label}</Link> : <b>{label}</b>}</span>)}</nav>}
+    <div className="page-head"><div className="tt">{overline && <span className="t-over">{overline}</span>}<div className="row g12 wrap"><h1 className="t-display">{title}</h1>{badge}</div></div>
+      {actions && <div className="row g10 wrap">{actions}</div>}</div></div>;
 }
 
 /* ---------- forms ---------- */

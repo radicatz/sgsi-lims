@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@fastify/multipart": "^9.4.0",
     "@fastify/rate-limit": "^10.2.1",
     "@sgsi/shared": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",

@@ -31,6 +31,17 @@ import { Users } from "@phosphor-icons/react/dist/csr/Users";
 import { Warning } from "@phosphor-icons/react/dist/csr/Warning";
 import { WarningCircle } from "@phosphor-icons/react/dist/csr/WarningCircle";
 import { X } from "@phosphor-icons/react/dist/csr/X";
+import { Plus } from "@phosphor-icons/react/dist/csr/Plus";
+import { PencilSimple } from "@phosphor-icons/react/dist/csr/PencilSimple";
+import { DotsThree } from "@phosphor-icons/react/dist/csr/DotsThree";
+import { Trash } from "@phosphor-icons/react/dist/csr/Trash";
+import { Archive } from "@phosphor-icons/react/dist/csr/Archive";
+import { UploadSimple } from "@phosphor-icons/react/dist/csr/UploadSimple";
+import { DownloadSimple } from "@phosphor-icons/react/dist/csr/DownloadSimple";
+import { FilePdf } from "@phosphor-icons/react/dist/csr/FilePdf";
+import { FileX } from "@phosphor-icons/react/dist/csr/FileX";
+import { Check } from "@phosphor-icons/react/dist/csr/Check";
+import { CaretLeft } from "@phosphor-icons/react/dist/csr/CaretLeft";
 import type { Icon as PhIcon } from "@phosphor-icons/react";
 
 const ICONS: Record<string, PhIcon> = {
@@ -41,6 +52,7 @@ const ICONS: Record<string, PhIcon> = {
   "lock-simple": LockSimple, "magnifying-glass": MagnifyingGlass, package: Package, question: Question, rows: Rows,
   "sign-out": SignOut, "squares-four": SquaresFour, stack: Stack, user: User, users: Users, warning: Warning,
   "warning-circle": WarningCircle, x: X,
+  "plus": Plus, "pencil-simple": PencilSimple, "dots-three": DotsThree, "trash": Trash, "archive": Archive, "upload-simple": UploadSimple, "download-simple": DownloadSimple, "file-pdf": FilePdf, "file-x": FileX, "check": Check, "caret-left": CaretLeft,
 };
 
 export function Icon({ n, s = 14, className }: { n: string; s?: 14 | 16 | 20 | 24 | 32; className?: string }) {

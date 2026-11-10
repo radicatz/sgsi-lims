@@ -18,19 +18,21 @@ export interface RequestMeta { requestId: string; screen?: string | undefined }
 /** Run `fn` in one transaction as the caller, with the audit metadata (screen, request id) set. */
 export async function asUser<T>(caller: Caller, meta: RequestMeta, fn: (tx: Tx) => Promise<T>): Promise<T> {
   return sql.begin(async (tx) => {
-    await tx.unsafe("set local role authenticated");
-    await tx`select set_config('request.jwt.claims', ${JSON.stringify(caller.claims)}, true),
+    // One statement sets the role and the claims, and it is sent together with the first query (pipelined),
+    // which saves round trips to the hosted database. Queries on one connection run in the order they were sent.
+    const setup = tx`select set_config('role', 'authenticated', true), set_config('request.jwt.claims', ${JSON.stringify(caller.claims)}, true),
                     set_config('request.jwt.claim.sub', ${caller.userId}, true),
                     set_config('app.request_id', ${meta.requestId}, true),
-                    set_config('app.screen', ${meta.screen ?? ""}, true)`;
-    return fn(tx);
+                    set_config('app.screen', ${meta.screen ?? ""}, true)`.execute();   // execute() sends it now; queries are otherwise lazy
+    const [out] = await Promise.all([fn(tx), setup]);
+    return out;
   }) as Promise<T>;
 }
 
 /** Privileged access, bypassing row-level security. Use only where no signed-in user exists yet. */
 export async function system<T>(meta: RequestMeta, fn: (tx: Tx) => Promise<T>): Promise<T> {
   return sql.begin(async (tx) => {
-    await tx`select set_config('app.request_id', ${meta.requestId}, true), set_config('app.screen', ${meta.screen ?? ""}, true)`;
+    await tx`select set_config('app.request_id', ${meta.requestId}, true), set_config('app.screen', ${meta.screen ?? ""}, true)`.execute();   // execute() sends it now; queries are otherwise lazy
     return fn(tx);
   }) as Promise<T>;
 }

@@ -12,7 +12,7 @@ async function call(path: string, init: RequestInit & { token?: string; json?: u
   if (init.json !== undefined) headers["content-type"] = "application/json";
   if (init.token) headers.authorization = `Bearer ${init.token}`;
   const r = await fetch(API + path, { method: init.method ?? (init.json ? "POST" : "GET"), headers, body: init.json !== undefined ? JSON.stringify(init.json) : undefined });
-  return { status: r.status, body: r.status === 204 ? null : await r.json().catch(() => null) };
+  return { status: r.status, body: r.status === 204 ? null : (await r.json().catch(() => null)) as any };
 }
 
 const health = await call("/health");

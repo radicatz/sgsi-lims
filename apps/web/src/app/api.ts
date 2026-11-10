@@ -15,7 +15,7 @@ let onExpired: (() => void) | null = null;
 export const setOnExpired = (fn: () => void) => { onExpired = fn; };
 
 async function raw(path: string, init: RequestInit, token?: string) {
-  const headers: Record<string, string> = { ...(init.body ? { "content-type": "application/json" } : {}), ...(init.headers as Record<string, string>) };
+  const headers: Record<string, string> = { ...(init.body && !(init.body instanceof FormData) ? { "content-type": "application/json" } : {}), ...(init.headers as Record<string, string>) };
   if (token) headers.authorization = `Bearer ${token}`;
   return fetch(`/api${path}`, { ...init, headers });
 }

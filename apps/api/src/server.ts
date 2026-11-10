@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { env } from "./env";
 import { sql } from "./db";
 import { sessionRoutes } from "./routes/session";
+import { masterRoutes } from "./routes/master";
 
 const app = Fastify({
   logger: process.env.NODE_ENV === "production" ? true : { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -31,6 +32,7 @@ await app.register(async (api) => {
     return { ok: true, dbTime: r!.db_time, permissions: r!.permissions };
   });
   await api.register(sessionRoutes);
+  await api.register(masterRoutes);
 }, { prefix: "/api" });
 
 await app.listen({ port: env.API_PORT, host: "0.0.0.0" });

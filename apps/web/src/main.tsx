@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider, Outlet } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,6 +7,8 @@ import { SessionProvider, useSession } from "./app/session";
 import { Guard, Shell } from "./app/Shell";
 import { Forgot, SetPassword, SignIn } from "./pages/Auth";
 import { Coming, NotFound, Profile } from "./pages/Basics";
+import { Clients, ClientPage } from "./pages/master/Clients";
+import { DrillHoles, Lithologies, Seams } from "./pages/master/Lists";
 import { Toasts } from "./ui";
 import "./styles/tokens.css";
 import "./styles/app.css";
@@ -27,11 +29,15 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
+const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams };
+const CLIENT_READ = ["company.read"];
+function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [
   { element: <Public />, children: [{ path: "/login", element: <SignIn /> }, { path: "/forgot", element: <Forgot /> }] },
   { path: "/set-password", element: <SetPassword /> },
   { element: <Private />, children: [
-    ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : <Coming path={p.path} />}</Guard> })),
+    ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : BUILT[p.path] ? <Built path={p.path} /> : <Coming path={p.path} />}</Guard> })),
+    { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
     { path: "/profile", element: <Profile /> },
     { path: "/notifications", element: <Coming path="/notifications" /> },
     { path: "/start", element: <Start /> },
