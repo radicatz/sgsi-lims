@@ -8,7 +8,7 @@ import { useSession } from "../app/session";
 import { Avatar, Button, Card, Empty, PageHead, Seg, TextField, toast } from "../ui";
 
 const PHASE: Record<string, [number, string]> = {
-  "/work": [5, "My work queues"], "/": [5, "Dashboard"], "/orders": [2, "Job orders"], "/batches": [3, "Batches"], "/reports": [4, "Reports"],
+  "/work": [5, "My work"], "/": [5, "Dashboard"], "/orders": [2, "Job orders"], "/batches": [3, "Batches"], "/reports": [4, "Reports"],
   "/search": [5, "Search"], "/clients": [1, "Clients"], "/master/drill-holes": [1, "Drill hole"], "/master/lithologies": [1, "Lithology"],
   "/master/seams": [1, "Seam"], "/users": [1, "Users"], "/config": [1, "Configuration"], "/audit": [5, "Audit log"], "/notifications": [5, "Notifications"],
 };

@@ -16,6 +16,7 @@ Run it locally (Node 22 or newer, pnpm 10):
 1. Copy `.env.example` to `.env` and fill the two secrets as its comments explain. Add `DEMO_PASSWORD=` for the demo accounts.
 2. `pnpm install`, then `pnpm seed:demo` once (creates the demo accounts: wahyu@, maya@, hendra@, bambang@, rina@, dedi@, fitri@ … sgsi.co.id).
 3. `pnpm dev` starts the API on port 4000 and the web app on http://localhost:5173.
+4. Checks: `pnpm test` (unit tests), `pnpm exec playwright test` (browser tests at 1440, 834 and 390; starts both servers and needs the demo accounts), and `pnpm --filter @sgsi/api exec tsx --env-file=../../.env scripts/check-roles.ts` (live role and sign-in lock check against a running API).
 
 The plan for the build is `.context/docs/Project/V1_Build_Plan.md`; the technology choices are in `Stack_Decision_Record.md`.
 

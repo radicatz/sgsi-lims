@@ -16,9 +16,12 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const token = h.slice(7);
   const hit = cache.get(token);
   if (hit && hit.until > Date.now()) { req.user = hit.user; return; }
-  const { data, error } = await verifier.auth.getClaims(token);
-  const claims = data?.claims as Record<string, unknown> | undefined;
-  if (error || !claims?.sub) return reply.code(401).send({ code: "session_expired", text: "Your session has ended. Sign in again." });
+  let claims: Record<string, unknown> | undefined;
+  try {
+    const { data, error } = await verifier.auth.getClaims(token);
+    claims = error ? undefined : (data?.claims as Record<string, unknown> | undefined);
+  } catch { claims = undefined; }                     // malformed tokens throw while decoding
+  if (!claims?.sub) return reply.code(401).send({ code: "session_expired", text: "Your session has ended. Sign in again." });
   const userId = String(claims.sub);
   const [p] = await sql`select email, status, (select coalesce(array_agg(distinct rp.permission_code), '{}') from user_roles ur
                          join role_permissions rp on rp.role_id = ur.role_id where ur.user_id = profiles.id) as permissions

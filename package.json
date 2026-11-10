@@ -3,7 +3,9 @@
   "private": true,
   "description": "SGSI Coal LIMS v1: web app, API and shared rules",
   "packageManager": "pnpm@10.34.9",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "pnpm --parallel --filter @sgsi/api --filter @sgsi/web dev",
     "dev:api": "pnpm --filter @sgsi/api dev",
@@ -12,5 +14,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "seed:demo": "pnpm --filter @sgsi/api seed:demo"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
   }
 }

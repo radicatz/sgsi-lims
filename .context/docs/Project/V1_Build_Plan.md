@@ -1,6 +1,6 @@
 # SGSI LIMS — v1 Build Plan
 
-Written Nov 10, 2026. **Status: proposed, waiting for go.**
+Written Nov 10, 2026. **Status: approved Nov 10, 2026 (defaults). Phase 0 built, section 7.**
 
 This plan replaces the "Roadmap & phasing" section of `Coal_LIMS_Research_and_Project_Plan.md`. That four-week plan was written before D-44 (Oct 29) took the analyst worksheet (Input ROA, Review ROA) and the RoA approval gate out of v1. It also predates every screen built since Oct 30.
 
@@ -133,3 +133,16 @@ Next-goal tables stay in the spec but are not created in v1:
 | 2 | Accept the schema changes C-1 to C-17 and apply them to the spec now? | Yes, in the same change as the first migration |
 | 3 | Send the request in section 4 now, in your name? | You send it; I can shorten it or translate it into Indonesian |
 | 4 | Stack open points (`Stack_Decision_Record.md` section 4) | Their defaults |
+
+## 7 · Build status
+
+### Phase 0 · Foundation (Nov 10, 2026)
+
+| Item | Result |
+| --- | --- |
+| Database | Supabase project `sgsi-lims` (waxtkvfepwdopggynwlv, Tokyo, free plan). Migrations 0100 to 0600 in `supabase/migrations/`: 42 tables with C-1 to C-17, audit trigger on every core table, row-level security on every table (87 policies), reference data (roles, 37 permissions and the grid, 36 parameters, standards and methods, services, lookups, rules, settings), function grants from the security advisor |
+| Code | `packages/shared` (permissions and sidebar by role, statuses, exact-decimal FC, NCV and basis conversion, password rules; 8 unit tests), `apps/api` (Fastify; each request runs as the signed-in user; sign-in with the lock after failed attempts, refresh, forgot and set password, `/me`), `apps/web` (React 19 and Vite: Sign in, Forgot password, Set password from the email links, the shell with the role sidebar, tablet rail and phone drawer, No access, idle sign-out warning, Profile, a holding page for each later module) |
+| Demo accounts | 10 accounts from the Admin frames, created with `pnpm seed:demo` (the seven personas plus Yusuf, Bagus, Joko) |
+| Checks | Live check against the real database: 29 of 29 (every role's sidebar and start page, the CSO has no `result.read`, tokens refused when missing or malformed, five wrong passwords lock the account, a locked account stays locked with the right password, profile preference saved). Browser tests: 30 of 30 at 1440, 834 and 390 (each persona signs in to its own sidebar and gets No access on a page it cannot open; wrong password; sign out) |
+| Gate | Met: every persona signs in and sees their own sidebar; the permission checks pass for every role; every table change writes an audit row |
+| Left for later in phase 0 | Row-level security tests per table in the database, a staging deployment, end-to-end tests in CI (needs the demo password as a repository secret), SMTP for invite and reset emails |
