@@ -1,5 +1,7 @@
 # Job Orders Screen — Design Plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The rules in this plan follow the new format, but the built frames, the prototype and the demo values here (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 > **Current state (Nov 6, 2026):** 53 frames in module 03 of the FigCraft main file (`../../design/figcraft/SGSI-LIMS-screens.figcraft`, rows A to E), plus the 2 CoA states added with Reports (55 in all). Revisions 7 to 12 below are the latest and are built; the sections from Oct 21 to Oct 29 are kept as history and still mention `screens.pen`, the Side sheet and earlier layouts, which are replaced. Frame names: `../Design System/Frame_Naming.md`. Prototype: `Job_Order_Prototype_Plan.md`.
 
 Oct 21, 2026 · screen S-17 in `../Project/Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
@@ -545,13 +547,13 @@ Tablet: Properties above Batches and CoA (one column); stepper scrolls sideways 
 
 ## 3 · Job Order · Detail · Samples
 
-The CSO's data-entry tab. The sample IDs typed here are the IDs the Preparation team prints on the labels (spec B-8 step 2).
+The CSO's data-entry tab. The CSO types the client's own names here (Client reference). The Sample ID and sample code are generated when each sample is received, and the Preparation team prints those on the labels (spec 6.1, B-8 step 2).
 
 | Part | Spec |
 | --- | --- |
 | Toolbar | **Add row**, **Paste from Excel**, **Import list** (S-16, with "Download template"), count "12 samples", search |
-| Grid columns | # · Sample ID* · Client description · Depth / lot reference · Remarks · Batch (empty until received) · Received (tick + date) · Status (Registered, Received, On hold) |
-| Rules | Editable until the sample's batch starts preparation; after that the row shows a `lock-simple` icon and a tooltip "Received on 21 Oct by Dedi Kurniawan". Duplicate sample IDs in the job order are flagged under the cell (spec V-06) |
+| Grid columns | # · Client reference* · Sample ID (empty until received) · Client description · Depth / lot reference · Remarks · Batch (empty until received) · Received (tick + date) · Status (Registered, Received, On hold) |
+| Rules | Editable until the sample's batch starts preparation; after that the row shows a `lock-simple` icon and a tooltip "Received on 21 Oct by Dedi Kurniawan". Duplicate client references in the job order are flagged under the cell (spec V-06) |
 | Save | Explicit **Save** with an unsaved-changes dot, as on Input ROA |
 
 Tablet: same grid with frozen # and Sample ID columns and sideways scroll. Mobile: one card per sample (ID, description, status) with **Add sample** opening a small form sheet; paste and import are hidden on mobile.
@@ -660,7 +662,7 @@ As the dashboard plans: breakpoints 360–767 mobile, 768–1199 tablet, 1200+ d
 | # | Question | Default drawn |
 | --- | --- | --- |
 | 1 | Job order number format (R-10) | `JO-YYYY-NNNN` |
-| 2 | Does the CSO enter sample IDs, or paste the client's list as is | Both: typed or pasted, with a template import |
+| 2 | Does the CSO enter sample IDs, or paste the client's list as is | Both: typed or pasted, with a template import. Since Nov 10 these are client references; the Sample ID is generated at reception (spec 6.1) |
 | 3 | Which fields are required on create | Client, service, method family, expected samples, due date |
 | 4 | Is "Close" needed in Core or only "Delivered" | Both shown; Close is a menu action |
 | 5 (Rev. 2) · answered | Which contact is printed on the CoA | None. The first contact is the primary contact (RoA attention, default send recipient); the CoA prints company name and address |
@@ -726,7 +728,7 @@ The prototype is built only after the frames are approved, so it copies settled 
 | Default signatory | Pick from the list, or "Type manually" reveals name and title fields |
 | Validation | On blur for each field, on Submit for all; messages under the field in plain words ("Enter the expected number of samples"); Submit is never disabled, so the user always learns what is missing |
 | Samples grid | Spreadsheet keys: arrows move, Enter edits and moves down, Tab moves right, Esc cancels the cell; Ctrl/Cmd + V pastes a block; empty pasted rows are ignored; duplicates are marked in the cell with a message; unsaved rows show a dot; **Save** saves all changed rows; leaving the tab with unsaved rows asks to save |
-| Paste preview | Shows the first 10 rows, the column mapping (Sample ID, Description, Depth/lot, Remarks), counts of new, duplicate and empty rows; **Add rows** or **Cancel** |
+| Paste preview | Shows the first 10 rows, the column mapping (Client reference, Description, Depth/lot, Remarks), counts of new, duplicate and empty rows; **Add rows** or **Cancel** |
 | Stepper | Read-only; each completed step shows its date on hover or below on mobile; the current step is announced to screen readers ("Step 3 of 6, Analysis, current") |
 | Tabs | Underline tabs; the tab is kept in the URL hash (`#samples`); counts update after saves |
 | CoA card | Four states: not ready (with the condition), draft (lab admin only), published (Download, Print, Mark sent for the CSO), sent (channel icon, recipient, date; **Mark sent** becomes "Add another send" for a second channel) |

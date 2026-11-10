@@ -1,5 +1,7 @@
 # SGSI LIMS Prototype — Demo Guide
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The recorded clips and the guide show the old format (`BNM-3507`, lab code `B0410-07`) and **are not being re-recorded**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Written Nov 9, 2026, for presenting the clickable prototype v2 to the lab. It lists every screen group, what each feature does, and who can see and use it. The suggested running order is at the end.
 
 - **Prototype link (preview):** https://claude.ai/artifact/SPepzodQgNhFaSNwenYbao. It is private until you share it from the page's Share menu.
@@ -179,7 +181,7 @@ Flows: **RE1 to RE3**.
 
 | Feature | What it is about | Who |
 | --- | --- | --- |
-| Quick search (top bar) | Type or scan a sample ID, lab code, batch, job order, report, client or drill hole. Shows recent searches, grouped results and the exact match (Enter opens it). Press `/` to jump to it. On the phone it is a search page with **Scan a label** | Everyone; results only include what the role can open |
+| Quick search (top bar) | Type or scan a sample ID or lab code (the prototype shows the old format; see the note at the top), batch, job order, report, client or drill hole. Shows recent searches, grouped results and the exact match (Enter opens it). Press `/` to jump to it. On the phone it is a search page with **Scan a label** | Everyone; results only include what the role can open |
 | Search results | Grouped by type with counts and **Show all**, and a "nothing matches" state | Everyone |
 | Advanced search | Find samples, batches, job orders or results by conditions:<br>• All or Any of the conditions<br>• choose the columns<br>• export to CSV<br>• save a query and share it with staff; saved queries have Rename, Duplicate, Share and Delete | Everyone. Searching by results: roles that see values (not the CSO) |
 | Sample history | One sample's life: registered, added to a batch, received (mass and condition), held, ADL, analysis, reported in an RoA, certified in a CoA. **View values** and **Export PDF** | Everyone with Search. Values: not the CSO |

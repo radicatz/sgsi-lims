@@ -1,3 +1,5 @@
+/* FORMAT MISMATCH (flagged Nov 10, 2026): the sample ids and lab codes below use the OLD format (client name as 'sample ID', lab code B{batch}-NN).
+   The lab's format is Sample ID SG.YYMMDD.CCC.BB.NNN + sample code CCC.BB.NNN.Lotxx (spec 6.1, D-51). Not rebuilt on purpose; the spec wins. See .context/docs/Project/Sample_Identifiers_Plan.md */
 /* Demo data and rules. Records follow the FigCraft frames, with the cross-module differences D1 to D8 settled as in
    docs/Prototype/Prototype_Plan.md section 8. "Today" is Thursday 5 November 2026 for every reviewer. */
 const D = (function () {

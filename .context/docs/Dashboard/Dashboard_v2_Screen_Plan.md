@@ -1,5 +1,7 @@
 # Dashboard v2 — Design Plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The rules in this plan follow the new format, but the built frames, the prototype and the demo values here (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Nov 5, 2026 · Revision 2, frames built Nov 5 · replaces the Oct 19 plan (built in pen.dev) and the deleted parity plan `Dashboard_Screen_Plan.md`
 
 "v2" is the name of this dashboard design, not a product release. **v1 ships with this dashboard.** The SIM Lab parity dashboard is dropped; everything it showed is on the Quality & reports tab.
@@ -100,7 +102,7 @@ Links: a KPI opens the batch list filtered to that set. Workflow bars and job or
 | Q2 | **RoA uploaded** | Signed RoAs uploaded in the period (Complete batch, D-49) | Card KPI |
 | Q3 | **Drill holes with CoA** | "62 of 74" with a progress bar | Card KPI, Kind=Progress |
 | Q4 | **Determinations** | Values saved in the period (one parameter of one sample = one determination), AssayNet | Card KPI, Kind=Delta |
-| Q5 | **CV vs Ash, RD vs Ash, FC vs GCV** | Scatter per pair (ADB), regression line, R² and n in the card head; tooltip on a point: lab code, sample ID, drill hole, the two values | Chart card, Scatter |
+| Q5 | **CV vs Ash, RD vs Ash, FC vs GCV** | Scatter per pair (ADB), regression line, R² and n in the card head; tooltip on a point: sample code, Sample ID, drill hole, the two values | Chart card, Scatter |
 | Q6 | **Trend CV** | CV per batch completed date, basis switch ADB, AR, DB, DAF in the card head | Chart card (Header=With basis switch), Trend |
 | Q7 | **Drill holes** | Filter tabs All and Missing CoA, search. Columns: Code, Company, Samples, RoA (downloads of the RoAs that hold its samples), CoA (file name and date, or "Missing" tag), Actions (Upload CoA for Lab admin and Superadmin). Pager, 10 rows | Table card, Tag, Button sm, Pager |
 

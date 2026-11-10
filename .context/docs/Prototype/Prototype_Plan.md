@@ -1,5 +1,7 @@
 # SGSI LIMS — Clickable Prototype Plan (v2): shared plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. This plan, the prototype it describes and the sample values in it (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Written Nov 6, 2026. **Status: BUILT Nov 6, 2026 as a private preview** (section 12). The shared link still shows version 31 until the owner's go.
 
 The prototype plan is split the same way as the screen plans. **This file** holds what every group shares: the goal, the decisions, the review bar, the app shell, the rules, the build phases and the checks. **Each group's plan** sits next to its screen plan and holds that group's screens, links, gaps, flows and demo data:

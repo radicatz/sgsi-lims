@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SGSI LIMS Design System</title>
+<style>
+  :root { --bg:#F6F1E6; --card:#FFFFFF; --text:#1A1A1A; --heading:#0E2A4E; --muted:#7D8699; --border:#E8DFC9; --primary:#1B3A6F; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 "Noto Sans", system-ui, sans-serif; }
+  header { padding:28px 32px 8px; max-width:1960px; margin:0 auto; }
+  h1 { font:500 34px/1.2 "Newsreader", Georgia, serif; color:var(--heading); margin:0 0 6px; }
+  header p { margin:0; color:#4A5876; max-width:760px; }
+  nav { position:sticky; top:0; z-index:5; background:rgba(246,241,230,.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); margin-top:18px; }
+  nav ul { list-style:none; margin:0 auto; padding:10px 32px; display:flex; flex-wrap:wrap; gap:8px; max-width:1960px; }
+  nav a { display:inline-block; padding:5px 12px; border:1px solid var(--border); border-radius:999px; background:var(--card); color:var(--primary); text-decoration:none; font-weight:600; font-size:13px; }
+  nav a:hover { background:#F0F4FA; }
+  main { max-width:1960px; margin:0 auto; padding:24px 32px 64px; display:flex; flex-direction:column; gap:40px; }
+  section h2 { font:600 20px/1.3 "Newsreader", Georgia, serif; color:var(--heading); margin:0 0 4px; }
+  section .meta { color:var(--muted); font-size:12px; margin:0 0 12px; }
+  .frame { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:12px; overflow:auto; }
+  .frame img { display:block; max-width:none; }
+  .fit img { max-width:100%; height:auto; }
+  .toggle { margin:0 32px; max-width:1960px; }
+  label { color:#4A5876; font-size:13px; cursor:pointer; }
+  footer { max-width:1960px; margin:0 auto; padding:0 32px 40px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SGSI LIMS Design System</h1>
+  <p>The Library page of <code>SGSI-LIMS-screens.figcraft</code>, rendered at 100 %: foundations, brand, the component sets and the Components test sheet. Rendered on Nov 10, 2026.</p>
+</header>
+<nav><ul id="toc"></ul></nav>
+<div class="toggle" style="padding-top:14px"><label><input type="checkbox" id="fit"> Fit images to the window width</label></div>
+<main id="frames"></main>
+<footer>Source: FigCraft file, page "Library". Re-render with <code>figcraft-cli export SGSI-LIMS-screens.figcraft --page Library -o .context/design/export/library</code>.</footer>
+<script>
+  const FRAMES = [
+    ["Foundations", "Colour tokens (Light and Dark), typography and text styles, spacing, radius, elevation, iconography, dark mode stage."],
+    ["01 Actions", "Button, Icon button, Segmented item, Link button."],
+    ["02 Status and labels", "Status badge, Tag, Delta, Count pill, Role badge, Avatar, File chip, Summary chip, Person chip."],
+    ["03 Forms", "Fields, search, checkbox, radio, switch, filter chip, parameter pill, menus, option rows, drop zone."],
+    ["04 Navigation", "Nav item, Sidebar, Top bar, Breadcrumb, Tab, Stepper, Page header, Pager, Sticky action bar."],
+    ["05 Data display", "Tables, grid cell, cards, calendar, photo, label, empty state, skeleton."],
+    ["06 Charts", "Chart card, legend, workflow bars, donut, bar chart, scatter, trend."],
+    ["07 Overlays", "Inline alert, toast, tooltip, dialog, side sheet, bottom sheet, scrim."],
+    ["Components", "Overview sheet built only from instances of the sets above."],
+    ["Brand Components", "Logo instances."],
+    ["Logo", "The Logo component set (type and colour variants)."],
+    ["ptba-logo", "Client logo component."]
+  ];
+  const toc = document.getElementById("toc"), main = document.getElementById("frames");
+  FRAMES.forEach(([name, note], i) => {
+    const id = "f" + i, src = encodeURIComponent(name) + ".png";
+    toc.insertAdjacentHTML("beforeend", `<li><a href="#${id}">${name}</a></li>`);
+    main.insertAdjacentHTML("beforeend", `<section id="${id}"><h2>${name}</h2><p class="meta">${note}</p><div class="frame"><img src="${src}" alt="${name}" loading="lazy"></div></section>`);
+  });
+  document.getElementById("fit").addEventListener("change", e => main.classList.toggle("fit", e.target.checked));
+</script>
+</body>
+</html>

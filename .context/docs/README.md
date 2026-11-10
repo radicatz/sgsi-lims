@@ -7,7 +7,8 @@ Nov 5, 2026. Plans and specifications for SGSI LIMS, one folder per screen group
 | Project | `Project/Coal_LIMS_Development_Spec.md` | Build-side specification: features, screens (S-00 to S-30), flows, data model, rules, decisions | Living; v1 scope in section 1.1 |
 | Project | `Project/Coal_LIMS_Research_and_Project_Plan.md` | First research, scope, stack, roadmap and vendor sources (Oct 16 to 19) | Background; the spec overrides it where they differ |
 | Project | `Project/Stack_Decision_Record.md` | Technology for v1: Supabase, Fastify API, React, how the web app reaches the data, PDFs, tests, deployment | Proposed Nov 10, waiting for go |
-| Project | `Project/V1_Build_Plan.md` | v1 build phases 0 to 6 with gates, schema changes C-1 to C-17, what the lab and client must provide, a request ready to send | Proposed Nov 10, waiting for go |
+| Project | `Project/V1_Build_Plan.md` | v1 build phases 0 to 6 with gates, schema changes C-1 to C-18, what the lab and client must provide, a request ready to send | Proposed Nov 10, waiting for go |
+| Project | `Project/Sample_Identifiers_Plan.md` | Register of what still shows the old sample ID and lab code format after the lab's new Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` (spec 6.1, D-51): frames, prototype, demo video, demo values, applied migrations | Decided Nov 10 with defaults; mismatch flagged, not rebuilt |
 | Design System | `Design System/Component_Library_Plan.md` | FigCraft component library (Revision 2) | Built Oct 30 |
 | Design System | `Design System/Design_Tokens.md` | Colour, radius and elevation tokens, Light and Dark, with contrast | Current (Nov 3 values) |
 | Design System | `Design System/Frame_Naming.md` | Naming of every frame and exported PNG | Rule |

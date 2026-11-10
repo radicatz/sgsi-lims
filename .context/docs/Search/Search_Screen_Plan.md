@@ -1,5 +1,7 @@
 # Search screen plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The rules in this plan follow the new format, but the built frames, the prototype and the demo values here (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Written Nov 5, 2026. **Status: BUILT Nov 5, 2026** (section 14). Module 08 Search, canvas row **M**. Builds on spec S-29 (advanced search), S-30 (sample history), F-SRCH-01 and F-GEN-01 (`../Project/Coal_LIMS_Development_Spec.md`), the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`, section 4: the CSO never sees result values or RoA files) and the Clarity LIMS search videos 03 and 08 (frames in `../../research/clarity-lims/screenshots/03-advanced-search/` and `08-search-functionality/`).
 
 ## 1 · Goal
@@ -59,9 +61,9 @@ Desktop and tablet. Focusing the field opens a panel under it (width 560, Elevat
 | --- | --- |
 | Empty focus | **Recent**: the last 5 records the user opened, and the last 3 searches |
 | Typing | From 2 characters: up to 3 hits per type in the order Samples, Batches, Job orders, Drill holes, Reports, Clients; the matching part of each ID is bold |
-| What it matches | Sample ID, lab code, batch number, job order number, PO, drill hole code, RoA and CoA numbers, client name and code |
+| What it matches | Sample ID, sample code, client reference, batch number, job order number, PO, drill hole code, RoA and CoA numbers, client name and code |
 | Exact match | When the text is exactly one record's ID, that hit is first and marked **Go to**; Enter opens it |
-| Scan | The scan button (or a USB scanner typing into the field) reads the Code 128 on a sample label (lab code) and opens that sample's **history** directly |
+| Scan | The scan button (or a USB scanner typing into the field) reads the Code 128 on a sample label (Sample ID) and opens that sample's **history** directly |
 | Footer | **See all N results** opens the results page; also Enter when there is no exact match |
 | No match | "No match for "XK-77"" and **Open advanced search** |
 | Keyboard | ↑ ↓ move, Enter opens, Esc closes |
@@ -90,7 +92,7 @@ Results for "BNM-35"                                  [Advanced search]
 | Types (left, 240) | One row per type with its count; All first; a type with 0 is shown muted and not clickable. On tablet and phone the types become Filter chips above the results |
 | Result sections | One card per type, Card head with the type and count; up to 5 rows; **Show all 12** switches the type |
 | One type selected | One card with every hit, pager (10 rows) |
-| Sample row | Sample ID, lab code, job order, client (avatar 40), status badge, arrow; opens the **Sample history** |
+| Sample row | Sample ID, sample code, job order, client (avatar 40), status badge, arrow; opens the **Sample history** |
 | Batch row | Batch number, job order, client, status badge, deadline; opens the batch page |
 | Job order row | Number, client, PO, status badge, due date; opens the job order |
 | Drill hole row | Code, description, client, CoA tag; opens the drill hole list filtered to it |
@@ -124,7 +126,7 @@ Advanced search
 | Match | Segmented **All** (AND) or **Any** (OR) for every condition. Groups such as "(1 AND 2) OR 3" are next goal (Clarity's grouping controls) |
 | Condition row | Number, **Field** select, **Operator** select, **Value** (text, select, number, date, or two values for "between"), remove ✕. A result field adds a **Basis** select (ADB, DB, DAF, AR) |
 | Operators | Text: is, is not, contains, starts with, is empty. Number: equals, greater than, less than, between. Date: on, before, after, between. Choice: is, is any of |
-| Fields | Samples: sample ID, lab code, job order, batch, client, drill hole, seam, lithology, depth from, depth to, status, received date, received by, condition, held reason. Batches: number, job order, client, status, standard, created, deadline, prepared by, analysed by, RoA number. Job orders: number, client, PO, status, parameters, created, due, CoA status. Results: every sample field, plus parameter, value, basis, entered by, entered date |
+| Fields | Samples: Sample ID, sample code, client reference, job order, batch, client, drill hole, seam, lithology, depth from, depth to, status, received date, received by, condition, held reason. Batches: number, job order, client, status, standard, created, deadline, prepared by, analysed by, RoA number. Job orders: number, client, PO, status, parameters, created, due, CoA status. Results: every sample field, plus parameter, value, basis, entered by, entered date |
 | Actions | **Add condition** (Tertiary), **Clear all** (Ghost), **Save query** (Secondary), **Search** (Primary). Search runs the query; changing a condition marks the results "Out of date, search again" |
 | Results card | Card head: count ("24 samples") with **Columns** (menu of checkboxes, the default columns per target ticked) and **Export** (CSV, XLSX). Table with sortable columns, pager (25 rows). A row opens its record: a sample or result row opens the Sample history |
 | Over 500 rows | Inline alert (Info) "Showing the first 500 of 2,318. Narrow the conditions, or export to get every row" |
@@ -158,7 +160,7 @@ B0410-07   JO-2026-0131   B-2026-0410   PT Bara Nusantara Mandiri
 
 | Part | Spec |
 | --- | --- |
-| Header | Breadcrumb Job orders > job order > sample ID; title sample ID with its status badge; the lab code, job order (link), batch (link) and client as separate texts; **Export PDF** (Secondary) |
+| Header | Breadcrumb Job orders > job order > sample ID; title sample ID with its status badge; the sample code, client reference, job order (link), batch (link) and client as separate texts; **Export PDF** (Secondary) |
 | Sample card (left, 378) | Key-value rows (Inline): drill hole, seam, lithology, depth from and to, client description, mass as received, condition, status, held reason when held |
 | History card | One entry per event: dot (status colour), event text, person (avatar 24 and name), date and time as separate texts; an entry can carry a second line (mass, condition, photos, ADL, values) |
 | v1 events | Registered on the job order; marked awaiting arrival or not received (Revision B); received and labelled (mass, condition, photos); added to a batch; held or released (reason); preparation started, finished (ADL); values entered and edited (by whom, how many parameters; values for roles that may see them); analysis finished; batch completed with the RoA number; CoA published, revised, sent |

@@ -1,5 +1,7 @@
 # SGSI LIMS Prototype — Demo Video Plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The recorded clips and the guide show the old format (`BNM-3507`, lab code `B0410-07`) and **are not being re-recorded**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Written Nov 9, 2026. A recorded, captioned demo of the clickable prototype v2, built from `Prototype_Demo_Guide.md`. One clip per part, so a revision re-renders only that part; the clips are then merged into one video.
 
 ## Decisions

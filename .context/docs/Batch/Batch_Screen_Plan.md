@@ -1,5 +1,7 @@
 # Batch Screens — Design Plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The rules in this plan follow the new format, but the built frames, the prototype and the demo values here (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Nov 4, 2026 · **BUILT (frames, Nov 4, 2026; prototype not updated yet)** · the single-batch page: Reception, Preparation and Analysis tabs, the RoA upload and Complete batch (spec S-18, with S-08 as its summary state)
 
 Written for: the product owner, and whoever builds the frames and the prototype.
@@ -81,9 +83,9 @@ Card head: title **Reception**, actions Scan field, **Mark all arrived**, **Prin
 | Column | Behaviour |
 | --- | --- |
 | # | Row number |
-| Sample ID | From the job order, read-only, mono |
-| Lab code | Created on arrival, `B0422-01` style (open point 2) |
-| Arrived | Checkbox; ticking sets the lab code, the arrival time and the account |
+| Client reference | The client's own name for the sample, from the job order, read-only, mono |
+| Sample ID and sample code | Generated on arrival: Sample ID `SG.YYMMDD.CCC.BB.NNN`, sample code `CCC.BB.NNN.Lotxx` (spec 6.1); the column shows the sample code with the Sample ID as a second line (open point 2) |
+| Arrived | Checkbox; ticking sets the Sample ID and sample code, the arrival time and the account |
 | Mass received (kg) | 2 decimals; required for arrived rows; warning below 0.1 kg or above 50 kg |
 | Condition | Select: Good (default), Damaged, Wet, Short, No tag; anything but Good needs a remark and shows a warning dot |
 | Remarks | Free text (left out of the tablet table, shown on the phone card) |
@@ -97,7 +99,7 @@ After Confirm reception the tab turns read-only (lock icons in the Action column
 
 ### 4.2 Preparation tab (batch Preparation)
 
-Columns: #, Sample ID, Lab code, **ADL (%)**, **Entered by** (avatar and name, date as a second text), Saved, Status. ADL: 2 decimals, warning above 20 %, entered by the Preparation team only. Card head actions: **Save all**, **Finish Preparation** (disabled with the reason until the guard passes). After finishing: badge Prep finished, the tab read-only, a line "Ready for analysis".
+Columns: #, Sample ID, Sample code, **ADL (%)**, **Entered by** (avatar and name, date as a second text), Saved, Status. ADL: 2 decimals, warning above 20 %, entered by the Preparation team only. Card head actions: **Save all**, **Finish Preparation** (disabled with the reason until the guard passes). After finishing: badge Prep finished, the tab read-only, a line "Ready for analysis".
 
 ### 4.3 Analysis tab (batch Prep finished, Analysis)
 
@@ -120,7 +122,7 @@ After Finish Analysis an **RoA card** appears above the table: **Upload signed R
 
 | Part | Desktop | Tablet | Phone |
 | --- | --- | --- | --- |
-| Print labels: label preview (50 × 30 mm: sample ID, lab code, Code 128 barcode, job order no., date received, company short name), printer, copies, "Only rows without a label"; a reprint asks for a reason and is logged | Dialog md | Dialog md | Bottom sheet |
+| Print labels: label preview (50 × 30 mm: Sample ID, sample code, Code 128 barcode of the Sample ID, job order no., date received, company short name), printer, copies, "Only rows without a label"; a reprint asks for a reason and is logged | Dialog md | Dialog md | Bottom sheet |
 | Photos: gallery with tag (Condition, Weighing, Other), taken by and time; **Add photo** (file on desktop, camera on tablet and phone); remove until Confirm reception | Side sheet | Side sheet | Bottom sheet |
 | Confirm reception with fewer samples: "Confirm reception with 6 of 8 samples?", text naming the samples that go back to the job order, counts Arrived, On hold, Leave the batch | Dialog md | Dialog md | Bottom sheet |
 | Hold a sample: reason (Damaged, Insufficient, Client request, Other) and note | Dialog sm | Dialog sm | Bottom sheet |
@@ -208,7 +210,7 @@ Flows stay F12 to F23 (reception, labels, fewer samples, hold, ADL, read-only, l
 | # | Question | Default |
 | --- | --- | --- |
 | 1 | Breadcrumb on the batch page: start at Batches (sidebar module) or at Job orders (where most users come from)? | **Decided Nov 4 (option B):** one fixed (location-based) breadcrumb, Batches > batch number, whatever the entry route; the sidebar always highlights Batches; the job order is a link in the header (research: section 14.1) |
-| 2 | Lab code format | `B` + batch number + 2-digit sequence, `B0422-01` |
+| 2 | Sample identifiers | **Answered Nov 10, 2026** (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN`, sample code `CCC.BB.NNN.Lotxx`, replacing `B0422-01`. The date, reset and lot questions in spec 6.1 stay open |
 | 3 | Warning limits | Mass below 0.1 kg or above 50 kg; ADL above 20 %; the Analysis ranges in 4.3 |
 | 4 | Label size and content | 50 × 30 mm as in 4.5 |
 | 5 | May a supervisor still receive a late sample into a confirmed batch? | No |

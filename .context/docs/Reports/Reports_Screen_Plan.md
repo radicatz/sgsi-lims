@@ -1,5 +1,7 @@
 # Reports screen plan
 
+> **FORMAT MISMATCH (flagged Nov 10, 2026).** The lab's sample identifiers changed (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code `CCC.BB.NNN.Lotxx` replace the lab code `B{batch}-NN`, and the client's own name is now the Client reference. The rules in this plan follow the new format, but the built frames, the prototype and the demo values here (`BNM-3507`, `B0410-07`) **still show the old format and are not being rebuilt**. **Where they disagree, the spec wins.** Register of mismatches: `../Project/Sample_Identifiers_Plan.md`.
+
 Written Nov 5, 2026. **Status: BUILT Nov 5, 2026** (section 14). Module 07 Reports, canvas row **L**. Builds on spec S-11, S-28, 9.5 and 9.8 (`../Project/Coal_LIMS_Development_Spec.md`), the job order CoA tab (`../Job Order/Job_Order_Screen_Plan.md` sections 2 and 5), the batch RoA card (`../Batch/Batch_Screen_Plan.md`), the My work queues Q6 and Q7 (`../My Work/My_Work_Screen_Plan.md`) and the sidebar rules (`../Navigation/Navigation_Screen_Plan.md`).
 
 ## 1 · Goal
@@ -140,7 +142,7 @@ The preview is a drawing of the PDF the system renders (spec 14.3), so its layou
 1. **Header**: SGSI logo and laboratory address; title "Certificate of Analysis"; certificate number and revision; date issued.
 2. **Client block**: client (principal) name and address, attention, client reference / PO, job order number, date received, sample count and description.
 3. **Statement**: one line naming the standards used for preparation and analysis (from the job order's standard, ASTM, ISO or GB/T).
-4. **Results**: one table per sample (sample ID and lab ID, then parameter, unit and one column per chosen basis, and the method with edition on each row), as the sample RoA's per-sample block (F-RPT-02).
+4. **Results**: one table per sample (Sample ID and sample code, then parameter, unit and one column per chosen basis, and the method with edition on each row), as the sample RoA's per-sample block (F-RPT-02).
 5. **Remarks**, if any.
 6. **Signature block**: signature and stamp area, signatory name and title.
 7. **Footer**: "Issued at Samarinda on 2 Nov 2026", "This certificate may not be reproduced except in full", page n of m, verification code, form code.
@@ -154,7 +156,7 @@ The RoA is the lab's paper report (form FM-LAB-021 rev 1), signed by the Technic
 1. **Header**: SGSI logo, laboratory name and address; RoA number, "Internal, not for distribution" in red, and the issue date.
 2. **Title and client block**: "Report of Analysis"; principal, attention, reference (PO), job order, date received, and the number of coal samples (held samples excluded).
 3. **Statement**: "Results as entered by the Analyst and signed by the Supervisor. The values are reported on four bases."
-4. **Results**: one block per sample (sample ID and lab ID), a table with parameter, unit, one column per basis (ADB, DB, DAF, AR) and the method with edition. Total moisture is reported on AR only, inherent moisture on ADB only, and ash on ADB, DB and AR. Fixed carbon is "By calculation". A held sample shows "Not analysed" with its hold reason.
+4. **Results**: one block per sample (Sample ID and sample code), a table with parameter, unit, one column per basis (ADB, DB, DAF, AR) and the method with edition. Total moisture is reported on AR only, inherent moisture on ADB only, and ash on ADB, DB and AR. Fixed carbon is "By calculation". A held sample shows "Not analysed" with its hold reason.
 5. **Signature block**: "Issued at Samarinda", the date, and the Technical Supervisor's name and title.
 6. **Footer**: "Internal, not for distribution. Signed copy kept in the laboratory file.", page n of m, and the form code.
 
@@ -268,7 +270,7 @@ Deviations from the plan:
 - **CoA status badge** reuses the job order Status badge colours with its own label: Published (the Reported colour), Sent (Delivered), Superseded and Void (Cancelled). A dedicated badge set is not needed yet.
 - **Download PDFs** on the multi-select frame is the library **Sticky action bar** (note "2 selected", Clear, Download PDFs), as in My work.
 - **Details** shows the person next to the date as a second text (Value 2), and the signatory's title as its own row, so no value joins two facts with a separator.
-- **Draft** shows "Number on publish" where the certificate number goes, because a draft has none. Demo sample IDs follow the client's initials and the job order number (BA-0142-01, BN-0131-01).
+- **Draft** shows "Number on publish" where the certificate number goes, because a draft has none. Demo sample IDs follow the client's initials and the job order number (BA-0142-01, BN-0131-01); from Nov 10 they follow spec 6.1 (`SG.260901.001.RI.001`, sample code `001.RI.001.Lot01`).
 - **Persona per frame:** Lab admin on the lists, Draft, Published and Revise; CSO on the CSO list, multi-select, Mark sent and Sent (desktop) and on the phone Published frame (sticky bar Download and Mark sent); Superadmin on Void; Analyst on the Analyst frames.
 - **Row menu** is not drawn open; its entries are in section 4. A frame can be added when the menu component is wanted.
 - **Tablet and phone** frames exist for the CoA list, CoA draft and CoA published, plus the phone Filters sheet and the phone RoA page; the RoA tab, CSO, Analyst, Empty and No_results states are desktop only, as planned.
