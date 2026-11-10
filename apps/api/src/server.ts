@@ -8,6 +8,7 @@ import { env } from "./env";
 import { sql } from "./db";
 import { sessionRoutes } from "./routes/session";
 import { masterRoutes } from "./routes/master";
+import { userRoutes } from "./routes/users";
 
 const app = Fastify({
   logger: process.env.NODE_ENV === "production" ? true : { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -33,6 +34,7 @@ await app.register(async (api) => {
   });
   await api.register(sessionRoutes);
   await api.register(masterRoutes);
+  await api.register(userRoutes);
 }, { prefix: "/api" });
 
 await app.listen({ port: env.API_PORT, host: "0.0.0.0" });

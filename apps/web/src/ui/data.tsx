@@ -103,3 +103,17 @@ export function Confirm({ title, text, ok = "Confirm", danger, busy, onOk, onClo
 }
 export const fileSize = (b: number) => (b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
 export const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" });
+
+/* ---------- page tabs (list switches, owner rule) ---------- */
+export function Tabs<T extends string>({ items, value, onChange }: { items: Array<{ id: T; label: string; count?: number }>; value: T; onChange: (v: T) => void }) {
+  return <div className="tabs" role="tablist">{items.map((t) => <button key={t.id} type="button" role="tab" aria-selected={value === t.id} className={cx("tab", value === t.id && "on")} onClick={() => onChange(t.id)}>
+    <span className="r">{t.label}{t.count !== undefined && <span className={cx("cpill", value === t.id && "primary")}>{t.count}</span>}</span><span className="u" /></button>)}</div>;
+}
+/** "Today 08:02", "Yesterday", or "4 Nov 2026", in the lab's time zone. */
+export function fmtWhen(iso: string | null | undefined) {
+  if (!iso) return "Never";
+  const d = new Date(iso), tz = "Asia/Makassar";
+  const day = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: tz });
+  if (day(d) === day(new Date())) return "Today " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: tz });
+  return fmtDate(iso);
+}

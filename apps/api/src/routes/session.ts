@@ -6,7 +6,7 @@ import { z } from "zod";
 import { ForgotBody, SetPasswordBody, SignInBody, passwordProblem, type Me } from "@sgsi/shared";
 import { admin, authClient } from "../supabase";
 import { asUser, getSetting, sql, system } from "../db";
-import { authenticate, forgetToken } from "../auth";
+import { authenticate, authenticateForPassword, forgetToken } from "../auth";
 import { env } from "../env";
 
 interface Security { lock_after_attempts: number; lock_minutes: number; idle_sign_out_minutes: number; warn_before_seconds: number;
@@ -57,7 +57,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return reply.code(204).send();
   });
 
-  r.post("/auth/set-password", { schema: { body: SetPasswordBody }, preHandler: authenticate }, async (req, reply) => {
+  r.post("/auth/set-password", { schema: { body: SetPasswordBody }, preHandler: authenticateForPassword }, async (req, reply) => {
     const sec = await getSetting<Security>("security");
     const problem = passwordProblem(req.body.password, sec, req.user!.email);
     if (problem) return reply.code(422).send({ code: "weak_password", field: "password", text: problem });

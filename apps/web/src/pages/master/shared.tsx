@@ -35,7 +35,7 @@ export function useSave<V>(fn: (v: V) => Promise<unknown>, opts: { keys: string[
   return useMutation({
     mutationFn: fn,
     onSuccess: (r) => { opts.keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] })); if (opts.done) toast(opts.done); opts.onDone?.(r); },
-    onError: (e) => { const err = e as ApiError; if (opts.onField && err.field) opts.onField(err.field, err.message); else toast(err.message, "error"); },
+    onError: (e) => { const err = e as ApiError; if (opts.onField) opts.onField(err.field, err.message); else toast(err.message, "error"); },
   });
 }
 export const post = (path: string, json?: unknown) => api(path, { method: "POST", ...(json !== undefined ? { json } : {}) });

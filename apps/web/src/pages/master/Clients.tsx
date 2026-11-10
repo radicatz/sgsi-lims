@@ -142,5 +142,6 @@ function ContactForm({ companyId, contact, first, onClose }: { companyId: string
     <TextField label="Email" type="email" value={f.email} onChange={(v) => set({ email: v })} error={err.email ?? null} />
     <TextField label="Phone" value={f.phone} onChange={(v) => set({ phone: v })} />
     <Switch id="ct-def" on={f.isDefault} onChange={(v) => set({ isDefault: v })} label="Default contact (pre-fills Attention on new job orders)" />
+    {err.form && <span className="help err">{err.form}</span>}
   </Dialog>;
 }
