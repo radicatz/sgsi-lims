@@ -318,6 +318,8 @@ Repeatability limits and CRM ranges are master data per method, entered from the
 
 ## Technical architecture & stack
 
+> **Superseded Nov 10, 2026** by `Stack_Decision_Record.md`, which fixes the open choices below (Fastify, Supabase Auth and Storage, no queue in v1). Kept as history.
+
 For a 4-week v1, run Supabase (self-hosted Postgres, Auth, Storage) under a thin TypeScript API and a React front end, all in Docker Compose. Supabase removes auth, file storage and CRUD plumbing from the month; the TypeScript API keeps the batch state machine, calc engine and report rendering out of the browser so v2 can grow on it.
 
 ```mermaid
@@ -567,6 +569,8 @@ Known issue found during the build (not caused by it): in the job order screens 
 
 ### v1 shortcuts (4 weeks)
 
+> **Superseded Nov 10, 2026** by `Stack_Decision_Record.md` and `V1_Build_Plan.md`.
+
 | Take | Instead of | Revisit in |
 | --- | --- | --- |
 | Supabase Auth + Row Level Security per company | Keycloak, custom RBAC service | v2 if SSO/AD needed |
@@ -593,6 +597,8 @@ Known issue found during the build (not caused by it): in the job order screens 
 - Exports to XLSX/CSV on every list, because users will keep Excel alongside for a while.
 
 ## Roadmap & phasing
+
+> **Superseded Nov 10, 2026** by `V1_Build_Plan.md`. This four-week roadmap was written before D-44 took the worksheet and Review ROA out of v1. Kept as history.
 
 v1 goes live at the end of week 4, one week per milestone, each closed by a check against real SIM Lab data. This assumes two full-stack developers fluent in React/TypeScript and Supabase, and a lab user available about half-time in weeks 3–4. For comparison, SUCOFINDO's proposal schedules its full module list over 12 months; v1 is the slice of that which SIM Lab already shows.
 

@@ -24,6 +24,8 @@ The project has no fixed details. SIM Lab is the only complete reference, and it
 
 ID prefixes used throughout: `R-` resource to gather, `D-` decision, `F-` feature, `S-` screen, `V-` validation rule, `T-` table.
 
+The build order, schema changes and inputs needed are in `V1_Build_Plan.md`; the technology is fixed in `Stack_Decision_Record.md` (both Nov 10, 2026).
+
 Scope is grouped by module, not by time: **Core modules** (the exploration flow SIM Lab shows) and **Extended modules** (the rest of the SUCOFINDO proposal's list). Which is built first is a separate planning question and is not covered here.
 
 ### 1.1 v1 scope (Oct 29, 2026, Proposed, D-44)
@@ -2113,44 +2115,46 @@ Roles (CSO, Preparation team, Analyst, Lab admin, Supervisor, Manager, Superadmi
 
 ### 14.1 Split of work
 
-| Concern                                                                                                           | Where                                                                    | Reason                                              |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------- |
-| CRUD on masters, companies, users, notifications                                                                  | Supabase REST with RLS                                                   | No custom code needed                               |
-| Batch transitions, result save with calculation, recheck, completion, report build, imports, dashboard aggregates | TypeScript API service                                                   | Rules and calculations must not live in the browser |
-| PDF rendering                                                                                                     | Gotenberg called by the API                                              | HTML templates to PDF                               |
-| Files                                                                                                             | Supabase Storage                                                         | CoA, reports, import files                          |
-| Background work                                                                                                   | Not needed for Core; email and queues arrive with notifications by email | D-28                                                |
+v1 (Nov 10, 2026, `Stack_Decision_Record.md` S-6): the web app calls only the API. The API runs each request as the signed-in user, so row-level security applies, and privileged steps run in `security definer` functions. The earlier split, where the browser used Supabase REST directly for masters, is replaced.
 
-### 14.2 API endpoints (service)
+| Concern | Where | Reason |
+| --- | --- | --- |
+| Every read and write from the web app | TypeScript API (Fastify), as the signed-in user | One permission model and one audit `request_id` per action |
+| Status changes (job order, batch, report), locking, numbering | Postgres functions `transition_order`, `transition_batch`, `transition_report`, called by the API | Atomic, audited, same rules for any caller |
+| FC and other calculations, range warnings | `packages/shared/calc`, run by the API on save and by the web app for preview | Spec 12.2 |
+| CoA and label PDFs | Gotenberg, called by the API | HTML templates to PDF |
+| Files | Supabase Storage, through signed URLs from the API | D-22 |
+| Sign-in, invite, reset | Supabase Auth; sign-in passes through the API to count failed attempts | App screens: lock after 5 tries |
+| Background work | None in v1; email arrives with a later notification channel | D-28 |
 
-| Method and path                                       | Purpose                                                                                | Permission                           |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------- | ----------------- |
-| `POST /orders`, `PATCH /orders/:id`, `POST /orders/:id/transition` body `{action}` | Create and edit job orders; submit, cancel, close                | `order.create`, `order.edit`, `order.cancel` |
-| `PUT /orders/:id/samples`                             | Save the job order's sample list                                                       | `order.edit`                         |
-| `POST /batches/:id/transition` body `{action, performed_by?}` | start/finish preparation, start/finish analysis, complete, hold/release sample | `batch.transition.prep`, `batch.transition.analysis`, `batch.complete` |
-| `PUT /batches/:id/assignments`                        | Optional analyst assignment per tab                                                    | `batch.assign`                       |
-| `POST /batches/:id/labels`                            | Render labels for chosen samples; logs reprints                                        | `label.print`                        |
-| `POST /reports/:id/transition` body `{action, comment, signatory_id? | signatory_name + signatory_title}` | submit, return, approve, publish and print (RoA); publish, revise, void (CoA) | `roa.draft`, `roa.approve`, `report.publish` |
-| `POST /orders/:id/coa`                                | Generate the job order's CoA draft from its issued RoAs (V-22)                         | `report.publish`                     |
-| `POST /escalations`, `POST /escalations/:id/answer`   | Request manager review; answer it                                                      | `review.flag`, `escalation.answer`   |
-| `POST /reports/:id/deliveries`                        | Mark a CoA sent                                                                        | `coa.mark_sent`                      |
-| `GET /work`                                           | The caller's queue counts and rows (S-19)                                              | any staff                            |
-| `POST /search`, `GET /saved-queries`                  | Advanced search and saved queries                                                      | `search.use`                         |
-| `GET /samples/:id/history`                            | Sample timeline                                                                        | `search.use`                         |
-| `PUT /batches/:id/samples`                            | Save sample rows (batch of rows, per-row results)                                      | `sample.write`                       |
-| `PUT /batches/:id/results`                            | Save results for a tab; server calculates and returns derived values and rule messages | `result.write`                       |
-| `POST /batches/:id/recheck`                           | Store flags with scope and reason; move batch back to analysis                         | `review.flag`                        |
-| `POST /batches/:id/complete`                          | Verify, snapshot values, generate RoA                                                  | `batch.complete`                     |
-| `GET /batches/:id/export?format=pdf                   | xlsx                                                                                   | csv`                                 | Serve snapshot or draft | `report.download` |
-| `GET /drill-holes/:id/export`                         | RoA per drill hole                                                                     | `report.download`                    |
-| `POST /imports`                                       | Create an import job; `GET /imports/:id` for preview and errors                        | `sample.write`, `result.write`       |
-| `GET /dashboard/operations`, `GET /dashboard/quality` | Aggregates with filters                                                                | by tab permission                    |
-| `POST /coa/:drillHoleId`                              | Upload and register                                                                    | `coa.upload`                         |
-| `POST /calc/preview`                                  | Same engine as save, no persistence                                                    | `result.write`                       |
+### 14.2 API endpoints (v1)
 
-Responses carry rule messages as `{code, severity, cell, text}` so the grid can show them in place.
+All paths are under `/api`. Each checks its permission (section 8.2) and returns rule messages as `{code, severity, field, text}`.
+
+| Area | Endpoints | Permission |
+| --- | --- | --- |
+| Session | `POST /auth/sign-in`, `POST /auth/sign-out`, `POST /auth/forgot`, `POST /auth/set-password`; `GET /me` (profile, roles, permissions, preferences, unread count), `PATCH /me`, `POST /me/password` | Public for the first four; any staff |
+| Notifications | `GET /notifications`, `POST /notifications/read` (ids or all) | Own rows |
+| My work | `GET /work` (queues and counts), `GET /work/:queue` | Roles with queues (S-19) |
+| Dashboard | `GET /dashboard/operations`, `GET /dashboard/quality` (period, company) | `dashboard.operations`, `dashboard.quality` |
+| Job orders | `GET /orders`, `POST /orders`, `GET /orders/:no`, `PATCH /orders/:no`, `POST /orders/:no/transition` (submit, cancel, close; reason) | Read: any staff. Write: `order.create`, `order.edit`, `order.cancel` |
+| Job order samples | `POST /orders/:no/samples/preview` (pasted rows: mapping, duplicates), `PUT /orders/:no/samples`, `POST /orders/:no/samples/:ref/not-received`, `POST /orders/:no/samples/:ref/restore` | `order.edit` |
+| Job order files and history | `POST /orders/:no/files`, `DELETE /orders/:no/files/:id`, `GET /orders/:no/history` | `order.edit` or `batch.create`; any staff for history |
+| Batches | `GET /batches`, `POST /orders/:no/batches` (Add batch), `GET /batches/:no`, `PATCH /batches/:no` (number and settings while Created) | `batch.create`, `batch.edit` |
+| Reception | `PATCH /batches/:no/reception` (arrived, mass, condition, remark per row), `POST /batches/:no/scan`, `POST /batches/:no/labels` (PDF), `POST /batches/:no/samples/:ref/photos`, `DELETE /batches/:no/samples/:ref/photos/:id`, `POST /batches/:no/samples/:ref/hold`, `POST /batches/:no/samples/:ref/release` | `reception` |
+| Preparation and analysis | `PUT /batches/:no/adl`, `PUT /batches/:no/values` (returns calculated values and rule messages), `POST /calc/preview` | `adl`, `result.write` |
+| Batch transitions | `POST /batches/:no/transition` (confirm_reception, finish_preparation, finish_analysis, complete); `POST /batches/:no/roa` (signed RoA upload) | `reception`, `adl`, `result.write`, `roa.upload` |
+| Reports | `GET /reports` (kind, filters), `POST /orders/:no/coa` (draft from completed batches), `GET /reports/:id`, `PATCH /reports/:id` (draft: bases, parameters, attention, signatory, client reference), `GET /reports/:id/preview`, `POST /reports/:id/transition` (publish, revise, void; reason), `POST /reports/:id/deliveries`, `POST /reports/download` (several as one archive) | `coa.download`, `roa.download`, `coa.write`, `coa.revise`, `coa.void`, `coa.send` |
+| Search | `GET /search?q=`, `POST /search/advanced`, `GET`, `POST`, `PATCH`, `DELETE /saved-queries`, `GET /samples/:ref/history` | `search.use`; values only with `values.view` |
+| Master data | Create, read, update and archive on `/clients` (with contacts and logo), `/drill-holes` (with CoA upload and history), `/lithologies`, `/seams` | `company.manage`, `master.write`, `coa.upload`; read follows sidebar access |
+| Admin | `/users` (list, invite, edit, deactivate, reactivate, unlock, send reset, resend invite), `GET /roles`, `GET /audit` (filters, CSV), `/config/{parameters,services,methods,rules,templates,lookups,laboratory,security}` | `user.manage`, `audit.read`, `config.write` |
+| Files | `GET /files/:id` (short-lived signed URL) | Permission of the owning record |
+
+Next goal (kept, not built in v1): worksheet results per tab (`PUT /batches/:id/results` with rounds), `POST /batches/:id/recheck`, RoA draft, approve and print, `POST /escalations`, `PUT /batches/:id/assignments`, `GET /batches/:id/export`, `GET /drill-holes/:id/export`, `POST /imports`.
 
 ### 14.3 Report generation
+
+**v1 (D-49, `V1_Build_Plan.md` C-9 and C-10):** there is no RoA in the system. Complete batch freezes the batch's values, and the CoA payload is built from the frozen values of the job order's completed batches, filtered to the bases and parameters chosen on the draft. Steps 3, 5 and 6 below apply to the CoA. Step 4's RoA sources are the batches. The RoA steps return with the worksheet.
 
 1. Build the payload (header fields, samples, values per basis, methods with editions, formulas used).
 2. Render the active template (house RoA template, or the company's CoA template) to HTML, then PDF through Gotenberg; build XLSX and CSV from the same payload for the RoA. The CoA is PDF only.
@@ -2165,18 +2169,21 @@ Parse on the server, map columns, validate each row with the same rules as the g
 
 ## 15. Frontend design
 
-| Topic                  | Spec                                                                                                                                                                                                                                         |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Stack                  | React and TypeScript; AG Grid community for entry; ECharts for charts; Phosphor icons (see the research plan's table); design tokens and components from `screens.pen`                                                                       |
-| Routes                 | `/login`, `/`, `/work`, `/orders`, `/orders/:id`, `/users`, `/companies`, `/master/drill-holes`, `/master/lithologies`, `/master/seams`, `/batches`, `/batches/:id`, `/batches/:id/receive`, `/batches/:id/input`, `/batches/:id/review`, `/reports/:id`, `/search`, `/samples/:id/history`, `/notifications`, `/profile`, `/audit`, `/config`, `/imports` |
-| Landing page           | `/work` (S-19) for every staff role; the dashboard stays one click away                                                                                                                                                                      |
-| Guarding               | Route guard by permission; hidden buttons mirror the server rules, never replace them                                                                                                                                                        |
-| State                  | Server state through a query cache; grid edits held locally until saved; one "dirty" indicator per row                                                                                                                                       |
-| Grid                   | Frozen sample columns; keyboard navigation like a spreadsheet; paste of ranges; per-cell error display; column set built from `tab_fields`                                                                                                   |
-| Preview                | Shared calculation package gives instant derived values; the saved value comes from the server                                                                                                                                               |
-| Responsive             | Breakpoints 360–767 mobile, 768–1199 tablet, 1200 and up desktop; touch targets 44 px; no horizontal page scroll; details in the research plan                                                                                               |
-| Accessibility          | Labels on every control, focus kept on sidebar toggle, colour is never the only signal (limit colours also have an icon)                                                                                                                     |
-| Empty and error states | Required for every list and every grid (section 10 global rules)                                                                                                                                                                             |
+Rewritten Nov 10, 2026 for v1. The technology is in `Stack_Decision_Record.md` S-7 to S-10, and the screens are in the FigCraft file and prototype v2.
+
+| Topic | Spec |
+| --- | --- |
+| Stack | React 19, Vite, React Router 7, TanStack Query, react-hook-form with the shared zod schemas, TanStack Table and Virtual, ECharts, `@phosphor-icons/react`, date-fns |
+| Components | One React component per FigCraft library set, with the library's property names. Ported from the prototype's component layer (`prototype/src/ui.js`) and styled with CSS Modules on the `sgsi-tokens.css` variables (Light and Dark) |
+| Routes | `/login`, `/forgot`, `/set-password`, `/work`, `/work/:queue`, `/`, `/orders`, `/orders/:no/:tab?`, `/batches`, `/batches/:no/:tab?`, `/reports`, `/reports/:id`, `/reports/roa/:no`, `/search`, `/search/advanced`, `/samples/:ref/history`, `/clients`, `/clients/:code`, `/master/drill-holes`, `/master/lithologies`, `/master/seams`, `/users`, `/users/:id`, `/audit`, `/config/:section?`, `/notifications`, `/profile`. The prototype's `#name` links map one to one |
+| Landing page | The role's start page (Navigation section 2), or the Profile's Start page |
+| Guarding | Route guard from the permissions in `GET /me`; a hidden page shows No access. Hidden buttons mirror the server rules and never replace them |
+| State | Server state through the query cache. Forms and grids keep edits locally until saved, with one unsaved marker per row. Notifications refetch every 30 s |
+| Analysis grid | Frozen sample column, keyboard movement like a spreadsheet, paste of ranges, rule messages per cell, FC preview from the shared calculation; columns from the batch's parameters. Virtualised for 400 rows by 60 parameters |
+| Responsive | Desktop from 1200, tablet 700 to 1199 (rail), phone below 700 (drawer, cards, bottom sheets, two-step forms), as the frames show at 1440, 834 and 390; touch targets 44 px; no horizontal page scroll |
+| Time | Shown in the lab's time zone from Configuration (default Asia/Makassar); dates as `d MMM yyyy` |
+| Accessibility | Labels on every control, visible focus, Esc closes the innermost layer, focus trapped in dialogs and returned, colour never the only signal |
+| Empty and error states | Required for every list, tab and grid |
 
 ## 16. Non-functional requirements
 
@@ -2190,7 +2197,7 @@ Parse on the server, map columns, validate each row with the same rules as the g
 | Performance     | Grid with 400 rows and 60 parameters stays responsive; list screens page on the server                                                                              | Proposed                                 |
 | Connectivity    | Per-row saves with retry; no data loss on a dropped connection during a save                                                                                        | Proposed                                 |
 | Backup          | Nightly database dump and storage copy; restore tested                                                                                                              | Proposed                                 |
-| Testing         | Golden tests against R-03 exports; formula unit tests from section 12; rule tests per V-id; permission tests per role; one end-to-end test of the whole flow in 9.1 | Proposed                                 |
+| Testing | Formula unit tests from section 12; rule tests per V-id; permission and RLS tests per role; the prototype's flows as Playwright tests at three widths; parity check of one real batch against its signed RoA (R-03) | Proposed (Nov 10, `Stack_Decision_Record.md` S-17) |
 | Localisation    | English labels, Indonesian terms kept (RoA, CoA); date format dd MMM yyyy; period decimal                                                                           | Proposed (D-24)                          |
 | Export          | Every list exports to CSV or XLSX                                                                                                                                   | Proposed                                 |
 
