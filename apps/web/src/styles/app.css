@@ -21,6 +21,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 button:disabled { cursor: not-allowed; }
 :focus-visible { outline: 3px solid var(--primary-200); outline-offset: 1px; }
 .boot { padding: 40px; font-family: var(--f-body); color: var(--text-secondary); }
+:root { --motion-fast: 120ms; --motion-base: 200ms; --motion-slow: 280ms; --ease-standard: cubic-bezier(0.2, 0, 0, 1); }  /* see .context/docs/Design System/Motion.md */
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
 /* ---------- text styles ---------- */
@@ -60,7 +61,7 @@ button:disabled { cursor: not-allowed; }
 .ph.i20 { width: 20px; height: 20px; } .ph.i16 { width: 16px; height: 16px; } .ph.i24 { width: 24px; height: 24px; } .ph.i32 { width: 32px; height: 32px; }
 
 /* ---------- app shell ---------- */
-.topbar { flex: none; height: 72px; display: flex; align-items: center; gap: 16px; padding: 0 24px; background: var(--surface-shell); border-bottom: 1px solid var(--surface-border); position: relative; z-index: 5; }
+.topbar { flex: none; height: 72px; display: flex; align-items: center; gap: 16px; padding: 0 24px; background: var(--surface-card); border-bottom: 1px solid var(--surface-border); position: relative; z-index: 5; }
 .phone .topbar { padding: 0 16px; }
 .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
 .logo { width: 48px; height: 48px; background: url("/sgsi-icon-primary.svg") center/contain no-repeat; flex: none; }
@@ -72,19 +73,40 @@ button:disabled { cursor: not-allowed; }
 .brand small { display: block; font: 400 13px/16px var(--f-body); color: var(--text-secondary); }
 .tablet .brand b { font-size: 24px; }
 .body { flex: 1 1 auto; display: flex; min-height: 0; }
-.side { flex: none; width: 248px; background: var(--surface-shell); border-right: 1px solid var(--surface-border); padding: 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+.side { flex: none; width: 248px; background: var(--surface-card); border-right: 1px solid var(--surface-border); padding: 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overflow-x: hidden; transition: width var(--motion-slow) var(--ease-standard); }
 .side.rail { width: 88px; }
-.nav { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 10px; color: var(--text-secondary); font: 500 14px/22px var(--f-body); width: 100%; text-align: left; }
+/* Nav item. Expanded and rail share one structure: the label and gap shrink to zero, so the icon glides to the centre. */
+.nav { position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 10px; color: var(--text-secondary); font: 500 14px/22px var(--f-body); width: 100%; text-align: left; transition: padding var(--motion-slow) var(--ease-standard), gap var(--motion-slow) var(--ease-standard), background var(--motion-fast) linear; }
 .nav:hover { background: var(--primary-50); }
 .nav:active { background: var(--primary-100); }
 .nav.on, a.nav.on { background: var(--action-nav-active); color: var(--text-inverse); }
-.rail .nav { justify-content: center; padding: 0; }
-.rail .nav span.lbl { display: none; }
+.nav:focus-visible { outline-offset: -3px; }
+.nav .ph { flex: none; }
+.nav .lbl { overflow: hidden; white-space: nowrap; max-width: 170px; opacity: 1; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-base) linear var(--motion-fast); }
+.rail .nav { padding: 0 17px; gap: 0; }
+.rail .nav .lbl { max-width: 0; opacity: 0; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
 .nav .cnt { margin-left: auto; background: var(--accent-100); color: var(--accent-text); font: 600 12px/18px var(--f-body); padding: 0 6px; border-radius: 999px; min-width: 22px; text-align: center; }
-.rail .nav .cnt { position: absolute; margin: -22px 0 0 26px; }
-.navgroup { display: flex; align-items: center; gap: 6px; padding: 14px 14px 6px; font: 500 11px/16px var(--f-mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
-.navgroup span { flex: 1; }
-.raildiv { height: 1px; background: var(--surface-divider); margin: 8px 0; }
+.rail .nav .cnt { position: absolute; margin: 0; right: 6px; top: 4px; }
+/* Group row: always 36px tall (design: fixed separator height), so the rail is as tall as the expanded sidebar. */
+.navg { display: flex; flex-direction: column; }
+.navgroup { display: flex; align-items: center; gap: 6px; width: 100%; height: 36px; padding: 14px 14px 6px; margin-bottom: 4px; font: 500 11px/16px var(--f-mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); transition: gap var(--motion-slow) var(--ease-standard); }
+.navgroup:disabled { cursor: default; }
+.navgroup .gtext { overflow: hidden; white-space: nowrap; max-width: 150px; opacity: 1; text-align: left; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-base) linear var(--motion-fast); }
+.navgroup .gline { flex: 1 1 0; min-width: 0; height: 1px; background: var(--surface-divider); }
+.navgroup .gcaret { flex: none; width: 14px; opacity: 1; transition: width var(--motion-slow) var(--ease-standard), opacity var(--motion-base) linear var(--motion-fast), transform var(--motion-base) var(--ease-standard); }
+.navgroup .gcaret.shut { transform: rotate(-90deg); }
+.rail .navgroup { gap: 0; }
+.rail .navgroup .gtext { max-width: 0; opacity: 0; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
+.rail .navgroup .gcaret { width: 0; opacity: 0; transition: width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
+.navgroup.static .gline { flex: 1 1 0; }
+/* Open and close a group: the row height animates 1fr to 0fr, the items fade. */
+.gitems { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--motion-base) var(--ease-standard); }
+.gitems.shut { grid-template-rows: 0fr; }
+.gin { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 4px; opacity: 1; transition: opacity var(--motion-base) linear; }
+.gitems.shut .gin { opacity: 0; visibility: hidden; transition: opacity var(--motion-fast) linear, visibility 0s linear var(--motion-base); }
+.sidefoot { margin-top: auto; padding-top: 28px; display: flex; flex-direction: column; flex: none; position: sticky; bottom: -16px; margin-bottom: -16px; padding-bottom: 16px; background: var(--surface-card); }  /* always the last thing, at the very bottom, even when the list scrolls */
+.ph.flip { transition: transform var(--motion-slow) var(--ease-standard); }
+.rail .ph.flip { transform: rotate(180deg); }
 .main { flex: 1 1 auto; min-width: 0; overflow-y: auto; overflow-x: hidden; background: var(--surface-shell); position: relative; }
 .page { padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .tablet .page { padding: 24px 24px 32px; }

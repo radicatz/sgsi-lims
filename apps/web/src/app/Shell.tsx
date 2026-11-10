@@ -25,9 +25,10 @@ export function Shell() {
     <TopBar onMenu={() => setDrawer(true)} />
     <div className="body">
       {bp !== "phone" && <nav className={cx("side", rail && "rail")} aria-label="Main">
-        <NavList rail={rail} /><span style={{ height: 24, flex: "none" }} />
-        {bp === "desktop" && <button className="nav" title={rail ? "Expand" : undefined} onClick={() => savePrefs.mutate({ sidebar: collapsed ? "expanded" : "collapsed" })}>
-          <Icon n={rail ? "caret-double-right" : "caret-double-left"} s={20} /><span className="lbl">Collapse</span></button>}</nav>}
+        <NavList rail={rail} />
+        {bp === "desktop" && <div className="sidefoot"><div className="navgroup static" aria-hidden="true"><i className="gline" /></div>
+          <button className="nav" title={rail ? "Expand" : undefined} aria-label={rail ? "Expand sidebar" : "Collapse sidebar"} onClick={() => savePrefs.mutate({ sidebar: collapsed ? "expanded" : "collapsed" })}>
+            <Icon n="caret-double-left" s={20} className="flip" /><span className="lbl">Collapse</span></button></div>}</nav>}
       <main className="main" id="main" ref={main}><Outlet /></main>
     </div>
     {drawer && <div className="scrim" style={{ justifyContent: "flex-start", alignItems: "stretch", padding: 0 }} onMouseDown={(e) => e.target === e.currentTarget && setDrawer(false)}>
@@ -41,11 +42,17 @@ export function Shell() {
 function NavList({ rail }: { rail: boolean }) {
   const { me } = useSession();
   const [shut, setShut] = useState<Record<string, boolean>>({});
-  return <>{navFor(me!.permissions).map((g, gi) => <div key={g.group} className="col" style={{ gap: 4 }}>
-    {rail ? gi > 0 && <div className="raildiv" /> : <button className="navgroup" onClick={() => setShut({ ...shut, [g.group]: !shut[g.group] })}><span>{g.group}</span><Icon n={shut[g.group] ? "caret-right" : "caret-down"} /></button>}
-    {(rail || !shut[g.group]) && g.items.map((it) => <NavLink key={it.id} to={it.path} end={it.path === "/"} title={rail ? it.label : undefined} className={({ isActive }) => cx("nav", isActive && "on")}>
-      <Icon n={it.icon} s={20} /><span className="lbl">{it.label}</span></NavLink>)}
-  </div>)}</>;
+  return <>{navFor(me!.permissions).map((g) => {
+    const closed = !rail && !!shut[g.group];
+    // One structure for expanded and rail, so the row heights never change and the width change can animate.
+    return <div key={g.group} className="navg">
+      <button className="navgroup" disabled={rail} aria-expanded={!closed} tabIndex={rail ? -1 : 0} onClick={() => setShut({ ...shut, [g.group]: !shut[g.group] })}>
+        <span className="gtext">{g.group}</span><i className="gline" /><Icon n="caret-down" className={cx("gcaret", closed && "shut")} /></button>
+      <div className={cx("gitems", closed && "shut")}><div className="gin">
+        {g.items.map((it) => <NavLink key={it.id} to={it.path} end={it.path === "/"} title={rail ? it.label : undefined} tabIndex={closed ? -1 : 0} className={({ isActive }) => cx("nav", isActive && "on")}>
+          <Icon n={it.icon} s={20} /><span className="lbl">{it.label}</span></NavLink>)}</div></div>
+    </div>;
+  })}</>;
 }
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
