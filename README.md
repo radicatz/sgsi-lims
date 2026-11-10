@@ -1,6 +1,27 @@
 # SGSI LIMS
 
-Planning, research and prototype material for the SGSI Coal LIMS. Everything lives under `.context/`.
+The SGSI Coal LIMS: the v1 application (code at the root) and the planning, research, design and prototype material under `.context/`.
+
+## Code
+
+| Folder | What is in it |
+| --- | --- |
+| `apps/web` | The web app: React 19, Vite, React Router, TanStack Query. Styles and components are ported from prototype v2; tokens come from the design file (`pnpm --filter @sgsi/web tokens`) |
+| `apps/api` | The API: Fastify, running each request as the signed-in user so the database's row-level security applies |
+| `packages/shared` | Shared by both: permission codes and the sidebar by role, status labels, request shapes, calculations (FC, NCV, basis conversion) in exact decimals |
+| `supabase/migrations` | The database, SQL first: schema, audit trigger, row-level security, reference data. Applied to the Supabase project `sgsi-lims` |
+
+Run it locally (Node 22 or newer, pnpm 10):
+
+1. Copy `.env.example` to `.env` and fill the two secrets as its comments explain. Add `DEMO_PASSWORD=` for the demo accounts.
+2. `pnpm install`, then `pnpm seed:demo` once (creates the demo accounts: wahyu@, maya@, hendra@, bambang@, rina@, dedi@, fitri@ … sgsi.co.id).
+3. `pnpm dev` starts the API on port 4000 and the web app on http://localhost:5173.
+
+The plan for the build is `.context/docs/Project/V1_Build_Plan.md`; the technology choices are in `Stack_Decision_Record.md`.
+
+## Planning and design material
+
+Everything below lives under `.context/`.
 
 | Folder | What is in it |
 | --- | --- |

@@ -23,3 +23,16 @@ desktop.ini
 .context/demo-video/out/*
 !.context/demo-video/out/clips/
 .context/demo-video/node_modules/
+
+# Code (apps, packages)
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+apps/web/.vite/
+supabase/.temp/
