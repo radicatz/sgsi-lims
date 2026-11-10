@@ -17,6 +17,8 @@ const UserBody = z.object({ fullName: z.string().trim().min(2, "Enter the name."
 const NewUserBody = UserBody.extend({ email: z.string().trim().toLowerCase().email("Enter a valid email.") });
 
 const fail = (reply: FastifyReply, code: number, key: string, message: string, field?: string) => reply.code(code).send({ code: key, text: message, ...(field ? { field } : {}) });
+/** Invite validity in days, from Configuration, Security (default 7). */
+const inviteUntil = (tx: Tx) => tx`now() + coalesce((select (value->>'invite_days')::int from app_settings where key = 'security'), 7) * interval '1 day'`;
 const link = (type: "invite" | "recovery", email: string) => admin.auth.admin.generateLink({ type, email, options: { redirectTo: `${env.WEB_ORIGIN}/set-password` } } as never);
 
 export async function userRoutes(app: FastifyInstance) {
@@ -75,7 +77,7 @@ export async function userRoutes(app: FastifyInstance) {
     const id = made.data.user.id;
     try {
       await run(req, "Users", async (tx) => {
-        await tx`insert into profiles (id, email, full_name, title, phone, status, invited_at, invite_expires_at) values (${id}, ${b.email}, ${b.fullName}, ${b.title}, ${b.phone}, 'invited', now(), now() + interval '7 days')`;
+        await tx`insert into profiles (id, email, full_name, title, phone, status, invited_at, invite_expires_at) values (${id}, ${b.email}, ${b.fullName}, ${b.title}, ${b.phone}, 'invited', now(), ${inviteUntil(tx)})`;
         await tx`insert into user_roles (user_id, role_id) select ${id}, id from roles where code = any(${b.roles})`;
       });
     } catch (e) { await admin.auth.admin.deleteUser(id); throw e; }
@@ -129,7 +131,7 @@ export async function userRoutes(app: FastifyInstance) {
       if (invited !== (u.status === "invited")) return fail(reply, 409, "wrong_state", invited ? "This user has already accepted the invite." : "This user has not accepted the invite yet. Resend the invite instead.");
       const made = await link("recovery", u.email as string);
       if (made.error) throw made.error;
-      if (invited) await run(req, "User page", (tx) => tx`update profiles set invited_at = now(), invite_expires_at = now() + interval '7 days' where id = ${req.params.id}`);
+      if (invited) await run(req, "User page", (tx) => tx`update profiles set invited_at = now(), invite_expires_at = ${inviteUntil(tx)} where id = ${req.params.id}`);
       return { link: made.data.properties?.action_link ?? null, emailed: false };
     });
   }

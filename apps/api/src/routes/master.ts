@@ -28,6 +28,8 @@ const signed = async (bucket: string, paths: string[]) => {
 const CompanyBody = z.object({
   name: text().min(1, "Enter the client name."), code: text(12).min(1, "Enter a short code.").regex(/^[A-Za-z0-9-]+$/, "Use letters, numbers and dashes."),
   status: z.enum(["active", "inactive"]).default("active"), address: opt(), billingAddress: opt(),
+  // C-18: the 3-digit company code in the Sample ID; assigned automatically, changed only by a Superadmin, locked after the first received sample
+  companyCode: z.string().trim().regex(/^[0-9]{3}$/, "Three digits, for example 012.").optional(),
 });
 const ContactBody = z.object({ fullName: text().min(1, "Enter the contact's name."), position: opt(120), email: z.union([z.literal(""), z.string().trim().email("Enter a valid email.")]).optional().transform((v) => v || null), phone: opt(40), isDefault: z.boolean().default(false) });
 const HoleBody = z.object({ companyId: uuid, code: text(40).min(1, "Enter the drill hole code."), description: opt() });
@@ -45,15 +47,16 @@ export async function masterRoutes(app: FastifyInstance) {
 
   /* ================= clients ================= */
   const companyRows = (tx: Tx, where: ReturnType<Tx>) => tx`
-    select c.id, c.code, c.name, c.address, c.billing_address, c.logo_path, c.status, c.archived_at, c.created_at,
+    select c.id, c.code, c.company_code, c.name, c.address, c.billing_address, c.logo_path, c.status, c.archived_at, c.created_at,
       (select count(*)::int from samples s join job_orders j on j.id = s.job_order_id where j.company_id = c.id) as total_sample,
+      exists (select 1 from samples s join job_orders j on j.id = s.job_order_id where j.company_id = c.id and s.received_at is not null) as code_locked,
       (select count(*)::int from job_orders j where j.company_id = c.id) as job_orders,
       (select count(*)::int from drill_holes d where d.company_id = c.id and d.archived_at is null) as drill_holes,
       (select count(*)::int from lithologies l where l.company_id = c.id and l.archived_at is null) as lithologies,
       (select count(*)::int from seams m where m.company_id = c.id and m.archived_at is null) as seams
     from companies c ${where} order by c.name`;
   const shapeCompany = (c: Record<string, unknown>, urls: Map<string, string>) => ({
-    id: c.id, code: c.code, name: c.name, address: c.address, billingAddress: c.billing_address, status: c.status, archivedAt: c.archived_at, createdAt: c.created_at,
+    id: c.id, code: c.code, companyCode: c.company_code, companyCodeLocked: c.code_locked, name: c.name, address: c.address, billingAddress: c.billing_address, status: c.status, archivedAt: c.archived_at, createdAt: c.created_at,
     logoUrl: c.logo_path ? urls.get(c.logo_path as string) ?? null : null, logoName: c.logo_path ? String(c.logo_path).split("/").pop() : null,
     totalSample: c.total_sample, jobOrders: c.job_orders, drillHoles: c.drill_holes, lithologies: c.lithologies, seams: c.seams,
   });
@@ -93,11 +96,21 @@ export async function masterRoutes(app: FastifyInstance) {
 
   r.patch("/companies/:id", { preHandler: writeCo, schema: { params: Id, body: CompanyBody } }, async (req, reply) => {
     const b = req.body; const code = b.code.toUpperCase();
+    const superadmin = req.user!.permissions.includes("config.write");
+    if (b.companyCode && !superadmin) return fail(reply, 403, "forbidden", "Only the Superadmin can change the company code.", "companyCode");
     try {
       const rows = await run(req, "Client page", (tx) => tx`update companies set code = ${code}, name = ${b.name}, address = ${b.address}, billing_address = ${b.billingAddress},
+        company_code = ${b.companyCode && superadmin ? b.companyCode : tx`company_code`},
         status = case when status = 'archived' then status else ${b.status} end where id = ${req.params.id} returning id`);
       return rows.length ? { ok: true } : fail(reply, 404, "not_found", "This client was not found.");
-    } catch (e) { if (isUnique(e)) return fail(reply, 409, "duplicate", `${code} is already used by another client.`, "code"); throw e; }
+    } catch (e) {
+      const err = e as { code?: string; message?: string; constraint_name?: string };
+      if (err.code === "P0001") return fail(reply, 409, "locked", err.message ?? "The company code is locked.", "companyCode");
+      if (isUnique(e)) return err.constraint_name === "companies_company_code_uq"
+        ? fail(reply, 409, "duplicate", `${b.companyCode} is already used by another client.`, "companyCode")
+        : fail(reply, 409, "duplicate", `${code} is already used by another client.`, "code");
+      throw e;
+    }
   });
 
   for (const [path, archive] of [["archive", true], ["restore", false]] as const) {

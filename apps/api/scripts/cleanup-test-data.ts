@@ -18,6 +18,7 @@ export async function cleanupTestData() {
     await tx`delete from lithologies where company_id in (${co})`;
     await tx`delete from company_contacts where company_id in (${co})`;
     await tx`delete from companies where code like 'ZT%' or code like 'ZE%'`;
+    await tx`delete from lookups where value like 'ZT %' or value like 'ZE %'`;
   });
   // test accounts (zt-*@sgsi.co.id): profile, roles and the Supabase Auth user
   const users = await sql`select id from profiles where email like 'zt-%@sgsi.co.id'`;

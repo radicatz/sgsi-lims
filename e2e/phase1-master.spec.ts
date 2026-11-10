@@ -107,12 +107,12 @@ test.describe.serial("master data", () => {
     await page.locator("#add-li").click();
     await page.getByRole("dialog").getByLabel("Company").selectOption({ label: name });
     await page.locator("#li-name").fill(lith);
-    await page.getByText("Parting", { exact: true }).click();
+    await page.getByRole("dialog").getByText("Parting", { exact: true }).click();
     await page.locator("#sf-save").click();
     await page.locator("#li-q").fill(lith);
     await expect(page.locator("tr", { hasText: lith }).locator(".tag", { hasText: "Parting" })).toBeVisible();
     await page.locator("tr", { hasText: lith }).getByRole("button", { name: "Edit" }).click();
-    await page.getByText("Coal", { exact: true }).click();
+    await page.getByRole("dialog").getByText("Coal", { exact: true }).click();
     await page.locator("#sf-save").click();
     await expect(page.locator("tr", { hasText: lith }).locator(".tag", { hasText: "Coal" })).toBeVisible();
     await page.goto("/master/seams");

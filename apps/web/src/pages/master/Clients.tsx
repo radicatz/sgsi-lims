@@ -54,14 +54,16 @@ export function Clients() {
 /* ---------- client form: logo, name, code, status, addresses ---------- */
 function ClientForm({ company, onClose, onCreated }: { company: Company | null; onClose: () => void; onCreated?: (id: string) => void }) {
   const phone = useIsPhone();
-  const [f, setF] = useState({ name: company?.name ?? "", code: company?.code ?? "", status: company && company.status !== "archived" ? company.status : "active", address: company?.address ?? "", billing: company?.billingAddress ?? "" });
+  const [f, setF] = useState({ name: company?.name ?? "", code: company?.code ?? "", status: company && company.status !== "archived" ? company.status : "active", address: company?.address ?? "", billing: company?.billingAddress ?? "", companyCode: company?.companyCode ?? "" });
+  const superadmin = useCan()("config.write");
   const [same, setSame] = useState(!company?.billingAddress);
   const [logo, setLogo] = useState<File | null>(null), [dropLogo, setDropLogo] = useState(false);
   const [err, setErr] = useState<Record<string, string>>({});
   const set = (p: Partial<typeof f>) => setF({ ...f, ...p });
   const preview = logo ? URL.createObjectURL(logo) : dropLogo ? null : company?.logoUrl ?? null;
   const save = useSave(async () => {
-    const body = { name: f.name, code: f.code, status: f.status, address: f.address, billingAddress: same ? "" : f.billing };
+    const body = { name: f.name, code: f.code, status: f.status, address: f.address, billingAddress: same ? "" : f.billing,
+      ...(company && superadmin && f.companyCode !== company.companyCode ? { companyCode: f.companyCode } : {}) };
     const id = company ? company.id : ((await api<{ id: string }>("/companies", { method: "POST", json: body })).id);
     if (company) await api(`/companies/${company.id}`, { method: "PATCH", json: body });
     if (logo) { const fd = new FormData(); fd.append("file", logo); await api(`/companies/${id}/logo`, { method: "POST", body: fd }); }
@@ -82,6 +84,9 @@ function ClientForm({ company, onClose, onCreated }: { company: Company | null; 
     <div className="grid" style={{ gridTemplateColumns: phone ? "1fr" : "2fr 1fr", gap: 16 }}>
       <TextField id="cl-name" label="Name" req value={f.name} onChange={(v) => set({ name: v })} placeholder="Client name" error={err.name ?? null} />
       <TextField id="cl-code" label="Code" req value={f.code} onChange={(v) => set({ code: v.toUpperCase() })} placeholder="BNM" error={err.code ?? null} /></div>
+    {company && superadmin && <TextField id="cl-ccode" label="Company code (Sample ID)" value={f.companyCode} onChange={(v) => set({ companyCode: v.replace(/\D/g, "").slice(0, 3) })} error={err.companyCode ?? null}
+      help={company.companyCodeLocked ? "Locked: this client already has received samples." : "Three digits, used in every Sample ID. Locks after the first received sample."} />}
+    {company?.companyCodeLocked && superadmin && <style>{`#cl-ccode { pointer-events: none; opacity: .6 }`}</style>}
     <Select label="Status" value={f.status} onChange={(v) => set({ status: v as typeof f.status })} options={[["active", "Active"], ["inactive", "Inactive"]]} />
     <TextArea label="Address" value={f.address} onChange={(v) => set({ address: v })} />
     <Check on={same} onChange={setSame} label="Billing address same as address" />
@@ -112,7 +117,7 @@ export function ClientPage() {
       {lists.map(([label, n, to]) => <div key={label} className="mcard" style={{ cursor: "default" }}><span className="t-sm c-sec">{label}</span>
         <div className="row between"><b className="t-h2">{n}</b>{canRead && <Link className="linkbtn" to={`${to}?company=${c.id}`}>View list<Icon n="arrow-right" /></Link>}</div></div>)}</div></Card>
     <div className="grid" style={{ gridTemplateColumns: phone || window.innerWidth < 1100 ? "1fr" : "378px minmax(0, 1fr)", alignItems: "start" }}>
-      <Card title="Properties"><div><KV k="Code"><span className="t-data">{c.code}</span></KV><KV k="Address">{c.address ?? "None"}</KV><KV k="Billing address">{c.billingAddress ?? "Same as address"}</KV>
+      <Card title="Properties"><div><KV k="Code"><span className="t-data">{c.code}</span></KV><KV k="Company code"><span className="t-data">{c.companyCode}</span>{c.companyCodeLocked ? " (locked)" : ""}</KV><KV k="Address">{c.address ?? "None"}</KV><KV k="Billing address">{c.billingAddress ?? "Same as address"}</KV>
         <KV k="Status">{STATUS_LABEL[c.status]}</KV><KV k="Created">{fmtDate(c.createdAt)}</KV><KV k="Job orders">{c.jobOrders}</KV><KV k="Total sample">{c.totalSample}</KV></div></Card>
       <Card title="Contacts" actions={write && <Button size="sm" icon="plus" id="add-contact" onClick={() => setCt("new")}>Add contact</Button>}>
         {c.contacts.length ? <Table rows={c.contacts} keyOf={(k) => k.id} cols={[

@@ -10,6 +10,7 @@ import { Coming, NotFound, Profile } from "./pages/Basics";
 import { Clients, ClientPage } from "./pages/master/Clients";
 import { DrillHoles, Lithologies, Seams } from "./pages/master/Lists";
 import { UserPage, Users } from "./pages/admin/Users";
+import { Config } from "./pages/admin/Config";
 import { Toasts } from "./ui";
 import "./styles/tokens.css";
 import "./styles/app.css";
@@ -30,7 +31,7 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
-const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users };
+const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config };
 const CLIENT_READ = ["company.read"];
 function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [
@@ -40,6 +41,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : BUILT[p.path] ? <Built path={p.path} /> : <Coming path={p.path} />}</Guard> })),
     { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
     { path: "/users/:id", element: <Guard anyOf={["user.manage"]}><UserPage /></Guard> },
+    { path: "/config/:section", element: <Guard anyOf={["config.write"]}><Config /></Guard> },
     { path: "/profile", element: <Profile /> },
     { path: "/notifications", element: <Coming path="/notifications" /> },
     { path: "/start", element: <Start /> },
