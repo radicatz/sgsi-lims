@@ -41,7 +41,7 @@ export function Users() {
       {!phone && <div className="row g10"><Button type="primary" size="lg" icon="plus" id="add-user" onClick={() => setForm("new")}>Add user</Button></div>}</div>
     <Tabs value={tab} onChange={(t) => setSp(t === "roles" ? { tab: "roles" } : {}, { replace: true })} items={[{ id: "users", label: "Users", count: data.length }, { id: "roles", label: "Roles" }]} />
     {tab === "roles" ? <RolesTab /> : <>
-      <div className="row g12 wrap" style={{ alignItems: "flex-end" }}><Search id="us-q" value={q} onChange={setQ} placeholder="Search name or email" width={phone ? "100%" : 320} />
+      <div className="row g12 wrap" style={{ alignItems: "flex-end" }}><Search label="Search" id="us-q" value={q} onChange={setQ} placeholder="Search name or email" width={phone ? "100%" : 320} />
         <Select label="Role" value={role} onChange={setRole} width={phone ? "100%" : 220} options={[["", "All roles"], ...(Object.keys(ROLE_LABEL) as RoleCode[]).map((r) => [r, ROLE_LABEL[r]] as [string, string])]} /></div>
       <Chips scroll value={chip} onChange={setChip} items={[{ id: "all", label: "All", count: base.length }, { id: "active", label: "Active", count: count("active") }, { id: "invited", label: "Invited", count: count("invited") },
         { id: "inactive", label: "Inactive", count: count("inactive") }, { id: "locked", label: "Locked", count: count("locked") }]} />

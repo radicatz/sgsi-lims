@@ -27,15 +27,15 @@ export const NAV: NavGroup[] = [
     { id: "work", label: "My work", icon: "check-square-offset", path: "/work", anyOf: ["work.use"] },
     { id: "dashboard", label: "Dashboard", icon: "squares-four", path: "/", anyOf: ["dashboard.operations"] },
     { id: "orders", label: "Job orders", icon: "clipboard-text", path: "/orders", anyOf: ["order.read"] },
-    { id: "batches", label: "Batches", icon: "stack", path: "/batches", anyOf: ["batch.read"] },
+    { id: "batches", label: "Batches", icon: "files", path: "/batches", anyOf: ["batch.read"] },
     { id: "reports", label: "Reports", icon: "file-text", path: "/reports", anyOf: ["coa.download", "roa.download"] },
     { id: "search", label: "Search", icon: "magnifying-glass", path: "/search", anyOf: ["search.use"] },
   ] },
   { group: "MASTER DATA", items: [
     { id: "clients", label: "Clients", icon: "buildings", path: "/clients", anyOf: ["company.read"] },
     { id: "drill-holes", label: "Drill hole", icon: "cylinder", path: "/master/drill-holes", anyOf: ["master.read"] },
-    { id: "lithologies", label: "Lithology", icon: "package", path: "/master/lithologies", anyOf: ["master.read"] },
-    { id: "seams", label: "Seam", icon: "rows", path: "/master/seams", anyOf: ["master.read"] },
+    { id: "lithologies", label: "Lithology", icon: "stack", path: "/master/lithologies", anyOf: ["master.read"] },
+    { id: "seams", label: "Seam", icon: "tray", path: "/master/seams", anyOf: ["master.read"] },
   ] },
   { group: "ADMIN", items: [
     { id: "users", label: "Users", icon: "users", path: "/users", anyOf: ["user.manage"] },

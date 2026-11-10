@@ -76,9 +76,12 @@ export function Select({ label, req, help, error, value, onChange, options, id, 
     <div className={cx("input", error && "err", disabled && "dis")}><select id={fid} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><Icon n="caret-down" /></div></Field></div>;
 }
-export function Search({ value, onChange, placeholder, id, width }: { value: string; onChange: (v: string) => void; placeholder: string; id?: string; width?: number | string }) {
-  return <label className="search" style={width ? { width, maxWidth: "100%" } : undefined}><Icon n="magnifying-glass" /><input id={id} value={value} placeholder={placeholder} aria-label={placeholder} onChange={(e) => onChange(e.target.value)} />
+export function Search({ value, onChange, placeholder, id, width, label }: { value: string; onChange: (v: string) => void; placeholder: string; id?: string; width?: number | string; label?: string }) {
+  const auto = useId(); const fid = id ?? auto;
+  const box = <label className="search" style={width && !label ? { width, maxWidth: "100%" } : undefined}><Icon n="magnifying-glass" /><input id={fid} value={value} placeholder={placeholder} aria-label={label ? undefined : placeholder} onChange={(e) => onChange(e.target.value)} />
     {value && <button type="button" aria-label="Clear search" onClick={() => onChange("")}><Icon n="x" /></button>}</label>;
+  if (!label) return box;
+  return <div className="field" style={width ? { width, maxWidth: "100%" } : undefined}><label className="flabel" htmlFor={fid}>{label}</label>{box}</div>;
 }
 export function Check({ on, onChange, label, id }: { on: boolean; onChange: (v: boolean) => void; label: string; id?: string }) {
   return <label className={cx("cb", on && "on")} id={id} onClick={(e) => { e.preventDefault(); onChange(!on); }}>

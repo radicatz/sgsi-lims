@@ -2,6 +2,8 @@
 
 Written Nov 10, 2026. **Status: approved Nov 10, 2026 (defaults). Phase 0 built, section 7.**
 
+> **Nov 10, 2026: sample identifiers fixed by the lab** (spec 6.1, D-51): Sample ID `SG.YYMMDD.CCC.BB.NNN` (e.g. `SG.260901.001.RI.001`) and sample code `CCC.BB.NNN.Lotxx`, generated at reception, replacing the lab code `B{batch}-NN`; the client's own name becomes the Client reference. Built into phases 1 to 3 below as schema change C-18; the six open details are **closed with defaults** (spec 6.1); the frames, prototype and demo video are **not rebuilt** and their old format is flagged as a mismatch (spec 6.2, `Sample_Identifiers_Plan.md`).
+
 This plan replaces the "Roadmap & phasing" section of `Coal_LIMS_Research_and_Project_Plan.md`. That four-week plan was written before D-44 (Oct 29) took the analyst worksheet (Input ROA, Review ROA) and the RoA approval gate out of v1. It also predates every screen built since Oct 30.
 
 The build follows the screens and the prototype as they are now:
@@ -29,9 +31,9 @@ Each phase ends on a staging link you can click through, and with its gate met. 
 | Phase | Builds | Screens (plans) | Gate (done when) | Size |
 | --- | --- | --- | --- | --- |
 | **0 · Foundation** | Repo, Compose, CI. Migrations from the spec DDL plus the changes in section 3. Seed data. Roles, permissions, RLS and their tests. Sign-in, invite, reset, lock after failed attempts, idle sign-out. App shell (sidebar by role, top bar, drawer). The component layer ported from the prototype. Audit trigger. Staging deployment | App screens, Navigation | Every persona signs in and sees their own sidebar on staging. Permission tests pass for every role. Every table change writes an audit row | L |
-| **1 · Master data and settings** | Clients (contacts, logo, archive), Drill hole (CoA upload, history), Lithology, Seam. Users (invite, edit, deactivate, unlock, roles grid). Configuration: parameters, services, methods, rules, lookups, laboratory, security, formulas (view) | Master Data, Admin (Users, Configuration) | The lab's real master lists (R-08) are loaded, and the parameter catalogue and lookups match the lab's own lists | M |
-| **2 · Job orders** | List, New and Edit (contact and signatory pickers, standards, parameters, checklists), Samples tab (paste, duplicates, five states, not received), Files, History, cancel, close | Job Order | A real job order (R-20) can be entered as the CSO writes it today | L |
-| **3 · Batches** | Add batch, batch list, Reception (scan, arrival, mass, condition, photos, labels, hold, confirm with fewer), Preparation (ADL), Analysis (final values, FC, range warnings), signed RoA upload, Complete batch. Hand-off notifications N1 to N5, N7, N8 | Batch | One real batch, entered from its signed RoA, gives the same numbers as the paper RoA | L |
+| **1 · Master data and settings** | Clients (contacts, logo, archive), Drill hole (CoA upload, history), Lithology, Seam. Users (invite, edit, deactivate, unlock, roles grid). Configuration: parameters, services, methods, rules, lookups, laboratory (with branch offices and their codes, `RI` Rapak Indah), security, formulas (view). A 3-digit company code on each client (spec 6.1) | Master Data, Admin (Users, Configuration) | The lab's real master lists (R-08) are loaded, and the parameter catalogue and lookups match the lab's own lists | M |
+| **2 · Job orders** | List, New and Edit (contact and signatory pickers, standards, parameters, checklists), Samples tab by client reference (paste, duplicates, five states, not received), Files, History, cancel, close | Job Order | A real job order (R-20) can be entered as the CSO writes it today | L |
+| **3 · Batches** | Add batch, batch list, Reception (Sample ID and sample code generated on arrival per spec 6.1, scan, arrival, mass, condition, photos, labels, hold, confirm with fewer), Preparation (ADL), Analysis (final values, FC, range warnings), signed RoA upload, Complete batch. Hand-off notifications N1 to N5, N7, N8 | Batch | One real batch, entered from its signed RoA, gives the same numbers as the paper RoA, and each received sample gets its Sample ID and sample code (spec 6.1) | L |
 | **4 · Reports** | CoA generate, draft, PDF through Gotenberg, publish, Mark sent, revise, void. Reports list with RoA and CoA tabs. The job order's CoA tab. N6 | Reports | A CoA for the real job order matches the lab's current CoA layout (R-10), with the right signatory (R-21) | M |
 | **5 · Monitoring and search** | My work queues, Dashboard (both tabs), quick and advanced search, saved queries, sample history, Audit log screen, notifications page, profile | My Work, Dashboard, Search, Admin (Audit log), App | Every prototype flow passes as an end-to-end test at 1440, 834 and 390 | M |
 | **6 · Hardening and go-live** | CSV and XLSX export on every list, performance (400 samples × 60 parameters), backups with a restore test, production deployment (R-11), user accounts (R-09), UAT on a real phone and tablet, handover | All | The lab enters new job orders in the system instead of Excel | M |
@@ -75,6 +77,7 @@ The DDL in spec 13.3 was written before several screen decisions. These changes 
 | C-15 | `audit_log` | Add `screen` and `actor_name` | The Audit log and History screens show where and who |
 | C-16 | `notifications` | Add `event` (N1 to N8) and `icon` | Notification items |
 | C-17 | `app_settings` | Keys `laboratory`, `security`, `numbering`, `timezone` | Configuration, Laboratory and Security; S-16 |
+| C-18 | `samples`, `companies`, numbering (**added Nov 10, after phase 0 was applied: a new migration at the start of phase 1**) | `samples.sample_ref` becomes `client_ref` (unique within a job order); `lab_code` becomes `sample_no` (the Sample ID, unique) plus `sample_code`; `samples.lot` (text, default `Lot01`, set at reception) and the received date the Sample ID uses. `companies.company_code` (3 digits, unique): the next free number when a client is created, editable by a Superadmin until the client's first received sample, then locked. Branch offices (2-letter code, name) under `app_settings.laboratory`, seeded with `RI` Rapak Indah; a batch belongs to one branch. A function `next_sample_no(company, branch, date)` called by Confirm reception: numbers per company and date from 001, refuses at 999 with a message, width settable by an Admin. The `numbering` setting gets `sample_id` and `sample_code` patterns in place of `lab_code` | D-51, spec 6.1 |
 
 Next-goal tables stay in the spec but are not created in v1:
 - `batch_assignments`
@@ -93,7 +96,7 @@ Next-goal tables stay in the spec but are not created in v1:
 | 3 | The lab's method list (standard, edition, r, R) and decimals per parameter | Phase 1 | R-05, R-06 | Spec 11 defaults |
 | 4 | Sample conditions, hold reasons and send channels as the lab uses them | Phase 1 | — | Prototype lists |
 | 5 | One real job order as written today (quote, PO or email) and the CoA sent for it | Phase 2 | R-20 | The form follows the screens; fields may change |
-| 6 | The sample ID and lab code format; the batch number format (still `B-YYYY-NNNN`); whether the job order number comes from another system | Phase 2, 3 | R-07, D-45, D-01 | Our formats, kept configurable |
+| 6 | Sample ID and sample code: format and details decided (spec 6.1: date received, number per company and date, branch `RI` only, company code auto-assigned, lot `Lot01`, client reference not on reports); ask the lab to confirm or correct. Also the batch number format (still `B-YYYY-NNNN`) and whether the job order number comes from another system | Phase 2, 3 | R-07, D-45, D-01 | The defaults in spec 6.1 |
 | 7 | The label printer model and label size | Phase 3 | — | PDF label sheet printed from the browser |
 | 8 | One completed batch with its signed RoA | Phase 3 | R-03 | Parity check postponed |
 | 9 | The CoA template (logo, wording, form code, numbering) and the signatory rule | Phase 4 | R-10, R-21 | The prototype's certificate layout; the default signatory per job order |
@@ -110,7 +113,7 @@ Next-goal tables stay in the spec but are not created in v1:
 > 3. The method list per parameter (standard, edition, repeatability r, reproducibility R) and how many decimals you report.
 > 4. The sample conditions, hold reasons and send channels you use.
 > 5. One real job order as you receive it today (quote, PO or email), and the CoA you sent for it.
-> 6. Your sample ID, lab code and batch number formats, and whether the job order number comes from another system.
+> 6. We number samples as `SG.YYMMDD.CCC.BB.NNN` (sample ID) and `CCC.BB.NNN.Lotxx` (sample code), using the date the sample is received, a running number per company that restarts each day, branch `RI`, system-assigned company codes and lot `Lot01`. Please tell us if any of this should differ. Also your batch number format, and whether the job order number comes from another system.
 > 7. The label printer model and label size.
 > 8. One completed batch with its signed RoA.
 > 9. Your CoA template and who signs which CoA.
@@ -130,9 +133,10 @@ Next-goal tables stay in the spec but are not created in v1:
 | # | Question | Default if not answered |
 | --- | --- | --- |
 | 1 | Is the phase order right, or should a module come earlier, for example Reports, to show the lab sooner? | As in section 2 |
-| 2 | Accept the schema changes C-1 to C-17 and apply them to the spec now? | Yes, in the same change as the first migration |
+| 2 | Accept the schema changes C-1 to C-18 and apply them to the spec now? | Yes, in the same change as the first migration |
 | 3 | Send the request in section 4 now, in your name? | You send it; I can shorten it or translate it into Indonesian |
 | 4 | Stack open points (`Stack_Decision_Record.md` section 4) | Their defaults |
+| 5 | Sample ID details (spec 6.1) | **Closed Nov 10, 2026 with the defaults** (date received; number per company and date, restarting daily; branch `RI` only; company code auto-assigned; lot `Lot01`; client reference not on the RoA or CoA). The lab can still correct them |
 
 ## 7 · Build status
 
@@ -146,3 +150,13 @@ Next-goal tables stay in the spec but are not created in v1:
 | Checks | Live check against the real database: 29 of 29 (every role's sidebar and start page, the CSO has no `result.read`, tokens refused when missing or malformed, five wrong passwords lock the account, a locked account stays locked with the right password, profile preference saved). Browser tests: 30 of 30 at 1440, 834 and 390 (each persona signs in to its own sidebar and gets No access on a page it cannot open; wrong password; sign out) |
 | Gate | Met: every persona signs in and sees their own sidebar; the permission checks pass for every role; every table change writes an audit row |
 | Left for later in phase 0 | Row-level security tests per table in the database, a staging deployment, end-to-end tests in CI (needs the demo password as a repository secret), SMTP for invite and reset emails |
+
+### Phase 1 · Master data and settings, parts 1 and 2 (Nov 10, 2026)
+
+| Item | Result |
+| --- | --- |
+| Master data | Clients (list, client page, contacts with a default, round logo upload, archive, restore, delete when unused), Drill hole (list, CoA upload and replace, CoA history with downloads, archive), Lithology, Seam. Filters, search, 25 rows per page, phone cards, read-only for Supervisor and Manager, links from the client page to its lists. Migration 0700: private buckets `logos` and `coa`; files reach the web only as one-hour signed links |
+| Users | List with status chips, Roles tab (permission grid from the database), user page, Add user (invite link), Edit, Send password reset, Resend invite, Unlock, Deactivate and Reactivate, and the rule that the last active Superadmin cannot be deactivated or lose the role. Mail is not set up yet, so the invite and reset links are shown to the Superadmin to send |
+| Fixes found on the way | Invited and locked accounts could not reach set-password (the guard accepted only active accounts); the per-request database setup now runs in one pipelined statement (a list call went from about 620 ms to about 420 ms) |
+| Checks | Live API checks against the real database: 40 for master data and 27 for users, run as the right and wrong roles; browser tests at 1440, 834 and 390 for master data (7 flows) and users (6 flows) |
+| Left in phase 1 | Configuration: Parameters, Services, Methods and standards, Validation rules, Lookups, Report templates, Laboratory, Security, Formulas (view). Import wizard for drill holes, seams and lithologies (S-16). The lab's real master lists (R-08). Mail delivery (SMTP) |

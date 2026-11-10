@@ -1,61 +1,7 @@
-// Icons: Phosphor Regular, the same set as the FigCraft library. Named by their kebab-case glyph names, as in the design.
-import { ArrowRight } from "@phosphor-icons/react/dist/csr/ArrowRight";
-import { Barcode } from "@phosphor-icons/react/dist/csr/Barcode";
-import { Bell } from "@phosphor-icons/react/dist/csr/Bell";
-import { Buildings } from "@phosphor-icons/react/dist/csr/Buildings";
-import { CaretDoubleLeft } from "@phosphor-icons/react/dist/csr/CaretDoubleLeft";
-import { CaretDoubleRight } from "@phosphor-icons/react/dist/csr/CaretDoubleRight";
-import { CaretDown } from "@phosphor-icons/react/dist/csr/CaretDown";
-import { CaretRight } from "@phosphor-icons/react/dist/csr/CaretRight";
-import { CheckCircle } from "@phosphor-icons/react/dist/csr/CheckCircle";
-import { CheckSquareOffset } from "@phosphor-icons/react/dist/csr/CheckSquareOffset";
-import { ClipboardText } from "@phosphor-icons/react/dist/csr/ClipboardText";
-import { ClockCounterClockwise } from "@phosphor-icons/react/dist/csr/ClockCounterClockwise";
-import { Cylinder } from "@phosphor-icons/react/dist/csr/Cylinder";
-import { Eye } from "@phosphor-icons/react/dist/csr/Eye";
-import { EyeSlash } from "@phosphor-icons/react/dist/csr/EyeSlash";
-import { FileText } from "@phosphor-icons/react/dist/csr/FileText";
-import { GearSix } from "@phosphor-icons/react/dist/csr/GearSix";
-import { Info } from "@phosphor-icons/react/dist/csr/Info";
-import { List } from "@phosphor-icons/react/dist/csr/List";
-import { LockSimple } from "@phosphor-icons/react/dist/csr/LockSimple";
-import { MagnifyingGlass } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
-import { Package } from "@phosphor-icons/react/dist/csr/Package";
-import { Question } from "@phosphor-icons/react/dist/csr/Question";
-import { Rows } from "@phosphor-icons/react/dist/csr/Rows";
-import { SignOut } from "@phosphor-icons/react/dist/csr/SignOut";
-import { SquaresFour } from "@phosphor-icons/react/dist/csr/SquaresFour";
-import { Stack } from "@phosphor-icons/react/dist/csr/Stack";
-import { User } from "@phosphor-icons/react/dist/csr/User";
-import { Users } from "@phosphor-icons/react/dist/csr/Users";
-import { Warning } from "@phosphor-icons/react/dist/csr/Warning";
-import { WarningCircle } from "@phosphor-icons/react/dist/csr/WarningCircle";
-import { X } from "@phosphor-icons/react/dist/csr/X";
-import { Plus } from "@phosphor-icons/react/dist/csr/Plus";
-import { PencilSimple } from "@phosphor-icons/react/dist/csr/PencilSimple";
-import { DotsThree } from "@phosphor-icons/react/dist/csr/DotsThree";
-import { Trash } from "@phosphor-icons/react/dist/csr/Trash";
-import { Archive } from "@phosphor-icons/react/dist/csr/Archive";
-import { UploadSimple } from "@phosphor-icons/react/dist/csr/UploadSimple";
-import { DownloadSimple } from "@phosphor-icons/react/dist/csr/DownloadSimple";
-import { FilePdf } from "@phosphor-icons/react/dist/csr/FilePdf";
-import { FileX } from "@phosphor-icons/react/dist/csr/FileX";
-import { Check } from "@phosphor-icons/react/dist/csr/Check";
-import { CaretLeft } from "@phosphor-icons/react/dist/csr/CaretLeft";
-import type { Icon as PhIcon } from "@phosphor-icons/react";
-
-const ICONS: Record<string, PhIcon> = {
-  "arrow-right": ArrowRight, barcode: Barcode, bell: Bell, buildings: Buildings, "caret-double-left": CaretDoubleLeft,
-  "caret-double-right": CaretDoubleRight, "caret-down": CaretDown, "caret-right": CaretRight, "check-circle": CheckCircle,
-  "check-square-offset": CheckSquareOffset, "clipboard-text": ClipboardText, "clock-counter-clockwise": ClockCounterClockwise,
-  cylinder: Cylinder, eye: Eye, "eye-slash": EyeSlash, "file-text": FileText, "gear-six": GearSix, info: Info, list: List,
-  "lock-simple": LockSimple, "magnifying-glass": MagnifyingGlass, package: Package, question: Question, rows: Rows,
-  "sign-out": SignOut, "squares-four": SquaresFour, stack: Stack, user: User, users: Users, warning: Warning,
-  "warning-circle": WarningCircle, x: X,
-  "plus": Plus, "pencil-simple": PencilSimple, "dots-three": DotsThree, "trash": Trash, "archive": Archive, "upload-simple": UploadSimple, "download-simple": DownloadSimple, "file-pdf": FilePdf, "file-x": FileX, "check": Check, "caret-left": CaretLeft,
-};
+// Icons: the official Phosphor icon font (@phosphor-icons/web, Regular weight), the same set as the FigCraft library.
+// Any glyph name from the design works as is (kebab-case, e.g. "check-square-offset"); see https://phosphoricons.com.
+import "@phosphor-icons/web/regular";
 
 export function Icon({ n, s = 14, className }: { n: string; s?: 14 | 16 | 20 | 24 | 32; className?: string }) {
-  const C = ICONS[n] ?? Question;
-  return <span className={["ph", s !== 14 ? `i${s}` : "", className].filter(Boolean).join(" ")} aria-hidden="true"><C size={s} /></span>;
+  return <i className={["ph", `ph-${n}`, s !== 14 ? `i${s}` : "", className].filter(Boolean).join(" ")} aria-hidden="true" />;
 }

@@ -27,7 +27,7 @@ export function Clients() {
     !inUse(c) && { label: "Delete", icon: "trash", danger: true, onClick: () => setDel(c) }]} />;
   return <MasterList title="Clients"
     actions={write && <Button type="primary" size={phone ? "touch" : "lg"} icon="plus" id="add-client" block={phone} onClick={() => setForm("new")}>Add client</Button>}
-    toolbar={<Search id="cl-q" value={q} onChange={setQ} placeholder="Search client name or code" width={phone ? "100%" : 320} />}
+    toolbar={<Search label="Search" id="cl-q" value={q} onChange={setQ} placeholder="Search client name or code" width={phone ? "100%" : 320} />}
     chips={<Chips scroll value={chip} onChange={setChip} items={[{ id: "all", label: "All", count: live.length }, { id: "active", label: "Active", count: base.filter((c) => c.status === "active").length },
       { id: "inactive", label: "Inactive", count: base.filter((c) => c.status === "inactive").length }, { id: "archived", label: "Archived", count: base.filter((c) => c.status === "archived").length }]} />}>
     {isLoading ? <Card><Empty icon="buildings" title="Loading clients" /></Card> : phone

@@ -12,7 +12,7 @@
     "tokens": "node scripts/tokens.mjs"
   },
   "dependencies": {
-    "@phosphor-icons/react": "^2.1.7",
+    "@phosphor-icons/web": "2.1.1",
     "@sgsi/shared": "workspace:*",
     "@tanstack/react-query": "^5.62.7",
     "react": "^19.0.0",
