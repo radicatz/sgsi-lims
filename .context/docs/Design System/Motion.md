@@ -2,7 +2,7 @@
 
 Reference for every animation in the web app. Read this before adding or changing one, and add a row to section 5 when a new animation ships. Started Nov 10, 2026 with the sidebar.
 
-The design file has no motion layer, so this document is the source. The tokens live in `apps/web/src/styles/app.css` (not in the generated `tokens.css`).
+The design file has no motion layer, so this document is the source. The tokens live in `apps/web/src/styles/base.css` (not in the generated `tokens.css`).
 
 ## 1. Tokens
 
@@ -22,7 +22,7 @@ Colour changes (hover, press) use `linear`.
 3. **Hide by shrinking, not by `display: none`.** A label that must disappear gets `max-width: 0` plus `opacity: 0` and `overflow: hidden`. A group that must close uses the `grid-template-rows: 1fr to 0fr` trick.
 4. **Order the fade and the move.** Content fades out fast (`--motion-fast`) while the box shrinks. Content fades in after a short delay (`--motion-fast`) while the box grows, so text never shows in a box that is too small.
 5. **Hidden means unreachable.** Closed content gets `visibility: hidden` (delayed until the animation ends) and `tabIndex={-1}` on links, so keyboard and screen reader users do not land on it.
-6. **Reduced motion.** `app.css` has one global rule: `@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }`. Do not add per-animation exceptions; do not fight it with `!important`.
+6. **Reduced motion.** `styles/base.css` has one global rule: `@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }`. Do not add per-animation exceptions; do not fight it with `!important`.
 7. **No motion that blocks work.** Nothing over 300 ms. No animation on first load of a page. No looping animation except the loading skeleton.
 
 ## 3. Recipe: add a transition

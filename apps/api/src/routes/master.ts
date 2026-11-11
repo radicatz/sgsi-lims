@@ -199,9 +199,23 @@ export async function masterRoutes(app: FastifyInstance) {
     });
     return ok ? { ok: true } : fail(reply, 404, "not_found", "This contact was not found.");
   });
-  r.post("/contacts/:id/archive", { preHandler: writeCo, schema: { params: Id } }, async (req, reply) => {
-    const rows = await run(req, "Client page", (tx) => tx`update company_contacts set archived_at = now(), is_default = false where id = ${req.params.id} returning id`);
-    return rows.length ? { ok: true } : fail(reply, 404, "not_found", "This contact was not found.");
+  // Delete a contact. A client always keeps at least one. A contact that job orders or reports already point to is hidden
+  // (its name stays on those records); an unused one is removed for good. Either way the Client page shows it gone.
+  r.delete("/contacts/:id", { preHandler: writeCo, schema: { params: Id } }, async (req, reply) => {
+    const res = await run(req, "Client page", async (tx) => {
+      const [k] = await tx`select company_id, is_default from company_contacts where id = ${req.params.id} and archived_at is null`;
+      if (!k) return "missing" as const;
+      const [n] = await tx`select count(*)::int as n from company_contacts where company_id = ${k.company_id} and archived_at is null`;
+      if (n!.n <= 1) return "last" as const;
+      const [u] = await tx`select (select count(*) from job_orders where contact_id = ${req.params.id}) + (select count(*) from reports where attention_contact_id = ${req.params.id}) as n`;
+      if (Number(u!.n) > 0) await tx`update company_contacts set archived_at = now(), is_default = false where id = ${req.params.id}`;
+      else await tx`delete from company_contacts where id = ${req.params.id}`;
+      if (k.is_default) await tx`update company_contacts set is_default = true where id = (select id from company_contacts where company_id = ${k.company_id} and archived_at is null order by full_name limit 1)`;
+      return "ok" as const;
+    });
+    if (res === "missing") return fail(reply, 404, "not_found", "This contact was not found.");
+    if (res === "last") return fail(reply, 409, "last_contact", "A client needs at least one contact. Add another one before deleting this one.");
+    return { ok: true };
   });
 
   /* ================= drill holes ================= */

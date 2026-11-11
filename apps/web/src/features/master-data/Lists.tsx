@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
-import { Button, Card, Dialog, Empty, Icon, TextField, toast } from "../../ui";
-import { Badge, Chips, Confirm, DropZone, FileChip, Menu, Note, Pager, Radio, RowActions, Search, Select, Table, Tag, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../ui/data";
+import { Button, Card, Dialog, Empty, Icon, TextField, toast } from "../../components";
+import { Badge, Chips, Confirm, DropZone, FileChip, Menu, Note, Pager, Radio, RowActions, Search, Select, Table, Tag, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../components";
 import { KIND_LABEL, KIND_TONE, MasterList, post, useCan, useCompanyOptions, useIsPhone, useList, useSave, type DrillHole, type Lithology, type Seam } from "./shared";
 
 /** Company filter that starts from ?company= (the client page links here). */

@@ -1,0 +1,61 @@
+/* SGSI LIMS app styles, ported from prototype v2 (.context/prototype/src/styles.css). Tokens: tokens.css. Components follow the FigCraft library. */
+
+:root {
+  --e-2xs: 0 2px 2px 0 var(--shadow-mid), 0 4px 4px 0 var(--shadow-light);
+  --e-xs: 0 1px 2px 0 var(--shadow-deep), 0 2px 2px 0 var(--shadow-mid), 0 4px 6px 0 var(--shadow-light);
+  --e-md: 0 2px 6px 0 var(--shadow-deep), 0 4px 6px 0 var(--shadow-mid), 0 6px 8px 0 var(--shadow-light);
+  --e-lg: 0 2px 6px 1px var(--shadow-deep), 0 4px 6px 2px var(--shadow-mid), 0 6px 8px 2px var(--shadow-light);
+  --e-xl: 0 4px 8px 2px var(--shadow-deep), 0 8px 8px 4px var(--shadow-mid), 0 10px 10px 6px var(--shadow-light);
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --scrim: rgba(14, 42, 78, 0.42);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--surface-background); color: var(--text-foreground); font: 400 14px/22px var(--f-body); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+a.nav, a.brand, a.btn, a.ib, .userchip { text-decoration: none; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--primary-200); outline-offset: 1px; }
+.boot { padding: 40px; font-family: var(--f-body); color: var(--text-secondary); }
+:root { --motion-fast: 120ms; --motion-base: 200ms; --motion-slow: 280ms; --ease-standard: cubic-bezier(0.2, 0, 0, 1); }  /* see .context/docs/Design System/Motion.md */
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- text styles ---------- */
+.t-display { font: 500 36px/42px var(--f-display); color: var(--text-heading); margin: 0; text-wrap: balance; }
+.t-h1 { font: 600 28px/34px var(--f-display); color: var(--text-heading); margin: 0; }
+.t-h2 { font: 600 22px/28px var(--f-display); color: var(--text-heading); margin: 0; }
+.t-h3 { font: 600 18px/24px var(--f-display); color: var(--text-heading); margin: 0; }
+.t-lead { font: italic 500 18px/28px var(--f-display); color: var(--text-secondary); }
+.t-num { font: 500 30px/34px var(--f-display); color: var(--text-heading); }
+.t-body { font: 400 14px/22px var(--f-body); }
+.t-sm { font: 400 13px/20px var(--f-body); }
+.t-cap { font: 400 12px/16px var(--f-body); }
+.t-over { font: 500 11px/16px var(--f-mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+.t-data { font: 400 13px/20px var(--f-mono); font-variant-numeric: tabular-nums; }
+.t-data-b { font: 600 13px/20px var(--f-mono); font-variant-numeric: tabular-nums; }
+.w5 { font-weight: 500; } .w6 { font-weight: 600; }
+.c-sec { color: var(--text-secondary); } .c-mut { color: var(--text-muted); } .c-err { color: var(--feedback-error); } .c-ok { color: var(--feedback-success); } .c-warn { color: var(--feedback-warning); } .c-head { color: var(--text-heading); } .c-brand { color: var(--action-brand-text); }
+.num { font-variant-numeric: tabular-nums; }
+.link { color: var(--action-brand-text); font-weight: 600; cursor: pointer; text-decoration: none; }
+.link:hover { text-decoration: underline; }
+.plain { color: inherit; }
+
+/* ---------- layout helpers ---------- */
+.row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row.top { align-items: flex-start; } .row.wrap { flex-wrap: wrap; } .row.end { justify-content: flex-end; } .row.between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.g4 { gap: 4px; } .g6 { gap: 6px; } .g10 { gap: 10px; } .g12 { gap: 12px; } .g16 { gap: 16px; } .g20 { gap: 20px; } .g24 { gap: 24px; }
+.grow { flex: 1 1 auto; min-width: 0; }
+.grid { display: grid; gap: 20px; min-width: 0; }
+.ellip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- icon ---------- */
+.ph { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; font-size: 14px; flex: none; }
+/* sizes follow the icon box: 14 (default), 16, 20, 24, 32 */
+.ph.i20 { width: 20px; height: 20px; font-size: 20px; } .ph.i16 { width: 16px; height: 16px; font-size: 16px; } .ph.i24 { width: 24px; height: 24px; font-size: 24px; } .ph.i32 { width: 32px; height: 32px; font-size: 32px; }

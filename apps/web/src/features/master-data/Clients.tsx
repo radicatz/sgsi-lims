@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
-import { Avatar, Button, Card, Dialog, Empty, Icon, PageHead, TextField, toast } from "../../ui";
-import { Badge, Check, Chips, Confirm, KV, Menu, Note, Pager, RowActions, Search, Select, Switch, Tag, Table, TextArea, DropZone, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../ui/data";
+import { Avatar, Button, Card, Dialog, Empty, Icon, PageHead, TextField, toast } from "../../components";
+import { Badge, Check, Chips, Confirm, KV, Menu, Note, Pager, RowActions, Search, Select, Switch, Tag, Table, TextArea, DropZone, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../components";
 import { useBreakpoint } from "../../app/session";
 import { MasterList, STATUS_LABEL, STATUS_TONE, post, useCan, useCompanies, useIsPhone, useSave, type Company, type Contact } from "./shared";
 
@@ -109,7 +109,9 @@ export function ClientPage() {
   const [form, setForm] = useState(false), [ct, setCt] = useState<Contact | "new" | null>(null), [arch, setArch] = useState(false);
   const archive = useSave(() => post(`/companies/${id}/${c?.status === "archived" ? "restore" : "archive"}`), { keys: ["companies", "company"], onDone: () => setArch(false) });
   const makeDefault = useSave((k: Contact) => post(`/contacts/${k.id}/default`), { keys: ["company"], done: "Default contact changed" });
-  const dropContact = useSave((k: Contact) => post(`/contacts/${k.id}/archive`), { keys: ["company"], done: "Contact archived" });
+  const [delCt, setDelCt] = useState<Contact | null>(null);
+  const dropContact = useSave((k: Contact) => api(`/contacts/${k.id}`, { method: "DELETE" }), { keys: ["company"], done: "Contact deleted", onDone: () => setDelCt(null) });
+  const lastContact = (c?.contacts.length ?? 0) <= 1;   // a client always keeps at least one contact
   const [del, setDel] = useState(false);
   const remove = useSave(() => api(`/companies/${id}`, { method: "DELETE" }), { keys: ["companies", "company"], done: "Client deleted", onDone: () => { setDel(false); nav("/clients"); } });
   const { sort, onSort } = useSort();
@@ -124,9 +126,9 @@ export function ClientPage() {
     { h: "Position", sort: (k) => k.position, render: (k) => k.position ?? "" }, { h: "Email", w: bp === "tablet" ? 180 : undefined, sort: (k) => k.email, render: (k) => bp === "tablet" ? <span title={k.email ?? undefined} style={{ display: "block", maxWidth: 164, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.email ?? ""}</span> : k.email ?? "" },   // tablet: fixed width, long emails are cut with an ellipsis, no sideways scroll
     
     bp === "desktop" && { h: "Phone", sort: (k) => k.phone, render: (k) => <span className="nowrap">{k.phone ?? ""}</span> },
-    // Make default (user-check icon) comes last so Edit and Archive line up in every row
+    // Make default (user-check icon) comes last so Edit and Delete line up in every row
     write && { h: "Actions", render: (k) => <RowActions items={[{ label: `Edit ${k.fullName}`, icon: "pencil-simple", onClick: () => setCt(k) },
-      { label: `Archive ${k.fullName}`, icon: "archive", onClick: () => dropContact.mutate(k) },
+      { label: `Delete ${k.fullName}`, icon: "trash", onClick: () => setDelCt(k), disabled: lastContact, why: "A client needs at least one contact." },
       { label: `Make ${k.fullName} the default contact`, icon: "user-check", onClick: () => makeDefault.mutate(k), show: !k.isDefault }]} /> }];
   return <div className="page">
     <PageHead crumb={[["Clients", "/clients"], [c.name]]} avatar={<Avatar name={c.name} size={64} logo={c.logoUrl} />} title={c.name}
@@ -145,13 +147,14 @@ export function ClientPage() {
         {!c.contacts.length ? <span className="t-sm c-mut">No contacts yet.</span> : phone
           ? <div className="col g10">{c.contacts.map((k) => <div key={k.id} className="ccard">
               <div className="top"><span className="row g8 grow" style={{ minWidth: 0 }}><b className="t-sm w6">{k.fullName}</b>{k.isDefault && <Tag label="Default" tone="blue" />}</span>{write && <Menu vertical label={`More for ${k.fullName}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setCt(k) },
-                { label: "Archive", icon: "archive", onClick: () => dropContact.mutate(k) }, !k.isDefault && { label: "Make default", icon: "user-check", onClick: () => makeDefault.mutate(k) }]} />}</div>
+                { label: "Delete", icon: "trash", danger: true, onClick: () => setDelCt(k), disabled: lastContact, why: "A client needs at least one contact." }, !k.isDefault && { label: "Make default", icon: "user-check", onClick: () => makeDefault.mutate(k) }]} />}</div>
               {k.position && <span className="t-cap c-sec">{k.position}</span>}
               {k.email && <span className="t-cap row g6"><Icon n="envelope-simple" />{k.email}</span>}
               {k.phone && <span className="t-cap">{k.phone}</span>}</div>)}</div>
           : <Table rows={sortRows(c.contacts, contactCols, sort)} keyOf={(k) => k.id} cols={contactCols} sort={sort} onSort={onSort} />}
         <Note>The default contact is pre-filled as Attention on new job orders. The job order form adds and edits the same contacts.</Note></Card></div>
     {form && <ClientForm company={c} onClose={() => setForm(false)} />}
+    {delCt && <Confirm title={`Delete ${delCt.fullName}?`} text="The contact is removed from this client. Job orders and reports that already use it keep the name." ok="Delete" danger busy={dropContact.isPending} onOk={() => dropContact.mutate(delCt)} onClose={() => setDelCt(null)} />}
     {ct && <ContactForm companyId={c.id} contact={ct === "new" ? null : ct} first={!c.contacts.length} onClose={() => setCt(null)} />}
     {arch && <Confirm title={`Archive ${c.name}?`} text="It stays on its job orders and reports, but no new job order can pick it. You can restore it later." ok="Archive" busy={archive.isPending} onOk={() => archive.mutate(undefined)} onClose={() => setArch(false)} />}
     {del && <Confirm title={`Delete ${c.name}?`} text="Nothing uses this client, so it can be removed for good." ok="Delete" danger busy={remove.isPending} onOk={() => remove.mutate(undefined)} onClose={() => setDel(false)} />}

@@ -4,9 +4,9 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ROLE_LABEL, type RoleCode } from "@sgsi/shared";
 import { api } from "../../app/api";
-import { Alert, Avatar, Button, Card, Dialog, Empty, Icon, PageHead, TextField, toast } from "../../ui";
-import { Badge, Check, Chips, Confirm, KV, Menu, Note, Pager, Search, Select, Table, Tabs, Tag, fmtDate, fmtWhen, usePaged, type Tone } from "../../ui/data";
-import { post, useIsPhone, useSave } from "../master/shared";
+import { Alert, Avatar, Button, Card, Dialog, Empty, Icon, PageHead, TextField, toast } from "../../components";
+import { Badge, Check, Chips, Confirm, KV, Menu, Note, Pager, Search, Select, Table, Tabs, Tag, fmtDate, fmtWhen, usePaged, type Tone } from "../../components";
+import { post, useIsPhone, useSave } from "../master-data/shared";
 
 interface User { id: string; email: string; fullName: string; title: string | null; phone: string | null; roles: RoleCode[]; status: "active" | "invited" | "inactive" | "locked";
   lockedUntil: string | null; failedAttempts: number; invitedAt: string | null; inviteExpiresAt: string | null; lastSignInAt: string | null; createdAt: string }

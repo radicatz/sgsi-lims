@@ -175,10 +175,16 @@ test.describe.serial("master data", () => {
       await page.locator("#ct-name").fill("Zeta Contact");
       await page.locator("#ct-save").click();
       await expect(page.getByRole("button", { name: "Edit Zeta Contact" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Archive Zeta Contact" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Delete Zeta Contact" })).toBeVisible();
       const zeta = page.locator("tr").filter({ hasText: "Zeta Contact" });
       await expect(zeta.getByRole("button", { name: "Make Zeta Contact the default contact" })).toBeVisible();   // user-check icon, last in the row
       await expect(page.locator("tr").filter({ hasText: "Sari Uji" }).getByRole("button", { name: /default/i })).toHaveCount(0);   // the default contact does not offer it
+      for (const who of ["Zeta Contact", "Budi Uji"]) {                                                                  // delete down to one contact
+        await page.getByRole("button", { name: `Delete ${who}` }).click();
+        await page.locator(".dialog").getByRole("button", { name: "Delete", exact: true }).click();
+        await expect(page.locator("tr").filter({ hasText: who })).toHaveCount(0);
+      }
+      await expect(page.getByRole("button", { name: "Delete Sari Uji" })).toBeDisabled();                               // the last contact stays
     }
   });
 

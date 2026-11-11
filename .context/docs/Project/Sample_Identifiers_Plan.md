@@ -45,7 +45,7 @@ These show the old format and **disagree with the spec**. The owner chose not to
 | Prototype v2 source, `prototype/src/` | `data.js` 57, `modules/search.js` 10, `modules/joborders.js` 6, `modules/batches.js` 6, `modules/reports.js` 1, `modules/admin.js` 1 | Private preview and shared link: the same, plus search and the Laboratory settings page |
 | Demo video, `demo-video/chapters/` | `05-penerimaan-sampel.js` 24, `03-daftar-sampel.js` 6, `06-preparasi.js` 5, `13-pencarian.js` 2, `04-batch.js` 1 | The recorded clips |
 | Database, `supabase/migrations/` | `20261110000300_work.sql` (`sample_ref`, `lab_code`), `20261110000500_reference_data.sql` (numbering `lab_code`) | Applied in phase 0; changed by C-18, not edited in place |
-| Web app | `apps/web/src/app/Shell.tsx` (search placeholder), `apps/web/src/pages/master/Lists.tsx` (1) | Text only; changed in phase 1 with C-18 |
+| Web app | `apps/web/src/app/Shell.tsx` (search placeholder), `apps/web/src/features/master-data/Lists.tsx` (1) | Text only; changed in phase 1 with C-18 |
 
 Left as history, not flagged: `library/screens/rowC.before-nov3.js`, `tools/newframes.js`, `tools/revc.js`, the archived plans, and `prototype/archive/`.
 

@@ -6,7 +6,7 @@ import { navFor, startPath } from "@sgsi/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useBreakpoint, useSession } from "./session";
-import { Avatar, Button, Card, Empty, Icon, IconBtn, cx, useEsc, useOutside } from "../ui";
+import { Avatar, Button, Card, Empty, Icon, IconBtn, cx, useEsc, useOutside } from "../components";
 
 export function Shell() {
   const { me } = useSession();

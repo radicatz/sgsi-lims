@@ -6,9 +6,9 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
 import { useBreakpoint } from "../../app/session";
-import { Alert, Button, Card, Dialog, Empty, Icon, Seg, TextField, cx } from "../../ui";
-import { Badge, Chips, KV, Note, Search, Select, Switch, Table, Tag, fmtDate, fmtWhen } from "../../ui/data";
-import { useSave } from "../master/shared";
+import { Alert, Button, Card, Dialog, Empty, Icon, Seg, TextField, cx } from "../../components";
+import { Badge, Chips, KV, Note, Search, Select, Switch, Table, Tag, fmtDate, fmtWhen } from "../../components";
+import { useSave } from "../master-data/shared";
 
 /* ---------- sections ---------- */
 type SectionId = "parameters" | "services" | "methods" | "rules" | "lookups" | "templates" | "laboratory" | "security" | "formulas";

@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Me } from "@sgsi/shared";
 import { api, loadSession, saveSession, setOnExpired, type Session } from "./api";
-import { Button, Dialog } from "../ui";
+import { Button, Dialog } from "../components";
 
 export type SignedOutReason = "timeout" | "expired" | null;
 interface Ctx {

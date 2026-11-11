@@ -3,8 +3,8 @@ import { useMemo, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
 import { useBreakpoint, useSession } from "../../app/session";
-import { toast } from "../../ui";
-import type { Tone } from "../../ui/data";
+import { toast } from "../../components";
+import type { Tone } from "../../components";
 
 export interface Company { id: string; code: string; companyCode: string; companyCodeLocked: boolean; name: string; address: string | null; billingAddress: string | null; status: "active" | "inactive" | "archived"; archivedAt: string | null; createdAt: string;
   logoUrl: string | null; logoName: string | null; totalSample: number; jobOrders: number; drillHoles: number; lithologies: number; seams: number }

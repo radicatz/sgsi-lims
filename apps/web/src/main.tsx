@@ -5,15 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NAV, startPath } from "@sgsi/shared";
 import { SessionProvider, useSession } from "./app/session";
 import { Guard, Shell } from "./app/Shell";
-import { Forgot, SetPassword, SignIn } from "./pages/Auth";
-import { Coming, NotFound, Profile } from "./pages/Basics";
-import { Clients, ClientPage } from "./pages/master/Clients";
-import { DrillHoles, Lithologies, Seams } from "./pages/master/Lists";
-import { UserPage, Users } from "./pages/admin/Users";
-import { Config } from "./pages/admin/Config";
-import { Toasts } from "./ui";
-import "./styles/tokens.css";
-import "./styles/app.css";
+import { Forgot, SetPassword, SignIn } from "./features/auth/Auth";
+import { Coming, NotFound, Profile } from "./features/common/Basics";
+import { Clients, ClientPage } from "./features/master-data/Clients";
+import { DrillHoles, Lithologies, Seams } from "./features/master-data/Lists";
+import { UserPage, Users } from "./features/admin/Users";
+import { Config } from "./features/admin/Config";
+import { Toasts } from "./components";
+import "./styles/index.css";
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
 

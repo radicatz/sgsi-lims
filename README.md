@@ -11,6 +11,16 @@ The SGSI Coal LIMS: the v1 application (code at the root) and the planning, rese
 | `packages/shared` | Shared by both: permission codes and the sidebar by role, status labels, request shapes, calculations (FC, NCV, basis conversion) in exact decimals |
 | `supabase/migrations` | The database, SQL first: schema, audit trigger, row-level security, reference data. Applied to the Supabase project `sgsi-lims` |
 
+Inside `apps/web/src`:
+
+| Folder | What is in it |
+| --- | --- |
+| `main.tsx` | Entry point and the route table |
+| `app/` | The shell (sidebar, top bar), the API client and the session |
+| `components/` | The component library, one file per family with the FigCraft set names: `Button`, `forms`, `table`, `Dialog`, `display` (badges, tags, chips, tabs), `feedback` (alerts, empty state, toasts), `layout` (card, page header), `Avatar`, `Icon`, plus `utils` and `format`. Import from `components` |
+| `features/` | One folder per module: `auth/`, `common/` (profile, not-found), `master-data/` (clients, drill hole, lithology, seam), `admin/` (users, configuration) |
+| `styles/` | `tokens.css` (from the design file) and one stylesheet per component family, all pulled in order by `index.css` |
+
 Run it locally (Node 22 or newer, pnpm 10):
 
 1. Copy `.env.example` to `.env` and fill the two secrets as its comments explain. Add `DEMO_PASSWORD=` for the demo accounts.

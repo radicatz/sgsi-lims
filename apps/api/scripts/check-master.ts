@@ -49,8 +49,9 @@ try {
   page = (await call(T.cso, "GET", `/companies/${cid}`)).body;
   ok("make default moves the default", page.contacts.find((k: any) => k.isDefault)?.fullName === "Budi Uji");
   ok("bad email rejected", (await call(T.cso, "PATCH", `/contacts/${c2.body.id}`, { fullName: "Sari", email: "nope", isDefault: false })).status === 422);
-  await call(T.cso, "POST", `/contacts/${c2.body.id}/archive`);
-  ok("archived contact leaves the page", (await call(T.cso, "GET", `/companies/${cid}`)).body.contacts.length === 1);
+  ok("a contact can be deleted while another remains", (await call(T.cso, "DELETE", `/contacts/${c2.body.id}`)).status === 200);
+  { const pg = (await call(T.cso, "GET", `/companies/${cid}`)).body; ok("deleted contact leaves the page, the other becomes default", pg.contacts.length === 1 && pg.contacts[0].isDefault); }
+  ok("the last contact cannot be deleted", (await call(T.cso, "DELETE", `/contacts/${c1.body.id}`)).status === 409);
 
   const lg = await call(T.cso, "POST", `/companies/${cid}/logo`, undefined, file("logo.png", "image/png", PNG));
   ok("logo uploads", lg.status === 200, JSON.stringify(lg));

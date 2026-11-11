@@ -1,0 +1,11 @@
+/* ---------- cards ---------- */
+.card { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card.flat { border-radius: 12px; }
+.card-head { min-height: 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.card-head .t-h3 { flex: 1 1 auto; min-width: 0; }
+.kpi { gap: 6px; }
+.kpi .lbl { font: 400 12px/16px var(--f-body); color: var(--text-secondary); }
+.kpi .sub { font: 400 12px/16px var(--f-body); color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.callout { background: var(--other-review); color: var(--other-review-fg); border-color: transparent; }
+.callout .t-h3 { color: #fff; }
+.callout .t-over { color: var(--accent); }

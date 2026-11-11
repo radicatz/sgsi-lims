@@ -1,9 +1,9 @@
 // App screens: Sign in, Forgot password, Set password (App_Screen_Plan.md sections 3.1 to 3.4).
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
-import { api, ApiError, type Session } from "../app/api";
-import { useSession } from "../app/session";
-import { Alert, Button, PasswordField, TextField } from "../ui";
+import { api, ApiError, type Session } from "../../app/api";
+import { useSession } from "../../app/session";
+import { Alert, Button, PasswordField, TextField } from "../../components";
 
 function AuthFrame({ children }: { children: ReactNode }) {
   return <div className="auth"><div className="acard">

@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navFor, startPath } from "@sgsi/shared";
-import { api } from "../app/api";
-import { useSession } from "../app/session";
-import { Avatar, Button, Card, Empty, PageHead, Seg, TextField, toast } from "../ui";
+import { api } from "../../app/api";
+import { useSession } from "../../app/session";
+import { Avatar, Button, Card, Empty, PageHead, Seg, TextField, toast } from "../../components";
 
 const PHASE: Record<string, [number, string]> = {
   "/work": [5, "My work"], "/": [5, "Dashboard"], "/orders": [2, "Job orders"], "/batches": [3, "Batches"], "/reports": [4, "Reports"],
