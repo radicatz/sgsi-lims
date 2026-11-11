@@ -48,7 +48,11 @@ Colours, radii, elevation and button sizes match the design exactly. Text sizes 
 - Key-value row key colour was `text-secondary`; fixed on Nov 11 to `text-muted` as in the design.
 - Table hover row uses `surface-muted` (owner decision Nov 10); not re-checked against the design in this audit.
 
-## Decision needed
+## Decision taken (Nov 11, 2026)
+
+Option A: the app stays at 12 px. The design's Caption styles (S:14 to S:16) were changed to 12/16 and everything bound to them follows. Table rows 1 to 4, 6 and 8 now agree for Caption-styled text; Tab (12 in the design, 13 in the app), Filter chip, Card padding, the icon button 28 and the 13/20 body step are still open differences.
+
+## Decision needed (kept for the record)
 
 The design's 10 px caption text is below the usual 12 px minimum for readable UI. Two ways to close rows 1 to 8:
 

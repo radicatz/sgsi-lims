@@ -18,7 +18,7 @@
 .badge-n { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; font: 600 11px/14px var(--f-body); background: var(--feedback-error-100); color: var(--feedback-error); }
 .delta { display: inline-flex; align-items: center; height: 21px; padding: 0 8px; border-radius: 999px; font: 600 12px/16px var(--f-body); background: var(--b); color: var(--f); }
 .av { width: 32px; height: 32px; border-radius: 999px; background: var(--accent-100); color: var(--accent-text); display: inline-flex; align-items: center; justify-content: center; font: 600 12px/16px var(--f-body); flex: none; overflow: hidden; }
-.av.s24 { width: 24px; height: 24px; font-size: 10px; } .av.s28 { width: 28px; height: 28px; font-size: 11px; } .av.s40 { width: 40px; height: 40px; font-size: 14px; } .av.s64 { width: 64px; height: 64px; font: 600 22px/28px var(--f-display); }
+.av.s24 { width: 24px; height: 24px; font-size: 10px; } .av.s28 { width: 28px; height: 28px; font-size: 11px; } .av.s40 { width: 40px; height: 40px; font-size: 14px; } .av.s100 { width: 100px; height: 100px; font: 600 32px/38px var(--f-display); } .av.s64 { width: 64px; height: 64px; font: 600 22px/28px var(--f-display); }
 .av.logo { background: #fff none center/80% no-repeat; border: 1px solid var(--surface-border); }
 .av.logo-ptba { background: #fff none center/80% no-repeat; border: 1px solid var(--surface-border); }
 .role { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--surface-border-strong); background: var(--surface-card); color: var(--text-secondary); font: 500 12px/16px var(--f-body); white-space: nowrap; }

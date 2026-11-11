@@ -10,17 +10,17 @@ import { admin } from "../src/supabase";
 type Client = [code: string, name: string, status: "active" | "inactive" | "archived", address: string, created: string, contacts: Array<[string, string, string, string, boolean?]>];
 const CLIENTS: Client[] = [
   ["BNM", "PT Bara Nusantara Mandiri", "active", "Jl. Mulawarman No. 12, Samarinda, Kalimantan Timur", "2026-01-14", [
-    ["Budi Hartono", "Site Geologist", "+62 812 5550 1844", "budi.hartono@baranusa.id", true], ["Sari Wulandari", "Finance", "+62 812 5554 0166", "sari@baranusa.id"], ["Dewi Anggraini", "Purchasing", "+62 811 5550 0192", "dewi@baranusa.id"]]],
+    ["Budi Hartono", "Site Geologist", "+62 812 5550 1844", "budi.hartono@baranusa.id", true], ["Sari Wulandari", "Finance", "+62 812 5554 0166", "sari@baranusa.id"], ["Dewi Anggraini", "Purchasing", "+62 811 5550 0192", "dewi@baranusa.id"], ["Rahmat Hidayat", "Lab Coordinator", "+62 812 5550 1901", "rahmat@baranusa.id"]]],
   ["KEP", "PT Kaltara Energi Prima", "active", "Jl. Sudirman No. 45, Tarakan, Kalimantan Utara", "2026-02-03", [
-    ["Andi Pratama", "Exploration Manager", "+62 811 5550 3301", "andi.pratama@kaltaraenergi.co.id", true], ["Lukas Wibowo", "Logistics", "+62 811 5550 3310", "lukas@kaltaraenergi.co.id"]]],
-  ["SBH", "CV Sumber Batu Hitam", "active", "Jl. Gatot Subroto No. 8, Balikpapan, Kalimantan Timur", "2026-02-20", [["Joko Santoso", "Director", "+62 812 5550 7781", "joko@sumberbatuhitam.co.id", true]]],
-  ["MCR", "PT Mahakam Coal Resources", "active", "Jl. Pahlawan No. 21, Tenggarong, Kalimantan Timur", "2026-03-09", [["Rudi Hartanto", "Site Geologist", "+62 813 5550 4410", "rudi.h@mahakamcoal.co.id", true]]],
+    ["Andi Pratama", "Exploration Manager", "+62 811 5550 3301", "andi.pratama@kaltaraenergi.co.id", true], ["Lukas Wibowo", "Logistics", "+62 811 5550 3310", "lukas@kaltaraenergi.co.id"], ["Maria Sihombing", "Finance", "+62 811 5550 3322", "maria@kaltaraenergi.co.id"]]],
+  ["SBH", "CV Sumber Batu Hitam", "active", "Jl. Gatot Subroto No. 8, Balikpapan, Kalimantan Timur", "2026-02-20", [["Joko Santoso", "Director", "+62 812 5550 7781", "joko@sumberbatuhitam.co.id", true], ["Hendra Kusuma", "Site Geologist", "+62 812 5550 7790", "hendra@sumberbatuhitam.co.id"], ["Yuli Astuti", "Finance", "+62 812 5550 7795", "yuli@sumberbatuhitam.co.id"]]],
+  ["MCR", "PT Mahakam Coal Resources", "active", "Jl. Pahlawan No. 21, Tenggarong, Kalimantan Timur", "2026-03-09", [["Rudi Hartanto", "Site Geologist", "+62 813 5550 4410", "rudi.h@mahakamcoal.co.id", true], ["Siti Rahmawati", "Purchasing", "+62 813 5550 4422", "siti@mahakamcoal.co.id"], ["Eko Prasetyo", "Logistics", "+62 813 5550 4430", "eko@mahakamcoal.co.id"]]],
   ["PTBA", "PT Bukit Asam Tbk", "active", "Jl. Parigi No. 1, Tanjung Enim, Sumatera Selatan", "2026-04-02", [
-    ["Budi Santoso", "Site Geologist", "+62 812 7770 1201", "budi.santoso@bukitasam.co.id", true], ["Rina Ayu Lestari", "Purchasing", "+62 812 7770 1220", "rina.ayu@bukitasam.co.id"]]],
-  ["BLC", "PT Berau Lestari Coal", "active", "Jl. Pemuda No. 3, Tanjung Redeb, Kalimantan Timur", "2026-05-11", [["Fajar Nugroho", "Site Manager", "+62 813 5550 8800", "fajar@beraulestari.co.id", true]]],
-  ["MBS", "CV Mitra Bara Sejahtera", "inactive", "Jl. Ahmad Yani No. 77, Banjarmasin, Kalimantan Selatan", "2026-03-01", [["Hasan Basri", "Owner", "+62 812 5000 1122", "", true]]],
-  ["TSA", "PT Tambang Sentosa Abadi", "archived", "Jl. Diponegoro No. 5, Samarinda", "2026-01-05", []],
-  ["KBM", "PT Kutai Batu Mas", "archived", "Jl. Imam Bonjol No. 9, Sangatta", "2026-01-09", []],
+    ["Budi Santoso", "Site Geologist", "+62 812 7770 1201", "budi.santoso@bukitasam.co.id", true], ["Rina Ayu Lestari", "Purchasing", "+62 812 7770 1220", "rina.ayu@bukitasam.co.id"], ["Agus Pratama", "QA Manager", "+62 812 7770 1233", "agus.pratama@bukitasam.co.id"]]],
+  ["BLC", "PT Berau Lestari Coal", "active", "Jl. Pemuda No. 3, Tanjung Redeb, Kalimantan Timur", "2026-05-11", [["Fajar Nugroho", "Site Manager", "+62 813 5550 8800", "fajar@beraulestari.co.id", true], ["Dian Permata", "Purchasing", "+62 813 5550 8811", "dian@beraulestari.co.id"], ["Bayu Setiawan", "Logistics", "+62 813 5550 8820", "bayu@beraulestari.co.id"]]],
+  ["MBS", "CV Mitra Bara Sejahtera", "inactive", "Jl. Ahmad Yani No. 77, Banjarmasin, Kalimantan Selatan", "2026-03-01", [["Hasan Basri", "Owner", "+62 812 5000 1122", "", true], ["Lina Marlina", "Finance", "+62 812 5000 1130", "lina@mitrabara.co.id"], ["Tono Wijaya", "Site Geologist", "+62 812 5000 1141", "tono@mitrabara.co.id"]]],
+  ["TSA", "PT Tambang Sentosa Abadi", "archived", "Jl. Diponegoro No. 5, Samarinda", "2026-01-05", [["Wahyu Nugraha", "Site Manager", "+62 811 5550 6601", "wahyu@tambangsentosa.co.id", true], ["Ratna Dewi", "Purchasing", "+62 811 5550 6612", "ratna@tambangsentosa.co.id"], ["Irfan Maulana", "Geologist", "+62 811 5550 6620", "irfan@tambangsentosa.co.id"]]],
+  ["KBM", "PT Kutai Batu Mas", "archived", "Jl. Imam Bonjol No. 9, Sangatta", "2026-01-09", [["Gunawan Saputra", "Site Manager", "+62 813 5550 9901", "gunawan@kutaibatumas.co.id", true], ["Nina Kartika", "Finance", "+62 813 5550 9912", "nina@kutaibatumas.co.id"]]],
 ];
 const CODES = CLIENTS.map((c) => c[0]);
 const meta = { requestId: "seed-master-demo", screen: "Seed" };

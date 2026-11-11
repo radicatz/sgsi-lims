@@ -56,8 +56,10 @@ textarea.input { height: 88px; padding: 10px 12px; resize: vertical; outline: 0;
 .ppill.na { color: var(--text-muted); border-style: dashed; cursor: not-allowed; }
 .ppill.grp { border-radius: 8px; }
 .ctag { display: inline-flex; height: 16px; align-items: center; padding: 0 5px; border-radius: 4px; background: var(--accent-100); color: var(--accent-text); font: 600 10px/14px var(--f-body); }
-.dz { height: 100px; box-sizing: border-box; justify-content: center; border: 1.5px dashed var(--surface-border-strong); border-radius: 12px; background: var(--surface-muted); padding: 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; color: var(--text-secondary); cursor: pointer; }
-.logobox { height: 100px; box-sizing: border-box; align-items: center; }
+.dz { border: 1.5px dashed var(--surface-border-strong); border-radius: 12px; background: var(--surface-muted); padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; color: var(--text-secondary); cursor: pointer; }
+.dz.round { width: 100px; height: 100px; box-sizing: border-box; border-radius: 999px; padding: 8px; gap: 2px; justify-content: center; flex: none; }   /* design: logo drop zone, 100 px circle */
+.dz.round b { font-size: 11px; line-height: 14px; font-weight: 500; }
+.logobox { min-height: 100px; align-items: center; }
 .ccard { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 16px; padding: 16px 12px 16px 16px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }   /* white card with border, like the Master data cards */
 .ccard .top { display: flex; align-items: center; gap: 8px; width: 100%; }
 .nowrap { white-space: nowrap; }

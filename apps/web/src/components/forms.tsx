@@ -65,10 +65,10 @@ export function Switch({ on, onChange, label, id }: { on: boolean; onChange: (v:
   return <label className={cx("sw", on && "on")} id={id} onClick={(e) => { e.preventDefault(); onChange(!on); }}><span className="tr" role="switch" aria-checked={on} tabIndex={0} onKeyDown={(e) => { if (e.key === " ") { e.preventDefault(); onChange(!on); } }} />{label}</label>;
 }
 
-export function DropZone({ text = "Drop the file here, or click to browse", hint = "PDF, up to 10 MB", accept, onFile, id }: { text?: string; hint?: string; accept?: string; onFile: (f: File) => void; id?: string }) {
+export function DropZone({ text = "Drop the file here, or click to browse", hint = "PDF, up to 10 MB", accept, onFile, id, round }: { text?: string; hint?: string; accept?: string; onFile: (f: File) => void; id?: string; round?: boolean }) {
   const ref = useRef<HTMLInputElement>(null); const [over, setOver] = useState(false);
-  return <div className={cx("dz", over && "over")} onClick={() => ref.current?.click()} onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+  return <div className={cx("dz", round && "round", over && "over")} onClick={() => ref.current?.click()} onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
     onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files[0]; if (f) onFile(f); }}>
-    <Icon n="upload-simple" s={20} /><b>{text}</b><span className="t-cap">{hint}</span>
+    <Icon n="upload-simple" s={20} /><b>{text}</b>{!round && <span className="t-cap">{hint}</span>}
     <input ref={ref} id={id} type="file" accept={accept} hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""; }} /></div>;
 }

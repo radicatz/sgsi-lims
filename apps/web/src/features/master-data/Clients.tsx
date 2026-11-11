@@ -83,10 +83,10 @@ function ClientForm({ company, onClose, onCreated }: { company: Company | null; 
   };
   return <Dialog title={company ? "Edit client" : "Add client"} size="lg" phone={phone} onClose={onClose}
     footer={<><Button size="lg" onClick={onClose}>Cancel</Button><Button size="lg" type="primary" id="cl-save" disabled={save.isPending} onClick={submit}>Save client</Button></>}>
-    {preview ? <div className="row g12 logobox"><Avatar name={f.name || "?"} size={64} logo={preview} /><div className="col grow" style={{ gap: 0 }}><span className="t-sm w5">{logo?.name ?? company?.logoName}</span>{logo && <span className="t-cap c-sec">{fileSize(logo.size)}</span>}</div>
+    {preview ? <div className="row g12 logobox"><Avatar name={f.name || "?"} size={100} logo={preview} /><div className="col grow" style={{ gap: 0 }}><span className="t-sm w5">{logo?.name ?? company?.logoName}</span>{logo && <span className="t-cap c-sec">{fileSize(logo.size)}</span>}</div>
       <Button size="sm" icon="trash" onClick={() => { setLogo(null); setDropLogo(true); }}>Remove</Button></div>
-      : <DropZone id="cl-logo" text="Drop or click to add logo" hint="PNG, JPEG, SVG or WebP, up to 2 MB. Shown round at 40 and 64 px." accept="image/png,image/jpeg,image/svg+xml,image/webp"
-        onFile={(file) => { if (file.size > 2097152) return toast("The logo is larger than 2 MB.", "error"); setLogo(file); setDropLogo(false); }} />}
+      : <div className="row g16 logobox"><DropZone round id="cl-logo" text="Drop or click to add logo" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+        onFile={(file) => { if (file.size > 2097152) return toast("The logo is larger than 2 MB.", "error"); setLogo(file); setDropLogo(false); }} /><span className="t-cap c-sec">PNG, JPEG, SVG or WebP, up to 2 MB. Shown round.</span></div>}
     <div className="grid" style={{ gridTemplateColumns: phone ? "1fr" : "2fr 1fr", gap: 16 }}>
       <TextField id="cl-name" label="Name" req value={f.name} onChange={(v) => set({ name: v })} placeholder="Client name" error={err.name ?? null} />
       <TextField id="cl-code" label="Code" req value={f.code} onChange={(v) => set({ code: v.toUpperCase() })} placeholder="BNM" error={err.code ?? null} /></div>
