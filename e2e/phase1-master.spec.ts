@@ -14,6 +14,12 @@ async function signIn(page: Page, email: string) {
   await page.locator("#si-submit").click();
   await expect(page.locator(".frame")).toBeVisible();
 }
+/** One row action: an icon-only ghost button (named "<icon label> <row>") on desktop and tablet; the card's "More for <row>" menu on the phone. */
+async function act(page: Page, phone: boolean, who: string, iconLabel: string, menuLabel: string) {
+  if (phone) { await page.getByRole("button", { name: `More for ${who}` }).click(); await page.getByRole("menuitem", { name: menuLabel, exact: true }).click(); }
+  else await page.getByRole("button", { name: `${iconLabel} ${who}`, exact: true }).click();
+}
+const row = (page: Page, text: string) => page.locator("tr, .icard").filter({ hasText: text });
 const cleanup = () => execSync("npx tsx --env-file=../../.env scripts/cleanup-test-data.ts", { cwd: "apps/api", stdio: "pipe" });
 
 test.describe.serial("master data", () => {
@@ -37,7 +43,7 @@ test.describe.serial("master data", () => {
     await page.locator("#ct-name").fill("Budi Uji");
     await page.getByLabel("Email").fill("budi@example.com");
     await page.locator("#ct-save").click();
-    await expect(page.getByText("Budi Uji")).toBeVisible();
+    await expect(page.getByText("Budi Uji", { exact: true })).toBeVisible();
     await expect(page.locator(".tag", { hasText: "Default" })).toBeVisible();   // the first contact is the default
     await page.locator("#add-contact").click();
     await page.locator("#ct-name").fill("Sari Uji");
@@ -57,24 +63,24 @@ test.describe.serial("master data", () => {
     await expect(page.getByText(`${code} is already used by another client.`)).toBeVisible();
   });
 
-  test("CSO archives and restores a client; the page links to master data", async ({ page }) => {
+  test("CSO archives and restores a client; the page links to master data", async ({ page }, info) => {
+    const phone = info.project.name === "phone";
     await signIn(page, "rina@sgsi.co.id");
     await page.goto("/clients");
     await page.locator("#cl-q").fill(code);
     await expect(page.getByText(name).first()).toBeVisible();
-    await page.getByRole("button", { name: `More for ${name}` }).click();
-    await page.getByRole("menuitem", { name: "Archive" }).click();
-    await page.getByRole("button", { name: "Archive", exact: true }).click();
+    await act(page, phone, name, "Archive", "Archive");
+    await page.getByRole("dialog").getByRole("button", { name: "Archive", exact: true }).click();
     await expect(page.getByText(name)).toHaveCount(0);                           // gone from All
     await page.getByRole("button", { name: /^Archived/ }).click();
     await expect(page.getByText(name).first()).toBeVisible();
-    await page.getByRole("button", { name: `More for ${name}` }).click();
-    await page.getByRole("menuitem", { name: "Restore" }).click();
+    await act(page, phone, name, "Restore", "Restore");
     await page.getByRole("button", { name: /^All/ }).click();
     await expect(page.getByText(name).first()).toBeVisible();
   });
 
-  test("lab admin adds a drill hole, uploads and replaces its CoA (MD2)", async ({ page }) => {
+  test("lab admin adds a drill hole, uploads and replaces its CoA (MD2)", async ({ page }, info) => {
+    const phone = info.project.name === "phone";
     await signIn(page, "maya@sgsi.co.id");
     await page.goto("/master/drill-holes");
     await page.locator("#add-dh").click();
@@ -89,19 +95,18 @@ test.describe.serial("master data", () => {
     await page.locator("#coa-file").setInputFiles({ name: "CoA-first.pdf", mimeType: "application/pdf", buffer: PDF });
     await page.locator("#coa-save").click();
     await expect(page.getByText("CoA uploaded").first()).toBeVisible();
-    await page.getByRole("button", { name: `More for ${hole}` }).click();
-    await page.getByRole("menuitem", { name: "Replace CoA" }).click();
+    await act(page, phone, hole, "Replace the CoA of", "Replace CoA");
     await page.locator("#coa-file").setInputFiles({ name: "CoA-second.pdf", mimeType: "application/pdf", buffer: PDF });
     await page.locator("#coa-save").click();
-    await page.getByRole("button", { name: `More for ${hole}` }).click();
-    await page.getByRole("menuitem", { name: "CoA history" }).click();
+    await act(page, phone, hole, "CoA history of", "CoA history");
     const dlg = page.getByRole("dialog", { name: "CoA history" });
     await expect(dlg.getByText("CoA-second.pdf")).toBeVisible();
     await expect(dlg.getByText("CoA-first.pdf")).toBeVisible();
     await expect(dlg.getByText("Current")).toHaveCount(1);
   });
 
-  test("lab admin edits a lithology and adds a seam (MD3)", async ({ page }) => {
+  test("lab admin edits a lithology and adds a seam (MD3)", async ({ page }, info) => {
+    const phone = info.project.name === "phone";
     await signIn(page, "maya@sgsi.co.id");
     await page.goto("/master/lithologies");
     await page.locator("#add-li").click();
@@ -110,11 +115,11 @@ test.describe.serial("master data", () => {
     await page.getByRole("dialog").getByText("Parting", { exact: true }).click();
     await page.locator("#sf-save").click();
     await page.locator("#li-q").fill(lith);
-    await expect(page.locator("tr", { hasText: lith }).locator(".tag", { hasText: "Parting" })).toBeVisible();
-    await page.locator("tr", { hasText: lith }).getByRole("button", { name: "Edit" }).click();
+    await expect(row(page, lith).locator(".tag", { hasText: "Parting" })).toBeVisible();
+    await act(page, phone, lith, "Edit", "Edit");
     await page.getByRole("dialog").getByText("Coal", { exact: true }).click();
     await page.locator("#sf-save").click();
-    await expect(page.locator("tr", { hasText: lith }).locator(".tag", { hasText: "Coal" })).toBeVisible();
+    await expect(row(page, lith).locator(".tag", { hasText: "Coal" })).toBeVisible();
     await page.goto("/master/seams");
     await page.locator("#add-se").click();
     await page.getByRole("dialog").getByLabel("Company").selectOption({ label: name });
@@ -122,7 +127,7 @@ test.describe.serial("master data", () => {
     await page.getByRole("dialog").getByLabel("Order").fill("7");
     await page.locator("#sf-save").click();
     await page.locator("#se-q").fill(seam);
-    await expect(page.locator("tr", { hasText: seam.toUpperCase() })).toBeVisible();
+    await expect(row(page, seam.toUpperCase())).toBeVisible();
   });
 
   test("the client page links to its lists, filtered", async ({ page }) => {
@@ -134,6 +139,42 @@ test.describe.serial("master data", () => {
     await page.getByRole("link", { name: /View list/ }).first().click();
     await expect(page).toHaveURL(/\/master\/drill-holes\?company=/);
     await expect(page.getByText(hole).first()).toBeVisible();
+  });
+
+  test("a table sorts when its head is clicked", async ({ page }, info) => {
+    test.skip(info.project.name === "phone", "the phone shows cards, not a table");
+    await signIn(page, "rina@sgsi.co.id");
+    await page.goto("/clients");
+    const codes = () => page.locator("tbody tr td:nth-child(2)").allTextContents();
+    await expect(page.locator("th.sorted")).toContainText("Client");                    // sorted by name when the page opens
+    await page.getByRole("button", { name: "Code", exact: true }).click();
+    await expect(page.locator("th.sorted")).toHaveAttribute("aria-sort", "ascending");
+    const up = await codes(); expect(up).toEqual([...up].sort((a, b) => a.localeCompare(b)));
+    await page.getByRole("button", { name: "Code", exact: true }).click();
+    await expect(page.locator("th.sorted")).toHaveAttribute("aria-sort", "descending");
+    const down = await codes(); expect(down).toEqual([...down].sort((a, b) => b.localeCompare(a)));
+  });
+
+  test("the client page has Edit, Archive and Delete buttons and contact actions", async ({ page }, info) => {
+    await signIn(page, "rina@sgsi.co.id");
+    await page.goto("/clients");
+    await page.locator("#cl-q").fill(code);
+    await page.locator("tr, .icard").filter({ hasText: name }).first().click();
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+    await expect(page.locator("#edit-client")).toBeVisible();
+    await expect(page.locator("#archive-client")).toBeVisible();
+    await expect(page.locator("#delete-client")).toBeDisabled();                         // the client has a drill hole, so it cannot be deleted
+    await expect(page.getByRole("button", { name: "More for this client" })).toHaveCount(0);   // no three-dots menu any more
+    await expect(page.getByText(code, { exact: true }).first()).toBeVisible();          // code and status sit under the name
+    if (info.project.name !== "phone") {
+      await page.locator("#add-contact").click();
+      await page.locator("#ct-name").fill("Zeta Contact");
+      await page.locator("#ct-save").click();
+      await expect(page.getByRole("button", { name: "Edit Zeta Contact" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Archive Zeta Contact" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Make Zeta Contact the default contact" })).toBeVisible();     // Make default is the last icon
+      await expect(page.getByRole("button", { name: "Make Sari Uji the default contact" })).toHaveCount(0);       // the default contact does not offer it
+    }
   });
 
   test("a supervisor sees the lists read-only", async ({ page }) => {

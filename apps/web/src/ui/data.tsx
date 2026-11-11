@@ -33,12 +33,40 @@ export function Pager({ page, pages, total, from, to, onPage }: PagerState) {
 }
 
 /* ---------- table ---------- */
-export interface Col<T> { h: string; cls?: string; render: (r: T, i: number) => ReactNode }
-export function Table<T>({ cols, rows, onRow, keyOf, empty }: { cols: Array<Col<T> | false | null | undefined>; rows: T[]; onRow?: (r: T) => void; keyOf: (r: T) => string; empty?: ReactNode }) {
+export interface Col<T> { h: string; cls?: string; render: (r: T, i: number) => ReactNode; sort?: (r: T) => string | number | null }
+export interface SortState { h: string; dir: "asc" | "desc" }
+/** Click a sortable head: first ascending, then descending, then back to the page's own order. The clicked head shows a caret in the action colour. */
+export function useSort(initial?: SortState) {
+  const [sort, setSort] = useState<SortState | null>(initial ?? null);
+  const onSort = (h: string) => setSort((s) => (!s || s.h !== h ? { h, dir: "asc" } : s.dir === "asc" ? { h, dir: "desc" } : null));
+  return { sort, onSort };
+}
+export function sortRows<T>(rows: T[], cols: Array<Col<T> | false | null | undefined>, sort: SortState | null): T[] {
+  const col = sort && (cols.filter(Boolean) as Array<Col<T>>).find((c) => c.h === sort.h);
+  if (!col?.sort) return rows;
+  const key = col.sort, k = sort!.dir === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const x = key(a), y = key(b);
+    if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;   // empty values stay last
+    return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "en", { numeric: true, sensitivity: "base" })) * k;
+  });
+}
+export function Table<T>({ cols, rows, onRow, keyOf, empty, sort, onSort }: { cols: Array<Col<T> | false | null | undefined>; rows: T[]; onRow?: (r: T) => void; keyOf: (r: T) => string; empty?: ReactNode;
+  sort?: SortState | null; onSort?: (h: string) => void }) {
   const cs = cols.filter(Boolean) as Array<Col<T>>;
-  return <div className="tblwrap"><table className="tbl"><thead><tr>{cs.map((c, i) => <th key={i} className={c.cls}>{c.h}</th>)}</tr></thead>
+  return <div className="tblwrap"><table className="tbl"><thead><tr>{cs.map((c, i) => {
+    const on = !!c.sort && sort?.h === c.h;
+    return <th key={i} className={cx(c.cls, c.sort && "sortable", on && "sorted")} aria-sort={on ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}>
+      {c.sort && onSort ? <button type="button" className="sorth" onClick={() => onSort(c.h)}>{c.h}<Icon n={on ? (sort!.dir === "asc" ? "caret-up" : "caret-down") : "arrows-down-up"} /></button> : c.h}</th>;
+  })}</tr></thead>
     <tbody>{rows.map((r, ri) => <tr key={keyOf(r)} className={cx(onRow && "click")} onClick={onRow ? () => onRow(r) : undefined}>{cs.map((c, i) => <td key={i} className={c.cls}>{c.render(r, ri)}</td>)}</tr>)}</tbody></table>
     {!rows.length && empty}</div>;
+}
+
+/* ---------- row actions: icon-only ghost buttons, one per action the row allows (the Actions column) ---------- */
+export interface RowAction { label: string; icon: string; onClick: () => void; show?: boolean; disabled?: boolean }
+export function RowActions({ items }: { items: RowAction[] }) {
+  return <span className="acts" role="group" aria-label="Actions">{items.filter((a) => a.show !== false).map((a) => <IconBtn key={a.label} n={a.icon} label={a.label} disabled={!!a.disabled} onClick={a.onClick} />)}</span>;
 }
 
 /* ---------- row menu, anchored under its button inside .frame ---------- */

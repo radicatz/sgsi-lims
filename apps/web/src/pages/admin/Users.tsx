@@ -144,7 +144,7 @@ export function UserPage() {
   if (isError || !u) return <div className="page"><Card><Empty icon="question" title="This user was not found" action={<Button onClick={() => nav("/users")}>Back to users</Button>} /></Card></div>;
   const roleInfo = (grid.data?.roles ?? []).filter((r) => u.roles.includes(r.code));
   return <div className="page">
-    <PageHead crumb={[["Users", "/users"], [u.fullName]]} title={<span className="row g16"><Avatar name={u.fullName} size={64} /><span>{u.fullName}</span></span>}
+    <PageHead crumb={[["Users", "/users"], [u.fullName]]} avatar={<Avatar name={u.fullName} size={64} />} title={u.fullName}
       badge={<span className="row g8"><RoleBadges roles={u.roles} /><Badge label={STATUS_LABEL[u.status]} tone={STATUS_TONE[u.status]} /></span>}
       actions={<><Button icon="pencil-simple" id="edit-user" onClick={() => setForm(true)}>Edit</Button><Menu size={36} label="More for this user" items={userMenu(u, actions, () => setForm(true), () => setDeact(true)).filter((i) => i && (i as { label: string }).label !== "Edit")} /></>} />
     <div className="grid" style={{ gridTemplateColumns: phone || window.innerWidth < 1100 ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", alignItems: "start" }}>

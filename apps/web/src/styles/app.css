@@ -273,6 +273,14 @@ textarea.input { height: 88px; padding: 10px 12px; resize: vertical; outline: 0;
 table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font: 400 13px/20px var(--f-body); }
 .tbl th { text-align: left; font: 500 12px/16px var(--f-body); color: var(--text-secondary); background: var(--primary-50); height: 44px; padding: 0 8px; white-space: nowrap; }
 .tbl th:first-child { border-radius: 8px 0 0 8px; padding-left: 8px; } .tbl th:last-child { border-radius: 0 8px 8px 0; }
+/* sortable head: a quiet up-down arrow; the clicked head turns dark with a caret in the action colour (design: Table header) */
+.tbl th .sorth { display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; height: 100%; }
+.tbl th .sorth .ph { color: var(--text-muted); }
+.tbl th.sortable:hover { color: var(--text-foreground); }
+.tbl th.sorted { color: var(--text-heading); } .tbl th.sorted .sorth .ph { color: var(--action-brand-text); }
+.tbl th.r .sorth { flex-direction: row-reverse; }
+/* Actions column: icon-only ghost buttons side by side, no gap */
+.acts { display: inline-flex; align-items: center; gap: 0; }
 .tbl td .t-data-b, .tbl td .t-data { white-space: nowrap; }
 .tbl td { padding: 10px 8px; border-bottom: 1px solid var(--surface-divider); vertical-align: middle; }
 /* row states stay apart from the head (primary-50): hover uses the muted surface, selected a half-strength primary tint */
@@ -296,11 +304,20 @@ table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font: 400
 .pager .pg:disabled { color: var(--text-muted); }
 .mcard { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
 .mcard:hover { border-color: var(--primary-300); }
+/* phone item card (design: Item card ref): avatar, name and address, the dots menu; then pills and the count */
+.icard { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 16px; padding: 12px 12px 12px 16px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+.icard:hover { border-color: var(--primary-300); }
+.icard .top { display: flex; align-items: center; gap: 12px; }
+.icard .meta { display: flex; align-items: center; gap: 8px; padding-right: 4px; }
+.icard .meta .cnt { margin-left: auto; color: var(--text-secondary); font: 400 13px/20px var(--f-body); }
+.pillcode { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font: 500 12px/16px var(--f-mono); }
+/* phone dialogs and sheets: touch-size buttons, side by side at equal width (design: Sticky action bar, Touch) */
+.phone .dialog .df { flex-wrap: nowrap; }
+.phone .dialog .df .btn { flex: 1 1 0; height: 44px; font-size: 14px; line-height: 20px; }
 .progress { height: 6px; border-radius: 3px; background: var(--surface-muted); overflow: hidden; flex: 1; min-width: 40px; }
 .progress i { display: block; height: 100%; background: var(--action); border-radius: 3px; }
 .progress.ok i { background: var(--status-st-completed); } .progress.warn i { background: var(--status-st-prep); }
-.kv { display: grid; grid-template-columns: 160px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--surface-divider); font: 400 13px/20px var(--f-body); }
-.kv:last-child { border-bottom: 0; }
+.kv { display: grid; grid-template-columns: 160px 1fr; gap: 12px; padding: 8px 0; font: 400 13px/20px var(--f-body); }   /* no line between rows (design: Key-value row) */
 .kv > span:first-child { color: var(--text-secondary); }
 .phone .kv { grid-template-columns: 1fr; gap: 2px; }
 .divider { height: 1px; background: var(--surface-divider); flex: none; }
