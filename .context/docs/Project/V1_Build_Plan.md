@@ -180,3 +180,10 @@ Next-goal tables stay in the spec but are not created in v1:
 - Token audit in `Design System/Token_Audit.md`. Owner decision: keep the app at 12 px small text; the design's Caption and component labels still say 10 px and need updating.
 - Folder structure of `apps/web/src`: `components/` (library, one file per family, import from `components`), `features/` (auth, common, master-data, admin), `styles/` (tokens plus one stylesheet per family via `index.css`). README has the table.
 - Verified: typecheck, `pnpm build`, API master check, 90 browser tests at 1440, 834 and 390.
+
+### Drill hole feedback (Nov 11, 2026)
+
+- Table rows have a 53 px minimum (the Wahyu row height), so read-only roles without row buttons keep the same height.
+- Drill hole table: Code fixed 150, Description fills, Total sample left aligned, Actions hug their content; the tablet table shows Code, Total sample, CoA, Actions (design Tablet-10). `Col` gained `fit` and `fill` next to `w`.
+- Replace and Upload CoA dialogs and the CoA history dialog follow the FigCraft refs (file row card, Close and Done in the history); PDF icons are red (`--feedback-error`).
+- Clients: the logo drop zone is a 100 px circle and the preview avatar is 100 px, as in the design; every client has demo contacts (3 each, Mitra Bara Sejahtera 2).

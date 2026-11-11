@@ -22,6 +22,7 @@
 .av.logo { background: #fff none center/80% no-repeat; border: 1px solid var(--surface-border); }
 .av.logo-ptba { background: #fff none center/80% no-repeat; border: 1px solid var(--surface-border); }
 .role { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--surface-border-strong); background: var(--surface-card); color: var(--text-secondary); font: 500 12px/16px var(--f-body); white-space: nowrap; }
+.ph-file-pdf { color: var(--feedback-error); }
 .filechip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--surface-border-strong); background: var(--surface-card); color: var(--text-secondary); font: 500 12px/16px var(--f-body); white-space: nowrap; }
 .filechip.miss { background: var(--surface-muted); color: var(--text-muted); }
 .pchip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 4px 12px 4px 4px; border-radius: 999px; border: 1px solid var(--surface-border); background: var(--surface-card); font: 500 13px/20px var(--f-body); }

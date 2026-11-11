@@ -12,7 +12,7 @@ table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font: 400
 /* Actions column: icon-only ghost buttons side by side, no gap */
 .acts { display: inline-flex; align-items: center; gap: 0; }
 .tbl td .t-data-b, .tbl td .t-data { white-space: nowrap; }
-.tbl td { padding: 10px 8px; border-bottom: 1px solid var(--surface-divider); vertical-align: middle; }
+.tbl td { height: 53px; box-sizing: border-box; padding: 10px 8px; border-bottom: 1px solid var(--surface-divider); vertical-align: middle; }
 /* row states stay apart from the head (primary-50): hover uses the muted surface, selected a half-strength primary tint */
 .tbl tr.click { cursor: pointer; } .tbl tr.click:hover td, .tbl tr:hover td { background: var(--surface-muted); }
 .tbl tr.sel td { background: color-mix(in srgb, var(--primary-50) 55%, var(--surface-card)); }

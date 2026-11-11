@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
+import { useBreakpoint } from "../../app/session";
 import { Button, Card, Dialog, Empty, Icon, TextField, toast } from "../../components";
 import { Badge, Chips, Confirm, DropZone, FileChip, Menu, Note, Pager, Radio, RowActions, Search, Select, Table, Tag, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../components";
 import { KIND_LABEL, KIND_TONE, MasterList, post, useCan, useCompanyOptions, useIsPhone, useList, useSave, type DrillHole, type Lithology, type Seam } from "./shared";
@@ -52,12 +53,13 @@ export function DrillHoles() {
     : <span className="row g8">{coaTag(d)}{up && !d.archived && <Button size="sm" icon="upload-simple" onClick={() => setCoaFor(d)}>Upload CoA</Button>}</span>;
   const deletable = (d: DrillHole) => d.totalSample === 0 && !d.coa;
   const { sort, onSort } = useSort({ h: "Code", dir: "asc" });
+  const tablet = useBreakpoint() === "tablet";   // design Tablet-10: Code, Total sample, CoA, Actions
   const cols: Array<Col<DrillHole> | false> = [
-    { h: "Code", sort: (d) => d.code, render: (d) => <b className="t-data-b">{d.code}</b> }, { h: "Description", sort: (d) => d.description, render: (d) => d.description ?? "" },
-    { h: "Total sample", cls: "r", sort: (d) => d.totalSample, render: (d) => d.totalSample }, { h: "Company", sort: (d) => d.companyName, render: (d) => d.companyName },
-    { h: "CoA", sort: (d) => (d.coa ? 1 : 0), render: coaCell },
+    { h: "Code", w: 150, sort: (d) => d.code, render: (d) => <b className="t-data-b">{d.code}</b> }, !tablet && { h: "Description", fill: true, sort: (d) => d.description, render: (d) => d.description ?? "" },
+    { h: "Total sample", fit: true, sort: (d) => d.totalSample, render: (d) => d.totalSample }, !tablet && { h: "Company", fit: true, sort: (d) => d.companyName, render: (d) => d.companyName },
+    { h: "CoA", fit: true, sort: (d) => (d.coa ? 1 : 0), render: coaCell },
     // CoA history and Replace CoA come last: not every row has them, so Edit and Archive stay in line
-    write && { h: "Actions", render: (d) => <RowActions items={[{ label: `Edit ${d.code}`, icon: "pencil-simple", onClick: () => setForm(d) }, ...stdActions(act, d, d.code, deletable(d)),
+    write && { h: "Actions", fit: true, render: (d) => <RowActions items={[{ label: `Edit ${d.code}`, icon: "pencil-simple", onClick: () => setForm(d) }, ...stdActions(act, d, d.code, deletable(d)),
       { label: `CoA history of ${d.code}`, icon: "clock-counter-clockwise", onClick: () => setHist(d), show: !!d.coa },
       { label: `Replace the CoA of ${d.code}`, icon: "upload-simple", onClick: () => setCoaFor(d), show: !!d.coa && up && !d.archived }]} /> }];
   const rows = sortRows(base.filter((d) => (chip === "all" ? !d.archived : chip === "missing" ? !d.archived && !d.coa : d.archived)), cols, sort);
@@ -105,19 +107,21 @@ function CoaUpload({ dh, onClose }: { dh: DrillHole; onClose: () => void }) {
   const replace = !!dh.coa;
   return <Dialog title={replace ? `Replace CoA for ${dh.code}` : `Upload CoA for ${dh.code}`} phone={useIsPhone()} onClose={onClose}
     sub={replace ? "The current file moves to the history. Files are never deleted." : "The file is attached to the drill hole and shows on the dashboard."}
-    footer={<><Button onClick={onClose}>Cancel</Button><Button type="primary" id="coa-save" disabled={!file || save.isPending} why="Choose a PDF first" onClick={() => save.mutate(undefined)}>{replace ? "Replace" : "Upload"}</Button></>}>
-    {file ? <div className="row g10"><FileChip label={file.name} /><span className="t-cap c-mut">{fileSize(file.size)}</span><Button size="sm" icon="trash" onClick={() => setFile(null)}>Remove</Button></div>
+    footer={<><Button size="lg" onClick={onClose}>Cancel</Button><Button size="lg" type="primary" id="coa-save" disabled={!file || save.isPending} why="Choose a PDF first" onClick={() => save.mutate(undefined)}>{replace ? "Replace" : "Upload"}</Button></>}>
+    {file ? <div className="filerow"><Icon n="file-pdf" s={20} /><div className="col grow" style={{ gap: 0, minWidth: 0 }}><b className="t-sm w6 ellip">{file.name}</b><span className="t-cap c-mut">{fileSize(file.size)}</span></div><Button type="ghost" size="sm" icon="trash" onClick={() => setFile(null)}>Remove</Button></div>
       : <DropZone id="coa-file" text="Drop the CoA here, or click to browse" hint="PDF, up to 10 MB" accept="application/pdf"
         onFile={(f) => (f.size > 10485760 ? toast("The CoA is larger than 10 MB.", "error") : f.type !== "application/pdf" ? toast("The CoA must be a PDF file.", "error") : setFile(f))} />}</Dialog>;
 }
 
 function CoaHistory({ dh, onClose }: { dh: DrillHole; onClose: () => void }) {
   const { data = [], isLoading } = useQuery({ queryKey: ["coa-history", dh.id], queryFn: () => api<{ items: Array<{ id: string; fileName: string; sizeBytes: number; isCurrent: boolean; uploadedAt: string; uploadedBy: string | null; url: string | null }> }>(`/drill-holes/${dh.id}/coa`).then((r) => r.items) });
-  return <Dialog title="CoA history" sub={dh.code} onClose={onClose} footer={<Button type="primary" onClick={onClose}>Done</Button>}>
-    {isLoading ? <span className="t-sm c-mut">Loading…</span> : data.map((h) => <div key={h.id} className="row g10" style={{ borderBottom: "1px solid var(--surface-divider)", paddingBottom: 12 }}>
-      <Icon n="file-pdf" s={20} /><div className="col grow" style={{ gap: 0 }}><span className="row g8"><b className="t-sm w6">{h.fileName}</b>{h.isCurrent && <Tag label="Current" tone="green" />}</span>
-        <span className="t-cap c-sec">{fileSize(h.sizeBytes)}, {h.uploadedBy ?? "Unknown"}, {fmtDate(h.uploadedAt)}</span></div>
-      {h.url && <a className="btn secondary sm" href={h.url} target="_blank" rel="noreferrer"><Icon n="download-simple" />Download</a>}</div>)}</Dialog>;
+  return <Dialog title="CoA history" size="xl" onClose={onClose} footer={<><Button size="lg" onClick={onClose}>Close</Button><Button size="lg" type="primary" onClick={onClose}>Done</Button></>}>
+    <span className="t-data-b">{dh.code}</span>
+    {isLoading ? <span className="t-sm c-mut">Loading…</span> : data.map((h) => <div key={h.id} className="filerow">
+      <Icon n="file-pdf" s={20} /><div className="col" style={{ gap: 0, flex: "1 1 200px", minWidth: 140 }}><b className="t-sm w6 ellip">{h.fileName}</b><span className="t-cap c-mut">{fileSize(h.sizeBytes)}</span></div>
+      <div className="col" style={{ gap: 0, flex: "0 0 160px" }}><span className="t-cap c-sec">Uploaded by {h.uploadedBy ?? "Unknown"}</span><span className="t-cap c-sec">{new Date(h.uploadedAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar" })}</span></div>
+      {h.isCurrent && <Tag label="Current" tone="green" />}
+      {h.url ? <a className="ib" href={h.url} target="_blank" rel="noreferrer" aria-label={`Download ${h.fileName}`} title={`Download ${h.fileName}`}><Icon n="download-simple" /></a> : <span style={{ width: 32 }} />}</div>)}</Dialog>;
 }
 
 /* ======================= lithology ======================= */

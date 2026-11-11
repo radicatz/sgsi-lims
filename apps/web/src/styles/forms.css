@@ -65,3 +65,5 @@ textarea.input { height: 88px; padding: 10px 12px; resize: vertical; outline: 0;
 .nowrap { white-space: nowrap; }
 .dz:hover, .dz.over { border-color: var(--primary); background: var(--primary-50); }
 .dz b { color: var(--text-foreground); font-weight: 600; font-size: 13px; }
+
+.filerow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }   /* design: File row in the CoA dialogs */

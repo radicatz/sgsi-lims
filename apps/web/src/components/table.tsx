@@ -24,7 +24,7 @@ export function Pager({ page, pages, total, from, to, onPage }: PagerState) {
 }
 
 /* ---------- table ---------- */
-export interface Col<T> { h: string; cls?: string; w?: number; render: (r: T, i: number) => ReactNode; sort?: (r: T) => string | number | null }
+export interface Col<T> { h: string; cls?: string; w?: number; fit?: boolean; fill?: boolean; render: (r: T, i: number) => ReactNode; sort?: (r: T) => string | number | null }
 
 export interface SortState { h: string; dir: "asc" | "desc" }
 
@@ -46,15 +46,18 @@ export function sortRows<T>(rows: T[], cols: Array<Col<T> | false | null | undef
   });
 }
 
+/** Column sizing: w = fixed width, fit = hug the content, fill = take the remaining width. */
+const colStyle = (c: { w?: number; fit?: boolean; fill?: boolean }): React.CSSProperties | undefined =>
+  c.w ? { width: c.w, minWidth: c.w, maxWidth: c.w } : c.fit ? { width: "1%", whiteSpace: "nowrap" } : c.fill ? { width: "100%" } : undefined;
 export function Table<T>({ cols, rows, onRow, keyOf, empty, sort, onSort }: { cols: Array<Col<T> | false | null | undefined>; rows: T[]; onRow?: (r: T) => void; keyOf: (r: T) => string; empty?: ReactNode;
   sort?: SortState | null; onSort?: (h: string) => void }) {
   const cs = cols.filter(Boolean) as Array<Col<T>>;
   return <div className="tblwrap"><table className="tbl"><thead><tr>{cs.map((c, i) => {
     const on = !!c.sort && sort?.h === c.h;
-    return <th key={i} style={c.w ? { width: c.w, minWidth: c.w } : undefined} className={cx(c.cls, c.sort && "sortable", on && "sorted")} aria-sort={on ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}>
+    return <th key={i} style={colStyle(c)} className={cx(c.cls, c.sort && "sortable", on && "sorted")} aria-sort={on ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}>
       {c.sort && onSort ? <button type="button" className="sorth" onClick={() => onSort(c.h)}>{c.h}<Icon n={on ? (sort!.dir === "asc" ? "caret-up" : "caret-down") : "arrows-down-up"} /></button> : c.h}</th>;
   })}</tr></thead>
-    <tbody>{rows.map((r, ri) => <tr key={keyOf(r)} className={cx(onRow && "click")} onClick={onRow ? () => onRow(r) : undefined}>{cs.map((c, i) => <td key={i} className={c.cls} style={c.w ? { width: c.w, minWidth: c.w } : undefined}>{c.render(r, ri)}</td>)}</tr>)}</tbody></table>
+    <tbody>{rows.map((r, ri) => <tr key={keyOf(r)} className={cx(onRow && "click")} onClick={onRow ? () => onRow(r) : undefined}>{cs.map((c, i) => <td key={i} className={c.cls} style={colStyle(c)}>{c.render(r, ri)}</td>)}</tr>)}</tbody></table>
     {!rows.length && empty}</div>;
 }
 
