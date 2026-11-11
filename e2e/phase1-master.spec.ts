@@ -49,8 +49,8 @@ test.describe.serial("master data", () => {
     await page.locator("#ct-name").fill("Sari Uji");
     await page.locator("#ct-def").click();
     await page.locator("#ct-save").click();
-    await expect(page.locator("tr", { hasText: "Sari Uji" }).locator(".tag", { hasText: "Default" })).toBeVisible();
-    await expect(page.locator("tr", { hasText: "Budi Uji" }).locator(".tag", { hasText: "Default" })).toHaveCount(0);
+    await expect(page.locator("tr, .ccard", { hasText: "Sari Uji" }).locator(".tag", { hasText: "Default" })).toBeVisible();
+    await expect(page.locator("tr, .ccard", { hasText: "Budi Uji" }).locator(".tag", { hasText: "Default" })).toHaveCount(0);
   });
 
   test("a duplicate code is refused on the field", async ({ page }) => {
@@ -136,21 +136,25 @@ test.describe.serial("master data", () => {
     await page.locator("#cl-q").fill(code);
     await page.getByText(name).first().click();
     await expect(page.getByRole("heading", { name })).toBeVisible();
-    await page.getByRole("link", { name: /View list/ }).first().click();
+    await page.getByRole("link", { name: /View list/ }).first().click();   // the whole card does the same
     await expect(page).toHaveURL(/\/master\/drill-holes\?company=/);
     await expect(page.getByText(hole).first()).toBeVisible();
+    await page.goBack();
+    await page.getByRole("link", { name: "Lithologies, view list" }).click();
+    await expect(page).toHaveURL(/\/master\/lithologies\?company=/);
   });
 
   test("a table sorts when its head is clicked", async ({ page }, info) => {
     test.skip(info.project.name === "phone", "the phone shows cards, not a table");
     await signIn(page, "rina@sgsi.co.id");
     await page.goto("/clients");
+    const head = info.project.name === "tablet" ? "Status" : "Code";    // the tablet table drops Code, Address and Created
     const codes = () => page.locator("tbody tr td:nth-child(2)").allTextContents();
     await expect(page.locator("th.sorted")).toContainText("Client");                    // sorted by name when the page opens
-    await page.getByRole("button", { name: "Code", exact: true }).click();
+    await page.getByRole("button", { name: head, exact: true }).click();
     await expect(page.locator("th.sorted")).toHaveAttribute("aria-sort", "ascending");
     const up = await codes(); expect(up).toEqual([...up].sort((a, b) => a.localeCompare(b)));
-    await page.getByRole("button", { name: "Code", exact: true }).click();
+    await page.getByRole("button", { name: head, exact: true }).click();
     await expect(page.locator("th.sorted")).toHaveAttribute("aria-sort", "descending");
     const down = await codes(); expect(down).toEqual([...down].sort((a, b) => b.localeCompare(a)));
   });
@@ -172,8 +176,9 @@ test.describe.serial("master data", () => {
       await page.locator("#ct-save").click();
       await expect(page.getByRole("button", { name: "Edit Zeta Contact" })).toBeVisible();
       await expect(page.getByRole("button", { name: "Archive Zeta Contact" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Make Zeta Contact the default contact" })).toBeVisible();     // Make default is the last icon
-      await expect(page.getByRole("button", { name: "Make Sari Uji the default contact" })).toHaveCount(0);       // the default contact does not offer it
+      const zeta = page.locator("tr").filter({ hasText: "Zeta Contact" });
+      await expect(zeta.getByRole("button", { name: "Make Zeta Contact the default contact" })).toBeVisible();   // user-check icon, last in the row
+      await expect(page.locator("tr").filter({ hasText: "Sari Uji" }).getByRole("button", { name: /default/i })).toHaveCount(0);   // the default contact does not offer it
     }
   });
 

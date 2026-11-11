@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
 import { Avatar, Button, Card, Dialog, Empty, Icon, PageHead, TextField, toast } from "../../ui";
 import { Badge, Check, Chips, Confirm, KV, Menu, Note, Pager, RowActions, Search, Select, Switch, Tag, Table, TextArea, DropZone, fileSize, fmtDate, sortRows, usePaged, useSort, type Col } from "../../ui/data";
+import { useBreakpoint } from "../../app/session";
 import { MasterList, STATUS_LABEL, STATUS_TONE, post, useCan, useCompanies, useIsPhone, useSave, type Company, type Contact } from "./shared";
 
 type Chip = "all" | "active" | "inactive" | "archived";
@@ -22,13 +23,14 @@ export function Clients() {
   const inUse = (c: Company) => c.jobOrders + c.drillHoles + c.lithologies + c.seams > 0;
   const archiveOrRestore = (c: Company) => (c.status === "archived" ? archive.mutate(c) : setArch(c));
   const { sort, onSort } = useSort({ h: "Client", dir: "asc" });
+  const tablet = useBreakpoint() === "tablet";   // design Tablet-09-Clients-01: Client, Status, Total sample, Actions
   const cols: Array<Col<Company> | false> = [
     { h: "Client", sort: (c) => c.name, render: (c) => <span className="row g10"><Avatar name={c.name} size={40} logo={c.logoUrl} /><b className="t-sm w6">{c.name}</b></span> },
-    { h: "Code", sort: (c) => c.code, render: (c) => <span className="t-data">{c.code}</span> },
-    { h: "Address", sort: (c) => c.address, render: (c) => <span className="t-sm c-sec">{c.address ?? ""}</span> },
+    !tablet && { h: "Code", sort: (c) => c.code, render: (c) => <span className="t-data">{c.code}</span> },
+    !tablet && { h: "Address", sort: (c) => c.address, render: (c) => <span className="t-sm c-sec">{c.address ?? ""}</span> },
     { h: "Status", sort: (c) => c.status, render: (c) => <Badge label={STATUS_LABEL[c.status]} tone={STATUS_TONE[c.status]} sm /> },
-    { h: "Total sample", cls: "r", sort: (c) => c.totalSample, render: (c) => c.totalSample },
-    { h: "Created", sort: (c) => c.createdAt, render: (c) => fmtDate(c.createdAt) },
+    { h: "Total sample", sort: (c) => c.totalSample, render: (c) => c.totalSample },
+    !tablet && { h: "Created", sort: (c) => c.createdAt, render: (c) => fmtDate(c.createdAt) },
     write && { h: "Actions", render: (c) => <RowActions items={[{ label: `Edit ${c.name}`, icon: "pencil-simple", onClick: () => setForm(c) },
       { label: c.status === "archived" ? `Restore ${c.name}` : `Archive ${c.name}`, icon: c.status === "archived" ? "arrow-counter-clockwise" : "archive", onClick: () => archiveOrRestore(c) },
       { label: `Delete ${c.name}`, icon: "trash", onClick: () => setDel(c), show: !inUse(c) }]} /> }];
@@ -80,8 +82,8 @@ function ClientForm({ company, onClose, onCreated }: { company: Company | null; 
     setErr(e); if (!Object.keys(e).length) save.mutate(undefined);
   };
   return <Dialog title={company ? "Edit client" : "Add client"} size="lg" phone={phone} onClose={onClose}
-    footer={<><Button onClick={onClose}>Cancel</Button><Button type="primary" id="cl-save" disabled={save.isPending} onClick={submit}>Save client</Button></>}>
-    {preview ? <div className="row g12"><Avatar name={f.name || "?"} size={64} logo={preview} /><div className="col grow" style={{ gap: 0 }}><span className="t-sm w5">{logo?.name ?? company?.logoName}</span>{logo && <span className="t-cap c-sec">{fileSize(logo.size)}</span>}</div>
+    footer={<><Button size="lg" onClick={onClose}>Cancel</Button><Button size="lg" type="primary" id="cl-save" disabled={save.isPending} onClick={submit}>Save client</Button></>}>
+    {preview ? <div className="row g12 logobox"><Avatar name={f.name || "?"} size={64} logo={preview} /><div className="col grow" style={{ gap: 0 }}><span className="t-sm w5">{logo?.name ?? company?.logoName}</span>{logo && <span className="t-cap c-sec">{fileSize(logo.size)}</span>}</div>
       <Button size="sm" icon="trash" onClick={() => { setLogo(null); setDropLogo(true); }}>Remove</Button></div>
       : <DropZone id="cl-logo" text="Drop or click to add logo" hint="PNG, JPEG, SVG or WebP, up to 2 MB. Shown round at 40 and 64 px." accept="image/png,image/jpeg,image/svg+xml,image/webp"
         onFile={(file) => { if (file.size > 2097152) return toast("The logo is larger than 2 MB.", "error"); setLogo(file); setDropLogo(false); }} />}
@@ -111,34 +113,43 @@ export function ClientPage() {
   const [del, setDel] = useState(false);
   const remove = useSave(() => api(`/companies/${id}`, { method: "DELETE" }), { keys: ["companies", "company"], done: "Client deleted", onDone: () => { setDel(false); nav("/clients"); } });
   const { sort, onSort } = useSort();
+  const bp = useBreakpoint();   // tablet hides the Phone column, phone shows contact cards
   if (isLoading) return <div className="page"><Card><Empty icon="buildings" title="Loading client" /></Card></div>;
   if (isError || !c) return <div className="page"><Card><Empty icon="question" title="This client was not found" action={<Button onClick={() => nav("/clients")}>Back to clients</Button>} /></Card></div>;
   const lists: Array<[string, number, string]> = [["Drill holes", c.drillHoles, "/master/drill-holes"], ["Lithologies", c.lithologies, "/master/lithologies"], ["Seams", c.seams, "/master/seams"]];
   const canRead = can("master.read");
   const used = c.jobOrders + c.drillHoles + c.lithologies + c.seams > 0;
   const contactCols: Array<Col<Contact> | false> = [
-    { h: "Name", sort: (k) => k.fullName, render: (k) => <span className="row g8"><b className="t-sm w6">{k.fullName}</b>{k.isDefault && <Tag label="Default" tone="blue" />}</span> },
-    !phone && { h: "Position", sort: (k) => k.position, render: (k) => k.position ?? "" }, { h: "Email", sort: (k) => k.email, render: (k) => k.email ?? "" }, !phone && { h: "Phone", sort: (k) => k.phone, render: (k) => k.phone ?? "" },
-    // Make default is the last icon, so Edit and Archive line up in every row, with or without it
+    { h: "Name", w: bp === "tablet" ? 200 : 210, sort: (k) => k.fullName, render: (k) => <span className="row g8"><b className="t-sm w6">{k.fullName}</b>{k.isDefault && <Tag label="Default" tone="blue" />}</span> },
+    { h: "Position", sort: (k) => k.position, render: (k) => k.position ?? "" }, { h: "Email", w: bp === "tablet" ? 180 : undefined, sort: (k) => k.email, render: (k) => bp === "tablet" ? <span title={k.email ?? undefined} style={{ display: "block", maxWidth: 164, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.email ?? ""}</span> : k.email ?? "" },   // tablet: fixed width, long emails are cut with an ellipsis, no sideways scroll
+    
+    bp === "desktop" && { h: "Phone", sort: (k) => k.phone, render: (k) => <span className="nowrap">{k.phone ?? ""}</span> },
+    // Make default (user-check icon) comes last so Edit and Archive line up in every row
     write && { h: "Actions", render: (k) => <RowActions items={[{ label: `Edit ${k.fullName}`, icon: "pencil-simple", onClick: () => setCt(k) },
       { label: `Archive ${k.fullName}`, icon: "archive", onClick: () => dropContact.mutate(k) },
-      { label: `Make ${k.fullName} the default contact`, icon: "star", onClick: () => makeDefault.mutate(k), show: !k.isDefault }]} /> }];
+      { label: `Make ${k.fullName} the default contact`, icon: "user-check", onClick: () => makeDefault.mutate(k), show: !k.isDefault }]} /> }];
   return <div className="page">
     <PageHead crumb={[["Clients", "/clients"], [c.name]]} avatar={<Avatar name={c.name} size={64} logo={c.logoUrl} />} title={c.name}
       sub={<span className="row g8"><Tag label={c.code} /><Badge label={STATUS_LABEL[c.status]} tone={STATUS_TONE[c.status]} /></span>}
       actions={write && <>
-        <Button icon="pencil-simple" id="edit-client" onClick={() => setForm(true)}>Edit</Button>
-        <Button icon={c.status === "archived" ? "arrow-counter-clockwise" : "archive"} id="archive-client" onClick={() => (c.status === "archived" ? archive.mutate(undefined) : setArch(true))}>{c.status === "archived" ? "Restore" : "Archive"}</Button>
-        <Button icon="trash" id="delete-client" disabled={used} why="Job orders or master data use this client. Archive it instead." onClick={() => setDel(true)}>Delete</Button></>} />
+        <Button size="lg" icon="pencil-simple" id="edit-client" onClick={() => setForm(true)}>Edit</Button>
+        <Button size="lg" icon={c.status === "archived" ? "arrow-counter-clockwise" : "archive"} id="archive-client" onClick={() => (c.status === "archived" ? archive.mutate(undefined) : setArch(true))}>{c.status === "archived" ? "Restore" : "Archive"}</Button>
+        <Button size="lg" icon="trash" id="delete-client" disabled={used} why="Job orders or master data use this client. Archive it instead." onClick={() => setDel(true)}>Delete</Button></>} />
     <Card title="Master data"><div className="grid" style={{ gridTemplateColumns: phone ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 12 }}>
-      {lists.map(([label, n, to]) => <div key={label} className="mcard" style={{ cursor: "default" }}><span className="t-sm c-sec">{label}</span>
-        <div className="row between"><b className="t-h2">{n}</b>{canRead && <Link className="btn ghost md" to={`${to}?company=${c.id}`}>View list<Icon n="arrow-right" /></Link>}</div></div>)}</div></Card>
+      {lists.map(([label, n, to]) => <div key={label} className="mcard" style={canRead ? undefined : { cursor: "default" }} {...(canRead ? { role: "link", tabIndex: 0, "aria-label": `${label}, view list`, onClick: () => nav(`${to}?company=${c.id}`), onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") nav(`${to}?company=${c.id}`); } } : {})}><span className="t-sm c-sec">{label}</span>
+        <div className="row between"><b className="t-h2">{n}</b>{canRead && <Link className="btn ghost md" to={`${to}?company=${c.id}`} onClick={(e) => e.stopPropagation()}>View list<Icon n="arrow-right" /></Link>}</div></div>)}</div></Card>
     <div className="grid" style={{ gridTemplateColumns: phone || window.innerWidth < 1100 ? "1fr" : "440px minmax(0, 1fr)", alignItems: "start" }}>
       <Card title="Properties"><div><KV k="Code"><span className="t-data">{c.code}</span></KV><KV k="Company code"><span className="t-data">{c.companyCode}</span>{c.companyCodeLocked ? " (locked)" : ""}</KV><KV k="Address">{c.address ?? "None"}</KV><KV k="Billing address">{c.billingAddress ?? "Same as address"}</KV>
         <KV k="Status">{STATUS_LABEL[c.status]}</KV><KV k="Created">{fmtDate(c.createdAt)}</KV><KV k="Job orders">{c.jobOrders}</KV><KV k="Total sample">{c.totalSample}</KV></div></Card>
       <Card title="Contacts" actions={write && <Button type="ghost" size="sm" icon="plus" id="add-contact" onClick={() => setCt("new")}>Add contact</Button>}>
-        {c.contacts.length ? <Table rows={sortRows(c.contacts, contactCols, sort)} keyOf={(k) => k.id} cols={contactCols} sort={sort} onSort={onSort} />
-          : <span className="t-sm c-mut">No contacts yet.</span>}
+        {!c.contacts.length ? <span className="t-sm c-mut">No contacts yet.</span> : phone
+          ? <div className="col g10">{c.contacts.map((k) => <div key={k.id} className="ccard">
+              <div className="top"><span className="row g8 grow" style={{ minWidth: 0 }}><b className="t-sm w6">{k.fullName}</b>{k.isDefault && <Tag label="Default" tone="blue" />}</span>{write && <Menu vertical label={`More for ${k.fullName}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setCt(k) },
+                { label: "Archive", icon: "archive", onClick: () => dropContact.mutate(k) }, !k.isDefault && { label: "Make default", icon: "user-check", onClick: () => makeDefault.mutate(k) }]} />}</div>
+              {k.position && <span className="t-cap c-sec">{k.position}</span>}
+              {k.email && <span className="t-cap row g6"><Icon n="envelope-simple" />{k.email}</span>}
+              {k.phone && <span className="t-cap">{k.phone}</span>}</div>)}</div>
+          : <Table rows={sortRows(c.contacts, contactCols, sort)} keyOf={(k) => k.id} cols={contactCols} sort={sort} onSort={onSort} />}
         <Note>The default contact is pre-filled as Attention on new job orders. The job order form adds and edits the same contacts.</Note></Card></div>
     {form && <ClientForm company={c} onClose={() => setForm(false)} />}
     {ct && <ContactForm companyId={c.id} contact={ct === "new" ? null : ct} first={!c.contacts.length} onClose={() => setCt(null)} />}
@@ -155,7 +166,7 @@ function ContactForm({ companyId, contact, first, onClose }: { companyId: string
   const submit = () => { if (!f.fullName.trim()) return setErr({ fullName: "Enter the contact's name." }); setErr({}); save.mutate(undefined); };
   const set = (p: Partial<typeof f>) => setF({ ...f, ...p });
   return <Dialog title={contact ? "Edit contact" : "Add contact"} onClose={onClose} phone={useIsPhone()}
-    footer={<><Button onClick={onClose}>Cancel</Button><Button type="primary" id="ct-save" disabled={save.isPending} onClick={submit}>Save contact</Button></>}>
+    footer={<><Button size="lg" onClick={onClose}>Cancel</Button><Button size="lg" type="primary" id="ct-save" disabled={save.isPending} onClick={submit}>Save contact</Button></>}>
     <TextField id="ct-name" label="Name" req value={f.fullName} onChange={(v) => set({ fullName: v })} error={err.fullName ?? null} />
     <TextField label="Position" value={f.position} onChange={(v) => set({ position: v })} />
     <TextField label="Email" type="email" value={f.email} onChange={(v) => set({ email: v })} error={err.email ?? null} />

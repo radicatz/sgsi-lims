@@ -264,7 +264,11 @@ textarea.input { height: 88px; padding: 10px 12px; resize: vertical; outline: 0;
 .ppill.na { color: var(--text-muted); border-style: dashed; cursor: not-allowed; }
 .ppill.grp { border-radius: 8px; }
 .ctag { display: inline-flex; height: 16px; align-items: center; padding: 0 5px; border-radius: 4px; background: var(--accent-100); color: var(--accent-text); font: 600 10px/14px var(--f-body); }
-.dz { border: 1.5px dashed var(--surface-border-strong); border-radius: 12px; background: var(--surface-muted); padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; color: var(--text-secondary); cursor: pointer; }
+.dz { height: 100px; box-sizing: border-box; justify-content: center; border: 1.5px dashed var(--surface-border-strong); border-radius: 12px; background: var(--surface-muted); padding: 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; color: var(--text-secondary); cursor: pointer; }
+.logobox { height: 100px; box-sizing: border-box; align-items: center; }
+.ccard { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 16px; padding: 16px 12px 16px 16px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }   /* white card with border, like the Master data cards */
+.ccard .top { display: flex; align-items: center; gap: 8px; width: 100%; }
+.nowrap { white-space: nowrap; }
 .dz:hover, .dz.over { border-color: var(--primary); background: var(--primary-50); }
 .dz b { color: var(--text-foreground); font-weight: 600; font-size: 13px; }
 
@@ -318,8 +322,8 @@ table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font: 400
 .progress i { display: block; height: 100%; background: var(--action); border-radius: 3px; }
 .progress.ok i { background: var(--status-st-completed); } .progress.warn i { background: var(--status-st-prep); }
 .kv { display: grid; grid-template-columns: 160px 1fr; gap: 12px; padding: 8px 0; font: 400 13px/20px var(--f-body); }   /* no line between rows (design: Key-value row) */
-.kv > span:first-child { color: var(--text-secondary); }
-.phone .kv { grid-template-columns: 1fr; gap: 2px; }
+.kv > span:first-child { color: var(--text-muted); }   /* design: Key-value row, Key = Text/muted */
+.phone .kv { grid-template-columns: 110px 1fr; gap: 12px; }   /* design Phone-09-Clients-02: key and value stay inline */
 .divider { height: 1px; background: var(--surface-divider); flex: none; }
 
 /* stepper */
