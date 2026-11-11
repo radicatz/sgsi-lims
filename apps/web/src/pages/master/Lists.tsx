@@ -70,7 +70,7 @@ export function DrillHoles() {
     {isLoading ? <Card><Empty icon="cylinder" title="Loading drill holes" /></Card> : phone
       ? <div className="col g10">{pg.rows.map((d) => <div key={d.id} className="icard" style={{ cursor: "default" }}>
           <div className="top"><div className="col grow" style={{ gap: 0, minWidth: 0 }}><b className="t-data-b">{d.code}</b><span className="t-cap c-sec ellip">{d.description ?? ""}</span></div>
-            {write && <Menu label={`More for ${d.code}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(d) }, ...stdMenu(act, d, d.code, deletable(d)),
+            {write && <Menu vertical label={`More for ${d.code}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(d) }, ...stdMenu(act, d, d.code, deletable(d)),
               d.coa && { label: "CoA history", icon: "clock-counter-clockwise", onClick: () => setHist(d) }, d.coa && up && !d.archived && { label: "Replace CoA", icon: "upload-simple", onClick: () => setCoaFor(d) }]} />}</div>
           <div className="t-cap c-sec">{d.companyName}</div>
           <div className="meta" style={{ paddingRight: 0 }}>{coaTag(d)}{!d.coa && up && !d.archived && <Button size="sm" icon="upload-simple" onClick={() => setCoaFor(d)}>Upload CoA</Button>}<span className="cnt">{d.totalSample} samples</span></div></div>)}
@@ -144,7 +144,7 @@ export function Lithologies() {
     {isLoading ? <Card><Empty icon="stack" title="Loading lithologies" /></Card> : phone
       ? <div className="col g10">{pg.rows.map((l) => <div key={l.id} className="icard" style={{ cursor: "default" }}>
           <div className="top"><div className="col grow" style={{ gap: 0, minWidth: 0 }}><b className="t-sm w6 ellip">{l.name}</b><span className="t-cap c-sec ellip">{l.companyName}</span></div>
-            {write && <Menu label={`More for ${l.name}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(l) }, ...stdMenu(act, l, l.name, l.totalSample === 0)]} />}</div>
+            {write && <Menu vertical label={`More for ${l.name}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(l) }, ...stdMenu(act, l, l.name, l.totalSample === 0)]} />}</div>
           <div className="meta" style={{ paddingRight: 0 }}><Tag label={KIND_LABEL[l.kind]} tone={KIND_TONE[l.kind]} /><span className="cnt">{l.totalSample} samples</span></div></div>)}
         {!pg.rows.length && <Card><Empty icon="stack" title="No lithologies" /></Card>}<Pager {...pg.pager} /></div>
       : <Card><Table rows={pg.rows} keyOf={(l) => l.id} cols={cols} sort={sort} onSort={onSort}
@@ -191,7 +191,7 @@ export function Seams() {
     {isLoading ? <Card><Empty icon="tray" title="Loading seams" /></Card> : phone
       ? <div className="col g10">{pg.rows.map((x) => <div key={x.id} className="icard" style={{ cursor: "default" }}>
           <div className="top"><div className="col grow" style={{ gap: 0, minWidth: 0 }}><b className="t-data-b">{x.code}</b><span className="t-cap c-sec ellip">{x.description ?? ""}</span></div>
-            {write && <Menu label={`More for ${x.code}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(x) }, ...stdMenu(act, x, x.code, x.totalSample === 0)]} />}</div>
+            {write && <Menu vertical label={`More for ${x.code}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(x) }, ...stdMenu(act, x, x.code, x.totalSample === 0)]} />}</div>
           <div className="meta" style={{ paddingRight: 0 }}><span className="pillcode">Order {x.sortOrder ?? "none"}</span><span className="t-cap c-sec ellip">{x.companyName}</span><span className="cnt">{x.totalSample} samples</span></div></div>)}
         {!pg.rows.length && <Card><Empty icon="tray" title="No seams" /></Card>}<Pager {...pg.pager} /></div>
       : <Card><Table rows={pg.rows} keyOf={(x) => x.id} cols={cols} sort={sort} onSort={onSort}

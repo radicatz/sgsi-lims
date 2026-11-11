@@ -71,7 +71,7 @@ export function RowActions({ items }: { items: RowAction[] }) {
 
 /* ---------- row menu, anchored under its button inside .frame ---------- */
 export interface MenuItem { label: string; icon?: string; onClick: () => void; danger?: boolean; disabled?: boolean; why?: string }
-export function Menu({ items, label = "More actions", size = 32 }: { items: Array<MenuItem | false | null | undefined>; label?: string; size?: 32 | 36 }) {
+export function Menu({ items, label = "More actions", size = 32, vertical }: { items: Array<MenuItem | false | null | undefined>; label?: string; size?: 32 | 36; vertical?: boolean }) {
   const [open, setOpen] = useState<{ top: number; right: number } | null>(null);
   const ref = useRef<HTMLSpanElement>(null);
   useOutside(ref, () => setOpen(null), !!open); useEsc(() => setOpen(null), !!open);
@@ -83,7 +83,7 @@ export function Menu({ items, label = "More actions", size = 32 }: { items: Arra
     const h = list.length * 38 + 14; const below = r.bottom - fr.top + 4;
     setOpen({ right: Math.max(8, fr.right - r.right), top: below + h > fr.height - 8 ? Math.max(8, r.top - fr.top - h - 4) : below });
   };
-  return <span ref={ref} style={{ display: "inline-flex" }}><IconBtn n="dots-three" label={label} size={size} onClick={toggle} />
+  return <span ref={ref} style={{ display: "inline-flex" }}><IconBtn n={vertical ? "dots-three-vertical" : "dots-three"} label={label} size={size} onClick={toggle} />
     {open && toFrame(<div className="menu" role="menu" style={{ top: open.top, right: open.right }} onMouseDown={(e) => e.stopPropagation()}>
       {list.map((it) => <button key={it.label} type="button" role="menuitem" className={cx("mi", it.danger && "danger")} disabled={!!it.disabled} title={it.disabled ? it.why : undefined}
         onClick={(e) => { e.stopPropagation(); setOpen(null); it.onClick(); }}>{it.icon && <Icon n={it.icon} />}{it.label}</button>)}</div>)}</span>;

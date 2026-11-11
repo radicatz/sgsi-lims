@@ -42,7 +42,7 @@ export function Clients() {
     {isLoading ? <Card><Empty icon="buildings" title="Loading clients" /></Card> : phone
       ? <div className="col g10">{pg.rows.map((c) => <div key={c.id} className="icard" onClick={() => nav(`/clients/${c.id}`)}>
           <div className="top"><Avatar name={c.name} size={40} logo={c.logoUrl} /><div className="col grow" style={{ gap: 0, minWidth: 0 }}><b className="t-sm w6 ellip">{c.name}</b><span className="t-cap c-sec ellip">{c.address ?? ""}</span></div>
-            {write && <Menu label={`More for ${c.name}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(c) },
+            {write && <Menu vertical label={`More for ${c.name}`} items={[{ label: "Edit", icon: "pencil-simple", onClick: () => setForm(c) },
               { label: c.status === "archived" ? "Restore" : "Archive", icon: c.status === "archived" ? "arrow-counter-clockwise" : "archive", onClick: () => archiveOrRestore(c) },
               !inUse(c) && { label: "Delete", icon: "trash", danger: true, onClick: () => setDel(c) }]} />}</div>
           <div className="meta"><span className="pillcode">{c.code}</span><Badge label={STATUS_LABEL[c.status]} tone={STATUS_TONE[c.status]} sm /><span className="cnt">{c.totalSample.toLocaleString("en-US")} samples</span></div></div>)}
@@ -136,7 +136,7 @@ export function ClientPage() {
     <div className="grid" style={{ gridTemplateColumns: phone || window.innerWidth < 1100 ? "1fr" : "440px minmax(0, 1fr)", alignItems: "start" }}>
       <Card title="Properties"><div><KV k="Code"><span className="t-data">{c.code}</span></KV><KV k="Company code"><span className="t-data">{c.companyCode}</span>{c.companyCodeLocked ? " (locked)" : ""}</KV><KV k="Address">{c.address ?? "None"}</KV><KV k="Billing address">{c.billingAddress ?? "Same as address"}</KV>
         <KV k="Status">{STATUS_LABEL[c.status]}</KV><KV k="Created">{fmtDate(c.createdAt)}</KV><KV k="Job orders">{c.jobOrders}</KV><KV k="Total sample">{c.totalSample}</KV></div></Card>
-      <Card title="Contacts" actions={write && <Button size="sm" icon="plus" id="add-contact" onClick={() => setCt("new")}>Add contact</Button>}>
+      <Card title="Contacts" actions={write && <Button type="ghost" size="sm" icon="plus" id="add-contact" onClick={() => setCt("new")}>Add contact</Button>}>
         {c.contacts.length ? <Table rows={sortRows(c.contacts, contactCols, sort)} keyOf={(k) => k.id} cols={contactCols} sort={sort} onSort={onSort} />
           : <span className="t-sm c-mut">No contacts yet.</span>}
         <Note>The default contact is pre-filled as Attention on new job orders. The job order form adds and edits the same contacts.</Note></Card></div>
