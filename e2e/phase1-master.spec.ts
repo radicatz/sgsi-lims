@@ -90,11 +90,16 @@ test.describe.serial("master data", () => {
     await page.locator("#sf-save").click();
     await page.locator("#dh-q").fill(hole);
     await expect(page.getByText(hole).first()).toBeVisible();
-    await expect(page.getByText("CoA missing").first()).toBeVisible();
-    await page.getByRole("button", { name: "Upload CoA" }).first().click();
+    if (phone) {
+      await expect(page.getByText("CoA missing").first()).toBeVisible();
+      await page.getByRole("button", { name: "Upload CoA" }).first().click();
+    } else {
+      await expect(page.getByText("No CoA uploaded").first()).toBeVisible();
+      await page.getByRole("button", { name: `Upload the CoA of ${hole}` }).click();
+    }
     await page.locator("#coa-file").setInputFiles({ name: "CoA-first.pdf", mimeType: "application/pdf", buffer: PDF });
     await page.locator("#coa-save").click();
-    await expect(page.getByText("CoA uploaded").first()).toBeVisible();
+    await expect(page.getByText(phone ? "CoA uploaded" : "CoA-first.pdf").first()).toBeVisible();
     await act(page, phone, hole, "Replace the CoA of", "Replace CoA");
     await page.locator("#coa-file").setInputFiles({ name: "CoA-second.pdf", mimeType: "application/pdf", buffer: PDF });
     await page.locator("#coa-save").click();

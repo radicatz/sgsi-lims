@@ -19,6 +19,14 @@ export async function cleanupTestData() {
     await tx`delete from company_contacts where company_id in (${co})`;
     await tx`delete from companies where code like 'ZT%' or code like 'ZE%'`;
     await tx`delete from lookups where value like 'ZT %' or value like 'ZE %'`;
+    await tx`delete from methods where parameter_id in (select id from parameters where code like 'ZT-%' or code like 'ZE-%')`;
+    await tx`delete from parameters where code like 'ZT-%' or code like 'ZE-%'`;
+    // Configuration slice B: services, methods and standards, template drafts made by the checks
+    await tx`delete from service_parameters where service_id in (select id from services where name like 'ZT %' or name like 'ZE %')`;
+    await tx`delete from services where name like 'ZT %' or name like 'ZE %'`;
+    await tx`delete from methods where standard_id in (select id from standards where code like 'ZT%' or code like 'ZE%')`;
+    await tx`delete from standards where code like 'ZT%' or code like 'ZE%'`;
+    await tx`delete from report_templates where status = 'draft' and (note like 'ZT%' or note like 'ZE%')`;
   });
   // test accounts (zt-*@sgsi.co.id): profile, roles and the Supabase Auth user
   const users = await sql`select id from profiles where email like 'zt-%@sgsi.co.id'`;

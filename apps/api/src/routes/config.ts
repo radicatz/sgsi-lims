@@ -6,6 +6,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { asUser, type Tx } from "../db";
 import { authenticate, requireAny } from "../auth";
+import { configBRoutes } from "./config-b";
 
 const SCREEN = "Configuration";
 const fail = (reply: FastifyReply, code: number, key: string, message: string, field?: string) => reply.code(code).send({ code: key, text: message, ...(field ? { field } : {}) });
@@ -72,8 +73,8 @@ export async function configRoutes(app: FastifyInstance) {
   /* hub: count and last change per section */
   r.get("/config/summary", async (req) => run(req, async (tx) => {
     const [c] = await tx`select (select count(*)::int from parameters where not is_group) as parameters, (select count(*)::int from services where status = 'active') as services,
-      (select count(*)::int from methods) as methods, (select count(*)::int from validation_rules) as rules, (select count(distinct list_key)::int from lookups) as lookups,
-      (select count(*)::int from report_templates) as templates, (select count(*)::int from formulas) as formulas`;
+      (select count(*)::int from methods where is_default) as methods, (select count(*)::int from validation_rules) as rules, (select count(distinct list_key)::int from lookups) as lookups,
+      (select count(*)::int from report_templates where kind = 'coa') as templates, (select count(*)::int from formulas) as formulas`;
     const last = await tx`select distinct on (k) k, at, actor_name from (
         select case when table_name in ('parameters','parameter_group_items') then 'parameters' when table_name in ('services','service_parameters') then 'services'
           when table_name in ('methods','standards') then 'methods' when table_name = 'validation_rules' then 'rules' when table_name = 'lookups' then 'lookups'
@@ -82,6 +83,8 @@ export async function configRoutes(app: FastifyInstance) {
       where k is not null order by k, at desc`;
     return { counts: c, lastChanged: Object.fromEntries(last.map((l) => [l.k, { at: l.at, by: l.actor_name }])) };
   }));
+
+  await configBRoutes(app);
 
   /* settings pages */
   r.get("/config/settings/:key", { schema: { params: Key } }, async (req) => {
@@ -122,6 +125,17 @@ export async function configRoutes(app: FastifyInstance) {
     return { items: rows.map((p) => ({ id: p.id, code: p.code, name: p.name, label: p.label, category: p.category, unit: p.unit, kind: p.kind, measuredBasis: p.measured_basis,
       decimals: p.decimals, allowsQualifier: p.allows_qualifier, typicalLow: p.typical_low == null ? null : Number(p.typical_low), typicalHigh: p.typical_high == null ? null : Number(p.typical_high),
       isGroup: p.is_group, active: p.active, inUse: p.in_use, families: p.families })) };
+  });
+  /* a new parameter goes last in its group; it has no methods until they are added under Methods and standards */
+  r.post("/config/parameters", { schema: { body: ParamBody } }, async (req, reply) => {
+    const b = req.body;
+    if (b.typicalLow != null && b.typicalHigh != null && b.typicalLow >= b.typicalHigh) return fail(reply, 400, "invalid", "The low end must be below the high end.", "typicalHigh");
+    try {
+      const [row] = await run(req, (tx) => tx`insert into parameters (code, name, label, category, unit, measured_basis, decimals, allows_qualifier, typical_low, typical_high, active, sort_order)
+        values (${b.code}, ${b.name}, ${b.label}, ${b.category}, ${b.unit ?? null}, ${b.measuredBasis ?? null}, ${b.decimals}, ${b.allowsQualifier}, ${b.typicalLow ?? null}, ${b.typicalHigh ?? null}, ${b.active},
+          (select coalesce(max(sort_order), 0) + 1 from parameters where category = ${b.category})) returning id`);
+      return reply.code(201).send({ id: row!.id });
+    } catch (e) { if (isUnique(e)) return fail(reply, 409, "duplicate", `${b.code} is already used by another parameter.`, "code"); throw e; }
   });
   r.patch("/config/parameters/:id", { schema: { params: z.object({ id: z.string().uuid() }), body: ParamBody } }, async (req, reply) => {
     const b = req.body;

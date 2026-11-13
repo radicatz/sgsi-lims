@@ -5,7 +5,7 @@ import { cx } from "./utils";
 
 // Data-screen components ported from the prototype (.context/prototype/src/ui.js): tables, paging, chips, menus, form controls.
 
-export type Tone = "grey" | "green" | "red" | "amber" | "blue" | "outline" | "orange";
+export type Tone = "grey" | "green" | "red" | "amber" | "blue" | "outline" | "orange" | "muted";
 
 export const Badge = ({ label, tone = "grey", sm }: { label: string; tone?: Tone; sm?: boolean }) => <span className={cx("badge", "tn-" + tone, sm && "sm")}>{label}</span>;
 

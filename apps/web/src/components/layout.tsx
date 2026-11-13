@@ -4,8 +4,11 @@ import { Link } from "react-router";
 import { Icon } from "./Icon";
 import { cx } from "./utils";
 
-export function Card({ title, actions, children, className }: { title?: string; actions?: ReactNode; children: ReactNode; className?: string }) {
-  return <section className={cx("card", className)}>{(title || actions) && <div className="card-head">{title && <h2 className="t-h3">{title}</h2>}{actions && <div className="row g8 wrap">{actions}</div>}</div>}{children}</section>;
+/** `count` shows a count pill beside the title (design: "Parameters 34"). */
+export function Card({ title, count, actions, children, className }: { title?: string; count?: number; actions?: ReactNode; children: ReactNode; className?: string }) {
+  const head = title && (count === undefined ? <h2 className="t-h3">{title}</h2>
+    : <div className="row g8 grow" style={{ minWidth: 0 }}><h2 className="t-h3" style={{ flex: "none" }}>{title}</h2><span className="cpill">{count}</span></div>);
+  return <section className={cx("card", className)}>{(title || actions) && <div className="card-head">{head}{actions && <div className="row g8 wrap">{actions}</div>}</div>}{children}</section>;
 }
 
 /** `avatar` sits left of the title block; `sub` goes under the title (code and status on a client page); `badge` sits beside the title. */

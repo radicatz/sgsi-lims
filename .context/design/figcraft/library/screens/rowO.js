@@ -355,3 +355,5 @@ exports.build = (b) => {
   configFrame(b, PX * 6, p, "phone", "02", "Parameters", "01", "List", "Parameters", (r) => parameters(b, r, "phone"));
   b.oEnd = { desktop: d + RY * 8 + 400, tablet: t + 3000, phone: p + 3200 };
 };
+exports.CFG = { frame, configFrame, sectionHead, status, tag, tf, sel, kv, tabs, table, pager, card, vframe, hframe, txt, icon, iconBtn, btn, pill, methods, lookups, laboratory, security, footerBtns, settingsCard, RULES, METHODS, SERVICES, SECTIONS };
+exports.CFG2 = { PARAMS, sw };

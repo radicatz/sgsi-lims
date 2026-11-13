@@ -48,7 +48,8 @@
 .main { flex: 1 1 auto; min-width: 0; overflow-y: auto; overflow-x: hidden; background: var(--surface-shell); position: relative; }
 .page { padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .tablet .page { padding: 24px 24px 32px; }
-.phone .page { padding: 16px 16px 24px; gap: 16px; }
+.phone .page { padding: 16px 16px 24px; gap: 16px; flex: 1 0 auto; }  /* fills the screen, so a bottom bar (.sticky-bar) can sit at the bottom of a short page */
+.phone .main { display: flex; flex-direction: column; }
 .page-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
 .page-head .tt { display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-width: 0; }
 .phone .page-head .t-display { font-size: 28px; line-height: 34px; }

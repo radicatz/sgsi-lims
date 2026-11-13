@@ -17,7 +17,7 @@ export interface Seam { id: string; code: string; description: string | null; so
 export const STATUS_LABEL = { active: "Active", inactive: "Inactive", archived: "Archived" } as const;
 export const STATUS_TONE: Record<Company["status"], Tone> = { active: "green", inactive: "grey", archived: "outline" };
 export const KIND_LABEL = { coal: "Coal", parting: "Parting", no_lithology: "No lithology" } as const;
-export const KIND_TONE: Record<Lithology["kind"], Tone> = { coal: "blue", parting: "amber", no_lithology: "outline" };
+export const KIND_TONE: Record<Lithology["kind"], Tone> = { coal: "blue", parting: "amber", no_lithology: "muted" };
 
 export const useCan = () => { const { me } = useSession(); return (p: string) => !!me?.permissions.includes(p); };
 export const useIsPhone = () => useBreakpoint() === "phone";

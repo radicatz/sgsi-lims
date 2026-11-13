@@ -1,14 +1,20 @@
 // Component layer, part of the FigCraft library port (Stack_Decision_Record S-7, S-8): Button.
-import { type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { cx } from "./utils";
 
 /* ---------- actions ---------- */
 type BtnType = "primary" | "secondary" | "tertiary" | "ghost";
+type BtnSize = "sm" | "md" | "lg" | "touch";
 
-export function Button({ type = "secondary", size = "md", tone, icon, trail, block, disabled, why, onClick, children, id, submit }: {
-  type?: BtnType; size?: "sm" | "md" | "lg" | "touch"; tone?: "danger" | "accent"; icon?: string; trail?: string; block?: boolean;
+/** The size a Button takes when it has no `size` of its own. A Dialog footer provides "lg" (owner, Nov 12 2026: every action button at the bottom of a dialog is lg). */
+export const ButtonSizeContext = createContext<BtnSize>("md");
+
+export function Button({ type = "secondary", size, tone, icon, trail, block, disabled, why, onClick, children, id, submit }: {
+  type?: BtnType; size?: BtnSize; tone?: "danger" | "accent"; icon?: string; trail?: string; block?: boolean;
   disabled?: boolean; why?: string; onClick?: () => void; children: ReactNode; id?: string; submit?: boolean }) {
+  const inherited = useContext(ButtonSizeContext);
+  size = size ?? inherited;
   return <button id={id} type={submit ? "submit" : "button"} className={cx("btn", type, size, tone, block && "block")} disabled={disabled} title={disabled ? why : undefined} onClick={onClick}>
     {icon && <Icon n={icon} />}{children}{trail && <Icon n={trail} />}</button>;
 }
