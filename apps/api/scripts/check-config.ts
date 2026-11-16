@@ -69,6 +69,9 @@ try {
   await call(S, "PATCH", `/config/parameters/${ash!.id}`, P({}));
   ok("V-31 severity and bounds save (bounds on the parameter)", (await call(S, "PATCH", "/config/rules/V-31", { severity: "block", active: true, low: 2, high: 35 })).status === 200
     && (await call(S, "GET", "/config/parameters")).body.items.find((p: any) => p.code === "ASH").typicalHigh === 35);
+  ok("a rule's message shown saves and lists", (await call(S, "PATCH", "/config/rules/V-31", { severity: "warn", active: true, message: "ZT Ash above 45 % is unusual." })).status === 200
+    && (await call(S, "GET", "/config/rules")).body.items.find((r: any) => r.code === "V-31").message === "ZT Ash above 45 % is unusual.");
+  ok("a message over 200 characters is refused on the field", (await call(S, "PATCH", "/config/rules/V-31", { severity: "warn", active: true, message: "x".repeat(201) })).body?.field === "message");
   ok("the fixed rule V-12 cannot change", (await call(S, "PATCH", "/config/rules/V-12", { severity: "warn", active: true })).status === 409);
   ok("formulas are listed", (await call(S, "GET", "/config/formulas")).body.items.some((f: any) => f.parameter === "FC"));
 
@@ -92,6 +95,7 @@ try {
     await tx`select set_config('app.skip_audit','on',true)`;
     await tx`update parameters set code = ${ash!.code}, decimals = ${ash!.decimals}, typical_low = ${ash!.typical_low}, typical_high = ${ash!.typical_high} where id = ${ash!.id}`;
     await tx`update validation_rules set severity = ${v31!.severity}, active = ${v31!.active}, params = jsonb_set(params, '{parameter}', '"ASH"') where code = 'V-31'`;
+    await tx`update validation_rules set params = params - 'message' where code = 'V-31'`;
     await tx`delete from lookups where value like 'ZT %'`;
     await tx`update companies set company_code = ${bnm!.company_code} where id = ${bnm!.id}`;
     await tx`update profiles set status = 'active', failed_attempts = 0, locked_until = null where email = 'joko@sgsi.co.id'`;

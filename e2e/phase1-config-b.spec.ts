@@ -83,7 +83,7 @@ test.describe.serial("configuration slice B", () => {
       await expect(page.locator("#new-version")).toBeVisible();
       await page.locator(".lrow", { hasText: "Active" }).click();
       await expect(page.getByText(/^Version \d+ \(active\)/)).toBeVisible();
-      await page.getByRole("button", { name: "All versions" }).click();
+      await page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("button", { name: "Report templates" }).click();   // the phone has a breadcrumb, not the ghost button
       await expect(page.locator(".lrow").first()).toBeVisible();
       return;
     }
@@ -91,7 +91,7 @@ test.describe.serial("configuration slice B", () => {
     await expect(page.getByText(/^Version \d+ \(draft\)/)).toBeVisible();
     await page.locator("#tp-note").fill("ZE note");
     await page.locator("#tp-statement").fill("ZE statement for the preview.");
-    await expect(page.locator(".coa").getByText("ZE statement for the preview.")).toBeVisible();
+    await expect(page.locator(".a4").getByText("ZE statement for the preview.")).toBeVisible();
     await page.locator("#tp-save").click();
     await expect(page.getByText("Draft saved")).toBeVisible();
     await page.getByRole("button", { name: "All versions" }).click();
@@ -101,6 +101,40 @@ test.describe.serial("configuration slice B", () => {
     await page.getByRole("menuitem", { name: "Delete" }).click();
     await page.locator(".dialog").getByRole("button", { name: "Delete", exact: true }).click();
     await expect(page.locator("tr", { hasText: "Draft" })).toHaveCount(0);
+  });
+
+  test("report templates on the phone: a version opens and Preview certificate shows the whole page", async ({ page }, info) => {
+    test.skip(info.project.name !== "phone", "the phone button");
+    await signIn(page, "wahyu@sgsi.co.id");
+    await page.goto("/config/templates");
+    await page.locator(".lrow").first().click();
+    await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toHaveCount(1);   // one breadcrumb, with three levels
+    await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText(/^Version \d+/)).toBeVisible();
+    await page.locator("#tp-preview").click();
+    const a4 = page.locator(".a4");
+    await expect(a4).toBeVisible();
+    const box = (await a4.boundingBox())!;
+    expect(box.width).toBeLessThanOrEqual(390);          // the page is scaled to the screen, never reflowed or cut
+    expect(Math.round((box.height / box.width) * 100)).toBe(Math.round((842 / 595) * 100));
+    await page.getByRole("button", { name: "Zoom in" }).click();   // zoom: the page grows and scrolls inside its box
+    await expect(page.locator(".zoomval")).not.toHaveText(String(Math.round((box.width / 595) * 100)) + "%");
+    const bigger = (await a4.boundingBox())!;
+    expect(bigger.width).toBeGreaterThan(box.width);
+    await page.getByRole("button", { name: "Fit to width" }).click();
+    expect(Math.round((await a4.boundingBox())!.width)).toBe(Math.round(box.width));
+  });
+
+  test("methods on the phone: the add dialog stays inside the screen", async ({ page }, info) => {
+    test.skip(info.project.name !== "phone", "the phone sheet");
+    await signIn(page, "wahyu@sgsi.co.id");
+    await page.goto("/config/methods");
+    await page.locator("#add-method").click();
+    const dlg = page.getByRole("dialog");
+    await expect(dlg).toBeVisible();
+    const box = (await dlg.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 
   test("a lab admin cannot open the new sections", async ({ page }) => {

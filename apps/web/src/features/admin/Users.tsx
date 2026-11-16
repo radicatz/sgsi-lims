@@ -182,7 +182,7 @@ export function Users() {
         <RolesTab />
       ) : (
         <>
-          <div className="row g12 wrap" style={{ alignItems: "flex-end" }}>
+          <div className="row g12 wrap" style={{ alignItems: "center" }}>
             <Search
               label="Search"
               id="us-q"
@@ -567,6 +567,7 @@ function UserForm({
   onClose: () => void;
   onInvite: (link: string | null) => void;
 }) {
+  const isPhone = useIsPhone();
   const grid = useRolesGrid();
   const [f, setF] = useState({
     fullName: user?.fullName ?? "",
@@ -622,7 +623,7 @@ function UserForm({
     <Dialog
       title={user ? "Edit user" : "Add user"}
       size="lg"
-      phone={useIsPhone()}
+      phone={isPhone}
       onClose={onClose}
       footer={
         <>
@@ -641,7 +642,7 @@ function UserForm({
       <div
         className="grid"
         style={{
-          gridTemplateColumns: useIsPhone() ? "1fr" : "1fr 1fr",
+          gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",
           gap: 16,
         }}
       >
@@ -684,15 +685,43 @@ function UserForm({
         </span>
         <div className="col g10">
           {(grid.data?.roles ?? []).map((r) => (
-            <div key={r.code}>
-              <Check
-                on={f.roles.includes(r.code)}
-                onChange={() => toggle(r.code)}
-                label={r.name}
-              />
-              <span className="t-cap c-sec" style={{ marginLeft: 30 }}>
-                {r.description}
+            <div
+              key={r.code}
+              className="row g12"
+              style={{
+                alignItems: isPhone ? "flex-start" : "center",
+                cursor: "pointer",
+              }}
+              onClick={() => toggle(r.code)}
+            >
+              <span
+                style={{
+                  pointerEvents: "none",
+                  display: "inline-flex",
+                  marginTop: isPhone ? 2 : 0,
+                }}
+              >
+                <Check
+                  on={f.roles.includes(r.code)}
+                  onChange={() => toggle(r.code)}
+                  label=""
+                />
               </span>
+              {isPhone ? (
+                <span className="col" style={{ gap: 2, minWidth: 0 }}>
+                  <b className="t-sm w6">{r.name}</b>
+                  <span className="t-sm c-sec">{r.description}</span>
+                </span>
+              ) : (
+                <>
+                  <b className="t-sm w6" style={{ width: 120, flex: "none" }}>
+                    {r.name}
+                  </b>
+                  <span className="t-sm c-sec" style={{ minWidth: 0 }}>
+                    {r.description}
+                  </span>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -919,20 +948,30 @@ export function UserPage() {
         <div className="col g16" style={{ minWidth: 0 }}>
           <Card title="Roles and permissions">
             {roleInfo.map((r) => (
-              <div key={r.code} className="col g4">
-                <span className="role" style={{ alignSelf: "flex-start" }}>
-                  {r.name}
-                </span>
+              <div key={r.code} className="row g12 wrap">
+                <span className="role">{r.name}</span>
                 <span className="t-sm c-sec">{r.description}</span>
               </div>
             ))}
-            <div className="col g8">
+            <div
+              className="grid"
+              style={{
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(min(100%, 260px), 1fr))",
+                gap: "8px 24px",
+              }}
+            >
               {u.permissions.map((p) => (
-                <div key={p} className="row g8 t-sm">
+                <div
+                  key={p}
+                  className="row g8 t-sm"
+                  style={{ alignItems: "flex-start" }}
+                >
                   <span
                     style={{
                       color: "var(--status-st-completed)",
                       display: "inline-flex",
+                      marginTop: 4,
                     }}
                   >
                     <Icon n="check" />

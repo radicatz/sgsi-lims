@@ -43,7 +43,7 @@ type SettingKey = keyof typeof SETTINGS;
 export const SETTING_DEFAULTS: Record<SettingKey, Record<string, unknown>> = {
   security: { lock_after_attempts: 5, lock_minutes: 15, idle_sign_out_minutes: 30, warn_before_seconds: 60, min_password_length: 10, require_letter_and_number: true,
     require_special_character: false, forbid_email_in_password: true, reset_link_minutes: 60, invite_days: 7 },
-  laboratory: { name: "PT Sentra Geo Survey Indonesia", address: "", accreditation: "LP-1234-IDN", place_of_issue: "Samarinda", branches: [{ code: "RI", name: "Rapak Indah" }] },
+  laboratory: { name: "PT Sentra Geo Survey Indonesia", address: "Jl. Rapak Indah No. 120, Loa Bakung, Sungai Kunjang, Samarinda, Kalimantan Timur 75243, Indonesia", accreditation: "LP-1234-IDN", place_of_issue: "Samarinda", branches: [{ code: "RI", name: "Rapak Indah" }] },
   numbering: { job_order: "JO-{YYYY}-{NNNN}", batch: "B-{YYYY}-{NNNN}", sample_id: "SG.{YYMMDD}.{CCC}.{BB}.{NNN}", sample_code: "{CCC}.{BB}.{NNN}.{LOT}", coa: "CoA-{job_order}-{revision}", sample_no_width: 3 },
 };
 const Key = z.object({ key: z.enum(["security", "laboratory", "numbering"]) });
@@ -59,7 +59,7 @@ const ParamBody = z.object({
   allowsQualifier: z.boolean(), typicalLow: z.number().nullable().optional(), typicalHigh: z.number().nullable().optional(), active: z.boolean(),
 }).refine((p) => p.typicalLow == null || p.typicalHigh == null || p.typicalLow < p.typicalHigh, { message: "The low end must be below the high end.", path: ["typicalHigh"] });
 const RuleBody = z.object({ severity: z.enum(["warn", "block"]), active: z.boolean(), tolerance: z.number().min(0).max(5).optional(),
-  low: z.number().nullable().optional(), high: z.number().nullable().optional() })
+  low: z.number().nullable().optional(), high: z.number().nullable().optional(), message: z.string().trim().max(200, "At most 200 characters.").optional() })
   .refine((r) => r.low == null || r.high == null || r.low < r.high, { message: "The low end must be below the high end.", path: ["high"] });
 const FIXED_RULES = ["V-12"];   // structural checks: listed, not edited
 
@@ -162,7 +162,7 @@ export async function configRoutes(app: FastifyInstance) {
     const rows = await run(req, (tx) => tx`select v.code, v.description, v.severity, v.params, v.active, p.id as parameter_id, p.code as parameter_code, p.unit, p.typical_low, p.typical_high
       from validation_rules v left join parameters p on p.code = v.params->>'parameter' order by v.code`);
     return { items: rows.map((v) => ({ code: v.code, description: v.description, severity: v.severity, active: v.active, fixed: FIXED_RULES.includes(v.code as string),
-      tolerance: v.params?.tolerance ?? null, parameter: v.parameter_code ?? null, unit: v.unit ?? null,
+      tolerance: v.params?.tolerance ?? null, message: v.params?.message ?? null, parameter: v.parameter_code ?? null, unit: v.unit ?? null,
       low: v.typical_low == null ? null : Number(v.typical_low), high: v.typical_high == null ? null : Number(v.typical_high) })) };
   });
   r.patch("/config/rules/:code", { schema: { params: z.object({ code: z.string().max(10) }), body: RuleBody } }, async (req, reply) => {
@@ -171,7 +171,7 @@ export async function configRoutes(app: FastifyInstance) {
     const ok = await run(req, async (tx) => {
       const [v] = await tx`select params from validation_rules where code = ${req.params.code}`;
       if (!v) return false;
-      const params = { ...(v.params ?? {}), ...(b.tolerance !== undefined ? { tolerance: b.tolerance } : {}) };
+      const params = { ...(v.params ?? {}), ...(b.tolerance !== undefined ? { tolerance: b.tolerance } : {}), ...(b.message !== undefined ? { message: b.message } : {}) };
       await tx`update validation_rules set severity = ${b.severity}, active = ${b.active}, params = ${tx.json(params)} where code = ${req.params.code}`;
       if (v.params?.parameter && (b.low !== undefined || b.high !== undefined))
         await tx`update parameters set typical_low = ${b.low ?? null}, typical_high = ${b.high ?? null} where code = ${v.params.parameter}`;

@@ -186,6 +186,7 @@ interface Rule {
   unit: string | null;
   low: number | null;
   high: number | null;
+  message: string | null;
 }
 interface Formula {
   id: string;
@@ -225,11 +226,8 @@ export function Config() {
   const current = SECTIONS.find((s) => s.id === section) ?? null;
   const [q, setQ] = useState("");
   const [sp] = useSearchParams();
+  const editorOpen = current?.id === "templates" && sp.has("v"); // the version editor draws its own breadcrumb
   const summary = useSummary();
-  const phoneEdit =
-    bp === "phone" &&
-    sp.has("edit") &&
-    (current?.id === "laboratory" || current?.id === "security");
   const sectionList = (
     <nav className="cfg-list" aria-label="Configuration sections">
       {(["LAB DATA", "DOCUMENTS", "SYSTEM"] as const).map((g) => (
@@ -244,7 +242,9 @@ export function Config() {
             >
               <span className="grow">{s.title}</span>
               {s.count && summary.data && (
-                <span className="t-sm c-mut">{summary.data.counts[s.count]}</span>
+                <span className="t-sm c-mut">
+                  {summary.data.counts[s.count]}
+                </span>
               )}
             </Link>
           ))}
@@ -274,20 +274,6 @@ export function Config() {
   ) : (
     <Overview summary={summary.data} />
   );
-  if (phoneEdit && current)
-    return (
-      <div className="page">
-        <nav className="crumb" aria-label="Breadcrumb">
-          <Link to="/config">Configuration</Link>
-          <Icon n="caret-right" />
-          <Link to={`/config/${current.id}`}>{current.title}</Link>
-          <Icon n="caret-right" />
-          <b>Edit</b>
-        </nav>
-        <h1 className="t-display">{current.title}</h1>
-        {body}
-      </div>
-    );
   return (
     <div className="page">
       <div className="page-head">
@@ -308,11 +294,13 @@ export function Config() {
       {bp === "phone" ? (
         current ? (
           <>
-            <nav className="crumb" aria-label="Breadcrumb">
-              <Link to="/config">Configuration</Link>
-              <Icon n="caret-right" />
-              <b>{current.title}</b>
-            </nav>
+            {!editorOpen && (
+              <nav className="crumb" aria-label="Breadcrumb">
+                <Link to="/config">Configuration</Link>
+                <Icon n="caret-right" />
+                <b>{current.title}</b>
+              </nav>
+            )}
             {body}
           </>
         ) : (
@@ -363,7 +351,7 @@ function Overview({ summary }: { summary: Summary | undefined }) {
     return l ? (
       <span className="row g6 wrap t-cap">
         <span className="c-mut">Last changed {fmtDate(l.at)}</span>
-        {l.by && <span className="c-brand w6">{l.by}</span>}
+        {l.by && <span className="c-mut w6">{l.by}</span>}
       </span>
     ) : (
       <span className="t-cap c-mut">Not changed yet</span>
@@ -493,11 +481,16 @@ function SearchResults({
   ];
   const sections = SECTIONS.filter((s) => hit(s.title, s.text));
   const shown = groups.filter((g) => g[2].length);
-  const found =
-    sections.length + shown.reduce((n, g) => n + g[2].length, 0);
+  const found = sections.length + shown.reduce((n, g) => n + g[2].length, 0);
   const n = shown.length + (sections.length ? 1 : 0);
   const row = (key: string, name: string, detail: string, id: SectionId) => (
-    <button key={key} type="button" className="lrow" style={{ alignItems: "center" }} onClick={() => onOpen(id)}>
+    <button
+      key={key}
+      type="button"
+      className="lrow"
+      style={{ alignItems: "center" }}
+      onClick={() => onOpen(id)}
+    >
       <span className="t-sm w6 grow" style={{ minWidth: 0 }}>
         {name}
       </span>
@@ -521,7 +514,9 @@ function SearchResults({
       {shown.map(([id, title, items]) => (
         <Card key={id} title={title} count={items.length}>
           <div className="col">
-            {items.slice(0, 8).map(([name, detail], i) => row(`${i}`, name, detail, id))}
+            {items
+              .slice(0, 8)
+              .map(([name, detail], i) => row(`${i}`, name, detail, id))}
           </div>
           {items.length > 8 && (
             <span className="t-cap c-mut">and {items.length - 8} more</span>
@@ -533,9 +528,8 @@ function SearchResults({
 }
 
 /* ======================= settings pages ======================= */
-/* FigCraft *-14-Configuration-08-Laboratory and -09-Security: cards of fields with one Restore defaults and Save under them.
-   The phone shows a read view (label, value, chevron per row); a tapped row opens the edit page (…-02-Edit): breadcrumb
-   "Configuration > Section > Edit", one card with the groups, Restore defaults, then Cancel and Save in the bottom bar. */
+/* FigCraft *-14-Configuration-08-Laboratory and -09-Security: cards of fields; desktop and tablet save the cards together with one
+   Restore defaults and Save; the phone shows a read card per group, each with its own Edit sheet (�-02-Edit-*). */
 interface SettingsData<T> {
   value: T;
   defaults: T;
@@ -589,6 +583,21 @@ function useSettingsForm(keys: string[], title: string, onSaved?: () => void) {
       setDraft(
         Object.fromEntries(keys.map((k, i) => [k, qs[i]!.data!.defaults])),
       ),
+    /** Put back the defaults of some fields only: { setting: [field, ...] }. */
+    restorePart: (parts: Record<string, string[]>) =>
+      setDraft((d) => {
+        const next = { ...d };
+        keys.forEach((k, i) => {
+          const fields = parts[k];
+          if (!fields) return;
+          const def = qs[i]!.data!.defaults;
+          next[k] = {
+            ...(d[k] ?? saved[k]),
+            ...Object.fromEntries(fields.map((x) => [x, def[x]])),
+          };
+        });
+        return next;
+      }),
     cancel: () => {
       setDraft({});
       setErr({});
@@ -598,148 +607,131 @@ function useSettingsForm(keys: string[], title: string, onSaved?: () => void) {
 }
 type SettingsForm = ReturnType<typeof useSettingsForm>;
 
-/** Phone edit mode of a settings page lives in the URL (?edit), so the breadcrumb and Back work. */
-function useEditMode() {
-  const [sp, setSp] = useSearchParams();
-  return {
-    editing: sp.has("edit"),
-    open: () => setSp({ edit: "" }),
-    close: () => setSp({}),
-  };
-}
-
-const Group = ({
-  title,
-  phone,
-  children,
-}: {
-  title: string;
-  phone: boolean;
-  children: ReactNode;
-}) =>
-  phone ? (
-    <div className="col g16">
-      <h2 className="t-h3">{title}</h2>
-      {children}
-    </div>
-  ) : (
-    <Card title={title}>{children}</Card>
-  );
-
-/** The form part: cards on desktop and tablet, one card with dividers on the phone edit page. */
+/** Desktop and tablet: one card per group, one Restore defaults and one Save under them. */
 function SettingsEdit({
   f,
   id,
-  phone,
   groups,
-  onCancel,
 }: {
   f: SettingsForm;
   id: string;
-  phone: boolean;
   groups: Array<[string, ReactNode]>;
-  onCancel: () => void;
 }) {
-  const restore = (
-    <Button type="ghost" size="lg" onClick={f.restore}>
-      Restore defaults
-    </Button>
-  );
-  const save = (
-    <Button
-      type="primary"
-      size={phone ? "touch" : "lg"}
-      id={`save-${id}`}
-      disabled={!f.dirty || f.save.isPending}
-      why="Nothing changed"
-      onClick={() => f.save.mutate(undefined)}
-    >
-      Save
-    </Button>
-  );
-  const alert = f.err.form && <Alert tone="error" title={f.err.form} />;
-  if (!phone)
-    return (
-      <>
-        {groups.map(([t, body]) => (
-          <Group key={t} title={t} phone={false}>
-            {body}
-          </Group>
-        ))}
-        {alert}
-        <div className="row g10 end">
-          {restore}
-          {save}
-        </div>
-      </>
-    );
   return (
     <>
-      <Card>
-        {groups.map(([t, body], i) => (
-          <div key={t} className="col g16">
-            {i > 0 && <div className="mdiv" />}
-            <Group title={t} phone>
-              {body}
-            </Group>
-          </div>
-        ))}
-        {alert}
-        <div className="row" style={{ justifyContent: "center" }}>
-          {restore}
-        </div>
-      </Card>
-      <div className="sticky-bar">
-        <Button
-          size="touch"
-          onClick={() => {
-            f.cancel();
-            onCancel();
-          }}
-        >
-          Cancel
+      {groups.map(([t, body]) => (
+        <Card key={t} title={t}>
+          <div className="col g16">{body}</div>
+        </Card>
+      ))}
+      {f.err.form && <Alert tone="error" title={f.err.form} />}
+      <div className="row g10 end">
+        <Button type="ghost" size="lg" onClick={f.restore}>
+          Restore defaults
         </Button>
-        {save}
+        <Button
+          type="primary"
+          size="lg"
+          id={`save-${id}`}
+          disabled={!f.dirty || f.save.isPending}
+          why="Nothing changed"
+          onClick={() => f.save.mutate(undefined)}
+        >
+          Save
+        </Button>
       </div>
     </>
   );
 }
 
-/** Phone read view: one card per group, a row per setting (label, value, chevron) that opens the edit page. */
-function SettingsRead({
-  groups,
+/** Phone read view of one group: a card with its own Edit button, then label over value for each row (no chevrons). */
+function PhoneCard({
+  title,
+  rows,
+  head,
+  foot,
   onEdit,
 }: {
-  groups: Array<[string, Array<[string, ReactNode]>, ReactNode?]>;
+  title: string;
+  rows: Array<[string, ReactNode]>;
+  head?: ReactNode;
+  foot?: ReactNode;
   onEdit: () => void;
 }) {
   return (
-    <>
-      {groups.map(([t, rows, foot]) => (
-        <Card key={t} title={t}>
-          <div className="col">
-            {rows.map(([k, val]) => (
-              <button
-                key={k}
-                type="button"
-                className="lrow plain"
-                style={{ alignItems: "center" }}
-                onClick={onEdit}
-              >
-                <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
-                  <span className="t-sm c-mut">{k}</span>
-                  <span className="t-sm">{val}</span>
-                </span>
-                <span className="c-mut" style={{ display: "inline-flex" }}>
-                  <Icon n="caret-right" />
-                </span>
-              </button>
-            ))}
+    <Card
+      title={title}
+      actions={
+        <Button
+          type="secondary"
+          size="md"
+          icon="pencil-simple"
+          onClick={onEdit}
+        >
+          Edit
+        </Button>
+      }
+    >
+      {head}
+      <div className="col g12">
+        {rows.map(([k, v]) => (
+          <div key={k} className="krow">
+            <span className="k">{k}</span>
+            <span className="v">{v}</span>
           </div>
-          {foot}
-        </Card>
-      ))}
-    </>
+        ))}
+      </div>
+      {foot}
+    </Card>
+  );
+}
+
+/** Phone edit of ONE group as a bottom sheet with its own form state: Restore defaults (this group's fields only), Cancel, Save. */
+function SettingsSheet({
+  keys,
+  title,
+  id,
+  restore,
+  onClose,
+  children,
+}: {
+  keys: string[];
+  title: string;
+  id: string;
+  restore: Record<string, string[]>;
+  onClose: () => void;
+  children: (f: SettingsForm) => ReactNode;
+}) {
+  const f = useSettingsForm(keys, title, onClose);
+  if (!f.ready) return null;
+  return (
+    <Dialog
+      title={`Edit ${title}`}
+      phone
+      onClose={onClose}
+      footer={
+        <>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            type="primary"
+            id={`save-${id}`}
+            disabled={!f.dirty || f.save.isPending}
+            why="Nothing changed"
+            onClick={() => f.save.mutate(undefined)}
+          >
+            Save
+          </Button>
+        </>
+      }
+    >
+      {children(f)}
+      {f.err.form && <Alert tone="error" title={f.err.form} />}
+      <div className="row" style={{ justifyContent: "center" }}>
+        <Button type="ghost" size="lg" onClick={() => f.restorePart(restore)}>
+          Restore defaults
+        </Button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -788,159 +780,189 @@ interface SecurityV extends Record<string, unknown> {
   reset_link_minutes: number;
   invite_days: number;
 }
-function SecuritySettings({ phone }: { phone: boolean }) {
-  const mode = useEditMode();
-  const f = useSettingsForm(["security"], "Security", mode.close);
-  if (!f.ready) return <Loading />;
+/* Security: four groups (Sign-in, Session, Passwords, Links), one setting. Desktop and tablet save them together; the phone
+   shows a card per group, each with its own Edit sheet. */
+const SEC_GROUPS = ["Sign-in", "Session", "Passwords", "Links"] as const;
+const SEC_FIELDS: Record<(typeof SEC_GROUPS)[number], string[]> = {
+  "Sign-in": ["lock_after_attempts", "lock_minutes"],
+  Session: ["idle_sign_out_minutes", "warn_before_seconds"],
+  Passwords: [
+    "min_password_length",
+    "require_letter_and_number",
+    "forbid_email_in_password",
+    "require_special_character",
+  ],
+  Links: ["invite_days"],
+};
+const secBody = (
+  f: SettingsForm,
+  g: (typeof SEC_GROUPS)[number],
+): ReactNode => {
   const v = f.v.security as SecurityV,
     e = f.err,
     set = (p: Partial<SecurityV>) => f.set("security", p);
-  const req = (b: boolean) => (b ? "Required" : "Not required");
-  if (phone && !mode.editing)
+  switch (g) {
+    case "Sign-in":
+      return (
+        <div className="cfg-form">
+          <NumField
+            id="sec-lock"
+            label="Lock after failed attempts"
+            value={v.lock_after_attempts}
+            onChange={(n) => set({ lock_after_attempts: n })}
+            err={e.lock_after_attempts}
+            help="3 to 10"
+          />
+          <NumField
+            id="sec-lockmin"
+            label="Lock for"
+            unit="minutes"
+            value={v.lock_minutes}
+            onChange={(n) => set({ lock_minutes: n })}
+            err={e.lock_minutes}
+          />
+        </div>
+      );
+    case "Session":
+      return (
+        <div className="cfg-form">
+          <NumField
+            id="sec-idle"
+            label="Sign out after inactivity"
+            unit="minutes"
+            value={v.idle_sign_out_minutes}
+            onChange={(n) => set({ idle_sign_out_minutes: n })}
+            err={e.idle_sign_out_minutes}
+          />
+          <NumField
+            id="sec-warn"
+            label="Warn before"
+            unit="seconds"
+            value={v.warn_before_seconds}
+            onChange={(n) => set({ warn_before_seconds: n })}
+            err={e.warn_before_seconds}
+          />
+        </div>
+      );
+    case "Passwords":
+      return (
+        <>
+          <div className="cfg-form">
+            <NumField
+              id="sec-pwlen"
+              label="Minimum length"
+              value={v.min_password_length}
+              onChange={(n) => set({ min_password_length: n })}
+              err={e.min_password_length}
+              help="8 to 64 characters"
+            />
+          </div>
+          <div className="col g10">
+            <Check
+              id="sec-letnum"
+              on={v.require_letter_and_number}
+              onChange={(b) => set({ require_letter_and_number: b })}
+              label="A letter and a number"
+            />
+            <Check
+              id="sec-noemail"
+              on={v.forbid_email_in_password}
+              onChange={(b) => set({ forbid_email_in_password: b })}
+              label="Not the email"
+            />
+            <Check
+              id="sec-special"
+              on={v.require_special_character}
+              onChange={(b) => set({ require_special_character: b })}
+              label="A special character"
+            />
+          </div>
+        </>
+      );
+    default:
+      return (
+        <div className="cfg-form">
+          <fieldset disabled className="bare">
+            <TextField
+              label="Reset link valid (minutes)"
+              value={String(v.reset_link_minutes)}
+              onChange={() => {}}
+              help="Set in Supabase Auth"
+            />
+          </fieldset>
+          <NumField
+            id="sec-invite"
+            label="Invite valid"
+            unit="days"
+            value={v.invite_days}
+            onChange={(n) => set({ invite_days: n })}
+            err={e.invite_days}
+          />
+        </div>
+      );
+  }
+};
+function SecuritySettings({ phone }: { phone: boolean }) {
+  const f = useSettingsForm(["security"], "Security");
+  const [sheet, setSheet] = useState<(typeof SEC_GROUPS)[number] | null>(null);
+  if (!f.ready) return <Loading />;
+  if (!phone)
     return (
-      <SettingsRead
-        onEdit={mode.open}
-        groups={[
-          [
-            "Sign-in",
-            [
-              ["Lock after failed attempts", v.lock_after_attempts],
-              ["Lock for", `${v.lock_minutes} minutes`],
-            ],
-          ],
-          [
-            "Session",
-            [
-              ["Sign out after inactivity", `${v.idle_sign_out_minutes} minutes`],
-              ["Warn before", `${v.warn_before_seconds} seconds`],
-            ],
-          ],
-          [
-            "Passwords",
-            [
-              ["Minimum length", `${v.min_password_length} characters`],
-              ["A letter and a number", req(v.require_letter_and_number)],
-              ["Not the email", req(v.forbid_email_in_password)],
-              ["A special character", req(v.require_special_character)],
-            ],
-          ],
-          [
-            "Links",
-            [
-              ["Reset link valid", `${v.reset_link_minutes} minutes`],
-              ["Invite valid", `${v.invite_days} days`],
-            ],
-          ],
-        ]}
+      <SettingsEdit
+        f={f}
+        id="security"
+        groups={SEC_GROUPS.map(
+          (g) => [g, secBody(f, g)] as [string, ReactNode],
+        )}
       />
     );
+  const v = f.v.security as SecurityV;
+  const req = (b: boolean) => (b ? "Required" : "Not required");
+  const rows: Record<
+    (typeof SEC_GROUPS)[number],
+    Array<[string, ReactNode]>
+  > = {
+    "Sign-in": [
+      ["Lock after failed attempts", v.lock_after_attempts],
+      ["Lock for", `${v.lock_minutes} minutes`],
+    ],
+    Session: [
+      ["Sign out after inactivity", `${v.idle_sign_out_minutes} minutes`],
+      ["Warn before", `${v.warn_before_seconds} seconds`],
+    ],
+    Passwords: [
+      ["Minimum length", `${v.min_password_length} characters`],
+      ["A letter and a number", req(v.require_letter_and_number)],
+      ["Not the email", req(v.forbid_email_in_password)],
+      ["A special character", req(v.require_special_character)],
+    ],
+    Links: [
+      ["Reset link valid", `${v.reset_link_minutes} minutes`],
+      ["Invite valid", `${v.invite_days} days`],
+    ],
+  };
   return (
-    <SettingsEdit
-      f={f}
-      id="security"
-      phone={phone}
-      onCancel={mode.close}
-      groups={[
-        [
-          "Sign-in",
-          <div className="cfg-form">
-            <NumField
-              id="sec-lock"
-              label="Lock after failed attempts"
-              value={v.lock_after_attempts}
-              onChange={(n) => set({ lock_after_attempts: n })}
-              err={e.lock_after_attempts}
-              help="3 to 10"
-            />
-            <NumField
-              id="sec-lockmin"
-              label="Lock for"
-              unit="minutes"
-              value={v.lock_minutes}
-              onChange={(n) => set({ lock_minutes: n })}
-              err={e.lock_minutes}
-            />
-          </div>,
-        ],
-        [
-          "Session",
-          <div className="cfg-form">
-            <NumField
-              id="sec-idle"
-              label="Sign out after inactivity"
-              unit="minutes"
-              value={v.idle_sign_out_minutes}
-              onChange={(n) => set({ idle_sign_out_minutes: n })}
-              err={e.idle_sign_out_minutes}
-            />
-            <NumField
-              id="sec-warn"
-              label="Warn before"
-              unit="seconds"
-              value={v.warn_before_seconds}
-              onChange={(n) => set({ warn_before_seconds: n })}
-              err={e.warn_before_seconds}
-            />
-          </div>,
-        ],
-        [
-          "Passwords",
-          <>
-            <div className="cfg-form">
-              <NumField
-                id="sec-pwlen"
-                label="Minimum length"
-                value={v.min_password_length}
-                onChange={(n) => set({ min_password_length: n })}
-                err={e.min_password_length}
-                help="8 to 64 characters"
-              />
-            </div>
-            <div className="col g10">
-              <Check
-                id="sec-letnum"
-                on={v.require_letter_and_number}
-                onChange={(b) => set({ require_letter_and_number: b })}
-                label="A letter and a number"
-              />
-              <Check
-                id="sec-noemail"
-                on={v.forbid_email_in_password}
-                onChange={(b) => set({ forbid_email_in_password: b })}
-                label="Not the email"
-              />
-              <Check
-                id="sec-special"
-                on={v.require_special_character}
-                onChange={(b) => set({ require_special_character: b })}
-                label="A special character"
-              />
-            </div>
-          </>,
-        ],
-        [
-          "Links",
-          <div className="cfg-form">
-            <fieldset disabled className="bare">
-              <TextField
-                label="Reset link valid (minutes)"
-                value={String(v.reset_link_minutes)}
-                onChange={() => {}}
-                help="Set in Supabase Auth"
-              />
-            </fieldset>
-            <NumField
-              id="sec-invite"
-              label="Invite valid"
-              unit="days"
-              value={v.invite_days}
-              onChange={(n) => set({ invite_days: n })}
-              err={e.invite_days}
-            />
-          </div>,
-        ],
-      ]}
-    />
+    <>
+      {SEC_GROUPS.map((g) => (
+        <PhoneCard
+          key={g}
+          title={g}
+          rows={rows[g]}
+          onEdit={() => setSheet(g)}
+        />
+      ))}
+      {sheet && (
+        <SettingsSheet
+          keys={["security"]}
+          title={sheet}
+          id={`security-${sheet.toLowerCase().replace(/[^a-z]/g, "")}`}
+          restore={{ security: SEC_FIELDS[sheet] }}
+          onClose={() => setSheet(null)}
+        >
+          {(sf) => secBody(sf, sheet)}
+        </SettingsSheet>
+      )}
+    </>
   );
 }
 
@@ -966,56 +988,147 @@ const PATTERNS: Array<[string, string, keyof NumberingV, string]> = [
   ["num-scode", "Sample code", "sample_code", "001.RI.001.Lot01"],
   ["num-coa", "CoA", "coa", "CoA-JO-2026-0142-1"],
 ];
-const NUM_HELP = "New numbers follow the pattern; existing numbers never change.";
+const NUM_HELP =
+  "New numbers follow the pattern; existing numbers never change.";
 const TOKENS = (
   <span className="t-cap c-mut">
     Tokens: {"{YYYY} {YY} {MM} {DD} {YYMMDD}"} date; {"{NNNN} {NNN} {NN}"}{" "}
-    running number; {"{CCC}"} company code; {"{BB}"} branch office;{" "}
-    {"{LOT}"} lot; {"{job_order} {revision}"} for the CoA.
+    running number; {"{CCC}"} company code; {"{BB}"} branch office; {"{LOT}"}{" "}
+    lot; {"{job_order} {revision}"} for the CoA.
   </span>
 );
-/* Laboratory, Numbering and Branch offices: two settings (laboratory, numbering) saved together. The logo is not built yet. */
-function LaboratorySettings({ phone }: { phone: boolean }) {
-  const mode = useEditMode();
-  const f = useSettingsForm(["laboratory", "numbering"], "Laboratory", mode.close);
-  if (!f.ready) return <Loading />;
+/* Laboratory, Numbering and Branch offices: two settings (laboratory, numbering). Desktop and tablet save the three groups together;
+   the phone shows a card per group, each with its own Edit sheet. */
+type LabGroup = "laboratory" | "numbering" | "branches";
+const LAB_TITLE: Record<LabGroup, string> = {
+  laboratory: "Laboratory",
+  numbering: "Numbering",
+  branches: "Branch offices",
+};
+const LAB_KEYS: Record<LabGroup, string[]> = {
+  laboratory: ["laboratory"],
+  numbering: ["numbering"],
+  branches: ["laboratory"],
+};
+const LAB_RESTORE: Record<LabGroup, Record<string, string[]>> = {
+  laboratory: {
+    laboratory: ["name", "address", "accreditation", "place_of_issue"],
+  },
+  numbering: {
+    numbering: [
+      "job_order",
+      "batch",
+      "sample_id",
+      "sample_code",
+      "coa",
+      "sample_no_width",
+    ],
+  },
+  branches: { laboratory: ["branches"] },
+};
+
+/** The laboratory's logo (the SGSI icon with the name) and its Replace logo button. */
+function LabLogo({ editable }: { editable: boolean }) {
+  return (
+    <div className="row g16 wrap" style={{ justifyContent: "space-between" }}>
+      <div className="lablogo" aria-label="Laboratory logo">
+        <img src="/sgsi-icon-primary.svg" alt="" />
+        <span className="rule" />
+        <span className="nm">
+          Sentra
+          <br />
+          Geo Survey
+          <br />
+          Indonesia
+        </span>
+      </div>
+      {editable && (
+        <Button
+          icon="upload-simple"
+          disabled
+          why="Replacing the logo comes with the certificate layout; the certificate uses this logo"
+        >
+          Replace logo
+        </Button>
+      )}
+    </div>
+  );
+}
+
+const labBody = (f: SettingsForm, g: LabGroup): ReactNode => {
   const lab = f.v.laboratory as LabV,
     nb = f.v.numbering as NumberingV,
     e = f.err,
     setLab = (p: Partial<LabV>) => f.set("laboratory", p),
     setNb = (p: Partial<NumberingV>) => f.set("numbering", p);
-  if (phone && !mode.editing)
+  if (g === "laboratory")
     return (
-      <SettingsRead
-        onEdit={mode.open}
-        groups={[
-          [
-            "Laboratory",
-            [
-              ["Laboratory name", lab.name],
-              ["Address", lab.address || "Not set"],
-              ["Accreditation number", lab.accreditation || "Not set"],
-              ["Place of issue", lab.place_of_issue],
-            ],
-          ],
-          [
-            "Numbering",
-            [
-              ...PATTERNS.map(
-                ([, label, k]) => [label, String(nb[k])] as [string, ReactNode],
-              ),
-              ["Sample ID running number", `${nb.sample_no_width} digits`],
-            ],
-            <span className="t-sm c-sec">{NUM_HELP}</span>,
-          ],
-          [
-            "Branch offices",
-            lab.branches.map((b) => [b.code, b.name] as [string, ReactNode]),
-          ],
-        ]}
-      />
+      <>
+        <LabLogo editable />
+        <TextField
+          id="lab-name"
+          label="Laboratory name"
+          req
+          value={lab.name}
+          onChange={(t) => setLab({ name: t })}
+          error={e.name ?? null}
+        />
+        <TextArea
+          id="lab-address"
+          label="Address"
+          value={lab.address}
+          onChange={(t) => setLab({ address: t })}
+          rows={4}
+        />
+        <div className="cfg-form">
+          <TextField
+            id="lab-accr"
+            label="Accreditation number"
+            value={lab.accreditation}
+            onChange={(t) => setLab({ accreditation: t })}
+          />
+          <TextField
+            id="lab-place"
+            label="Place of issue"
+            req
+            value={lab.place_of_issue}
+            onChange={(t) => setLab({ place_of_issue: t })}
+            error={e.place_of_issue ?? null}
+            help={`Printed as "Issued at ${lab.place_of_issue || "�"}"`}
+          />
+        </div>
+      </>
     );
-  const branches = (
+  if (g === "numbering")
+    return (
+      <>
+        <div className="cfg-form">
+          {PATTERNS.map(([id, label, k, example]) => (
+            <TextField
+              key={id}
+              id={id}
+              label={label}
+              value={String(nb[k])}
+              onChange={(t) => setNb({ [k]: t } as Partial<NumberingV>)}
+              error={e[k as string] ?? null}
+              help={`For example ${example}`}
+            />
+          ))}
+          <NumField
+            id="num-width"
+            label="Sample ID running number"
+            unit="digits"
+            value={nb.sample_no_width}
+            onChange={(n) => setNb({ sample_no_width: n })}
+            err={e.sample_no_width}
+            help="3 allows 999 samples per client and day"
+          />
+        </div>
+        <span className="t-sm c-sec">{NUM_HELP}</span>
+        {TOKENS}
+      </>
+    );
+  return (
     <>
       <div className="col g8">
         {lab.branches.map((b, i) => (
@@ -1078,81 +1191,65 @@ function LaboratorySettings({ phone }: { phone: boolean }) {
       </span>
     </>
   );
+};
+
+function LaboratorySettings({ phone }: { phone: boolean }) {
+  const f = useSettingsForm(["laboratory", "numbering"], "Laboratory");
+  const [sheet, setSheet] = useState<LabGroup | null>(null);
+  if (!f.ready) return <Loading />;
+  if (!phone)
+    return (
+      <SettingsEdit
+        f={f}
+        id="laboratory"
+        groups={(Object.keys(LAB_TITLE) as LabGroup[]).map(
+          (g) => [LAB_TITLE[g], labBody(f, g)] as [string, ReactNode],
+        )}
+      />
+    );
+  const lab = f.v.laboratory as LabV,
+    nb = f.v.numbering as NumberingV;
   return (
-    <SettingsEdit
-      f={f}
-      id="laboratory"
-      phone={phone}
-      onCancel={mode.close}
-      groups={[
-        [
-          "Laboratory",
-          <>
-            <TextField
-              id="lab-name"
-              label="Laboratory name"
-              req
-              value={lab.name}
-              onChange={(t) => setLab({ name: t })}
-              error={e.name ?? null}
-            />
-            <TextArea
-              id="lab-address"
-              label="Address"
-              value={lab.address}
-              onChange={(t) => setLab({ address: t })}
-            />
-            <div className="cfg-form">
-              <TextField
-                id="lab-accr"
-                label="Accreditation number"
-                value={lab.accreditation}
-                onChange={(t) => setLab({ accreditation: t })}
-              />
-              <TextField
-                id="lab-place"
-                label="Place of issue"
-                req
-                value={lab.place_of_issue}
-                onChange={(t) => setLab({ place_of_issue: t })}
-                error={e.place_of_issue ?? null}
-                help={`Printed as "Issued at ${lab.place_of_issue || "…"}"`}
-              />
-            </div>
-          </>,
-        ],
-        [
-          "Numbering",
-          <>
-            <div className="cfg-form">
-              {PATTERNS.map(([id, label, k, example]) => (
-                <TextField
-                  key={id}
-                  id={id}
-                  label={label}
-                  value={String(nb[k])}
-                  onChange={(t) => setNb({ [k]: t } as Partial<NumberingV>)}
-                  error={e[k as string] ?? null}
-                  help={`For example ${example}`}
-                />
-              ))}
-              <NumField
-                id="num-width"
-                label="Sample ID running number"
-                unit="digits"
-                value={nb.sample_no_width}
-                onChange={(n) => setNb({ sample_no_width: n })}
-                err={e.sample_no_width}
-                help="3 allows 999 samples per client and day"
-              />
-            </div>
-            <span className="t-sm c-sec">{NUM_HELP}</span>
-            {TOKENS}
-          </>,
-        ],
-        ["Branch offices", branches],
-      ]}
-    />
+    <>
+      <PhoneCard
+        title="Laboratory"
+        head={<LabLogo editable={false} />}
+        rows={[
+          ["Laboratory name", lab.name],
+          ["Address", lab.address || "Not set"],
+          ["Accreditation number", lab.accreditation || "Not set"],
+          ["Place of issue", lab.place_of_issue],
+        ]}
+        onEdit={() => setSheet("laboratory")}
+      />
+      <PhoneCard
+        title="Numbering"
+        rows={[
+          ...PATTERNS.map(
+            ([, label, k]) => [label, String(nb[k])] as [string, ReactNode],
+          ),
+          ["Sample ID running number", `${nb.sample_no_width} digits`],
+        ]}
+        foot={<span className="t-sm c-sec">{NUM_HELP}</span>}
+        onEdit={() => setSheet("numbering")}
+      />
+      <PhoneCard
+        title="Branch offices"
+        rows={lab.branches.map((b) => [b.code, b.name] as [string, ReactNode])}
+        onEdit={() => setSheet("branches")}
+      />
+      {sheet && (
+        <SettingsSheet
+          keys={LAB_KEYS[sheet]}
+          title={LAB_TITLE[sheet]}
+          id={`laboratory-${sheet}`}
+          restore={LAB_RESTORE[sheet]}
+          onClose={() => setSheet(null)}
+        >
+          {(sf) => labBody(sf, sheet)}
+        </SettingsSheet>
+      )}
+    </>
   );
 }
 
@@ -1235,8 +1332,15 @@ function Lookups({ editable, phone }: { editable: boolean; phone: boolean }) {
             rows={rows}
             keyOf={(l) => l.id}
             cols={[
-              { h: "Order", render: (l) => <span className="c-mut">{l.sortOrder}</span> },
-              { h: "Value", render: (l) => <b className="t-sm w6">{l.value}</b> },
+              {
+                h: "Order",
+                cls: "r",
+                render: (l) => <span className="c-mut">{l.sortOrder}</span>,
+              },
+              {
+                h: "Value",
+                render: (l) => <b className="t-sm w6">{l.value}</b>,
+              },
               { h: "Needs a remark", render: (l) => yes(l.needsRemark) },
               { h: "Status", render: status },
               editable && {
@@ -1363,7 +1467,10 @@ function Parameters({ editable }: { editable: boolean }) {
     [cat, setCat] = useState("all"),
     [form, setForm] = useState<Param | "new" | null>(null);
   const items = useMemo(() => data.filter((p) => !p.isGroup), [data]);
-  const cats = useMemo(() => [...new Set(items.map((p) => p.category))], [items]);
+  const cats = useMemo(
+    () => [...new Set(items.map((p) => p.category))],
+    [items],
+  );
   const base = items.filter(
     (p) =>
       !q ||
@@ -1400,8 +1507,14 @@ function Parameters({ editable }: { editable: boolean }) {
       </Button>
     ),
   };
-  const code = { h: "Code", render: (p: Param) => <b className="t-data-b">{p.code}</b> };
-  const name = { h: "Name", render: (p: Param) => <span className="t-sm">{p.name}</span> };
+  const code = {
+    h: "Code",
+    render: (p: Param) => <b className="t-data-b">{p.code}</b>,
+  };
+  const name = {
+    h: "Name",
+    render: (p: Param) => <span className="t-sm">{p.name}</span>,
+  };
   const group = { h: "Group", render: (p: Param) => p.category };
   const cols = tablet
     ? [code, name, group, { h: "Methods", render: methods }, edit]
@@ -1741,7 +1854,10 @@ function Rules({ editable, phone }: { editable: boolean; phone: boolean }) {
               >
                 <span className="col grow" style={{ gap: 2, minWidth: 0 }}>
                   <span className="row g8" style={{ minWidth: 0 }}>
-                    <b className="t-data-b" style={{ flex: "none", whiteSpace: "nowrap" }}>
+                    <b
+                      className="t-data-b"
+                      style={{ flex: "none", whiteSpace: "nowrap" }}
+                    >
                       {r.code}
                     </b>
                     <span className="t-sm ellip">{r.description}</span>
@@ -1765,7 +1881,10 @@ function Rules({ editable, phone }: { editable: boolean; phone: boolean }) {
             rows={data}
             keyOf={(r) => r.code}
             cols={[
-              { h: "Rule", render: (r) => <b className="t-data-b">{r.code}</b> },
+              {
+                h: "Rule",
+                render: (r) => <b className="t-data-b">{r.code}</b>,
+              },
               {
                 h: "Applies to",
                 render: (r) => (
@@ -1802,6 +1921,9 @@ function Rules({ editable, phone }: { editable: boolean; phone: boolean }) {
     </>
   );
 }
+/** {low}, {high}, {unit} and {parameter} in a rule's message take the values of its bounds fields. */
+const fillTokens = (m: string, v: Record<string, string>) =>
+  m.replace(/\{(parameter|low|high|unit)\}/g, (_, k: string) => v[k] || "…");
 function RuleForm({
   r,
   phone,
@@ -1817,6 +1939,11 @@ function RuleForm({
     tolerance: r.tolerance?.toString() ?? "",
     low: r.low?.toString() ?? "",
     high: r.high?.toString() ?? "",
+    message:
+      r.message ??
+      (r.parameter
+        ? "{parameter} is outside {low} to {high} {unit}. Check the value before you save."
+        : `${r.description}. Check the value before you save.`),
   });
   const [err, setErr] = useState<Record<string, string>>({});
   const save = useSave(
@@ -1826,6 +1953,7 @@ function RuleForm({
         json: {
           severity: f.severity,
           active: f.active,
+          message: f.message,
           ...(r.tolerance != null ? { tolerance: Number(f.tolerance) } : {}),
           ...(r.parameter ? { low: num(f.low), high: num(f.high) } : {}),
         },
@@ -1847,7 +1975,7 @@ function RuleForm({
   };
   return (
     <Dialog
-      title={`Edit ${r.code}`}
+      title={`Edit rule ${r.code}`}
       sub={r.description}
       phone={phone}
       onClose={onClose}
@@ -1876,6 +2004,9 @@ function RuleForm({
           value={f.severity}
           onChange={(v) => setF({ ...f, severity: v })}
         />
+        <span className="help">
+          Block stops the value from being saved; Warn saves it with a flag.
+        </span>
       </div>
       {r.tolerance != null && (
         <TextField
@@ -1890,14 +2021,14 @@ function RuleForm({
         <div className="cfg-form">
           <TextField
             id="ru-lo"
-            label={`Low${r.unit ? ` (${r.unit})` : ""}`}
+            label={`Lower bound${r.unit ? ` (${r.unit})` : ""}`}
             type="number"
             value={f.low}
             onChange={(t) => setF({ ...f, low: t })}
           />
           <TextField
             id="ru-hi"
-            label={`High${r.unit ? ` (${r.unit})` : ""}`}
+            label={`Upper bound${r.unit ? ` (${r.unit})` : ""}`}
             type="number"
             value={f.high}
             onChange={(t) => setF({ ...f, high: t })}
@@ -1905,15 +2036,51 @@ function RuleForm({
           />
         </div>
       )}
+      <TextArea
+        id="ru-message"
+        label="Message shown"
+        value={f.message}
+        onChange={(t) => setF({ ...f, message: t })}
+      />
+      {r.parameter && (
+        <>
+          <span className="row g6 wrap">
+            {["{parameter}", "{low}", "{high}", "{unit}"].map((tok) => (
+              <button
+                key={tok}
+                type="button"
+                className="ppill"
+                style={{ height: 24, fontSize: 12 }}
+                onClick={() =>
+                  setF({
+                    ...f,
+                    message: `${f.message}${f.message && !f.message.endsWith(" ") ? " " : ""}${tok}`,
+                  })
+                }
+              >
+                {tok}
+              </button>
+            ))}
+          </span>
+          <span className="help" id="ru-shown">
+            Shown as:{" "}
+            {fillTokens(f.message, {
+              parameter: r.parameter,
+              low: f.low,
+              high: f.high,
+              unit: r.unit ?? "",
+            })}
+          </span>
+        </>
+      )}
+      {err.message && <span className="help err">{err.message}</span>}
       <Switch
         id="ru-active"
         on={f.active}
         onChange={(b) => setF({ ...f, active: b })}
         label="Active"
       />
-      <span className="help">
-        Block stops the value from being saved; Warn saves it with a flag.
-      </span>
+
       {err.form && <span className="help err">{err.form}</span>}
     </Dialog>
   );
@@ -1934,13 +2101,19 @@ function Formulas({ phone }: { phone: boolean }) {
       {phone ? (
         <div className="col">
           {data.map((f) => (
-            <div key={f.id} className="lrow plain-cursor" style={{ flexDirection: "column", gap: 4 }}>
+            <div
+              key={f.id}
+              className="lrow plain-cursor"
+              style={{ flexDirection: "column", gap: 4 }}
+            >
               <span className="row between g8" style={{ width: "100%" }}>
                 <b className="t-sm w6">{name(f)}</b>
                 <span className="t-sm c-sec">v{f.version}</span>
               </span>
               <code className="t-data">{f.expression}</code>
-              <span className="t-cap c-mut">Used since {fmtDate(f.validFrom)}</span>
+              <span className="t-cap c-mut">
+                Used since {fmtDate(f.validFrom)}
+              </span>
             </div>
           ))}
         </div>

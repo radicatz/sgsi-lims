@@ -2,7 +2,9 @@
 // (versioned, text fields with a live preview). Every screen follows the FigCraft frames *-14-Configuration-03/04/06-*; the phone
 // edits too: a tapped row opens the form as a bottom sheet, a template version opens the editor.
 import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { CoaDocument, FitPage, type CoaLab } from "./CoaDocument";
 import { api } from "../../app/api";
 import { useBreakpoint } from "../../app/session";
 import {
@@ -11,6 +13,7 @@ import {
   Dialog,
   Empty,
   Icon,
+  IconBtn,
   TextField,
   TextArea,
   cx,
@@ -893,8 +896,11 @@ export function Templates({ editable: wide }: { editable: boolean }) {
   const { data = [], isLoading } = useConfigList<Template>("templates");
   const bp = useBreakpoint();
   const editable = wide || bp === "phone";
-  const [openId, setOpenId] = useState<string | null>(null),
-    [del, setDel] = useState<Template | null>(null);
+  // the open version lives in the URL (?v=), so Config can drop its own breadcrumb while the editor shows its three levels
+  const [sp, setSp] = useSearchParams();
+  const openId = sp.get("v");
+  const setOpenId = (id: string | null) => setSp(id ? { v: id } : {});
+  const [del, setDel] = useState<Template | null>(null);
   const act = useSave(
     (p: { id: string; verb: "activate" }) =>
       api(`/config/templates/${p.id}/${p.verb}`, { method: "POST" }),
@@ -1073,6 +1079,11 @@ function TemplateEditor({
   onBack: () => void;
 }) {
   const draft = t.status === "draft" && editable;
+  const lab = useQuery({
+    queryKey: ["config", "settings", "laboratory"],
+    queryFn: () =>
+      api<{ value: CoaLab }>("/config/settings/laboratory").then((r) => r.value),
+  });
   const [f, setF] = useState({
     formCode: t.formCode,
     title: t.title,
@@ -1081,6 +1092,7 @@ function TemplateEditor({
     note: t.note ?? "",
   });
   const [err, setErr] = useState<Record<string, string>>({});
+  const [show, setShow] = useState(false);
   const dirty =
     f.formCode !== t.formCode ||
     f.title !== t.title ||
@@ -1117,12 +1129,29 @@ function TemplateEditor({
     setErr(e);
     return !Object.keys(e).length;
   };
+  const labv: CoaLab = lab.data ?? { name: "", address: "", place_of_issue: "" };
+  const page = (
+    <CoaDocument f={f} revision={t.revision} draft={t.status === "draft"} lab={labv} />
+  );
   return (
     <>
-      <button type="button" className="linkbtn" onClick={onBack}>
-        <Icon n="caret-left" />
-        All versions
-      </button>
+      {phone ? (
+        <nav className="crumb" aria-label="Breadcrumb">
+          <Link to="/config">Configuration</Link>
+          <Icon n="caret-right" />
+          <button type="button" className="linkbtn" onClick={onBack}>
+            Report templates
+          </button>
+          <Icon n="caret-right" />
+          <b>Version {t.revision}</b>
+        </nav>
+      ) : (
+        <div className="row">
+          <Button type="ghost" icon="caret-left" onClick={onBack}>
+            All versions
+          </Button>
+        </div>
+      )}
       <Card
         title={`Version ${t.revision} (${TPL_LABEL[t.status].toLowerCase()})`}
       >
@@ -1154,26 +1183,49 @@ function TemplateEditor({
             label="Statement"
             value={f.statement}
             onChange={(x) => setF({ ...f, statement: x })}
+            {...(phone ? { rows: 5 } : {})}
           />
           <TextArea
             id="tp-terms"
             label="Terms line"
             value={f.terms}
             onChange={(x) => setF({ ...f, terms: x })}
+            {...(phone ? { rows: 4 } : {})}
           />
-          <TextField
-            id="tp-note"
-            label="Note"
-            value={f.note}
-            onChange={(x) => setF({ ...f, note: x })}
-            help="What changed in this version."
-          />
+          {phone ? (
+            <TextArea
+              id="tp-note"
+              label="Note"
+              value={f.note}
+              onChange={(x) => setF({ ...f, note: x })}
+              rows={4}
+            />
+          ) : (
+            <TextField
+              id="tp-note"
+              label="Note"
+              value={f.note}
+              onChange={(x) => setF({ ...f, note: x })}
+              help="What changed in this version."
+            />
+          )}
           {(err.statement || err.terms || err.form) && (
             <span className="help err">
               {err.statement ?? err.terms ?? err.form}
             </span>
           )}
         </fieldset>
+        {phone && (
+          <Button
+            id="tp-preview"
+            size="touch"
+            icon="file-text"
+            block
+            onClick={() => setShow(true)}
+          >
+            Preview certificate
+          </Button>
+        )}
         {draft && phone && (
           <>
             <Button
@@ -1225,15 +1277,13 @@ function TemplateEditor({
           </Note>
         )}
       </Card>
-      <Card title="Preview">
-        <div className="coa-stage">
-          <CoaPreview
-            f={f}
-            revision={t.revision}
-            draft={t.status === "draft"}
-          />
-        </div>
-      </Card>
+      {!phone && (
+        <Card title="Preview">
+          <div className="a4-stage">
+            <FitPage>{page}</FitPage>
+          </div>
+        </Card>
+      )}
       {draft && phone && (
         <div className="sticky-bar">
           <Button size="touch" onClick={onBack}>
@@ -1251,69 +1301,22 @@ function TemplateEditor({
           </Button>
         </div>
       )}
-    </>
-  );
-}
-
-/** A drawing of the certificate with demo results; the text fields above feed it live. */
-function CoaPreview({
-  f,
-  revision,
-  draft,
-}: {
-  f: { title: string; formCode: string; statement: string; terms: string };
-  revision: number;
-  draft: boolean;
-}) {
-  const rows: Array<[string, string, string, string]> = [
-    ["Total moisture", "%", "—", "14.20"],
-    ["Inherent moisture", "%", "8.10", "—"],
-    ["Ash", "%", "5.42", "5.06"],
-    ["Volatile matter", "%", "39.85", "37.21"],
-    ["Total sulphur", "%", "0.42", "0.39"],
-    ["Gross calorific value", "kcal/kg", "5,980", "5,584"],
-  ];
-  return (
-    <div className="coa" aria-label="Certificate preview">
-      {draft && (
-        <span className="coa-mark" aria-hidden="true">
-          DRAFT
-        </span>
+      {phone && show && (
+        <div
+          className="fullscreen"
+          style={{ position: "fixed", zIndex: 60 }}
+          role="dialog"
+          aria-label="Certificate preview"
+        >
+          <div className="fh">
+            <IconBtn n="caret-left" label="Back" size={44} onClick={() => setShow(false)} />
+            <b className="t-sm w6">Preview certificate</b>
+          </div>
+          <div className="fb" style={{ background: "var(--surface-muted)" }}>
+            <FitPage>{page}</FitPage>
+          </div>
+        </div>
       )}
-      <div className="row between">
-        <b className="t-sm w6">Sentra Geo Survey Indonesia</b>
-        <span className="t-data">CoA-JO-2026-0142-1</span>
-      </div>
-      <h3 className="t-h2 coa-title">{f.title || "Certificate of Analysis"}</h3>
-      <p className="t-cap c-sec" style={{ margin: 0 }}>
-        {f.statement}
-      </p>
-      <table className="coa-t">
-        <thead>
-          <tr>
-            <th>Parameter</th>
-            <th>Unit</th>
-            <th>ADB</th>
-            <th>AR</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r[0]}>
-              <td>{r[0]}</td>
-              <td>{r[1]}</td>
-              <td>{r[2]}</td>
-              <td>{r[3]}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="row between coa-foot">
-        <span className="t-cap c-sec">{f.terms}</span>
-        <span className="t-cap c-mut">
-          {f.formCode} rev {revision}
-        </span>
-      </div>
-    </div>
+    </>
   );
 }

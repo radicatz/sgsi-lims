@@ -215,7 +215,10 @@ a.mi {
   gap: 16px;
 }
 .phone .cfg-form {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+}
+.cfg-form > * {
+  min-width: 0;
 }
 fieldset:disabled .input {
   background: var(--surface-muted);
@@ -384,62 +387,267 @@ fieldset:disabled .input {
   }
 }
 
-/* configuration: certificate preview (report templates) */
-.coa-stage {
+/* configuration: laboratory logo block, phone section cards */
+.lablogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lablogo img {
+  width: 48px;
+  height: auto;
+  flex: none;
+}
+.lablogo .rule {
+  width: 1px;
+  align-self: stretch;
+  background: var(--primary-deep);
+  opacity: 0.7;
+}
+.lablogo .nm {
+  font: 600 17px/1.05 var(--f-display);
+  color: var(--primary-deep);
+  letter-spacing: -0.2px;
+}
+.krow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.krow .k {
+  font: 400 12px/16px var(--f-body);
+  color: var(--text-muted);
+}
+.krow .v {
+  font: 400 13px/20px var(--f-body);
+  color: var(--text-foreground);
+  overflow-wrap: anywhere;
+}
+
+/* configuration: the certificate page (A4, 1 px = 1 pt). Tokens: navy only for the brand name; keys muted, strokes the warm border, values neutral */
+.a4-stage {
   background: var(--surface-muted);
   border-radius: 12px;
   padding: 24px;
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
+  overflow: hidden;
 }
-.coa {
-  position: relative;
-  width: 640px;
-  max-width: 100%;
-  background: #fff;
+.phone .a4-stage {
+  padding: 12px;
+}
+.zoombar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.zoomval {
+  min-width: 52px;
+  text-align: center;
+  font: 600 12px/16px var(--f-body);
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: 8px;
+}
+.zoomval:hover {
+  background: var(--primary-50);
+}
+.fullscreen .zoombar {
+  position: fixed;
+  z-index: 70;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 4px 8px;
+  background: var(--surface-card);
   border: 1px solid var(--surface-border);
-  border-radius: 4px;
-  padding: 28px 32px;
+  border-radius: 999px;
+  box-shadow: var(--e-lg);
+}
+.fullscreen .fb {
+  padding-bottom: 80px;
+}
+.zoombox {
+  width: 100%;
+  overflow: auto;
+  max-height: 78vh;
+}
+.a4 {
+  position: relative;
+  width: 595px;
+  height: 842px;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 34px 40px 30px;
+  box-shadow: var(--e-md);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  overflow: hidden;
+  font: 400 8px/12px var(--f-body);
+  color: var(--text-foreground);
 }
-.coa-title {
-  margin: 0;
+.a4-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.a4-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.a4-brand img {
+  width: 40px;
+  height: auto;
+  flex: none;
+}
+.a4-brand b {
+  display: block;
+  font: 600 14px/16px var(--f-display);
+  color: var(--text-heading);
+}
+.a4-brand span {
+  display: block;
+  font-size: 7px;
+  line-height: 10px;
+  color: var(--text-muted);
+  max-width: 280px;
+}
+.a4-no {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 7.5px;
+  color: var(--text-muted);
+}
+.a4-no b {
+  font: 600 9px/14px var(--f-mono);
+  color: var(--text-foreground);
+}
+.a4-title {
+  margin: 6px 0 0;
   text-align: center;
+  font: 500 22px/28px var(--f-display);
+  color: var(--text-heading);
 }
-.coa-t {
+.a4-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 4px;
+}
+.a4-meta dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.a4-meta dl > div {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 6px;
+}
+.a4-meta dt {
+  color: var(--text-muted);
+}
+.a4-meta dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-foreground);
+}
+.a4-statement {
+  margin: 2px 0 0;
+  font-size: 8px;
+  line-height: 12px;
+  color: var(--text-foreground);
+}
+.a4-t {
   width: 100%;
   border-collapse: collapse;
-  font: 400 12px/18px var(--f-body);
+  table-layout: fixed;
+  font-family: var(--f-body);
+  font-size: 7.5px;
+  line-height: 11px;
+  border: 1px solid var(--surface-border);
 }
-.coa-t th {
-  text-align: left;
-  color: var(--text-secondary);
-  font-weight: 600;
-  padding: 4px 8px;
-  background: var(--surface-muted);
-}
-.coa-t td {
-  padding: 3px 8px;
-  border-bottom: 1px solid var(--surface-divider);
-}
-.coa-foot {
-  margin-top: 24px;
-  gap: 12px;
-  align-items: flex-end;
-}
-.coa-mark {
-  position: absolute;
-  inset: 40% 0 auto 0;
+.a4-t th,
+.a4-t td {
+  border: 1px solid var(--surface-border);
+  padding: 2px 5px;
   text-align: center;
-  font: 700 64px/1 var(--f-body);
-  color: rgba(14, 42, 78, 0.06);
-  transform: rotate(-18deg);
-  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-foreground);
 }
-
+.a4-t th {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+.a4-t th small {
+  display: block;
+  font: 400 6.5px/9px var(--f-body);
+  color: var(--text-muted);
+}
+.a4-t td:first-child {
+  text-align: center;
+}
+.a4-sign {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 150px;
+  margin-top: 10px;
+  font-size: 8px;
+  color: var(--text-muted);
+}
+.a4-sign b {
+  color: var(--text-foreground);
+}
+.a4-sign i {
+  height: 26px;
+}
+.a4-sign .sig {
+  align-self: flex-start;
+  border-top: 1px solid var(--text-foreground);
+  padding-top: 3px;
+  font-weight: 600;
+  color: var(--text-foreground);
+}
+.a4-foot {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  font-size: 7px;
+  line-height: 10px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--surface-border);
+  padding-top: 6px;
+}
+.a4-foot span:last-child {
+  text-align: right;
+}
+.a4-mark {
+  position: absolute;
+  inset: 42% 0 auto 0;
+  text-align: center;
+  font: 700 90px/1 var(--f-body);
+  color: rgba(154, 90, 0, 0.06);
+  transform: rotate(-24deg);
+  pointer-events: none;
+  letter-spacing: 6px;
+}
 /* configuration overview (FigCraft *-14-Configuration-01-Configuration_hub-01-Overview): 3 columns on desktop, 2 on tablet, 1 on phone */
 .cfg-overview {
   display: grid;

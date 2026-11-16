@@ -31,9 +31,9 @@ const Field = ({ label, req, help, error, id, children }: { label?: string | und
   <div className="field">{label && <label className="flabel" htmlFor={id}>{label}{req && <span className="req">*</span>}</label>}{children}
     {error ? <span className="help err">{error}</span> : help ? <span className="help">{help}</span> : null}</div>;
 
-export function TextArea({ label, value, onChange, placeholder, id }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; id?: string }) {
+export function TextArea({ label, value, onChange, placeholder, id, rows }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; id?: string; rows?: number }) {
   const auto = useId(); const fid = id ?? auto;
-  return <Field label={label} id={fid}><textarea className="input" id={fid} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} /></Field>;
+  return <Field label={label} id={fid}><textarea className="input" id={fid} value={value} placeholder={placeholder} {...(rows ? { rows, style: { height: "auto" } } : {})} onChange={(e) => onChange(e.target.value)} /></Field>;
 }
 
 export function Select({ label, req, help, error, value, onChange, options, id, disabled, width }: { label?: string; req?: boolean; help?: string; error?: string | null; value: string; onChange: (v: string) => void;

@@ -1,7 +1,7 @@
 // Phase 1, Configuration slice A (Admin plan section 6) at 1440, 834 and 390: the hub, Security save and restore, Lookups add,
 // Parameters and rules dialogs with their checks, Laboratory branches and numbering, Formulas, search, and access.
 // Layouts per the FigCraft frames *-14-Configuration-*: the phone edits too (list rows open a bottom sheet; Laboratory and Security
-// show a read view whose rows open an edit page).
+// show a card per group, each with its own Edit sheet).
 // Test values start with ZE and are removed afterwards.
 import { execSync } from "node:child_process";
 import { expect, test, type Page } from "@playwright/test";
@@ -29,37 +29,38 @@ test.describe.serial("configuration", () => {
     await page.locator(".mcard", { hasText: "Lockout, sign-out" }).click();
     if (phone) {
       await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Configuration" })).toBeVisible();
-      await expect(page.locator(".lrow", { hasText: "Lock after failed attempts" })).toContainText("5");
+      await expect(page.locator(".krow", { hasText: "Lock after failed attempts" })).toContainText("5");
     } else await expect(page.locator("#sec-lock")).toHaveValue("5");
   });
 
   test("security: save a new lock count, then restore the defaults", async ({ page }, info) => {
     const phone = info.project.name === "phone";
-    // the phone opens the edit page from a row of the read view
+    const save = phone ? "#save-security-signin" : "#save-security";
+    // the phone has a card per group; the Sign-in card's Edit opens its own sheet
     const edit = async () => {
       if (!phone) return;
-      await page.locator(".lrow", { hasText: "Lock after failed attempts" }).click();
-      await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Edit", { exact: true })).toBeVisible();
+      await page.locator(".card", { hasText: "Sign-in" }).getByRole("button", { name: "Edit" }).click();
+      await expect(page.getByRole("dialog", { name: "Edit Sign-in" })).toBeVisible();
     };
     const lock = async (n: string) => {
-      if (phone) await expect(page.locator(".lrow", { hasText: "Lock after failed attempts" })).toContainText(n);
+      if (phone) await expect(page.locator(".krow", { hasText: "Lock after failed attempts" })).toContainText(n);
       else await expect(page.locator("#sec-lock")).toHaveValue(n);
     };
     await signIn(page, "wahyu@sgsi.co.id");
     await page.goto("/config/security");
     await edit();
     await page.locator("#sec-lock").fill("6");
-    await page.locator("#save-security").click();
-    await expect(page.getByText("Security saved")).toBeVisible();
+    await page.locator(save).click();
+    await expect(page.getByText(/(Security|Sign-in) saved/)).toBeVisible();
     await page.reload();
     await lock("6");
     await edit();
     await page.locator("#sec-lock").fill("2");
-    await page.locator("#save-security").click();
+    await page.locator(save).click();
     await expect(page.getByText("At least 3 attempts.")).toBeVisible();
     await page.getByRole("button", { name: "Restore defaults" }).click();
-    await page.locator("#save-security").click();
-    await expect(page.getByText("Security saved").last()).toBeVisible();
+    await page.locator(save).click();
+    await expect(page.getByText(/(Security|Sign-in) saved/).last()).toBeVisible();
     await page.reload();
     await lock("5");
   });
@@ -82,7 +83,11 @@ test.describe.serial("configuration", () => {
     await expect(row("V-12").getByLabel("Fixed")).toBeVisible();
     if (info.project.name === "phone") await row("V-31").click();
     else await row("V-31").getByRole("button", { name: "Edit" }).click();
-    await expect(page.getByRole("dialog", { name: "Edit V-31" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Edit rule V-31" })).toBeVisible();
+    await expect(page.locator("#ru-shown")).toContainText(/ASH is outside 0 to 45 %/);   // the message fills {low} and {high} from the bounds
+    await page.locator("#ru-lo").fill("7");
+    await page.locator("#ru-hi").fill("44");
+    await expect(page.locator("#ru-shown")).toContainText("7 to 44");
     await page.getByRole("button", { name: "Cancel" }).click();
   });
 
@@ -131,13 +136,19 @@ test.describe.serial("configuration", () => {
     await expect(page.locator("tr", { hasText: code })).toBeVisible();
   });
 
-  test("laboratory: branch offices and a numbering check, one Save for the page", async ({ page }, info) => {
+  test("laboratory: logo, address, branch offices and a numbering check; the phone edits each card on its own", async ({ page }, info) => {
     await signIn(page, "wahyu@sgsi.co.id");
     await page.goto("/config/laboratory");
+    await expect(page.getByLabel("Laboratory logo")).toBeVisible();
+    await expect(page.getByText(/Jl\. Rapak Indah No\. 120, Loa Bakung/).first()).toBeVisible();
     if (info.project.name === "phone") {
-      await expect(page.locator(".lrow", { hasText: "Rapak Indah" })).toContainText("RI");
-      await page.locator(".lrow", { hasText: "Batch" }).click();
-      await expect(page.getByRole("heading", { name: "Laboratory", level: 1 })).toBeVisible();
+      await expect(page.locator(".card", { hasText: "Branch offices" })).toContainText("Rapak Indah");
+      await page.locator(".card", { hasText: "Numbering" }).getByRole("button", { name: "Edit" }).click();
+      await expect(page.getByRole("dialog", { name: "Edit Numbering" })).toBeVisible();
+      await page.locator("#num-batch").fill("B-{XYZ}-{NNNN}");
+      await page.locator("#save-laboratory-numbering").click();
+      await expect(page.getByText("Use only the listed tokens.")).toBeVisible();
+      return;
     }
     await expect(page.getByLabel("Office 1")).toHaveValue("Rapak Indah");
     await page.locator("#num-batch").fill("B-{XYZ}-{NNNN}");

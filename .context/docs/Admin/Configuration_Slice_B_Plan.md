@@ -124,3 +124,15 @@ The six desktop frames and the tablet Services frame exist (row O). These are no
 | 4 | Template footer text | Not editable; v1 fields are Title, Form code, Statement, Terms line, Note (the frame) |
 | 5 | Draw the missing frames first | No; build the app on the slice A patterns, draw frames later if you want them |
 | 6 | Schema change C-19 | I write the SQL file; you run it in the Supabase SQL editor, I verify |
+
+## 8 · Build status (Nov 16, 2026)
+
+Built and tested (migration C-19 applied by the owner on Nov 12). Feedback round of Nov 16, all in the app:
+
+- **Methods and standards on the phone:** the add and edit sheet stays inside the screen (`.cfg-form` columns are `minmax(0, 1fr)`, children can shrink).
+- **Validation rules:** the edit dialog has **Message shown** (Admin plan frames `Phone/Desktop-14-Configuration-05-Validation_rules-02-Edit`), stored in the rule's `params.message` (no schema change), labels "Lower bound" and "Upper bound", title "Edit rule V-31".
+- **Lookups:** the Order column is right aligned.
+- **Report templates:** "All versions" is a ghost button. The preview is an A4 page (`CoaDocument.tsx`, 595 x 842, 1 px = 1 pt) in the layout of the Desktop-14 New_version frame with the bordered per-sample tables of the lab's sample report (CODE SAMPLE, Test Method, ADB, DB, DAF, AR, mass row), the letterhead taken from the Laboratory settings, scaled to the width it is given (`FitPage`). On the phone the editor has a breadcrumb, taller Statement, Terms line and Note fields, and a **Preview certificate** button that opens the whole page full screen (scaled, not reflowed).
+- **Laboratory:** the logo (SGSI icon with the name; `public/sgsi-icon-primary.svg` is the asset) heads the Laboratory card with a disabled **Replace logo** button (upload comes with the certificate layout, R-10); the address "Jl. Rapak Indah No. 120, Loa Bakung, Sungai Kunjang, Samarinda, Kalimantan Timur 75243, Indonesia" is the default and is stored in the setting.
+- **Laboratory and Security on the phone:** a card per group (Laboratory, Numbering, Branch offices; Sign-in, Session, Passwords, Links), each with its own outlined Edit button and its own bottom-sheet edit (Restore defaults of that group only, Cancel, Save). No chevrons on the rows. Desktop and tablet are unchanged: cards with one Restore defaults and one Save.
+- **FigCraft:** `Phone-14-Configuration-09-Security-01-Default` now has the Edit buttons and no chevrons; the old full-page `Security-02-Edit` is replaced by `Security-02-Edit-Sign_in`, `-Session`, `-Passwords` and `-Links`; the Laboratory frames show the new address. The Laboratory edit frames still carry the template's "Clear all" and "Apply" buttons; the app says Cancel and Save.
