@@ -134,6 +134,11 @@ button:disabled {
   font: 600 13px/20px var(--f-mono);
   font-variant-numeric: tabular-nums;
 }
+/* Data/Small (FigCraft): numbers in table cells */
+.t-data-sm {
+  font: 400 12px/20px var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
 .w5 {
   font-weight: 500;
 }

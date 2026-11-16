@@ -210,7 +210,7 @@ export function DrillHoles() {
       cls: "r",
       w: 100,
       sort: (d) => d.totalSample,
-      render: (d) => d.totalSample,
+      render: (d) => <span className="t-data-sm">{d.totalSample}</span>,
     },
     !tablet && {
       h: "Description",
@@ -775,7 +775,7 @@ export function Lithologies() {
       h: "Total sample",
       cls: "r",
       sort: (l) => l.totalSample,
-      render: (l) => l.totalSample,
+      render: (l) => <span className="t-data-sm">{l.totalSample}</span>,
     },
     !tablet && {
       h: "Company",
@@ -1067,7 +1067,7 @@ export function Seams() {
       w: !tablet ? 100 : 80,
       cls: "r",
       sort: (x) => x.sortOrder,
-      render: (x) => x.sortOrder ?? "",
+      render: (x) => <span className="t-data-sm">{x.sortOrder ?? ""}</span>,
     },
     {
       h: "Code",
@@ -1092,7 +1092,7 @@ export function Seams() {
       w: 160,
       cls: "r",
       sort: (x) => x.totalSample,
-      render: (x) => x.totalSample,
+      render: (x) => <span className="t-data-sm">{x.totalSample}</span>,
     },
     write && {
       h: "Actions",

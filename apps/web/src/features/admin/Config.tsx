@@ -1335,7 +1335,9 @@ function Lookups({ editable, phone }: { editable: boolean; phone: boolean }) {
               {
                 h: "Order",
                 cls: "r",
-                render: (l) => <span className="c-mut">{l.sortOrder}</span>,
+                render: (l) => (
+                  <span className="t-data-sm c-mut">{l.sortOrder}</span>
+                ),
               },
               {
                 h: "Value",
@@ -1527,12 +1529,24 @@ function Parameters({ editable }: { editable: boolean }) {
           h: "Basis",
           render: (p: Param) => (p.measuredBasis ? BASIS[p.measuredBasis] : ""),
         },
-        { h: "Decimals", cls: "r", render: (p: Param) => p.decimals },
+        {
+          h: "Decimals",
+          cls: "r",
+          render: (p: Param) => <span className="t-data-sm">{p.decimals}</span>,
+        },
         { h: "Methods", render: methods },
         {
           h: "Typical range",
           render: (p: Param) => (
-            <span className="t-sm">{range(p.typicalLow, p.typicalHigh)}</span>
+            <span
+              className={
+                p.typicalLow == null && p.typicalHigh == null
+                  ? "t-sm"
+                  : "t-data-sm"
+              }
+            >
+              {range(p.typicalLow, p.typicalHigh)}
+            </span>
           ),
         },
         { h: "Status", render: status },
@@ -1897,7 +1911,15 @@ function Rules({ editable, phone }: { editable: boolean; phone: boolean }) {
               { h: "Severity", render: sev },
               {
                 h: "Bounds",
-                render: (r) => <span className="t-sm">{bounds(r)}</span>,
+                render: (r) => (
+                  <span
+                    className={
+                      r.parameter || r.tolerance != null ? "t-data-sm" : "t-sm"
+                    }
+                  >
+                    {bounds(r)}
+                  </span>
+                ),
               },
               editable && {
                 h: "",

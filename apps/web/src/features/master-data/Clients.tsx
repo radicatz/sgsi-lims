@@ -119,7 +119,7 @@ export function Clients() {
       h: "Total sample",
       cls: "r",
       sort: (c) => c.totalSample,
-      render: (c) => c.totalSample,
+      render: (c) => <span className="t-data-sm">{c.totalSample}</span>,
     },
     !tablet && {
       h: "Created",
