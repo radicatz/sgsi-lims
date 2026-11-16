@@ -21,6 +21,10 @@ export async function cleanupTestData() {
     await tx`delete from lookups where value like 'ZT %' or value like 'ZE %'`;
     await tx`delete from methods where parameter_id in (select id from parameters where code like 'ZT-%' or code like 'ZE-%')`;
     await tx`delete from parameters where code like 'ZT-%' or code like 'ZE-%'`;
+    // contacts added from the job order form by the browser tests
+    await tx`delete from company_contacts where full_name like 'ZE %' or full_name like 'ZT %'`;
+    // Job orders made by the checks and the browser tests
+    await tx`delete from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
     // Configuration slice B: services, methods and standards, template drafts made by the checks
     await tx`delete from service_parameters where service_id in (select id from services where name like 'ZT %' or name like 'ZE %')`;
     await tx`delete from services where name like 'ZT %' or name like 'ZE %'`;

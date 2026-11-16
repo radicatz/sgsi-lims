@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "seed:demo": "pnpm --filter @sgsi/api seed:demo",
-    "seed:master": "pnpm --filter @sgsi/api seed:master"
+    "seed:master": "pnpm --filter @sgsi/api seed:master",
+    "seed:orders": "pnpm --filter @sgsi/api seed:orders"
   },
   "devDependencies": {
     "@playwright/test": "1.49.1"

@@ -1,6 +1,6 @@
 # Job orders: build design (phase 2)
 
-Written Nov 16, 2026, for phase 2 of `../Project/V1_Build_Plan.md`. **Status: waiting for go.** The screens are specified in `Job_Order_Screen_Plan.md` (Revisions 7 to 12, 55 frames in module 03) and `Job_Order_Prototype_Plan.md` (flows JO1 to JO12); the rules in spec S-17, 9.3 and 6.1. This file says how they are built and tested.
+Written Nov 16, 2026, for phase 2 of `../Project/V1_Build_Plan.md`. **Status: slice A built (Nov 16, 2026), slice B next.** The screens are specified in `Job_Order_Screen_Plan.md` (Revisions 7 to 12, 55 frames in module 03) and `Job_Order_Prototype_Plan.md` (flows JO1 to JO12); the rules in spec S-17, 9.3 and 6.1. This file says how they are built and tested.
 
 ## 1 · Scope
 
@@ -123,3 +123,34 @@ The frames still show the old format (flagged, `../Project/Sample_Identifiers_Pl
 | 5 | Files tab and History tab are not drawn | Built from the patterns (Files: drop zone and file rows as the CoA history; History: Audit log rows), tagged in the plan |
 | 6 | Batches and CoA tabs in phase 2 | Shown with their empty states, no Add batch or Generate CoA yet |
 | 7 | A real job order to test the gate (R-20, request item 5) | Demo job orders until it arrives; the gate is checked against it when it does |
+
+## 10 · Identifier formats (Nov 16, 2026)
+
+The formats now in force for everything that hangs on a job order. They are settings (Configuration > Laboratory > Numbering) except where noted; the frames and the prototype still show the old demo values (`BNM-3507`, `B0410-07`), and **the spec wins** (6.1).
+
+| Identifier | Format | Example | Given when | Where it is set |
+| --- | --- | --- | --- | --- |
+| **Job order number** | `JO-{YYYY}-{NNNN}`: year, then the next number of that year | `JO-2026-0144` | The job order is created (suggested by the form, then fixed) | Numbering, Job order |
+| Batch number | `B-{YYYY}-{NNNN}` (a database check; the CSO or Preparation may edit it) | `B-2026-0418` | A batch is added (phase 3) | Numbering, Batch |
+| **Client reference** | The client's own name for a sample, typed or pasted; unique within the job order; not printed on the RoA or CoA | `BNM-3507` | The sample is registered (slice B) | The CSO |
+| **Sample ID** | `SG.{YYMMDD}.{CCC}.{BB}.{NNN}`: Sentra Geo, the date received, the client's company code, the branch office, the day's running number for that client | `SG.261022.003.RI.007` | Confirm reception (phase 3) | Numbering, Sample ID |
+| **Sample code** | `{CCC}.{BB}.{NNN}.{LOT}` | `003.RI.007.Lot01` | Confirm reception (phase 3) | Numbering, Sample code |
+| CoA number | `CoA-{job order}-{revision}` | `CoA-JO-2026-0142-1` | A CoA is generated (phase 4) | Numbering, CoA |
+| RoA number | `RoA-{batch_no}-{version}` (spec D-11, a placeholder until the lab confirms); the signed RoA's own number is entered at upload | `RoA-B-2026-0417-1` | The batch is completed (phase 3) | Phase 3 design |
+
+Company codes in the database now (assigned in order; the Superadmin may change one until the client's first received sample): TSA 001, KBM 002, **BNM 003**, KEP 004, SBH 005, MBS 006, MCR 007, PTBA 008, BLC 009. The identifiers plan's example (`BNM` 001) is therefore `SG.261022.003.RI.007` here. Branch office: `RI` Rapak Indah. Lot: `Lot01` unless Preparation sets another at reception. The running number has 3 digits and is refused at 999.
+
+**The 14 demo job orders** (`pnpm seed:orders`) keep their prototype numbers, which already follow the pattern: JO-2026-0130 (PT Bukit Asam, reported), 0131 (Bara Nusantara, delivered), 0132 (Sumber Batu Hitam, closed), 0133 (Kaltara, delivered), 0134 (Bara Nusantara, awaiting samples), 0135 (Mahakam, cancelled), 0136 (Sumber Batu Hitam, draft), 0137 (Kaltara, awaiting samples, coking coal), 0138 (Bara Nusantara, reported), 0139 (Mahakam, in progress, past due), 0140 (Sumber Batu Hitam, delivered), 0141 (Kaltara, reported), 0142 (Bara Nusantara, in progress), 0143 (PT Bukit Asam, draft). The next new one is **JO-2026-0144**. When slice B adds the demo samples, their client references keep the old demo values and their Sample IDs and sample codes are generated in the format above (for received ones only).
+
+## 11 · Build status
+
+### Slice A (Nov 16, 2026)
+
+| Item | Result |
+| --- | --- |
+| API | `apps/api/src/routes/orders.ts`: `GET /orders/catalogue`, `GET /orders` (filters, counts per status, server paging), `GET /orders/:no`, `POST /orders`, `PUT /orders/:no`, `POST /orders/:no/submit`, `/cancel`, `/close`. Checks: `apps/api/scripts/check-orders.ts`, 45 live checks as the right and wrong roles |
+| Screens | `apps/web/src/features/orders/`: `List.tsx`, `OrderForm.tsx` (dialog on desktop and tablet, two full-screen steps on the phone; contact and signatory pickers; parameter pills with coverage; Ash and Trace checklists), `Detail.tsx` (header, Stepper, tabs with counts, Overview) |
+| Tests | `e2e/phase2-orders.spec.ts`: 7 flows at 1440, 834 and 390 (21 runs): list and filters, create and submit (JO1, JO9), draft and validation (JO2), contacts (JO3), Ash checklist and coking-coal pills (JO4), edit, cancel and the close rule (JO8), read-only visit (JO12) |
+| Demo data | `pnpm seed:orders` (14 job orders), `--remove` takes them out |
+| Left in slice A | The Samples, Files and History tabs show a placeholder (slice B). The form has no file drop zone (Files is slice B). The job order number is assigned by the server (the frames have no number field); the CSO cannot type another one |
+| Differences from the design | The form catalogue is loaded when the list opens, so New job order opens at once (the database is remote and the call takes about 1.3 s). A new job order starts with no client chosen, so a CSO cannot submit for the wrong client by leaving the default. Due date uses the browser's date field. Due-date filter is a choice (Any date, Before today, Today, Next 7 days, Next 30 days). Close stays disabled until the CoA is sent (phase 4) |

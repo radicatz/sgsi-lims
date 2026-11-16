@@ -5,7 +5,7 @@ import { cx } from "./utils";
 
 // Data-screen components ported from the prototype (.context/prototype/src/ui.js): tables, paging, chips, menus, form controls.
 
-export type Tone = "grey" | "green" | "red" | "amber" | "blue" | "outline" | "orange" | "muted";
+export type Tone = "grey" | "green" | "red" | "amber" | "blue" | "outline" | "orange" | "muted" | "purple";
 
 export const Badge = ({ label, tone = "grey", sm }: { label: string; tone?: Tone; sm?: boolean }) => <span className={cx("badge", "tn-" + tone, sm && "sm")}>{label}</span>;
 
@@ -25,6 +25,12 @@ export function Chips<T extends string>({ items, value, onChange, scroll }: { it
 }
 
 /* ---------- page tabs (list switches, owner rule) ---------- */
+/** The job order's life as steps (Stepper in the library): a mark per step, its name and a short note. */
+export function Stepper({ steps }: { steps: Array<{ name: string; note?: string; state: "done" | "cur" | "up" }> }) {
+  return <div className="stepper" role="list">{steps.map((s) => <div key={s.name} role="listitem" className={cx("step", s.state)} aria-current={s.state === "cur" ? "step" : undefined}>
+    <span className="mk">{s.state === "done" && <Icon n="check" s={14} />}</span><b>{s.name}</b>{s.note && <small>{s.note}</small>}</div>)}</div>;
+}
+
 export function Tabs<T extends string>({ items, value, onChange }: { items: Array<{ id: T; label: string; count?: number }>; value: T; onChange: (v: T) => void }) {
   return <div className="tabs" role="tablist">{items.map((t) => <button key={t.id} type="button" role="tab" aria-selected={value === t.id} className={cx("tab", value === t.id && "on")} onClick={() => onChange(t.id)}>
     <span className="r">{t.label}{t.count !== undefined && <span className={cx("cpill", value === t.id && "primary")}>{t.count}</span>}</span><span className="u" /></button>)}</div>;

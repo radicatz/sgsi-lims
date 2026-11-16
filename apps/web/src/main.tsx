@@ -11,6 +11,8 @@ import { Clients, ClientPage } from "./features/master-data/Clients";
 import { DrillHoles, Lithologies, Seams } from "./features/master-data/Lists";
 import { UserPage, Users } from "./features/admin/Users";
 import { Config } from "./features/admin/Config";
+import { Orders } from "./features/orders/List";
+import { OrderPage } from "./features/orders/Detail";
 import { Toasts } from "./components";
 import "./styles/index.css";
 
@@ -30,7 +32,7 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
-const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config };
+const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders };
 const CLIENT_READ = ["company.read"];
 function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [
@@ -38,6 +40,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
   { path: "/set-password", element: <SetPassword /> },
   { element: <Private />, children: [
     ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : BUILT[p.path] ? <Built path={p.path} /> : <Coming path={p.path} />}</Guard> })),
+    { path: "/orders/:no/:tab?", element: <Guard anyOf={["order.read"]}><OrderPage /></Guard> },
     { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
     { path: "/users/:id", element: <Guard anyOf={["user.manage"]}><UserPage /></Guard> },
     { path: "/config/:section", element: <Guard anyOf={["config.write"]}><Config /></Guard> },
