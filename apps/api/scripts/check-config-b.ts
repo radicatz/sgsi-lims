@@ -78,8 +78,10 @@ try {
   const m1 = (await call(S, "GET", "/config/methods")).body.items as any[];
   ok("a new edition becomes the current one and the old one stays", ne.status === 201 && m1.find((m) => m.id === ne.body.id)?.isDefault === true && m1.find((m) => m.id === ashAstm.id)?.isDefault === false);
   ok("the same edition twice is 409 on the field", (await call(S, "POST", "/config/methods", body)).body?.field === "edition");
-  ok("a fix changes r, R and the title only", (await call(S, "PATCH", `/config/methods/${ne.body.id}`, { title: "ZT fixed", repeatability: 0.12, reproducibility: 0.24 })).status === 200
-    && (await call(S, "GET", "/config/methods")).body.items.find((m: any) => m.id === ne.body.id).reproducibility === 0.24);
+  ok("a fix changes r, R, the title and the detection limit", (await call(S, "PATCH", `/config/methods/${ne.body.id}`, { title: "ZT fixed", repeatability: 0.12, reproducibility: 0.24, detectionLimit: 0.01 })).status === 200
+    && (await call(S, "GET", "/config/methods")).body.items.find((m: any) => m.id === ne.body.id).reproducibility === 0.24
+    && (await call(S, "GET", "/config/methods")).body.items.find((m: any) => m.id === ne.body.id).detectionLimit === 0.01);
+  ok("a detection limit of zero is refused on the field", (await call(S, "PATCH", `/config/methods/${ne.body.id}`, { title: "ZT fixed", detectionLimit: 0 })).body?.field === "detectionLimit");
   const nm = await call(S, "POST", "/config/methods", { parameterId: tm!.id, family: "ISO", methodCode: "ZT1", edition: "2098", title: "", repeatability: null, reproducibility: null });
   ok("a method is added where the standard had none", nm.status === 201 && (await call(S, "GET", "/config/methods")).body.items.some((m: any) => m.parameterCode === "TM" && m.family === "ISO" && m.isDefault));
   ok("a missing parameter is refused", (await call(S, "POST", "/config/methods", { ...body, parameterId: "00000000-0000-4000-8000-000000000000" })).body?.field === "parameterId");

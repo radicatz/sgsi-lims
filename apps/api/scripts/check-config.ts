@@ -32,7 +32,7 @@ const [bnm] = await sql`select id, company_code from companies where code = 'BNM
 try {
   ok("lab admin gets 403 on Configuration", (await call(LAB, "GET", "/config/summary")).status === 403 && (await call(LAB, "PUT", "/config/settings/security", orig.security)).status === 403);
   const sum = (await call(S, "GET", "/config/summary")).body;
-  ok("summary counts the sections", sum.counts.parameters > 30 && sum.counts.rules === 7 && sum.counts.formulas === 2, JSON.stringify(sum.counts));
+  ok("summary counts the sections", sum.counts.parameters > 30 && sum.counts.rules === 7 && sum.counts.formulas === 3, JSON.stringify(sum.counts));   // FC, NCV v2, H by Seyler (NCV v1 retired)
 
   /* security */
   ok("lock after 2 attempts is refused on the field", (await call(S, "PUT", "/config/settings/security", { ...orig.security, lock_after_attempts: 2 })).body?.field === "lock_after_attempts");
@@ -73,7 +73,9 @@ try {
     && (await call(S, "GET", "/config/rules")).body.items.find((r: any) => r.code === "V-31").message === "ZT Ash above 45 % is unusual.");
   ok("a message over 200 characters is refused on the field", (await call(S, "PATCH", "/config/rules/V-31", { severity: "warn", active: true, message: "x".repeat(201) })).body?.field === "message");
   ok("the fixed rule V-12 cannot change", (await call(S, "PATCH", "/config/rules/V-12", { severity: "warn", active: true })).status === 409);
-  ok("formulas are listed", (await call(S, "GET", "/config/formulas")).body.items.some((f: any) => f.parameter === "FC"));
+  const fl = (await call(S, "GET", "/config/formulas")).body.items as any[];
+  ok("formulas are listed, active versions only", fl.some((f) => f.parameter === "FC") && fl.filter((f) => f.parameter === "NCV").map((f) => f.version).join() === "2"
+    && fl.some((f) => f.parameter === "H" && /Seyler/.test(f.expression)), JSON.stringify(fl.map((f) => [f.parameter, f.version])));
 
   /* company code (C-18) */
   ok("the Superadmin changes a company code", (await call(S, "PATCH", `/companies/${bnm!.id}`, { name: "PT Bara Nusantara Mandiri", code: "BNM", companyCode: "099" })).status === 200

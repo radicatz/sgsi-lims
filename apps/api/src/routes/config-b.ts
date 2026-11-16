@@ -25,10 +25,12 @@ const MethodBody = z.object({
   edition: z.string().trim().regex(/^[0-9]{4}$/, "Four digits, for example 2023."),
   title: z.string().trim().max(200).optional().default(""),
   repeatability: z.number().min(0).nullable().optional(), reproducibility: z.number().min(0).nullable().optional(),
+  detectionLimit: z.number().positive("Above zero.").max(1000).nullable().optional(),   // values below it print as <limit (spec 3.6 W-9)
 }).refine((m) => m.repeatability == null || m.reproducibility == null || m.repeatability <= m.reproducibility, { message: "R is not below r.", path: ["reproducibility"] });
 const MethodEdit = z.object({
   title: z.string().trim().max(200).optional().default(""),
   repeatability: z.number().min(0).nullable().optional(), reproducibility: z.number().min(0).nullable().optional(),
+  detectionLimit: z.number().positive("Above zero.").max(1000).nullable().optional(),   // values below it print as <limit (spec 3.6 W-9)
 }).refine((m) => m.repeatability == null || m.reproducibility == null || m.repeatability <= m.reproducibility, { message: "R is not below r.", path: ["reproducibility"] });
 const TemplateBody = z.object({
   formCode: z.string().trim().regex(/^[A-Za-z0-9][A-Za-z0-9 ._-]{2,30}$/, "Letters, numbers, dashes or dots, 3 to 31 characters."),
@@ -190,11 +192,12 @@ export async function configBRoutes(app: FastifyInstance) {
   r.get("/config/methods", async (req) => {
     const rows = await run(req, (tx) => tx`
       select m.id, m.parameter_id, p.code as parameter_code, p.label as parameter_label, p.sort_order, s.family::text as family, s.code as method_code, s.edition, s.title,
-        m.repeatability, m.reproducibility, m.is_default
+        m.repeatability, m.reproducibility, m.detection_limit, m.is_default
       from methods m join parameters p on p.id = m.parameter_id join standards s on s.id = m.standard_id
       order by p.sort_order, p.code, s.family, s.edition desc`);
     return { items: rows.map((m) => ({ id: m.id, parameterId: m.parameter_id, parameterCode: m.parameter_code, parameterLabel: m.parameter_label, family: m.family, methodCode: m.method_code,
       edition: m.edition, title: m.title ?? "", repeatability: m.repeatability == null ? null : Number(m.repeatability), reproducibility: m.reproducibility == null ? null : Number(m.reproducibility),
+      detectionLimit: m.detection_limit == null ? null : Number(m.detection_limit),
       isDefault: m.is_default })) };
   });
 
@@ -209,8 +212,8 @@ export async function configBRoutes(app: FastifyInstance) {
       const [dup] = await tx`select 1 from methods where parameter_id = ${b.parameterId} and standard_id = ${std!.id}`;
       if (dup) return "duplicate" as const;
       await tx`update methods set is_default = false where parameter_id = ${b.parameterId} and standard_id in (select id from standards where family = ${b.family}::standard_family)`;
-      const [row] = await tx`insert into methods (parameter_id, standard_id, repeatability, reproducibility, is_default)
-        values (${b.parameterId}, ${std!.id}, ${b.repeatability ?? null}, ${b.reproducibility ?? null}, true) returning id`;
+      const [row] = await tx`insert into methods (parameter_id, standard_id, repeatability, reproducibility, detection_limit, is_default)
+        values (${b.parameterId}, ${std!.id}, ${b.repeatability ?? null}, ${b.reproducibility ?? null}, ${b.detectionLimit ?? null}, true) returning id`;
       return row!.id as string;
     });
     if (res === "no_parameter") return fail(reply, 422, "invalid", "This parameter does not exist.", "parameterId");
@@ -218,13 +221,13 @@ export async function configBRoutes(app: FastifyInstance) {
     return reply.code(201).send({ id: res });
   });
 
-  // Fix a typo without a new edition: title, r and R only. The title belongs to the standard, so other parameters using it see the same title.
+  // Fix an edition without a new one: title, r, R and the detection limit only. The title belongs to the standard, so other parameters using it see the same title.
   r.patch("/config/methods/:id", { schema: { params: Id, body: MethodEdit } }, async (req, reply) => {
     const b = req.body;
     const ok = await run(req, async (tx) => {
       const [m] = await tx`select id, standard_id from methods where id = ${req.params.id}`;
       if (!m) return false;
-      await tx`update methods set repeatability = ${b.repeatability ?? null}, reproducibility = ${b.reproducibility ?? null} where id = ${m.id}`;
+      await tx`update methods set repeatability = ${b.repeatability ?? null}, reproducibility = ${b.reproducibility ?? null}, detection_limit = ${b.detectionLimit ?? null} where id = ${m.id}`;
       await tx`update standards set title = ${b.title || null} where id = ${m.standard_id}`;
       return true;
     });

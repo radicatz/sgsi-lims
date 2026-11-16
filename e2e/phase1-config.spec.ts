@@ -161,6 +161,8 @@ test.describe.serial("configuration", () => {
     await page.goto("/config/formulas");
     await expect(page.getByText("100 - IM - ASH - VM")).toBeVisible();
     await expect(page.getByText("FC (ADB)")).toBeVisible();
+    await expect(page.getByText("NCV (AR)")).toHaveCount(1);          // version 1 is retired and not listed
+    await expect(page.getByText(/^Seyler, when H is not measured/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Edit" })).toHaveCount(0);
     test.skip(info.project.name === "phone", "search sits in the desktop and tablet header");
     await page.goto("/config");

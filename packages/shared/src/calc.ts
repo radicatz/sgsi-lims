@@ -24,12 +24,38 @@ export function fixedCarbon(im: Num, ash: Num, vm: Num): string | null {
   return new Decimal(100).minus(a).minus(b).minus(c).toFixed(2);
 }
 
-/** NCV (AR) from GCV (ADB): GCV × (100 − TM) / (100 − IM) − 5.85 × (9 × H + TM). */
-export function netCalorific(gcv: Num, tm: Num, im: Num, h: Num): string | null {
-  const [g, t, i, hh] = [dec(gcv), dec(tm), dec(im), dec(h)];
-  if (!g || !t || !i || !hh) return null;
-  const ar = g.times(new Decimal(100).minus(t)).dividedBy(new Decimal(100).minus(i));
-  return ar.minus(new Decimal(5.85).times(hh.times(9).plus(t))).toFixed(0);
+export type Standard = "ISO" | "ASTM" | "GBT";
+const J_PER_CAL = new Decimal("4.1868");
+const half = (d: Decimal, places: number) => d.toDecimalPlaces(places, Decimal.ROUND_HALF_UP);
+
+/** Hydrogen estimated from the proximate analysis (Seyler), for Net CV when hydrogen is not measured (owner, Nov 16 2026):
+ *  H daf = 0.069 × (GCV daf / 100 + VM daf) − 2.86, GCV in kcal/kg. Returns H on the air-dried basis, 2 decimals, converted from the
+ *  rounded daf value as the lab's workbook does (spec 3.6 W-1). */
+export function hydrogenSeyler(gcvAdb: Num, vmAdb: Num, im: Num, ash: Num): string | null {
+  const [g, v, i, a] = [dec(gcvAdb), dec(vmAdb), dec(im), dec(ash)];
+  if (!g || !v || !i || !a) return null;
+  const organic = new Decimal(100).minus(i).minus(a);          // 100 − IM − Ash
+  if (organic.lte(0)) return null;
+  const toDaf = (x: Decimal) => x.times(100).dividedBy(organic);
+  const hDaf = half(new Decimal("0.069").times(toDaf(g).dividedBy(100).plus(toDaf(v))).minus("2.86"), 2);
+  return half(hDaf.times(organic).dividedBy(100), 2).toFixed(2);
+}
+
+/** Net calorific value, as received, kcal/kg, from GCV (ADB, kcal/kg), TM, IM and hydrogen (ADB, excluding the hydrogen in the
+ *  moisture, as the ultimate analysis reports it; or the Seyler estimate). The formula follows the job order's standard (spec 12.1, W-4):
+ *  - ISO 1928:     NCV ar (J/g) = GCV ar × 4.1868 − 206 × H ar − 23.05 × TM
+ *  - GB/T 213:     the same with 23 × TM
+ *  - ASTM D5865:   NCV ar = GCV ar − 5.72 × 9 × (H ar + 0.1119 × TM), the hydrogen of the moisture added back
+ *  where X ar = X adb × (100 − TM) / (100 − IM). Checked against the shipment workbook (Test Report #2): ISO 4745, ASTM 4730. */
+export function netCalorific(gcvAdb: Num, tm: Num, im: Num, hAdb: Num, standard: Standard = "ISO"): string | null {
+  const [g, t, i, h] = [dec(gcvAdb), dec(tm), dec(im), dec(hAdb)];
+  if (!g || !t || !i || !h) return null;
+  const k = new Decimal(100).minus(t).dividedBy(new Decimal(100).minus(i));   // ADB to AR
+  const gAr = g.times(k), hAr = h.times(k);
+  const net = standard === "ASTM"
+    ? gAr.minus(new Decimal("5.72").times(9).times(hAr.plus(new Decimal("0.1119").times(t))))
+    : gAr.times(J_PER_CAL).minus(new Decimal(206).times(hAr)).minus(new Decimal(standard === "GBT" ? "23" : "23.05").times(t)).dividedBy(J_PER_CAL);
+  return half(net, 0).toFixed(0);
 }
 
 export type Basis = "adb" | "ar" | "db" | "daf";

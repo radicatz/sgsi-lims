@@ -480,6 +480,7 @@ interface Method {
   title: string;
   repeatability: number | null;
   reproducibility: number | null;
+  detectionLimit: number | null;
   isDefault: boolean;
 }
 // the way the standards write their numbers: D3174-23, ISO 1171:2010, GB/T 212-2008
@@ -658,6 +659,7 @@ function MethodForm({
     title: cur?.title ?? "",
     r: cur?.repeatability?.toString() ?? "",
     R: cur?.reproducibility?.toString() ?? "",
+    dl: cur?.detectionLimit?.toString() ?? "",
   });
   const [err, setErr] = useState<Record<string, string>>({});
   const pick = (pid: string, fam: Family) => {
@@ -674,6 +676,7 @@ function MethodForm({
       title: c?.title ?? "",
       r: c?.repeatability?.toString() ?? "",
       R: c?.reproducibility?.toString() ?? "",
+      dl: c?.detectionLimit?.toString() ?? "",
     });
   };
   const fixing = mode === "fix" && !!cur;
@@ -686,6 +689,7 @@ function MethodForm({
               title: f.title,
               repeatability: num(f.r),
               reproducibility: num(f.R),
+              detectionLimit: num(f.dl),
             },
           })
         : api("/config/methods", {
@@ -698,6 +702,7 @@ function MethodForm({
               title: f.title,
               repeatability: num(f.r),
               reproducibility: num(f.R),
+              detectionLimit: num(f.dl),
             },
           }),
     {
@@ -719,6 +724,8 @@ function MethodForm({
       e.reproducibility = "Use numbers.";
     else if (r != null && R != null && r > R)
       e.reproducibility = "R is not below r.";
+    const dl = num(f.dl);
+    if (f.dl && (Number.isNaN(dl) || (dl ?? 0) <= 0)) e.detectionLimit = "A number above zero.";
     setErr(e);
     if (!Object.keys(e).length) save.mutate(undefined);
   };
@@ -793,6 +800,7 @@ function MethodForm({
                 title: cur.title,
                 r: cur.repeatability?.toString() ?? "",
                 R: cur.reproducibility?.toString() ?? "",
+                dl: cur.detectionLimit?.toString() ?? "",
               });
             }}
           >
@@ -840,6 +848,17 @@ function MethodForm({
           value={f.R}
           onChange={(t) => setF({ ...f, R: t })}
           error={err.reproducibility ?? null}
+        />
+      </div>
+      <div className="cfg-form" style={two}>
+        <TextField
+          id="me-dl"
+          label="Detection limit"
+          type="number"
+          value={f.dl}
+          onChange={(t) => setF({ ...f, dl: t })}
+          error={err.detectionLimit ?? null}
+          help="In the parameter's unit. A result below it is reported as <limit, for example <0.01."
         />
       </div>
       {editions.length > 0 && (

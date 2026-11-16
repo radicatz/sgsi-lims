@@ -93,16 +93,18 @@ Next-goal tables stay in the spec but are not created in v1:
 | --- | --- | --- | --- | --- |
 | 1 | Where production runs (Supabase Cloud or the client's server), the domain, internet speed at the lab, and the mail sender for invites | Phase 0 for staging; phase 6 for production | R-11, D-25 | Staging on Supabase Cloud; go-live waits |
 | 2 | Master lists as files: clients and contacts, drill holes, seams, lithologies | Phase 1 | R-08 | Demo lists from the prototype; real data loaded later |
-| 3 | The lab's method list (standard, edition, r, R) and decimals per parameter | Phase 1 | R-05, R-06 | Spec 11 defaults |
+| 3 | The lab's method list (standard, edition, r, R and **detection limit**) per parameter. Decimals: **answered Nov 16, 2026: 2 decimals**, as on the lab's RoA | Phase 1 | R-05, R-06 | Spec 11 defaults |
 | 4 | Sample conditions, hold reasons and send channels as the lab uses them | Phase 1 | — | Prototype lists |
 | 5 | One real job order as written today (quote, PO or email) and the CoA sent for it | Phase 2 | R-20 | The form follows the screens; fields may change |
 | 6 | Sample ID and sample code: format and details decided (spec 6.1: date received, number per company and date, branch `RI` only, company code auto-assigned, lot `Lot01`, client reference not on reports); ask the lab to confirm or correct. Also the batch number format (still `B-YYYY-NNNN`) and whether the job order number comes from another system | Phase 2, 3 | R-07, D-45, D-01 | The defaults in spec 6.1 |
 | 7 | The label printer model and label size | Phase 3 | — | PDF label sheet printed from the browser |
 | 8 | One completed batch with its signed RoA | Phase 3 | R-03 | Parity check postponed |
-| 9 | The CoA template (logo, wording, form code, numbering) and the signatory rule | Phase 4 | R-10, R-21 | The prototype's certificate layout; the default signatory per job order |
+| 9 | The CoA template (logo, wording, form code, numbering). Signatory: **answered Nov 16, 2026: the Laboratory Manager signs**; the lab issues the CoA (D-26) | Phase 4 | R-10, R-21 | The prototype's certificate layout; the Manager as the default signatory |
 | 10 | Which events each person should be notified of | Phase 3 | R-14, D-28 | Events N1 to N8 as designed |
 | 11 | The staff list with roles | Phase 6 | R-09 | Demo personas on staging |
 | 12 | Personal data and retention duties under UU PDP | Phase 6 | NFR | Staff names and emails only; audit kept without expiry |
+| 13 | Net CV: which standard the lab reports it under (ISO 1928, ASTM D5865 or GB/T 213), and confirm that hydrogen is estimated (Seyler) rather than measured. Is Net CV printed on the RoA or CoA? | Phase 3 | R-06, spec 12.1 | The job order's standard picks the formula; hydrogen estimated by Seyler (owner, Nov 16) |
+| 14 | Shipment work: since the lab issues the CoA, does it also sample and analyse vessel or barge loadings? If so: per-lot rapid reports, tonnage-weighted means, contract specs and buyer-specific CoA parameters, as in the shipment workbook | After v1 | R-12, D-26, S-20 | Not in v1; exploration and job-order work only |
 
 ### Request ready to send
 
@@ -110,16 +112,18 @@ Next-goal tables stay in the spec but are not created in v1:
 >
 > 1. Where the system should run (cloud or your own server), the web address to use, the internet speed at the lab, and an email account the system can send invites and password resets from.
 > 2. Your master lists in Excel: clients with contact persons, drill holes, seams and lithologies.
-> 3. The method list per parameter (standard, edition, repeatability r, reproducibility R) and how many decimals you report.
+> 3. The method list per parameter (standard, edition, repeatability r, reproducibility R, and the detection limit).
 > 4. The sample conditions, hold reasons and send channels you use.
 > 5. One real job order as you receive it today (quote, PO or email), and the CoA you sent for it.
 > 6. We number samples as `SG.YYMMDD.CCC.BB.NNN` (sample ID) and `CCC.BB.NNN.Lotxx` (sample code), using the date the sample is received, a running number per company that restarts each day, branch `RI`, system-assigned company codes and lot `Lot01`. Please tell us if any of this should differ. Also your batch number format, and whether the job order number comes from another system.
 > 7. The label printer model and label size.
 > 8. One completed batch with its signed RoA.
-> 9. Your CoA template and who signs which CoA.
+> 9. Your CoA template (logo, wording, form code, numbering). We will print the Laboratory Manager as the signatory.
 > 10. Who should be notified of what (batch ready to receive, analysis finished, CoA ready, and so on).
 > 11. The staff list with each person's role.
 > 12. Any data-protection requirements from your side.
+> 13. Net calorific value: which standard you report it under (ISO, ASTM or GB/T), and whether hydrogen is estimated from the proximate analysis or measured. Do you print Net CV on the RoA or CoA?
+> 14. Do you also sample and analyse vessel or barge loadings? If so, we will need one complete shipment file set: the rapid reports per lot, the final report and the CoA.
 
 ## 5 · Working method
 
@@ -137,6 +141,16 @@ Next-goal tables stay in the spec but are not created in v1:
 | 3 | Send the request in section 4 now, in your name? | You send it; I can shorten it or translate it into Indonesian |
 | 4 | Stack open points (`Stack_Decision_Record.md` section 4) | Their defaults |
 | 5 | Sample ID details (spec 6.1) | **Closed Nov 10, 2026 with the defaults** (date received; number per company and date, restarting daily; branch `RI` only; company code auto-assigned; lot `Lot01`; client reference not on the RoA or CoA). The lab can still correct them |
+
+### Answers from the owner (Nov 16, 2026), after the shipment workbook review
+
+| Question | Answer | Where it went |
+| --- | --- | --- |
+| Decimals: the workbook prints IM, Ash, VM, FC to 1, the lab's RoA to 2 | **2 decimals** | Parameters seeded at 2 (TM moved from 1 to 2); spec D-12 |
+| Net CV: hydrogen measured or estimated | **Estimated** | Seyler estimate in `packages/shared/src/calc.ts`; spec 12.1; request item 13 confirms the standard |
+| Who signs the CoA | **The Laboratory Manager** | Spec R-21; phase 2 defaults the job order's signatory to the Manager |
+| Who issues the CoA (D-26) | **The lab, SGSI** | Spec D-26 answered; shipment desk still outside v1 (request item 14) |
+| Import wizard (S-16) | **On hold** | Phase 1 status below |
 
 ## 7 · Build status
 
@@ -201,8 +215,17 @@ Next-goal tables stay in the spec but are not created in v1:
 | Item | Status |
 | --- | --- |
 | Builds in the phase row (master data, users, configuration, company code) | **Done** |
-| Import wizard for drill holes, seams and lithologies (S-16, F-MD-05) | **Not built**: the Import buttons in the design have nothing behind them yet |
+| Import wizard for drill holes, seams and lithologies (S-16, F-MD-05) | **On hold** (owner, Nov 16, 2026): the Import buttons in the design have nothing behind them yet |
 | Gate: the lab's real master lists loaded (R-08), method list and lookups matching the lab's (R-05, R-06, request items 2 to 4) | **Waiting on the lab's files**; the app runs on the prototype's demo lists (`pnpm seed:master`) |
 | Carried from phase 0 | Mail delivery (SMTP; invite and reset links are shown to the Superadmin), staging deployment, per-table RLS tests, end-to-end tests in CI (needs the demo password as a repository secret) |
 
 Phase 1 is **built, with its gate waiting on the lab's data**. Phase 2 (Job orders) depends only on phase 0 and can start.
+
+### Calculation fix and detection limits (Nov 16, 2026)
+
+- **Net CV:** the first seeded formula (GCV ar − 5.85 × (9H + TM)) gave 4696 kcal/kg for the shipment workbook's coal against the printed 4745. Replaced by the formula per standard (ISO 1928, GB/T 213, ASTM D5865) and a Seyler hydrogen estimate; the workbook is now the unit-test fixture (GCV ar, db, daf; Net CV ISO 4745, ASTM 4730). Migration `20261116000100_net_cv_by_standard.sql` (data only, idempotent; applied Nov 16): NCV version 1 retired, version 2 and the H (Seyler) row active; TM at 2 decimals. Configuration > Formulas lists active versions only.
+- **Detection limit** on Methods and standards: a field in the add, new-edition and fix dialog (`methods.detection_limit`, existing column); a result below it will print as `<limit` (spec 3.6 W-9). Checks: 2 more live API checks, browser flows updated.
+
+### Phase 2 · Job orders (Nov 16, 2026)
+
+Build design written: `../Job Order/Job_Order_Build_Design.md` (two slices: A list, form and detail; B samples, files and history). No schema change is needed. **Waiting for go.**

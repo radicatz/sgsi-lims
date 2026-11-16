@@ -70,6 +70,7 @@ test.describe.serial("configuration slice B", () => {
     await page.getByRole("button", { name: "Add ISO method for TM" }).click();
     await page.locator("#me-code").fill("ZE1");
     await page.locator("#me-edition").fill("2098");
+    await page.locator("#me-dl").fill("0.01");
     await page.locator("#me-save").click();
     await expect(page.getByText("ISO ZE1:2098")).toBeVisible();
   });

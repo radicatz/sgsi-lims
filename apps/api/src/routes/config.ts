@@ -74,7 +74,7 @@ export async function configRoutes(app: FastifyInstance) {
   r.get("/config/summary", async (req) => run(req, async (tx) => {
     const [c] = await tx`select (select count(*)::int from parameters where not is_group) as parameters, (select count(*)::int from services where status = 'active') as services,
       (select count(*)::int from methods where is_default) as methods, (select count(*)::int from validation_rules) as rules, (select count(distinct list_key)::int from lookups) as lookups,
-      (select count(*)::int from report_templates where kind = 'coa') as templates, (select count(*)::int from formulas) as formulas`;
+      (select count(*)::int from report_templates where kind = 'coa') as templates, (select count(*)::int from formulas where status = 'active') as formulas`;
     const last = await tx`select distinct on (k) k, at, actor_name from (
         select case when table_name in ('parameters','parameter_group_items') then 'parameters' when table_name in ('services','service_parameters') then 'services'
           when table_name in ('methods','standards') then 'methods' when table_name = 'validation_rules' then 'rules' when table_name = 'lookups' then 'lookups'
@@ -182,6 +182,6 @@ export async function configRoutes(app: FastifyInstance) {
 
   /* formulas: view only in v1 (S-15) */
   r.get("/config/formulas", async (req) => ({ items: (await run(req, (tx) => tx`select f.id, p.code as parameter, p.name, f.target_basis, f.version, f.expression, f.inputs, f.valid_from, f.status
-      from formulas f join parameters p on p.id = f.parameter_id order by p.sort_order, f.target_basis, f.version`))
+      from formulas f join parameters p on p.id = f.parameter_id where f.status = 'active' order by p.sort_order, f.target_basis, f.version`))   // retired versions stay in the table for results calculated with them
     .map((f) => ({ id: f.id, parameter: f.parameter, name: f.name, basis: f.target_basis, version: f.version, expression: f.expression, inputs: f.inputs, validFrom: f.valid_from, status: f.status })) }));
 }
