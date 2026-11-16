@@ -33,7 +33,7 @@ The lab has not confirmed these; the full wording is in spec 6.1.
 | Spec | Section 6.1 (format, rules, decisions), 6.2 (mismatches), D-51, R-07 closed, glossary, features, label, import, reception step, screen columns, search, validation, database table | Done Nov 10 |
 | Build plan | C-18 (new migration at the start of phase 1), phase 1 (company code, branch offices), phase 2 (client references on the job order), phase 3 (IDs generated at Confirm reception, gate), request item 6, open point 5 closed | Done Nov 10 |
 | Screen plans | The rule text in the Job Order, Batch, Search, Reports, Admin and Dashboard plans | Done Nov 10; the demo values in them are not changed |
-| Database and app | C-18 migration, `next_sample_no()`, company code field, branch offices setting, the search placeholder text | **Not built**; planned in phases 1 to 3 |
+| Database and app | C-18 migration, `next_sample_no()`, company code field, branch offices setting, the search placeholder text | **Built in phase 1** (migration 0800 Nov 10, company code on the client form, branch offices and patterns in Configuration > Laboratory, placeholder Nov 16). Generating the Sample ID and sample code at Confirm reception, the label and search come with phases 3 and 5 |
 
 ## 4. Mismatch register (flagged)
 
@@ -45,7 +45,7 @@ These show the old format and **disagree with the spec**. The owner chose not to
 | Prototype v2 source, `prototype/src/` | `data.js` 57, `modules/search.js` 10, `modules/joborders.js` 6, `modules/batches.js` 6, `modules/reports.js` 1, `modules/admin.js` 1 | Private preview and shared link: the same, plus search and the Laboratory settings page |
 | Demo video, `demo-video/chapters/` | `05-penerimaan-sampel.js` 24, `03-daftar-sampel.js` 6, `06-preparasi.js` 5, `13-pencarian.js` 2, `04-batch.js` 1 | The recorded clips |
 | Database, `supabase/migrations/` | `20261110000300_work.sql` (`sample_ref`, `lab_code`), `20261110000500_reference_data.sql` (numbering `lab_code`) | Applied in phase 0; changed by C-18, not edited in place |
-| Web app | `apps/web/src/app/Shell.tsx` (search placeholder), `apps/web/src/features/master-data/Lists.tsx` (1) | Text only; changed in phase 1 with C-18 |
+| Web app | `apps/web/src/app/Shell.tsx` (search placeholder), `apps/web/src/features/master-data/Lists.tsx` (1) | **Fixed** (Nov 16, 2026): both changed; no longer a mismatch |
 
 Left as history, not flagged: `library/screens/rowC.before-nov3.js`, `tools/newframes.js`, `tools/revc.js`, the archived plans, and `prototype/archive/`.
 

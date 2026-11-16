@@ -789,8 +789,8 @@ The owner decided **not** to rebuild the frames, the prototype or the demo video
 | Prototype v2 (private preview and shared link) | The same, including search and the Laboratory settings page | **Flagged, not rebuilt** |
 | Demo video chapters 03, 04, 05, 06 and 13, and `Prototype_Demo_Guide.md` | The same | **Flagged, not rebuilt** |
 | Demo values and examples in the screen plans | `BNM-3507`, `B0410-07` and the old column names; the rule text above them is current | **Flagged**: a note at the top of each plan |
-| Applied database migrations (phase 0) | `samples.sample_ref`, `samples.lab_code`, numbering setting `lab_code` | **To change** by C-18, a new migration at the start of phase 1 (`V1_Build_Plan.md`) |
-| Web app shell | Search placeholder "Search by batch, lab code, or drill hole…"; one more mention in `Lists.tsx` | **To change** in phase 1 with C-18 (text only) |
+| Applied database migrations (phase 0) | `samples.sample_ref`, `samples.lab_code`, numbering setting `lab_code` | **Changed** by C-18 (migration 0800, Nov 10, 2026): `client_ref`, `sample_no`, `sample_code`, `lot`; the numbering setting has the two new patterns |
+| Web app shell | Search placeholder "Search by batch, lab code, or drill hole…"; one more mention in `Lists.tsx` | **Changed** (Nov 16, 2026): "Search by sample ID, batch, job order or drill hole…"; the `Lists.tsx` mention is gone |
 | Archived plans and prototype sources | The old format | Left as history |
 
 How to read a mismatched artifact: before reception the ID column is the **Client reference**; after reception it is the **sample code**, with the **Sample ID** as a second line. Do not copy an old value into new work; new screens, plans and code use the terms Sample ID, sample code and client reference, never "lab code".

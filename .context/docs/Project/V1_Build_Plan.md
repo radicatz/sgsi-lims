@@ -162,7 +162,7 @@ Next-goal tables stay in the spec but are not created in v1:
 | Owner feedback (Nov 10) | Official Phosphor icon font; sidebar icons Batches `files`, Lithology `stack`, Seam `tray`; a Search label over every list search; `pnpm seed:master` loads the prototype's master data (`--remove` takes it out); table row hover uses `--surface-muted` and the selected row a half-strength primary tint, so neither matches the head |
 | C-18 sample identifiers | Migration 0800 (run by the owner in the SQL editor, recorded in the migration history as 20261110094000): `client_ref`, `sample_no`, `sample_code`, `lot`; 3-digit `company_code` (next free, locked after the first received sample, changed only by the Superadmin on the client form); `batches.branch_code`; `next_sample_no()` per client, branch and day; branch offices and the new patterns in the settings |
 | Configuration, slice A | Hub (sections with counts and last change, search across sections, parameters, values and rules), Security, Laboratory with branch offices, Numbering (token check), Lookups, Parameters (code locked once in use, a rename follows into the range rules), Validation rules (Warn or Block, bounds on the parameter, V-12 fixed), Formulas (view). Read-only on the phone. Invites now last the configured number of days. Design: `../Admin/Configuration_Build_Design.md`. Checks: 26 live API checks, 7 browser flows |
-| Left in phase 1 | Configuration slice B: Services (versioned), Methods and standards (matrix), Report templates (versioned). Import wizard for drill holes, seams and lithologies (S-16). The lab's real master lists (R-08). Mail delivery (SMTP) |
+| Left in phase 1 | See "Phase 1 status" below (updated Nov 16, 2026) |
 
 ### Clients feedback round, design and app (Nov 11, 2026)
 
@@ -187,3 +187,22 @@ Next-goal tables stay in the spec but are not created in v1:
 - Drill hole table: Code fixed 150, Description fills, Total sample left aligned, Actions hug their content; the tablet table shows Code, Total sample, CoA, Actions (design Tablet-10). `Col` gained `fit` and `fill` next to `w`.
 - Replace and Upload CoA dialogs and the CoA history dialog follow the FigCraft refs (file row card, Close and Done in the history); PDF icons are red (`--feedback-error`).
 - Clients: the logo drop zone is a 100 px circle and the preview avatar is 100 px, as in the design; every client has demo contacts (3 each, Mitra Bara Sejahtera 2).
+
+### Configuration slice B and the Configuration rounds (Nov 12 to 16, 2026)
+
+- **Slice B built:** Services (versioned: a Draft is edited in place, editing an Active one saves the next version and archives the old one, one default), Methods and standards (matrix per parameter and ASTM, ISO, GB/T; New edition keeps the old one for older results; Fix this edition for title, r and R), Report templates (versions, draft from the active one, activate, live A4 certificate preview with zoom). Migration C-19 (`20261112000100_config_slice_b.sql`, run by the owner Nov 12). Design: `../Admin/Configuration_Slice_B_Plan.md`. Checks: 37 live API checks (`check-config-b.ts`), browser flows in `e2e/phase1-config-b.spec.ts`.
+- **All Configuration sections follow the FigCraft frames** at three widths, the phone edits too (sheets for list rows; Laboratory and Security as a card per group with its own edit sheet). Validation rules have a "Message shown" with `{parameter}`, `{low}`, `{high}`, `{unit}` from the bounds. The Laboratory card carries the logo and the lab's address.
+- **Users:** tablet table and phone cards per the frames; dialog footer buttons are lg everywhere.
+- **Master data rounds:** Drill hole (CoA column with the PDF icon, ghost icon actions with disabled history and delete, phone cards per the card refs), Lithology (muted No lithology tag, phone cards), Seam (tablet columns), Total sample right aligned with the sort icon after the label, Clients Delete disabled when in use.
+- **C-18 text:** the top-bar search placeholder now reads "Search by sample ID, batch, job order or drill hole…" (spec 6.2).
+
+### Phase 1 status (Nov 16, 2026)
+
+| Item | Status |
+| --- | --- |
+| Builds in the phase row (master data, users, configuration, company code) | **Done** |
+| Import wizard for drill holes, seams and lithologies (S-16, F-MD-05) | **Not built**: the Import buttons in the design have nothing behind them yet |
+| Gate: the lab's real master lists loaded (R-08), method list and lookups matching the lab's (R-05, R-06, request items 2 to 4) | **Waiting on the lab's files**; the app runs on the prototype's demo lists (`pnpm seed:master`) |
+| Carried from phase 0 | Mail delivery (SMTP; invite and reset links are shown to the Superadmin), staging deployment, per-table RLS tests, end-to-end tests in CI (needs the demo password as a repository secret) |
+
+Phase 1 is **built, with its gate waiting on the lab's data**. Phase 2 (Job orders) depends only on phase 0 and can start.

@@ -1,6 +1,6 @@
 # SGSI LIMS — Stack Decision Record
 
-Written Nov 10, 2026. **Status: proposed, waiting for go** (open points in section 4).
+Written Nov 10, 2026. **Status: accepted** (built on since phase 0; the open points in section 4 were taken with their defaults). Where the build differs from a decision, section 5 says so.
 
 This record fixes the technology for the v1 build. It replaces the "Technical architecture & stack" and "v1 shortcuts" sections of `Coal_LIMS_Research_and_Project_Plan.md`, which left several choices open ("NestJS or Fastify", "Keycloak or Supabase Auth", "MinIO or Supabase Storage"). The spec's decisions D-22 (Supabase Storage), D-23 (email and password), D-25 (containers that run on a vendor cloud or a client server) and D-29 (audit of every Core table) stand. The build order is in `V1_Build_Plan.md`.
 
@@ -68,3 +68,13 @@ The choices below follow from what the v1 screens need, not from the original fo
 | 4 | Charts in ECharts (S-9), or keep the prototype's SVG charts? | ECharts |
 | 5 | Lab time zone: Asia/Makassar (WITA) for Samarinda? | Asia/Makassar |
 | 6 | Who builds: Claude builds phase by phase and you review each phase on a staging link, or a development team takes over with this record and the plan? | Claude builds, you review each phase |
+
+## 5 · As built (Nov 16, 2026)
+
+Phases 0 and 1 kept every decision above except these three. The record follows the code; nothing is planned to change back.
+
+| # | Decision | As built | Why |
+| --- | --- | --- | --- |
+| S-5 | Drizzle ORM for typed queries | **postgres.js tagged SQL** in the API, with zod schemas on every body | Each request runs in one transaction as the signed-in user (S-6); plain parameterised SQL kept that small and fast, and the risk spike in section 3 never needed the ORM |
+| S-8 | CSS Modules | **One global stylesheet per component family** in `apps/web/src/styles/` (tokens, base, shell, buttons, forms, tables, overlays, badges, cards, pages), imported through `index.css` | The prototype's `styles.css` ported family by family with the same class names, so the frames, the prototype and the app share one vocabulary |
+| S-12 | Buckets `client-logos`, `coa-drill-hole`, … | **`logos`** and **`coa`** (migration 0700), private, signed links of one hour | Named when phase 1 needed them; the remaining buckets (`signed-roa`, `job-order-files`, `sample-photos`, `reports`) keep the names above when their phases add them |
