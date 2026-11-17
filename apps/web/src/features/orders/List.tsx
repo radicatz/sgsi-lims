@@ -24,6 +24,7 @@ import { useCompanyOptions } from "../master-data/shared";
 import { CancelDialog } from "./Detail";
 import { OrderForm } from "./OrderForm";
 import {
+  STD_LABEL,
   useCatalogue,
   STATUSES,
   STATUS_LABEL,
@@ -319,9 +320,8 @@ export function Orders() {
           </Button>
         )}
         {reset && !phone ? (
-          <button
-            type="button"
-            className="linkbtn"
+          <Button
+            type="ghost"
             onClick={() => {
               setQ("");
               setChip("all");
@@ -331,7 +331,7 @@ export function Orders() {
             }}
           >
             Reset
-          </button>
+          </Button>
         ) : null}
       </div>
       {list.isLoading ? (
@@ -350,7 +350,7 @@ export function Orders() {
               onKeyDown={(e) => e.key === "Enter" && open(o)}
             >
               <div className="row between">
-                <b className="t-data-b">{o.orderNo}</b>
+                <b className="t-data-b c-brand">{o.orderNo}</b>
                 <Badge
                   label={STATUS_LABEL[o.status]}
                   tone={STATUS_TONE[o.status]}
@@ -358,11 +358,13 @@ export function Orders() {
                 />
               </div>
               <b className="t-sm w6">{o.company}</b>
-              <span className="t-cap c-sec">
-                {[
-                  o.service ?? "Custom",
-                  o.standards.map((s) => (s === "GBT" ? "GB/T" : s)).join(" "),
-                ].join("   ")}
+              <span className="row g8" style={{ flexWrap: "wrap" }}>
+                <span className="t-cap c-sec">{o.service ?? "Custom"}</span>
+                <span className="row g4" style={{ flexWrap: "nowrap" }}>
+                  {o.standards.map((s) => (
+                    <Tag key={s} label={STD_LABEL[s]} />
+                  ))}
+                </span>
               </span>
               <div className="row between t-cap">
                 <span className="c-sec">
