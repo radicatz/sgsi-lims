@@ -56,7 +56,7 @@ test.describe.serial("job orders, slice A", () => {
     await page.locator("#jo-q").fill("MCR-2207");
     await expect(page.getByText("JO-2026-0139").first()).toBeVisible();
     await expect(page.getByText("JO-2026-0142")).toHaveCount(0);
-    if (!phone) { await expect(page.getByText("Attn. Rudi Hartanto").first()).toBeVisible(); }
+    if (!phone) { await expect(page.locator("tbody tr", { hasText: "PT Mahakam Coal Resources" })).toBeVisible(); }   // the list drops the attention line (Desktop-03)
     await page.getByText("JO-2026-0139").first().click();
     await expect(page).toHaveURL(/\/orders\/JO-2026-0139$/);
     await expect(page.getByRole("heading", { name: "JO-2026-0139" })).toBeVisible();

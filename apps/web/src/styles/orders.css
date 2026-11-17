@@ -83,7 +83,7 @@
 .ppill .ptag {
   font: 600 9px/12px var(--f-body);
   letter-spacing: 0.4px;
-  padding: 0 5px;
+  padding: 2px 5px;
   border-radius: 6px;
   background: var(--accent-100);
   color: var(--accent-text);
