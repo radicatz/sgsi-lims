@@ -1,6 +1,6 @@
 # Job orders: build design (phase 2)
 
-Written Nov 16, 2026, for phase 2 of `../Project/V1_Build_Plan.md`. **Status: slice A built (Nov 16, 2026), slice B next.** The screens are specified in `Job_Order_Screen_Plan.md` (Revisions 7 to 12, 55 frames in module 03) and `Job_Order_Prototype_Plan.md` (flows JO1 to JO12); the rules in spec S-17, 9.3 and 6.1. This file says how they are built and tested.
+Written Nov 16, 2026, for phase 2 of `../Project/V1_Build_Plan.md`. **Status: slice A built (Nov 16, 2026), slice B built (Nov 17, 2026); phase 2 is complete.** The screens are specified in `Job_Order_Screen_Plan.md` (Revisions 7 to 12, 55 frames in module 03) and `Job_Order_Prototype_Plan.md` (flows JO1 to JO12); the rules in spec S-17, 9.3 and 6.1. This file says how they are built and tested.
 
 ## 1 · Scope
 
@@ -87,9 +87,9 @@ Each is committed when its checks pass, as Configuration was.
 | `GET /orders/:no` | The job order with its parameters, contact, signatory, counts (samples by state, batches, files) and the derived status (spec 9.3) |
 | `PUT /orders/:no` | Edit. Allowed until the first batch starts preparation (S-17 rules); then 409 with the reason |
 | `POST /orders/:no/submit`, `/cancel` (reason), `/close` | Draft to Awaiting samples; Cancel only while no sample is received; Close only when Delivered (until phase 4 the button is disabled with the reason) |
-| `GET`, `PUT /orders/:no/samples` | The list in row order; save is one batch of adds, edits and deletes, refused as a whole with the duplicate rows named. A row locks once its batch is in preparation |
-| `POST /samples/:id/not-received`, `/restore` | Reason from the lookup `not_received_reason`, a note when the reason needs one |
-| `GET`, `POST`, `DELETE /orders/:no/files` | Bucket `job-order-files` (private; PDF, images, Excel, Word, CSV; up to 20 MB) |
+| `GET`, `PUT /orders/:no/samples` | The list in row order; save is one batch of adds, edits and deletes, refused as a whole with the duplicate rows named. A row locks once it is in a batch (as built, following frame 07), is received or is marked not received |
+| `POST /orders/:no/samples/:id/not-received`, `/restore` | Reason from the lookup `not_received_reason`, a note when the reason needs one (as built: under the job order, so its status is checked in the same step) |
+| `GET`, `POST /orders/:no/files`, `DELETE /orders/:no/files/:id` | Bucket `job-order-files` (private; PDF, images, Excel, Word, CSV; up to 20 MB) |
 | `GET /orders/:no/history` | The audit rows of the job order, its parameters, group items, samples and files, newest first, with before and after. Read by the API after the `order.read` check, because `audit_log` is `audit.read` only |
 
 **Numbering.** `JO-{YYYY}-{NNNN}` from Configuration > Laboratory > Numbering; the next number is the highest of the year plus one, taken under a transaction-level advisory lock so two CSOs never get the same one. No counter table is needed.
@@ -154,3 +154,31 @@ Company codes in the database now (assigned in order; the Superadmin may change 
 | Demo data | `pnpm seed:orders` (14 job orders), `--remove` takes them out |
 | Left in slice A | The Samples, Files and History tabs show a placeholder (slice B). The form has no file drop zone (Files is slice B). The job order number is assigned by the server (the frames have no number field); the CSO cannot type another one |
 | Differences from the design | The form catalogue is loaded when the list opens, so New job order opens at once (the database is remote and the call takes about 1.3 s). A new job order starts with no client chosen, so a CSO cannot submit for the wrong client by leaving the default. Due date uses the browser's date field. Due-date filter is a choice (Any date, Before today, Today, Next 7 days, Next 30 days). Close stays disabled until the CoA is sent (phase 4) |
+
+### Slice B (Nov 17, 2026)
+
+Built against frames 03-03-06 to 12 (Samples, the three sizes where drawn), 02-01 (the form's "Notes and files" drop zone), the CoA history file rows (Files) and the Audit log frames 15-01-01 to 03 (History).
+
+| Item | Result |
+| --- | --- |
+| API | `apps/api/src/routes/orders-b.ts`, registered by `orderRoutes`: `GET`, `PUT /orders/:no/samples`, `POST /orders/:no/samples/:id/not-received`, `/restore`, `GET`, `POST /orders/:no/files`, `DELETE /orders/:no/files/:id`, `GET /orders/:no/history`. Uploads are checked by extension and first bytes, up to 20 MB, stored under a random path with their SHA-256, downloaded through one-hour signed links that keep the file's name |
+| Data step | Bucket `job-order-files` (`supabase/migrations/20261117000100_job_order_files_bucket.sql`, data only, applied Nov 17) |
+| Screens | `apps/web/src/features/orders/Samples.tsx` (grid, paste preview, not-received dialog and sheet, phone cards and add/edit sheet), `Files.tsx` (Files tab, the form's drop zone), `History.tsx`; the detail's head gets **Add samples** while a job order has no samples (frames 09, 10) |
+| Tests | `apps/api/scripts/check-orders.ts`: 80 live checks (35 new: the five states and locks, save, duplicates in any case, a swap of two references, depths, removal, not received and restore, file types and limits, signed links, history entries, read-only roles, a cancelled job order). `e2e/phase2-orders.spec.ts`: 3 new flows at 1440, 834 and 390 (JO5 samples by paste and by typing, JO10 not received and restore with the lock reasons, JO11 files from the form and the tab, then History) |
+| Demo data | `pnpm seed:orders` now also loads samples: JO-2026-0134 (6 expected, as frame 06) and JO-2026-0139 (8 in the five states with batches B-2026-0420 and B-2026-0421, as frame 07). The received ones carry their Sample ID and sample code in the section 10 format (`SG.261105.007.RI.001`, `007.RI.001.Lot01`). `--remove` takes out the samples and the two batches too |
+
+**Where the build differs from the frames, and why**
+
+| Point | Frame | Build |
+| --- | --- | --- |
+| Identifier columns | "Sample ID" holds the client's ID | **Client reference** (typed) and **Sample ID** ("Given at reception", then the sample code over the Sample ID), spec 6.1 and section 7 |
+| Expected rows | No action | The actions **Mark as not received** (R5 allows it for any sample in no batch) and **Remove** (a typed row must be removable) appear while the row is hovered or typed in, so the row looks as drawn at rest. Phone: in the sample's edit sheet |
+| In-batch rows | Locked | Locked, as drawn (section 5 said "once its batch is in preparation"; the frame wins) |
+| Empty state | Paste from Excel only | Paste from Excel and **Add row**, so the first row can be typed (tablet: Add row only, as the tablet frames have no Paste button) |
+| Paste | The preview | A text box when the browser does not allow reading the clipboard, then the preview; **Paste other rows** starts again. Ctrl+V of Excel rows anywhere in the grid opens the preview too |
+| Depth | "DH-BNM-021 14.20-14.55 m" | One cell, typed or pasted as "hole from-to"; a hole that is not one of the client's codes gets a small info icon with the hint (section 6) |
+| Unsaved rows | Orange dot and number | As drawn; leaving the tab or the page with unsaved rows asks first |
+| Save with a duplicate | Save (3) stays primary | As drawn: pressing it puts the cursor on the first problem row |
+| History | (not drawn) | The Audit log rows; one save of many samples is one entry ("3 samples", each row in the expanded part); an edit of the parameter set shows only the net change |
+
+**Open for later:** the History query filters the audit log by the job order inside the JSON before and after; at 4,600 rows it answers in about 1.3 s like every other route on the remote database. When the log grows, an expression index on `coalesce(after->>'job_order_id', before->>'job_order_id')` (a schema change, so the owner runs it) keeps it quick.

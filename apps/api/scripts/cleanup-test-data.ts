@@ -10,6 +10,10 @@ export async function cleanupTestData() {
   if (files.length) await admin.storage.from("coa").remove(files.map((f) => f.storage_path as string));
   const logos = await sql`select logo_path from companies where (code like 'ZT%' or code like 'ZE%') and logo_path is not null`;
   if (logos.length) await admin.storage.from("logos").remove(logos.map((l) => l.logo_path as string));
+  // files kept with the test job orders (their rows go with the job orders below)
+  const orderFiles = await sql`select f.storage_path from job_order_files f join job_orders j on j.id = f.job_order_id
+    where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
+  if (orderFiles.length) await admin.storage.from("job-order-files").remove(orderFiles.map((f) => f.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit', 'on', true)`;
     await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;

@@ -1,8 +1,9 @@
 // Demo job orders from the prototype (Job_Order_Prototype_Plan section 7), so the list and the detail show something until the lab's
-// real job orders arrive (R-20). 14 job orders for the demo clients, in every status the app can show. Safe to run again: existing
-// numbers are kept. Not audited (bulk demo load). Needs `pnpm seed:master` first.
-//   pnpm seed:orders            load the demo job orders
-//   pnpm seed:orders --remove   remove them again (with their samples and files rows)
+// real job orders arrive (R-20). 14 job orders for the demo clients, in every status the app can show, and the samples of frames 03-03-06
+// and 07 (JO-2026-0134 expected, JO-2026-0139 in the five states with two batches). Safe to run again: existing numbers are kept, and a
+// job order that already has samples gets none. Not audited (bulk demo load). Needs `pnpm seed:master` first.
+//   pnpm seed:orders            load the demo job orders and samples
+//   pnpm seed:orders --remove   remove them again (with their samples, the two demo batches and the files rows)
 import { sql } from "../src/db";
 
 type Std = "ASTM" | "ISO" | "GBT";
@@ -25,9 +26,30 @@ const ORDERS: Array<[string, string, string, string | null, Std[], number, strin
 ];
 const NOS = ORDERS.map((o) => o[0]);
 
+// Demo samples (slice B, frames 03-03-06 and 07). The client references keep the frames' values; a received sample gets its Sample ID and
+// sample code in the C-18 format (company code, branch RI, the day's running number). [ref, description, hole, from, to, remarks, state]
+type DemoState = "expected" | "received" | "in_batch" | "awaiting" | "not_received";
+const SAMPLES: Record<string, { batches?: Array<[string, string, number]>; rows: Array<[string, string, string, number, number, string, DemoState, string?]> }> = {
+  "JO-2026-0134": { rows: [
+    ["BNM-3401", "Ply A1 upper", "DH-BNM-021", 14.2, 14.55, "Composite", "expected"], ["BNM-3402", "Ply A1 lower", "DH-BNM-021", 14.55, 14.9, "", "expected"],
+    ["BNM-3403", "Ply A2", "DH-BNM-021", 16.1, 16.45, "Composite", "expected"], ["BNM-3404", "Ply B1", "DH-BNM-022", 8.2, 8.55, "", "expected"],
+    ["BNM-3405", "Ply B2", "DH-BNM-022", 9.0, 9.35, "Composite", "expected"], ["BNM-3406", "Ply C", "DH-BNM-022", 11.1, 11.4, "", "expected"],
+  ] },
+  // [batch no, status, days ago it was made]
+  "JO-2026-0139": { batches: [["B-2026-0420", "analysis", 12], ["B-2026-0421", "created", 2]], rows: [
+    ["BNM-3501", "Ply A1 upper", "DH-MCR-011", 6.2, 6.55, "Composite", "received", "B-2026-0420"], ["BNM-3502", "Ply A1 lower", "DH-MCR-011", 6.55, 6.9, "", "received", "B-2026-0420"],
+    ["BNM-3503", "Ply A2", "DH-MCR-011", 8.1, 8.45, "Composite", "received", "B-2026-0420"], ["BNM-3504", "Ply B1", "DH-MCR-012", 3.4, 3.75, "", "received", "B-2026-0420"],
+    ["BNM-3505", "Ply B2", "DH-MCR-012", 4.0, 4.35, "Composite", "in_batch", "B-2026-0421"], ["BNM-3506", "Ply C", "DH-MCR-012", 5.1, 5.4, "", "in_batch", "B-2026-0421"],
+    ["BNM-3507", "Ply D1", "DH-MCR-013", 2.2, 2.55, "", "awaiting", "B-2026-0420"], ["BNM-3508", "Ply D2", "DH-MCR-013", 2.55, 2.9, "Composite", "not_received"],
+  ] },
+};
+const BATCH_NOS = Object.values(SAMPLES).flatMap((s) => (s.batches ?? []).map((b) => b[0]));
+
 if (process.argv.includes("--remove")) {
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit','on',true)`;
+    await tx`delete from samples where job_order_id in (select id from job_orders where order_no = any(${NOS}::text[]))`;
+    await tx`delete from batches where batch_no = any(${BATCH_NOS}::text[])`;
     const del = await tx`delete from job_orders where order_no = any(${NOS}::text[]) returning order_no`;
     console.log(`removed ${del.length} demo job orders`);
   });
@@ -68,4 +90,54 @@ await sql.begin(async (tx) => {
   }
 });
 console.log(`loaded ${made} demo job orders (${NOS.length - made} already there)`);
+
+// the demo samples, for job orders that have none yet
+const [prep] = await sql`select id from profiles where email = 'dedi@sgsi.co.id'`;
+let filled = 0;
+await sql.begin(async (tx) => {
+  await tx`select set_config('app.skip_audit','on',true)`;
+  for (const [no, spec] of Object.entries(SAMPLES)) {
+    const [jo] = await tx`select j.id, j.company_id, j.sample_type, c.company_code from job_orders j join companies c on c.id = j.company_id where j.order_no = ${no}`;
+    if (!jo || (await tx`select 1 from samples where job_order_id = ${jo.id} limit 1`).length) continue;
+    const batch = new Map<string, { id: string; day: string }>();
+    for (const [bno, status, ago] of spec.batches ?? []) {
+      const started = status !== "created";
+      const [b] = await tx`insert into batches (job_order_id, company_id, batch_no, batch_date, deadline_on, standard, status, branch_code,
+          reception_confirmed_at, reception_confirmed_by, prep_finished_at, prep_finished_by, analysis_started_at, analysis_started_by, created_by, created_at)
+        values (${jo.id}, ${jo.company_id}, ${bno}, current_date - ${ago}::int, current_date - ${ago}::int + 10, 'ASTM', ${status}::batch_status, 'RI',
+          ${started ? tx`now() - make_interval(days => ${ago})` : null}, ${started ? prep?.id ?? null : null},
+          ${started ? tx`now() - make_interval(days => ${ago - 1})` : null}, ${started ? prep?.id ?? null : null},
+          ${started ? tx`now() - make_interval(days => ${ago - 1})` : null}, ${started ? prep?.id ?? null : null}, ${cso.id}, now() - make_interval(days => ${ago}))
+        on conflict (batch_no) do update set batch_no = excluded.batch_no returning id, batch_date::text as day`;
+      batch.set(bno, { id: b!.id, day: b!.day });
+    }
+    let n = 0;
+    for (const [i, [ref, descr, hole, from, to, remarks, state, bno]] of spec.rows.entries()) {
+      const b = bno ? batch.get(bno) : undefined;
+      let sampleNo: string | null = null, code: string | null = null;
+      if (state === "received" && b) {
+        const [c] = await tx`insert into sample_counters as c (company_id, branch_code, day, last) values (${jo.company_id}, 'RI', ${b.day}, 1)
+          on conflict (company_id, branch_code, day) do update set last = c.last + 1 returning last`;
+        const nnn = String(c!.last).padStart(3, "0");
+        sampleNo = `SG.${b.day.slice(2, 4)}${b.day.slice(5, 7)}${b.day.slice(8, 10)}.${jo.company_code}.RI.${nnn}`;
+        code = `${jo.company_code}.RI.${nnn}.Lot01`;
+      }
+      const [s] = await tx`insert into samples (job_order_id, row_no, client_ref, client_description, sample_type, remarks, drill_hole_text, depth_from, depth_to,
+          batch_id, released_from_batch_id, released_at, received_at, received_by, arrived_at, arrived_by, sample_no, sample_code, label_status,
+          not_received_reason, not_received_by, not_received_at)
+        values (${jo.id}, ${i + 1}, ${ref}, ${descr}, ${jo.sample_type}, ${remarks || null}, ${hole}, ${from}, ${to},
+          ${state === "received" || state === "in_batch" ? b?.id ?? null : null}, ${state === "awaiting" ? b?.id ?? null : null}, ${state === "awaiting" ? tx`now() - interval '11 days'` : null},
+          ${state === "received" ? tx`${b!.day}::date + time '10:30'` : null}, ${state === "received" ? prep?.id ?? null : null},
+          ${state === "received" ? tx`${b!.day}::date + time '10:00'` : null}, ${state === "received" ? prep?.id ?? null : null}, ${sampleNo}, ${code}, ${state === "received" ? "printed" : "none"},
+          ${state === "not_received" ? "Client did not send it" : null}, ${state === "not_received" ? cso.id : null}, ${state === "not_received" ? tx`now() - interval '3 days'` : null})
+        returning id`;
+      await tx`insert into sample_intervals (sample_id, drill_hole_id, depth_from, depth_to)
+        select ${s!.id}, d.id, ${from}, ${to} from drill_holes d where d.company_id = ${jo.company_id} and lower(d.code) = lower(${hole}) and d.archived_at is null`;
+      n++;
+    }
+    filled++;
+    console.log(`${no}: ${n} demo samples`);
+  }
+});
+console.log(`samples loaded for ${filled} job orders`);
 await sql.end();

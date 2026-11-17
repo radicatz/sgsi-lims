@@ -24,6 +24,7 @@ import {
   useOutside,
 } from "../../components";
 import { useSave } from "../master-data/shared";
+import { PendingFiles, sendPending } from "./Files";
 import {
   CATALOGUE_KEY,
   STD_LABEL,
@@ -869,7 +870,8 @@ function FormBody({
   const [f, setF] = useState<Form>(() => initial(cat, detail)),
     [errs, setErrs] = useState<Errors>({}),
     [summary, setSummary] = useState(""),
-    [step, setStep] = useState<1 | 2>(1);
+    [step, setStep] = useState<1 | 2>(1),
+    [files, setFiles] = useState<File[]>([]);
   const set = (p: Partial<Form>) => {
     setF((x) => ({ ...x, ...p }));
     setErrs({});
@@ -893,8 +895,8 @@ function FormBody({
     return e;
   };
   const save = useSave(
-    (submit: boolean) =>
-      api<{ orderNo?: string }>(
+    async (submit: boolean) => {
+      const r = await api<{ orderNo?: string }>(
         edit ? `/orders/${detail!.orderNo}` : "/orders",
         {
           method: edit ? "PUT" : "POST",
@@ -918,9 +920,13 @@ function FormBody({
             submit,
           },
         },
-      ),
+      );
+      // the form's files go up once the job order exists (frame 02-01, "Notes and files")
+      if (!edit && r.orderNo && files.length) await sendPending(r.orderNo, files);
+      return r;
+    },
     {
-      keys: ["orders", "order", CATALOGUE_KEY, "companies"],
+      keys: ["orders", "order", CATALOGUE_KEY, "companies", "order-files"],
       onField: (field, text) => {
         if (
           field &&
@@ -1115,7 +1121,7 @@ function FormBody({
     <>
       <span className="t-over sec">Report</span>
       <SignatoryPicker cat={cat} form={f} set={set} phone={phone} />
-      <span className="t-over sec">Notes</span>
+      <span className="t-over sec">{edit ? "Notes" : "Notes and files"}</span>
       <TextArea
         id="jo-notes"
         label="Notes"
@@ -1124,6 +1130,7 @@ function FormBody({
         placeholder="Add a note for the lab…"
         rows={3}
       />
+      {!edit && <PendingFiles files={files} onChange={setFiles} phone={phone} />}
     </>
   );
   const alert = summary ? <Alert tone="error" title={summary} /> : null;

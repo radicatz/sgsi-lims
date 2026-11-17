@@ -7,6 +7,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { asUser, type Tx } from "../db";
 import { authenticate, requireAny } from "../auth";
+import { orderSliceBRoutes } from "./orders-b";
 
 const SCREEN = "Job orders";
 const uuid = z.string().uuid();
@@ -331,4 +332,7 @@ export async function orderRoutes(app: FastifyInstance) {
     if (res === "not_delivered") return fail(reply, 409, "not_delivered", "A job order can be closed once its CoA is marked sent.");
     return { ok: true };
   });
+
+  /* ================= slice B: samples, files, history ================= */
+  await orderSliceBRoutes(app);
 }

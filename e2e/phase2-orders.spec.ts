@@ -1,6 +1,7 @@
-// Phase 2, job orders slice A (Job_Order_Build_Design.md; prototype flows JO1, JO2, JO3, JO4, JO8, JO9, JO12) at 1440, 834 and 390: the list and its
+// Phase 2, job orders (Job_Order_Build_Design.md; prototype flows JO1 to JO5 and JO8 to JO12) at 1440, 834 and 390. Slice A: the list and its
 // filters, the New job order form (dialog on desktop and tablet, two steps on the phone), draft and submit rules, contacts, the coking-coal
-// pills, edit, cancel and close, and a read-only visit. Test values start with ZE and are removed afterwards. Needs `pnpm seed:orders`.
+// pills, edit, cancel and close, and a read-only visit. Slice B: samples by paste and by typing, not received and restore, files and history.
+// Test values start with ZE and are removed afterwards. Needs `pnpm seed:orders`.
 import { execSync } from "node:child_process";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -178,5 +179,129 @@ test.describe.serial("job orders, slice A", () => {
     await expect(page.locator("#edit-order")).toHaveCount(0);
     await page.goto("/orders/JO-2026-0142?edit");
     await expect(page.locator("#jo-company")).toHaveCount(0);
+  });
+});
+
+// Slice B (frames 03-03-06 to 12; flows JO5, JO10, JO11): the Samples tab, the Files tab and the form's drop zone, the History tab.
+test.describe.serial("job orders, slice B", () => {
+  test.beforeAll(() => { cleanup(); });
+  test.afterAll(() => { cleanup(); });
+  let no = "";
+  const ref = (page: Page, v: string) => page.locator(`input[value="${v}"]`);
+
+  test("register samples by paste or by typing; duplicates are caught before saving (JO5)", async ({ page }, info) => {
+    const phone = info.project.name === "phone", tablet = info.project.name === "tablet";
+    await signIn(page, "rina@sgsi.co.id");
+    no = await makeOrder(page, phone, `ZE samples ${info.project.name} ${Date.now() % 100000}`);
+    await expect(page.getByText("No samples yet")).toBeVisible();
+    if (phone) {
+      await page.locator("#add-sample").click();
+      await page.locator("#sheet-ref").fill("ZE-1");
+      await page.locator("#sheet-depth").fill("DH-BNM-022 8.20-8.55");
+      await page.locator("#sheet-save").click();
+      await expect(page.locator(".scard", { hasText: "ZE-1" })).toBeVisible();
+      await page.locator("#add-sample").click();
+      await page.locator("#sheet-ref").fill("ze-1");
+      await page.locator("#sheet-save").click();
+      await expect(page.getByText("ze-1 is already on this job order.")).toBeVisible();
+      await page.locator("#sheet-ref").fill("ZE-2");
+      await page.locator("#sheet-save").click();
+      await expect(page.locator(".scard", { hasText: "ZE-2" })).toBeVisible();
+      await page.locator(".scard", { hasText: "ZE-2" }).click();
+      await page.locator("#sheet-desc").fill("ZE edited");
+      await page.locator("#sheet-save").click();
+      await expect(page.locator(".scard", { hasText: "ZE edited" })).toBeVisible();
+      return;
+    }
+    if (!tablet) {
+      await page.locator("#empty-paste").click();
+      await page.locator("#paste-text").fill("Sample ID\tDescription\tHole\tFrom\tTo\nZE-1\tPly A\tDH-BNM-022\t8.20\t8.55\nZE-2\tPly B\tDH-BNM-022\t8.55\t8.90\nZE-3\tPly C\nZE-2\tPly B again");
+      await expect(dlg(page).getByText("1 duplicate", { exact: true })).toBeVisible();
+      await expect(dlg(page).getByText("Duplicate", { exact: true })).toBeVisible();
+      await page.locator("#paste-add").click();
+      await expect(ref(page, "ZE-3")).toBeVisible();
+      await expect(ref(page, "DH-BNM-022 8.20-8.55 m")).toBeVisible();
+    } else {
+      await page.locator("#empty-add").click();
+      for (const [i, r] of ["ZE-1", "ZE-2", "ZE-3"].entries()) {
+        if (i) await page.locator("#add-row").click();
+        await page.locator("[id^=ref-n]").last().fill(r);
+      }
+    }
+    await expect(page.locator("#save-samples")).toHaveText("Save (3)");
+    await page.locator("[id^=ref-n]").last().fill("ZE-1");
+    await expect(page.getByText("Fix 1 duplicate ID before saving")).toBeVisible();
+    await expect(page.getByText("ZE-1 is already in row 1.")).toBeVisible();
+    await page.locator("[id^=ref-n]").last().fill("ZE-3");
+    await page.locator("#save-samples").click();
+    await expect(page.getByText("Samples saved")).toBeVisible();
+    await page.reload();
+    for (const r of ["ZE-1", "ZE-2", "ZE-3"]) await expect(ref(page, r)).toBeVisible();
+    await expect(page.locator("#save-samples")).toHaveText("Save");
+  });
+
+  test("mark a sample not received with a reason, then restore it; locked rows say why (JO10)", async ({ page }, info) => {
+    const phone = info.project.name === "phone";
+    await signIn(page, "rina@sgsi.co.id");
+    await page.goto(`/orders/${no}/samples`);
+    if (phone) {
+      await page.locator(".scard", { hasText: "ZE-1" }).click();
+      await page.locator("#sheet-nr").click();
+    } else {
+      await ref(page, "ZE-1").click();                                    // the row's actions show while it is being typed in
+      await page.getByRole("button", { name: "Mark ZE-1 as not received" }).click();
+    }
+    await expect(page.getByText("Mark ZE-1 as not received?")).toBeVisible();
+    await page.locator("#nr-reason").selectOption("Other");
+    await page.locator("#nr-confirm").click();
+    await expect(page.getByText("Add a note for this reason.")).toBeVisible();
+    await page.locator("#nr-note").fill("ZE the core box broke");
+    await page.locator("#nr-confirm").click();
+    await expect(page.getByText("ZE-1 marked not received")).toBeVisible();
+    await expect(page.getByText("Not received", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Restore ZE-1" }).click();
+    await expect(page.getByText("ZE-1 restored")).toBeVisible();
+    await expect(page.getByText("Not received", { exact: true })).toHaveCount(0);
+    // the demo order 0139: received and in-batch rows are locked with their reason
+    await page.goto("/orders/JO-2026-0139/samples");
+    if (phone) {
+      await expect(page.locator(".scard", { hasText: "BNM-3501" }).getByText("Received", { exact: true })).toBeVisible();
+      await page.locator(".lockic").first().click();
+      await expect(page.getByText(/Received on .+\. Received samples can't be edited\./)).toBeVisible();
+    } else {
+      await expect(page.getByText("007.RI.001.Lot01")).toBeVisible();
+      await page.locator(".lockic").first().hover();
+      await expect(page.getByRole("tooltip")).toContainText("Received samples can't be edited.");
+      await expect(page.getByRole("button", { name: "Mark BNM-3507 as not received" })).toBeVisible();   // awaiting arrival: shown at rest
+    }
+  });
+
+  test("files from the form and the Files tab, then the History tab lists the changes (JO11)", async ({ page }, info) => {
+    const phone = info.project.name === "phone";
+    await signIn(page, "rina@sgsi.co.id");
+    await openForm(page);
+    await page.locator("#jo-ref").fill(`ZE files ${info.project.name} ${Date.now() % 100000}`);
+    await page.locator("#jo-expected").fill("3");
+    if (phone) await page.locator("#jo-next").click();
+    await page.locator("#jo-form-file").setInputFiles({ name: "ZE quote.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n% ZE\n%%EOF\n") });
+    await expect(page.locator(".filerow", { hasText: "ZE quote.pdf" })).toBeVisible();
+    await page.locator("#jo-submit").click();
+    await expect(page).toHaveURL(/\/orders\/JO-\d{4}-\d{4}\/samples$/);
+    await page.getByRole("tab", { name: /^Files/ }).click();
+    await expect(page.locator(".filerow", { hasText: "ZE quote.pdf" })).toBeVisible();
+    await page.locator("#jo-file").setInputFiles({ name: "ZE tool.exe", mimeType: "application/octet-stream", buffer: Buffer.from("MZ") });
+    await expect(page.getByText("Use a PDF, image, Excel, Word or CSV file.")).toBeVisible();
+    await page.locator("#jo-file").setInputFiles({ name: "ZE list.csv", mimeType: "text/csv", buffer: Buffer.from("ref,desc\nZE-1,Ply A\n") });
+    await expect(page.getByText("ZE list.csv added")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Download ZE list.csv" })).toHaveAttribute("href", /token=/);
+    await page.getByRole("button", { name: "Remove ZE list.csv" }).click();
+    await page.getByRole("button", { name: "Remove", exact: true }).click();
+    await expect(page.getByText("ZE list.csv removed")).toBeVisible();
+    await expect(page.locator(".filerow", { hasText: "ZE list.csv" })).toHaveCount(0);
+    await page.getByRole("tab", { name: /^History/ }).click();
+    await expect(page.getByText("File removed", { exact: true })).toBeVisible();
+    await expect(page.getByText("File added", { exact: true }).first()).toBeVisible();
+    await page.getByText("Created", { exact: true }).click();
+    await expect(page.getByText("Expected samples", { exact: true })).toBeVisible();
   });
 });

@@ -26,6 +26,9 @@ import {
 } from "../../components";
 import { useSave } from "../master-data/shared";
 import { OrderForm } from "./OrderForm";
+import { SamplesTab } from "./Samples";
+import { FilesTab } from "./Files";
+import { HistoryTab } from "./History";
 import {
   useCatalogue,
   STATUS_LABEL,
@@ -195,9 +198,12 @@ export function OrderPage() {
       ]}
     />
   );
+  // frames 03-03-09 and 10: a job order with no samples yet offers Add samples in its head
+  const addSamples =
+    can("order.edit") && live && d.counts.samples === 0;
   const late = pastDue({ dueOn: d.dueOn, status: d.status });
   const sub = (
-    <div className="col g6">
+    <div className="col g6 order-sub">
       <b className="t-sm w6" style={{ fontWeight: 500 }}>
         {d.company.name}
       </b>
@@ -247,7 +253,25 @@ export function OrderPage() {
           </span>
         }
         sub={sub}
-        actions={phone ? undefined : menu || undefined}
+        actions={
+          phone ? undefined : (
+            <>
+              {addSamples && (
+                <Button
+                  type="primary"
+                  icon="plus"
+                  id="add-samples"
+                  onClick={() =>
+                    nav(`/orders/${no}/samples`, { state: { add: true } })
+                  }
+                >
+                  Add samples
+                </Button>
+              )}
+              {menu}
+            </>
+          )
+        }
       />
       {d.status === "cancelled" ? (
         <Alert
@@ -275,13 +299,7 @@ export function OrderPage() {
         />
       )}
       {tab === "samples" && (
-        <Card title="Samples">
-          <Empty
-            icon="test-tube"
-            title="Registering samples comes next"
-            text={`${d.expectedSamples ?? 0} samples are expected. The sample list opens in the next step of the build.`}
-          />
-        </Card>
+        <SamplesTab no={no} live={live} phone={phone} tablet={bp === "tablet"} />
       )}
       {tab === "batches" && (
         <Card title="Batches">
@@ -292,15 +310,7 @@ export function OrderPage() {
           />
         </Card>
       )}
-      {tab === "files" && (
-        <Card title="Files">
-          <Empty
-            icon="paperclip"
-            title="Files come next"
-            text="The quote, PO and client letters will be kept here."
-          />
-        </Card>
-      )}
+      {tab === "files" && <FilesTab no={no} live={live} phone={phone} />}
       {tab === "coa" && (
         <Card title="Certificate of Analysis">
           <Empty
@@ -310,15 +320,7 @@ export function OrderPage() {
           />
         </Card>
       )}
-      {tab === "history" && (
-        <Card title="History">
-          <Empty
-            icon="clock-counter-clockwise"
-            title="History comes next"
-            text="Every change to this job order will be listed here."
-          />
-        </Card>
-      )}
+      {tab === "history" && <HistoryTab no={no} phone={phone} />}
       {editing && (
         <OrderForm detail={d} phone={phone} onClose={() => setSp({})} />
       )}

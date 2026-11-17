@@ -1,8 +1,9 @@
-// Live check of the job order API (slice A) against the real database: who may read and write, the form catalogue, create and submit rules,
-// numbering, edit, cancel and close rules, the list filters. Needs the API running and the demo job orders (pnpm seed:orders).
+// Live check of the job order API (slices A and B) against the real database: who may read and write, the form catalogue, create and submit rules,
+// numbering, edit, cancel and close rules, the list filters; the sample list, not received and restore, files and history. Needs the API running and pnpm seed:orders.
 // Test rows have client reference "ZT ..." or order numbers "ZT-..." and are removed at the end.
 // Run: pnpm --filter @sgsi/api exec tsx --env-file=../../.env scripts/check-orders.ts
 import { sql } from "../src/db";
+import { admin } from "../src/supabase";
 
 const API = `http://localhost:${process.env.API_PORT ?? 4000}/api`;
 const PW = process.env.DEMO_PASSWORD!;
@@ -129,7 +130,98 @@ try {
   /* audit */
   const [a] = await sql`select count(*)::int as n from audit_log where screen = 'Job orders' and table_name = 'job_orders' and at > now() - interval '10 minutes'`;
   ok("changes wrote audit rows with the screen Job orders", a!.n >= 8, String(a!.n));
+
+  /* ================= slice B: samples ================= */
+  const mixed = (await call(CSO, "GET", "/orders/JO-2026-0139/samples")).body;
+  const st = (s: string) => mixed.items.filter((i: any) => i.state === s).length;
+  ok("the demo order 0139 shows the five states (4 received, 2 in batch, 1 awaiting arrival, 1 not received)", mixed.items.length === 8 && st("received") === 4 && st("in_batch") === 2 && st("awaiting_arrival") === 1 && st("not_received") === 1,
+    JSON.stringify(mixed.items?.map((i: any) => i.state)));
+  const rec = mixed.items[0];
+  ok("a received row is locked with who and when, and carries its Sample ID and sample code", rec.locked && /^Received on \d+ \w+ by .+\. Received samples can't be edited\.$/.test(rec.lockWhy)
+    && /^SG\.\d{6}\.007\.RI\.\d{3}$/.test(rec.sampleNo) && /^007\.RI\.\d{3}\.Lot01$/.test(rec.sampleCode), `${rec.lockWhy} ${rec.sampleNo}`);
+  ok("an in-batch row is locked, an awaiting-arrival row is not and may be marked not received", mixed.items[4].locked && /In batch B-2026-0421/.test(mixed.items[4].lockWhy) && !mixed.items[6].locked && mixed.items[6].canMarkNotReceived && !mixed.items[6].canRemove);
+  ok("the reasons come from the lookup, Other needs a note", mixed.reasons.some((r: any) => r.value === "Other" && r.needsNote) && mixed.reasons[0].value === "Client did not send it");
+  ok("a preparation user reads the samples but can't save, mark or upload", (await call(PREP, "GET", "/orders/JO-2026-0139/samples")).status === 200
+    && (await call(PREP, "PUT", "/orders/JO-2026-0139/samples", { rows: [], removed: [] })).status === 403
+    && (await call(PREP, "POST", `/orders/JO-2026-0139/samples/${mixed.items[6].id}/not-received`, { reason: "Lost in transit" })).status === 403
+    && (await call(PREP, "GET", "/orders/JO-2026-0139/history")).status === 200);
+
+  const zo = await call(CSO, "POST", "/orders", base({ orderNo: "ZT-JO-0010", clientReference: "ZT samples", submit: true, signatoryId: cat.signatories[0].id })); made.push("ZT-JO-0010");
+  ok("a job order for the sample checks", zo.status === 201, JSON.stringify(zo.body));
+  const S = "/orders/ZT-JO-0010/samples";
+  const put1 = await call(CSO, "PUT", S, { rows: [
+    { clientRef: "ZT-S1", description: "Ply A", drillHole: null, depthFrom: null, depthTo: null, remarks: "Composite" },
+    { clientRef: "ZT-S2", description: "Ply B", drillHole: "dh-bnm-022", depthFrom: 8.2, depthTo: 8.55, remarks: null },
+    { clientRef: "ZT-S3", description: "Ply C", drillHole: "DH-NOPE-1", depthFrom: 1, depthTo: 2, remarks: null },
+  ], removed: [] });
+  let list = (await call(CSO, "GET", S)).body.items;
+  ok("one save adds three rows in order, as Expected", put1.status === 200 && put1.body.added === 3 && list.map((i: any) => i.clientRef).join() === "ZT-S1,ZT-S2,ZT-S3" && list.every((i: any) => i.state === "expected" && i.canRemove),
+    JSON.stringify(put1.body));
+  ok("a drill hole of the client is linked (any case), an unknown one stays as typed", list[1].matched === true && list[2].matched === false && list[2].drillHole === "DH-NOPE-1" && list[1].depthFrom === "8.20");
+  const dupe = await call(CSO, "PUT", S, { rows: [{ clientRef: "zt-s1", description: null, drillHole: null, depthFrom: null, depthTo: null, remarks: null }], removed: [] });
+  ok("a duplicate client reference (any case) refuses the whole save", dupe.status === 422 && dupe.body.code === "duplicate" && /zt-s1/.test(dupe.body.text) && (await call(CSO, "GET", S)).body.items.length === 3, JSON.stringify(dupe.body));
+  const swap = await call(CSO, "PUT", S, { rows: [
+    { id: list[0].id, clientRef: "ZT-S2", description: "Ply A", drillHole: null, depthFrom: null, depthTo: null, remarks: "Composite" },
+    { id: list[1].id, clientRef: "ZT-S1", description: "Ply B", drillHole: "DH-BNM-022", depthFrom: 8.2, depthTo: 8.55, remarks: null },
+  ], removed: [] });
+  list = (await call(CSO, "GET", S)).body.items;
+  ok("two references can be swapped in one save", swap.status === 200 && list[0].clientRef === "ZT-S2" && list[1].clientRef === "ZT-S1", JSON.stringify(swap.body));
+  ok("a depth to below the depth from is refused on the row", (await call(CSO, "PUT", S, { rows: [{ clientRef: "ZT-S4", description: null, drillHole: "DH-1", depthFrom: 5, depthTo: 4, remarks: null }], removed: [] })).body?.field === "rows.0.depth");
+  ok("one depth without the other is refused", (await call(CSO, "PUT", S, { rows: [{ clientRef: "ZT-S4", description: null, drillHole: "DH-1", depthFrom: 5, depthTo: null, remarks: null }], removed: [] })).status === 422);
+  const rm = await call(CSO, "PUT", S, { rows: [], removed: [list[2].id] });
+  ok("an expected row can be removed", rm.status === 200 && rm.body.removed === 1 && (await call(CSO, "GET", S)).body.items.length === 2);
+  ok("a received row can't be edited and an in-batch row can't be removed", (await call(CSO, "PUT", "/orders/JO-2026-0139/samples", { rows: [{ id: rec.id, clientRef: "ZT-X", description: null, drillHole: null, depthFrom: null, depthTo: null, remarks: null }], removed: [] })).body?.code === "locked"
+    && (await call(CSO, "PUT", "/orders/JO-2026-0139/samples", { rows: [], removed: [mixed.items[4].id] })).body?.code === "locked");
+
+  /* not received and restore */
+  const s1 = list[1].id as string;
+  ok("Other without a note is refused on the note", (await call(CSO, "POST", `${S}/${s1}/not-received`, { reason: "Other" })).body?.field === "note");
+  ok("a reason that is not in the lookup is refused", (await call(CSO, "POST", `${S}/${s1}/not-received`, { reason: "ZT made up" })).body?.field === "reason");
+  ok("a sample is marked not received with its reason", (await call(CSO, "POST", `${S}/${s1}/not-received`, { reason: "Client did not send it", note: "ZT note" })).status === 200
+    && (await call(CSO, "GET", S)).body.items[1].notReceived?.reason === "Client did not send it");
+  ok("a not-received row is locked and can't be marked twice", (await call(CSO, "GET", S)).body.items[1].locked && (await call(CSO, "POST", `${S}/${s1}/not-received`, { reason: "Lost in transit" })).status === 409);
+  ok("Restore brings it back to Expected, and only once", (await call(CSO, "POST", `${S}/${s1}/restore`)).status === 200 && (await call(CSO, "GET", S)).body.items[1].state === "expected"
+    && (await call(CSO, "POST", `${S}/${s1}/restore`)).body?.code === "not_marked");
+  ok("a received sample can't be marked not received", (await call(CSO, "POST", `/orders/JO-2026-0139/samples/${rec.id}/not-received`, { reason: "Lost in transit" })).body?.code === "locked");
+
+  /* files */
+  const upload = async (token: string, name: string, bytes: Uint8Array | Buffer, type = "application/octet-stream"): Promise<Res> => {
+    const fd = new FormData(); fd.append("file", new Blob([bytes], { type }), name);
+    const r = await fetch(`${API}/orders/ZT-JO-0010/files`, { method: "POST", headers: { authorization: `Bearer ${token}` }, body: fd });
+    return { status: r.status, body: await r.json().catch(() => null) };
+  };
+  const pdf = Buffer.from("%PDF-1.4\n% ZT check file\n%%EOF\n");
+  const up = await upload(CSO, "ZT quote.pdf", pdf, "application/pdf");
+  ok("a PDF is uploaded", up.status === 201 && up.body.fileName === "ZT quote.pdf", JSON.stringify(up.body));
+  ok("a file that only says it is a PDF is refused", (await upload(CSO, "ZT fake.pdf", Buffer.from("not a pdf"), "application/pdf")).status === 415);
+  ok("an unknown type is refused", (await upload(CSO, "ZT tool.exe", Buffer.from("MZ...."))).status === 415);
+  ok("a CSV is accepted", (await upload(CSO, "ZT list.csv", Buffer.from("ref,desc\nZT-S1,Ply A\n"), "text/csv")).status === 201);
+  ok("a file over 20 MB is refused", (await upload(CSO, "ZT big.pdf", Buffer.concat([pdf, Buffer.alloc(20 * 1024 * 1024 + 10)]))).status === 413);
+  ok("a preparation user can't upload", (await upload(PREP, "ZT prep.pdf", pdf, "application/pdf")).status === 403);
+  const files = (await call(CSO, "GET", "/orders/ZT-JO-0010/files")).body;
+  ok("the list has both files with a signed download link, newest first", files.items.length === 2 && files.items[0].fileName === "ZT list.csv" && /^https:\/\/.+token=/.test(files.items[1].url ?? "") && files.items[1].kind === "pdf",
+    JSON.stringify(files.items?.map((f: any) => f.fileName)));
+  ok("the detail counts the files", (await call(CSO, "GET", "/orders/ZT-JO-0010")).body.counts.files === 2);
+  ok("a file is removed", (await call(CSO, "DELETE", `/orders/ZT-JO-0010/files/${files.items[0].id}`)).status === 200 && (await call(CSO, "GET", "/orders/ZT-JO-0010/files")).body.items.length === 1);
+  ok("a preparation user can't remove a file", (await call(PREP, "DELETE", `/orders/ZT-JO-0010/files/${files.items[1].id}`)).status === 403);
+
+  /* history */
+  const hist = (await call(CSO, "GET", "/orders/ZT-JO-0010/history")).body.items as Array<any>;
+  const acts = hist.map((h) => h.action);
+  ok("the history lists the creation, the samples added and removed, not received, restore and the files", ["Created", "Samples added", "Samples removed", "Marked not received", "Restored", "File added", "File removed"].every((x) => acts.includes(x)),
+    acts.join(", "));
+  const added = hist.find((h) => h.action === "Samples added");
+  ok("one save of three rows is one entry with each row", added?.record === "3 samples" && added.changes.length === 3 && added.changes[0].field === "ZT-S1", JSON.stringify(added));
+  ok("the swap shows as edits of the client reference, without the parking step", hist.filter((h) => h.action === "Updated" && h.recordType === "Sample").every((h) => !h.changes.some((c: any) => String(c.after).startsWith("~")))
+    && hist.some((h) => h.action === "Updated" && h.changes.some((c: any) => c.field === "Client reference" && c.before === "ZT-S1" && c.after === "ZT-S2")), JSON.stringify(hist.filter((h) => h.action === "Updated")));
+  ok("the history is newest first and names the user", hist[0].at >= hist[hist.length - 1].at && hist.every((h) => h.actor));
+  await call(CSO, "POST", "/orders/ZT-JO-0010/cancel", { reason: "ZT done with samples" });
+  ok("a cancelled job order's samples and files can't change", (await call(CSO, "PUT", S, { rows: [], removed: [] })).body?.code === "locked" && (await upload(CSO, "ZT late.pdf", pdf, "application/pdf")).status === 409
+    && (await call(CSO, "GET", S)).body.canEdit === false);
 } finally {
+  // the stored files of the test orders go with them
+  const paths = await sql`select f.storage_path from job_order_files f join job_orders j on j.id = f.job_order_id where j.order_no = any(${made}::text[]) or j.client_reference like 'ZT %'`;
+  if (paths.length) await admin.storage.from("job-order-files").remove(paths.map((p) => p.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit','on',true)`;
     await tx`update companies set address = ${bnm!.address} where id = ${bnm!.id}`;
