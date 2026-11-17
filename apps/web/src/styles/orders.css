@@ -137,6 +137,19 @@
   padding: 16px;
 }
 
+/* the Overview's parameter pills (frame Desktop 03-03-01): 22 high, round, primary-50 with a primary-200 line, Caption/Medium secondary */
+.parpill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-200);
+  background: var(--primary-50);
+  color: var(--text-secondary);
+  font: 500 12px/16px var(--f-body);
+  white-space: nowrap;
+}
 /* ---------- Samples tab (frames 03-03-06 to 12) ---------- */
 .c-act {
   color: var(--action-brand-text);
@@ -200,11 +213,11 @@
   border-radius: 12px;
 }
 /* the lock of a row that can't change: a quiet icon whose tooltip says why */
-.ib.lockic {
+.btn.icon.lockic {
   color: var(--text-muted);
   cursor: help;
 }
-.ib.lockic:hover {
+.btn.icon.lockic:hover {
   background: none;
 }
 .tip.left {
@@ -243,29 +256,41 @@
   cursor: pointer;
 }
 
-/* ---------- History tab (Audit log rows, frames 15-01-01 and 02) ---------- */
+/* ---------- History tab (frames 03-03-13 History and 14 History_row_expanded) ---------- */
+.htbl tbody tr:not(.xrow) td {
+  height: 56px;
+}
+/* the open row: a tinted, rounded block under the row (radius 10, padding 8 12) */
 .tbl tr.xrow td {
-  background: var(--surface-muted);
-  padding: 12px 12px 14px;
+  padding: 0 0 8px;
+  background: none;
+}
+.tbl tr.xrow:hover td {
+  background: none;
 }
 .hist-x {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface-muted);
 }
 .hist-grid {
   display: grid;
-  grid-template-columns: minmax(140px, 260px) minmax(0, 200px) minmax(0, 1fr);
-  gap: 6px 16px;
+  grid-template-columns: minmax(120px, 260px) minmax(0, 260px) minmax(0, 1fr);
+  gap: 8px 0;
   align-items: baseline;
+  padding: 4px 0;
 }
 .hist-grid > span {
   overflow-wrap: anywhere;
+  padding-right: 12px;
 }
 .hcard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--surface-border);
@@ -274,8 +299,8 @@
   text-align: left;
   color: inherit;
 }
-.hcard .hist-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+.hcard .hist-x {
+  margin-top: 2px;
 }
 /* frames 06 and 11: an editable row shows no action and no hints at rest; they appear while the row is hovered or typed in */
 .sgrid .acts.hov {
@@ -298,9 +323,63 @@
 .page-head:has(.order-sub) > .row {
   margin-top: 4px;
 }
-/* tablet frames 06 and 07: the grid keeps its columns and scrolls sideways inside the card */
+/* desktop: the eight columns need 1080 px; below that the grid scrolls inside the card */
 table.sgrid {
   min-width: 1080px;
+}
+/* tablet (frames T 06, 07; plan Revision 14): six columns that fit the 666 px card, no sideways scroll */
+table.sgrid.tgrid {
+  min-width: 0;
+  table-layout: fixed;
+}
+.tgrid td.act {
+  padding: 4px 0;
+}
+.tgrid .scell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.tgrid .scell > .row {
+  min-width: 0;
+}
+.tgrid .scell > .row > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tgrid td .t-cap {
+  overflow-wrap: anywhere;
+}
+.tgrid input.gc.ref {
+  height: 24px;
+}
+.sgrid input.gc.cap {
+  height: 18px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font: 400 12px/16px var(--f-body);
+  color: var(--text-secondary);
+}
+.sgrid input.gc.cap.mut {
+  color: var(--text-muted);
+}
+.sgrid input.gc.cap::placeholder {
+  font: 400 12px/16px var(--f-body);
+}
+/* an empty description or remarks line takes no room until the row is being typed in */
+.tgrid tr:not(:focus-within) input.gc.opt:placeholder-shown {
+  display: none;
+}
+.gcbtn {
+  display: block;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: text;
+  color: inherit;
 }
 .sgrid td .row {
   flex-wrap: nowrap;

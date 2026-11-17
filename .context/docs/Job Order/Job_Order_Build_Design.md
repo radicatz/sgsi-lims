@@ -163,7 +163,7 @@ Built against frames 03-03-06 to 12 (Samples, the three sizes where drawn), 02-0
 | --- | --- |
 | API | `apps/api/src/routes/orders-b.ts`, registered by `orderRoutes`: `GET`, `PUT /orders/:no/samples`, `POST /orders/:no/samples/:id/not-received`, `/restore`, `GET`, `POST /orders/:no/files`, `DELETE /orders/:no/files/:id`, `GET /orders/:no/history`. Uploads are checked by extension and first bytes, up to 20 MB, stored under a random path with their SHA-256, downloaded through one-hour signed links that keep the file's name |
 | Data step | Bucket `job-order-files` (`supabase/migrations/20261117000100_job_order_files_bucket.sql`, data only, applied Nov 17) |
-| Screens | `apps/web/src/features/orders/Samples.tsx` (grid, paste preview, not-received dialog and sheet, phone cards and add/edit sheet), `Files.tsx` (Files tab, the form's drop zone), `History.tsx`; the detail's head gets **Add samples** while a job order has no samples (frames 09, 10) |
+| Screens | `apps/web/src/features/orders/Samples.tsx` (grid, paste preview, not-received dialog and sheet, phone cards and add/edit sheet), `Files.tsx` (Files tab, the form's drop zone), `History.tsx` |
 | Tests | `apps/api/scripts/check-orders.ts`: 80 live checks (35 new: the five states and locks, save, duplicates in any case, a swap of two references, depths, removal, not received and restore, file types and limits, signed links, history entries, read-only roles, a cancelled job order). `e2e/phase2-orders.spec.ts`: 3 new flows at 1440, 834 and 390 (JO5 samples by paste and by typing, JO10 not received and restore with the lock reasons, JO11 files from the form and the tab, then History) |
 | Demo data | `pnpm seed:orders` now also loads samples: JO-2026-0134 (6 expected, as frame 06) and JO-2026-0139 (8 in the five states with batches B-2026-0420 and B-2026-0421, as frame 07). The received ones carry their Sample ID and sample code in the section 10 format (`SG.261105.007.RI.001`, `007.RI.001.Lot01`). `--remove` takes out the samples and the two batches too |
 
@@ -179,6 +179,16 @@ Built against frames 03-03-06 to 12 (Samples, the three sizes where drawn), 02-0
 | Depth | "DH-BNM-021 14.20-14.55 m" | One cell, typed or pasted as "hole from-to"; a hole that is not one of the client's codes gets a small info icon with the hint (section 6) |
 | Unsaved rows | Orange dot and number | As drawn; leaving the tab or the page with unsaved rows asks first |
 | Save with a duplicate | Save (3) stays primary | As drawn: pressing it puts the cursor on the first problem row |
-| History | (not drawn) | The Audit log rows; one save of many samples is one entry ("3 samples", each row in the expanded part); an edit of the parameter set shows only the net change |
+| History | Frames 13 and 14 (Revision 13) | As drawn after the owner feedback below; one save of many samples is one entry ("3 samples", each row in the open block); an edit of the parameter set shows only the net change |
+
+**Owner feedback, Nov 17 (built the same day):**
+
+| Point | Change |
+| --- | --- |
+| Add samples | The head's **Add samples** button is gone (the frames have none). The Samples tab's empty state keeps Paste from Excel and Add row |
+| History | Follows frames 13 and 14: desktop When, User, Action, Record (type over the record), Changes (summary and caret); the open row is a tinted, rounded block with Field, Before (muted), After (heading colour, bold); tablet When (no year), Record, Action and a 44 px caret, with the user at the top of the open block; phone cards (Action and time, record, avatar and name), 6 a page, the open card shows Field over Before → After. The Created entry keeps its caret: it opens the fields the job order was created with (the frame shows "12 fields" without one) |
+| Parameter pills | Overview pills as frame 01: 22 high, round, primary-50 with a primary-200 line, 12 px medium secondary text |
+| Tablet Samples | Plan Revision 14: #, Sample (client reference with the sample code beside it, description, remarks only when there are some), Depth / lot reference (hole over depths), Batch, Status, Action (44 px). No sideways scroll. The depth reads as two lines and becomes one field while it is edited; an empty description or remarks line shows only while the row is being typed in. The Action column is 96 wide when an expected row has both Mark as not received and Remove (two 44 px icons do not fit the frame's 52); the lock says why on a tap |
+| Phone stepper | Vertical, as frame Phone 01, with a 2 px line joining the markers (green after a done step, the border colour after the others); the line is not drawn in the frame |
 
 **Open for later:** the History query filters the audit log by the job order inside the JSON before and after; at 4,600 rows it answers in about 1.3 s like every other route on the remote database. When the log grows, an expression index on `coalesce(after->>'job_order_id', before->>'job_order_id')` (a schema change, so the owner runs it) keeps it quick.

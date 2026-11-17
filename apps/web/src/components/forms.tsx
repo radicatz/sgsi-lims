@@ -1,6 +1,6 @@
 // Component layer, part of the FigCraft library port (Stack_Decision_Record S-7, S-8): forms.
 import { useId, useRef, useState, type ReactNode } from "react";
-import { IconBtn } from "./Button";
+import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { cx } from "./utils";
 
@@ -18,7 +18,7 @@ export function PasswordField({ label, value, onChange, error, help, placeholder
   const [show, setShow] = useState(false); const auto = useId(); const fid = id ?? auto;
   return <div className="field"><label className="flabel" htmlFor={fid}>{label}</label>
     <div className={cx("input", error && "err")} style={{ paddingRight: 4 }}><input id={fid} type={show ? "text" : "password"} value={value} placeholder={placeholder} autoComplete={autoComplete} aria-invalid={!!error} onChange={(e) => onChange(e.target.value)} />
-      <IconBtn n={show ? "eye-slash" : "eye"} label={show ? "Hide password" : "Show password"} onClick={() => setShow(!show)} /></div>
+      <Button iconOnly icon={show ? "eye-slash" : "eye"} label={show ? "Hide password" : "Show password"} onClick={() => setShow(!show)} /></div>
     {error ? <span className="help err">{error}</span> : help ? <span className="help">{help}</span> : null}</div>;
 }
 

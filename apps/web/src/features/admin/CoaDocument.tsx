@@ -3,7 +3,7 @@
 // footer) with the bordered grid of the lab's sample report (CODE SAMPLE, Test Method, basis columns, mass row).
 // The text fields of the template feed it live; the results are demo values.
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { IconBtn } from "../../components";
+import { Button } from "../../components";
 
 export interface CoaFields {
   title: string;
@@ -203,11 +203,11 @@ export function FitPage({ children }: { children: ReactNode }) {
   return (
     <div style={{ width: "100%" }}>
       <div className="zoombar" role="group" aria-label="Zoom">
-        <IconBtn n="minus" label="Zoom out" size={36} disabled={zoom <= 0.5} onClick={() => step(-0.25)} />
+        <Button iconOnly icon="minus" label="Zoom out" size="lg"disabled={zoom <= 0.5} onClick={() => step(-0.25)} />
         <button type="button" className="zoomval" aria-label="Fit to width" onClick={() => setZoom(1)}>
           {Math.round(k * 100)}%
         </button>
-        <IconBtn n="plus" label="Zoom in" size={36} disabled={zoom >= 3} onClick={() => step(0.25)} />
+        <Button iconOnly icon="plus" label="Zoom in" size="lg"disabled={zoom >= 3} onClick={() => step(0.25)} />
         <button type="button" className="linkbtn" onClick={() => setZoom(1)} disabled={zoom === 1}>
           Fit
         </button>

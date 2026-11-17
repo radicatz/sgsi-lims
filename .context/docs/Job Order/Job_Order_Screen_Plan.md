@@ -7,6 +7,10 @@
 Oct 21, 2026 · screen S-17 in `../Project/Coal_LIMS_Development_Spec.md` (sections 3.5, 9.3, 10 S-17) · first screen of the new flow
 Revised Oct 27, 2026 after the first review: see **Revision 2**; **Revision 3** (contact dropdown, hint clean-up) is planned and waits for approval. It covers company and contacts, the Standard field, parameter pills, the stepper, tab order, and the new Add batch screen.
 
+Revision 14 (Nov 17, 2026, **BUILT**): the tablet Samples table no longer scrolls sideways. See the last section.
+
+Revision 13 (Nov 17, 2026, **BUILT**): the History tab frames. See the last section.
+
 Revision 7 (Nov 2, 2026, **BUILT** in the frames): the Create form follows the prototype (version 31) and three owner changes; the FigCraft file is organised by screen size. See the next section.
 
 Revision 6 (Oct 30, 2026, built in part): the job order frames are redrawn from scratch in FigCraft, built only from the new component library. See the section after Revision 7.
@@ -1118,3 +1122,117 @@ Built with `library/cards.js` and the changed generators (`../Batch/Batch_Screen
 **Card padding (Nov 4, 2026, supersedes the 16 / 20 rule of 6.5e):** every card on every screen is padded 16 on all four sides.
 
 **Owner edits (Nov 5, 2026, saved 14:26):** the Key-value rows of the Overview (desktop, tablet, dark preview) and of Mark sent and Sent are now top-aligned (component change, see `../Design System/Component_Library_Plan.md`, last section); in Samples_locked_row_tooltip the tooltip moved 30 px down, to y 543, under the locked row. The tooltip position is taken into `library/screens/rowC.js` (`TIPY` 543).
+
+## Revision 13 · History tab (BUILT Nov 17, 2026)
+
+Written for: the product owner, who approves it, and whoever builds or reviews the frames.
+
+### 13.1 Why
+
+The job order detail has six tabs (Overview, Samples, Batches, Files, CoA, History), but the **History** tab has no frame at any size: every detail frame shows it as an inactive tab only (spec S-17 v1 note: "The Files and History tab contents are not drawn yet"). The web app already has the tab (`apps/web/src/features/orders/History.tsx`, API `GET /orders/:no/history`), built from the Audit log frames. These frames draw what the app shows, so the design and the app match.
+
+### 13.2 What the tab shows
+
+Every change to the job order, its parameters, its samples and its files, **newest first**. It is the Audit log (`../Admin/Admin_Screen_Plan.md` section 5) filtered to one job order, without the filter bar.
+
+| Part | Spec |
+| --- | --- |
+| Where | Job order detail, tab **History** active; the header and stepper as on the other tabs. Open to every staff role (read only) |
+| Card | Card head "History" with a Count pill (number of entries); no buttons, no filters |
+| Columns (desktop) | **When** (160: "21 Oct 2026, 08:40"; "Today, 10:42" and "Yesterday, 16:05" for the last two days), **User** (190: Avatar 24 and name; "System" without avatar), **Action** (170), **Record** (fill: the record type in Caption muted over the record in Data style, link colour; "8 samples" in body style), **Changes** (160: the changed field's name, or "N fields", with a caret; "—" when there is nothing to open) |
+| Actions that occur | Created, Submitted, Updated, Status changed, Cancelled, Closed, Parameters changed, Samples added, Samples removed, Marked not received, Restored, File added, File removed |
+| Record types | Job order (JO-2026-0139), Sample (BNM-3507), Samples (8 samples), File (PO-MCR-2207.pdf) |
+| Expanded row | A tinted block under the row, as in the Audit log: a grid **Field / Before / After** (Before in muted text, After in foreground; numbers and codes in Data style, words in body style; "—" for empty); for Samples added, one line per sample (the sample in the Field column, its description, drill hole and depth as After, for example "Ply A1 upper, DH-MCR-011, 6.20-6.55 m"); an optional note ("Client confirmed the ply was lost in transport"); the closing line "*Action* by *name* on the Job orders screen." |
+| Pager | 10 entries per page, "Showing 1–10 of N" |
+| Empty | Empty state with `clock-counter-clockwise`, "No changes yet", "Every change to this job order, its samples and files is listed here." In practice every job order has at least its Created entry, so this frame is not drawn |
+| Tablet | As the Audit log tablet frame: columns **When**, **Record**, **Action** and a caret; the user and the field list move into the expanded block |
+| Phone | One card per entry (as the Audit log phone frame): Action in bold with the time on the right, record type and record, Avatar 24 and name; tapping a card opens the changes inside it as Field, then Before → After; Mobile pager |
+
+**Not in History (v1):** batch events (batch created, reception confirmed, ADL, values, RoA upload) and CoA events (published, sent) are not listed as their own entries; they live on the batch page and the CoA tab. When they change the job order's status, the **Status changed** entry shows it (for example Awaiting samples to In progress at Confirm reception). See open point 13.6-1.
+
+### 13.3 Frames
+
+Persona Rina Kartika (CSO), as on the other detail frames. Demo job order **JO-2026-0139** (PT Mahakam Coal Resources, In progress, the same as `07-Samples_mixed_states`: 8 samples, batches B-2026-0420 and B-2026-0421, BNM-3507 awaiting arrival, BNM-3508 not received, 1 file).
+
+| # | Frame | Sizes | Content |
+| --- | --- | --- | --- |
+| H1 | `{Size}-03-Job_orders-03-Job_order_detail-13-History` | D, T, P | The 10 entries below, all closed |
+| H2 | `{Size}-03-Job_orders-03-Job_order_detail-14-History_row_expanded` | D, P | Desktop: the **Samples added** row open (8 samples with description, drill hole and depth). Phone: the **Marked not received** card open (Reason, Note) |
+
+Demo entries, newest first:
+
+| When | User | Action | Record | Changes |
+| --- | --- | --- | --- | --- |
+| 22 Oct 2026, 10:05 | Rina Kartika | Marked not received | Sample BNM-3508 | Reason: Client did not send it; Note: "Client confirmed the ply was lost in transport" |
+| 21 Oct 2026, 08:40 | Dedi Kurniawan | Updated | Sample BNM-3507 | 2 fields: Batch B-2026-0421 → —, Released from batch — → B-2026-0421 |
+| 20 Oct 2026, 16:12 | Dedi Kurniawan | Status changed | Job order JO-2026-0139 | Status: Awaiting samples → In progress |
+| 20 Oct 2026, 09:30 | Rina Kartika | File added | File PO-MCR-2207.pdf | — |
+| 16 Oct 2026, 11:20 | Rina Kartika | Parameters changed | Job order JO-2026-0139 | Parameters added: HGI |
+| 15 Oct 2026, 14:02 | Rina Kartika | Updated | Sample BNM-3505 | Client description: Ply B → Ply B2 |
+| 15 Oct 2026, 10:48 | Rina Kartika | Samples added | Samples, 8 samples | 8 samples |
+| 14 Oct 2026, 15:30 | Rina Kartika | Submitted | Job order JO-2026-0139 | Status: Draft → Awaiting samples |
+| 14 Oct 2026, 15:22 | Rina Kartika | Updated | Job order JO-2026-0139 | 2 fields: Due date 24 Oct 2026 → 20 Oct 2026, Priority Standard → Urgent |
+| 14 Oct 2026, 15:10 | Rina Kartika | Created | Job order JO-2026-0139 | 12 fields |
+
+Ten entries, so the pager shows one page ("Showing 1–10 of 10").
+
+Total: **5 frames** (desktop H1 and H2, tablet H1, phone H1 and H2).
+
+### 13.4 How it is built
+
+1. New generator `library/screens/rowCh.js`, **add-only**: it deletes and rebuilds only its own 5 frames by exact name and places them to the right of the last job order detail frame on each page. It reuses the detail frame builder of `rowC.js` (header, stepper, tabs with History active) and the Audit log table and card patterns of `rowO.js`.
+2. No library change: Table rows, Avatar, Count pill, Pager and Empty state exist.
+3. Check each frame by screenshot (no clipping, nothing wider than its size, 44 px touch targets on the phone cards and pager); fit only these frames (`fitcfg.js` with an `ONLY` filter), not the whole file.
+4. Deploy: dirty check, backup (`backup/SGSI-LIMS-screens.before-jo-history.figcraft`), close, copy, reopen.
+5. Docs: build status here, spec S-17 v1 note (History drawn), `../Design System/Frame_Naming.md` (variants 13 and 14), memory. No PNG export unless asked.
+
+### 13.5 Differences with the app to settle
+
+| Point | App today | Frames |
+| --- | --- | --- |
+| Tablet | The desktop table with all five columns | The Audit log tablet layout (When, Record, Action, caret). If you approve, the app follows the frames |
+| Pager with one page | Always shown | Shown as "Showing 1–10 of 10", the same as the app |
+
+### 13.6 Open points
+
+| # | Question | Default |
+| --- | --- | --- |
+| 1 | Should History also list batch and CoA events (batch created, reception confirmed, CoA published, CoA sent) as their own entries | No for v1, as the app: they show only through **Status changed**; a full timeline can come later |
+| 2 | Filters in the tab (Action, User) | None; a job order has tens of entries, not hundreds |
+| 3 | Export CSV from the tab | No; the Audit log (Supervisor, Manager) exports, filtered by record |
+| 4 | The Files tab is not drawn either | Not in this round; it can follow the same way (the app has `Files.tsx`) |
+
+### 13.7 Build status (Nov 17, 2026)
+
+All 5 frames are built with `library/screens/rowCh.js` (`build-screens.js Ch`, add-only) on the Desktop, Tablet and Mobile Phone pages, to the right of the last job order detail frame of each page: `13-History` (desktop, tablet, phone), `14-History_row_expanded` (desktop: Samples added open; phone: Marked not received open). The open points of 13.6 were used with their defaults. Backup: `backup/SGSI-LIMS-screens.before-jo-history.figcraft`.
+
+The app had **unsaved edits** that differed from the file on disk, so the build ran on a copy of the app's state (`backup/SGSI-LIMS-screens.your-unsaved-edits-nov17.figcraft`) to keep them.
+
+Deviations: the phone shows the first 6 of the 10 entries (pager 1 / 2), like the Audit log phone frame; the desktop pager shows 1, 2, 3 although the 10 entries fit one page (the pager component has fixed page buttons).
+
+## Revision 14 · Tablet Samples table without sideways scroll (BUILT Nov 17, 2026)
+
+Written for: the product owner, and whoever builds or reviews the frames.
+
+### 14.1 Why
+
+The tablet Samples tab kept the desktop table at 1,086 px inside a card that has 666 px, so Remarks, Batch, Status and Action had to be scrolled into view. Every other tablet table avoids this by dropping or folding columns (Job orders list, Audit log, Configuration). Frames: `Tablet-03-Job_orders-03-Job_order_detail-06-Samples`, `-07-Samples_mixed_states` and `-08-Samples_mark_as_not_received` (all three share the table).
+
+### 14.2 The tablet table (616 px of 666)
+
+| Column | Width | Content |
+| --- | --- | --- |
+| # | 32 | Row number |
+| Sample | fills the rest (about 220) | Sample ID (Data style) on line 1; Client description (Caption, secondary) on line 2; **Remarks** (Caption, muted) on line 3, only when the sample has remarks |
+| Depth / lot reference | 130 | Drill hole on line 1, depth range on line 2 |
+| Batch | 100 | Batch number (link colour) or a muted dash |
+| Status | 132 | The five-state badge |
+| Action | 52 | Icon button at 44 px (lock, mark not received, restore) |
+
+Rows without remarks are two lines, rows with remarks three. The desktop table (8 columns) and the phone cards are unchanged. The Remarks column is not dropped, it moves under the description, so no data is lost.
+
+### 14.3 Build status
+
+Library: two new sets next to the desktop ones, **Table header row samples tablet** and **Table row samples tablet** (Action = None, Locked, Mark, Restore; Remarks is a layer that is hidden when empty). The three tablet frames were rebuilt in place, at their old positions, with `library/screens/rowCt.js` (`build-screens.js Ct`, add-only; it uses `rowC.js` `samples`, `mixed` and `markDesktop` with a tablet branch in `sRow` and `sHead`). The grid is no longer clipped. Frame heights: 06 is 1058, 07 is 1116, 08 is 1180. Backup: `backup/SGSI-LIMS-screens.before-tablet-samples.figcraft`.
+
+The web app (`apps/web/src/features/orders/Samples.tsx`) follows this layout on the tablet since Nov 17, 2026 (see `Job_Order_Build_Design.md`, slice B, owner feedback).

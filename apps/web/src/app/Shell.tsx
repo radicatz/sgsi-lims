@@ -12,7 +12,6 @@ import {
   Card,
   Empty,
   Icon,
-  IconBtn,
   cx,
   useEsc,
   useOutside,
@@ -89,8 +88,9 @@ export function Shell() {
             <div className="col g12" style={{ paddingBottom: 8 }}>
               <div className="row between">
                 <span className="logo" style={{ width: 36, height: 36 }} />
-                <IconBtn
-                  n="x"
+                <Button
+                  iconOnly
+                  icon="x"
                   label="Close menu"
                   onClick={() => setDrawer(false)}
                 />
@@ -168,7 +168,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
   return (
     <header className="topbar">
       {bp === "phone" && (
-        <IconBtn n="list" label="Open menu" size={36} onClick={onMenu} />
+        <Button iconOnly icon="list" label="Open menu" size="lg" onClick={onMenu} />
       )}
       <Link
         className="brand"
@@ -197,10 +197,11 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         </label>
       )}
       <div className="bellwrap">
-        <IconBtn
-          n="bell"
+        <Button
+          iconOnly
+          icon="bell"
           type="secondary"
-          size={36}
+          size="lg"
           label={`Notifications${me!.unread ? `, ${me!.unread} unread` : ""}`}
           onClick={() => nav("/notifications")}
         />

@@ -71,7 +71,7 @@ class B {
     (this.textIds[st] = this.textIds[st] || []).push(id);
     return id;
   }
-  applyTextStyles() { for (const [st, ids] of Object.entries(this.textIds)) this.raw("style.apply", { ids, style: st }); this.textIds = {}; }
+  applyTextStyles() { const have = this.reg && this.reg.styleNames; for (const [st, ids] of Object.entries(this.textIds)) this.raw("style.apply", { ids, style: have && !have.has(st) && st === "Data" && have.has("Regular") ? "Regular" : st }); this.textIds = {}; }
   // instance of a built set (default = first variant, or by variant name)
   inst(parent, setName, variant) {
     const info = this.sets[setName], v = variant ? info.variants[variant] : info.first;

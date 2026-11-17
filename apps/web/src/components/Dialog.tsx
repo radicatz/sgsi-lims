@@ -1,6 +1,6 @@
 // Component layer, part of the FigCraft library port (Stack_Decision_Record S-7, S-8): Dialog.
 import { type ReactNode } from "react";
-import { Button, ButtonSizeContext, IconBtn } from "./Button";
+import { Button, ButtonSizeContext } from "./Button";
 import { cx, toFrame, useEsc } from "./utils";
 
 /* ---------- overlays ---------- */
@@ -42,7 +42,7 @@ export function Dialog({
               </p>
             )}
           </div>
-          <IconBtn n="x" label="Close" onClick={onClose} />
+          <Button iconOnly icon="x" label="Close" onClick={onClose} />
         </div>
         {children && <div className="db">{children}</div>}
         {footer && (

@@ -46,7 +46,6 @@ a {
 a.nav,
 a.brand,
 a.btn,
-a.ib,
 .userchip {
   text-decoration: none;
 }
@@ -150,6 +149,9 @@ button:disabled {
 }
 .c-mut {
   color: var(--text-muted);
+}
+.c-for {
+  color: var(--text-foreground);
 }
 .c-err {
   color: var(--feedback-error);

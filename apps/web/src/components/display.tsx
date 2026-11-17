@@ -26,8 +26,9 @@ export function Chips<T extends string>({ items, value, onChange, scroll }: { it
 
 /* ---------- page tabs (list switches, owner rule) ---------- */
 /** The job order's life as steps (Stepper in the library): a mark per step, its name and a short note. */
-export function Stepper({ steps }: { steps: Array<{ name: string; note?: string; state: "done" | "cur" | "up" }> }) {
-  return <div className="stepper" role="list">{steps.map((s) => <div key={s.name} role="listitem" className={cx("step", s.state)} aria-current={s.state === "cur" ? "step" : undefined}>
+/** `vertical`: the phone stepper (frame Phone 03-03-01), one step a row with a line joining the markers. */
+export function Stepper({ steps, vertical }: { steps: Array<{ name: string; note?: string; state: "done" | "cur" | "up" }>; vertical?: boolean }) {
+  return <div className={cx("stepper", vertical && "vert")} role="list">{steps.map((s) => <div key={s.name} role="listitem" className={cx("step", s.state)} aria-current={s.state === "cur" ? "step" : undefined}>
     <span className="mk">{s.state === "done" && <Icon n="check" s={14} />}</span><b>{s.name}</b>{s.note && <small>{s.note}</small>}</div>)}</div>;
 }
 

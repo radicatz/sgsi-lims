@@ -13,7 +13,6 @@ import {
   Dialog,
   Empty,
   Icon,
-  IconBtn,
   TextField,
   TextArea,
   cx,
@@ -1328,7 +1327,7 @@ function TemplateEditor({
           aria-label="Certificate preview"
         >
           <div className="fh">
-            <IconBtn n="caret-left" label="Back" size={44} onClick={() => setShow(false)} />
+            <Button iconOnly icon="caret-left" label="Back" size="touch"onClick={() => setShow(false)} />
             <b className="t-sm w6">Preview certificate</b>
           </div>
           <div className="fb" style={{ background: "var(--surface-muted)" }}>

@@ -9,7 +9,7 @@ const MAIN = process.env.MAIN_IN || dir + "/SGSI-LIMS-screens.figcraft";
 const json = process.env.JSON_IN || "C:/Users/pc/AppData/Local/Temp/main.json";
 cp.execFileSync(CLI, ["convert", MAIN, json]);
 const J = JSON.parse(fs.readFileSync(json));
-const reg = loadReg(J);
+const reg = loadReg(J); reg.styleNames = new Set((J.styles || []).map((x) => x.name));
 // rows H, I and J are always rebuilt last, in that order: delete their old frames here and hide them from the other rows' placement
 const b = new B(J.next_id).useReg(reg).regSets();
 b.logo = {};

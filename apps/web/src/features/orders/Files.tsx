@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
 import { useSession } from "../../app/session";
-import { Card, Confirm, DropZone, Empty, Icon, IconBtn, fileSize, toast } from "../../components";
+import { Button, Card, Confirm, DropZone, Empty, Icon, fileSize, toast } from "../../components";
 import { useSave } from "../master-data/shared";
 
 export const FILE_HINT = "PDF, image, Excel, Word or CSV, up to 20 MB";
@@ -23,7 +23,7 @@ interface OrderFile { id: string; fileName: string; sizeBytes: number; kind: str
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar" });
 
 function FileRow({ name, size, by, at, kind, url, phone, onRemove }: { name: string; size: number; by?: string | null; at?: string; kind: string; url?: string | null; phone: boolean; onRemove?: () => void }) {
-  const dl = url ? <a className="ib" href={url} target="_blank" rel="noreferrer" aria-label={`Download ${name}`} title={`Download ${name}`}><Icon n="download-simple" /></a> : null;
+  const dl = url ? <a className="btn ghost md icon" href={url} target="_blank" rel="noreferrer" aria-label={`Download ${name}`} title={`Download ${name}`}><Icon n="download-simple" /></a> : null;
   return (
     <div className="filerow">
       <Icon n={ICON[kind] ?? "file"} s={20} />
@@ -37,7 +37,7 @@ function FileRow({ name, size, by, at, kind, url, phone, onRemove }: { name: str
           <span className="t-cap c-sec">{when(at)}</span>
         </div>
       )}
-      <span className="acts">{dl}{onRemove && <IconBtn n="trash" label={`Remove ${name}`} onClick={onRemove} />}</span>
+      <span className="acts">{dl}{onRemove && <Button iconOnly icon="trash" label={`Remove ${name}`} onClick={onRemove} />}</span>
     </div>
   );
 }

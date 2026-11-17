@@ -194,6 +194,8 @@ test.describe.serial("job orders, slice B", () => {
     await signIn(page, "rina@sgsi.co.id");
     no = await makeOrder(page, phone, `ZE samples ${info.project.name} ${Date.now() % 100000}`);
     await expect(page.getByText("No samples yet")).toBeVisible();
+    await expect(page.locator("#add-samples")).toHaveCount(0);                 // no Add samples in the head (the frames have none)
+    await expect(page.locator(".stepper.vert")).toHaveCount(phone ? 1 : 0);   // the phone stepper is vertical
     if (phone) {
       await page.locator("#add-sample").click();
       await page.locator("#sheet-ref").fill("ZE-1");
@@ -241,7 +243,7 @@ test.describe.serial("job orders, slice B", () => {
   });
 
   test("mark a sample not received with a reason, then restore it; locked rows say why (JO10)", async ({ page }, info) => {
-    const phone = info.project.name === "phone";
+    const phone = info.project.name === "phone", tablet = info.project.name === "tablet";
     await signIn(page, "rina@sgsi.co.id");
     await page.goto(`/orders/${no}/samples`);
     if (phone) {
@@ -270,8 +272,17 @@ test.describe.serial("job orders, slice B", () => {
       await expect(page.getByText(/Received on .+\. Received samples can't be edited\./)).toBeVisible();
     } else {
       await expect(page.getByText("007.RI.001.Lot01")).toBeVisible();
-      await page.locator(".lockic").first().hover();
-      await expect(page.getByRole("tooltip")).toContainText("Received samples can't be edited.");
+      if (tablet) {
+        // tablet (plan Revision 14): six columns, no sideways scroll; the 44 px lock says why on a tap
+        await expect(page.locator(".tgrid th")).toHaveCount(6);
+        const wrap = await page.locator(".tgrid").evaluate((t) => [t.parentElement!.scrollWidth, t.parentElement!.clientWidth]);
+        expect(wrap[0]).toBeLessThanOrEqual(wrap[1]);
+        await page.locator(".lockic").first().click();
+        await expect(page.getByText(/Received on .+\. Received samples can't be edited\./)).toBeVisible();
+      } else {
+        await page.locator(".lockic").first().hover();
+        await expect(page.getByRole("tooltip")).toContainText("Received samples can't be edited.");
+      }
       await expect(page.getByRole("button", { name: "Mark BNM-3507 as not received" })).toBeVisible();   // awaiting arrival: shown at rest
     }
   });
@@ -300,6 +311,8 @@ test.describe.serial("job orders, slice B", () => {
     await expect(page.locator(".filerow", { hasText: "ZE list.csv" })).toHaveCount(0);
     await page.getByRole("tab", { name: /^History/ }).click();
     await expect(page.getByText("File removed", { exact: true })).toBeVisible();
+    // frames 13: desktop When, User, Action, Record, Changes; tablet When, Record, Action and a caret; phone cards
+    if (!phone) await expect(page.locator(".htbl th")).toHaveCount(info.project.name === "tablet" ? 4 : 5);
     await expect(page.getByText("File added", { exact: true }).first()).toBeVisible();
     await page.getByText("Created", { exact: true }).click();
     await expect(page.getByText("Expected samples", { exact: true })).toBeVisible();

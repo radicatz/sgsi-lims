@@ -12,7 +12,6 @@ import {
   Confirm,
   Dialog,
   Icon,
-  IconBtn,
   Search,
   Select,
   TextArea,
@@ -315,13 +314,15 @@ function ContactPicker({
                         </span>
                       </span>
                     </button>
-                    <IconBtn
-                      n="pencil-simple"
+                    <Button
+                      iconOnly
+                      icon="pencil-simple"
                       label={`Edit ${k.fullName}`}
                       onClick={() => start(k)}
                     />
-                    <IconBtn
-                      n="trash"
+                    <Button
+                      iconOnly
+                      icon="trash"
                       label={`Remove ${k.fullName}`}
                       onClick={() => setRemove(k)}
                     />
@@ -412,13 +413,14 @@ function ContactEdit({
         </div>
       </div>
       <div className="col g8">
-        <IconBtn
-          n="floppy-disk"
+        <Button
+          iconOnly
+          icon="floppy-disk"
           label="Save contact"
           disabled={busy || !draft.fullName.trim()}
           onClick={onSave}
         />
-        <IconBtn n="x" label="Cancel" onClick={onCancel} />
+        <Button iconOnly icon="x" label="Cancel" onClick={onCancel} />
       </div>
     </div>
   );
@@ -503,8 +505,9 @@ function SignatoryPicker({
                 />
               </div>
               <div className="col g8">
-                <IconBtn
-                  n="check"
+                <Button
+                  iconOnly
+                  icon="check"
                   label="Use this signatory"
                   disabled={!draft.name.trim()}
                   onClick={() => {
@@ -517,8 +520,9 @@ function SignatoryPicker({
                     close();
                   }}
                 />
-                <IconBtn
-                  n="x"
+                <Button
+                  iconOnly
+                  icon="x"
                   label="Cancel"
                   onClick={() => setAdding(false)}
                 />
@@ -1194,10 +1198,11 @@ function FormBody({
   return toFrame(
     <div className="fullscreen" role="dialog" aria-label={title}>
       <div className="fh">
-        <IconBtn
-          n={step === 2 ? "caret-left" : "x"}
+        <Button
+          iconOnly
+          icon={step === 2 ? "caret-left" : "x"}
           label={step === 2 ? "Back" : "Close"}
-          size={44}
+          size="touch"
           onClick={() => (step === 2 ? setStep(1) : onClose())}
         />
         <b className="t-sm w6 grow">{title}</b>

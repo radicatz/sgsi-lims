@@ -651,7 +651,7 @@ function CoaHistory({ dh, onClose }: { dh: DrillHole; onClose: () => void }) {
   const dl = (h: { fileName: string; url: string | null }) =>
     h.url ? (
       <a
-        className="ib"
+        className="btn ghost md icon"
         href={h.url}
         target="_blank"
         rel="noreferrer"

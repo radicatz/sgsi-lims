@@ -190,7 +190,7 @@ export function OrderPage() {
         can("order.cancel") &&
           live && {
             label: "Close",
-            icon: "lock-simple",
+            icon: "archive",
             disabled: !d.can.close.ok,
             why: d.can.close.why ?? "",
             onClick: () => setClose(true),
@@ -198,9 +198,6 @@ export function OrderPage() {
       ]}
     />
   );
-  // frames 03-03-09 and 10: a job order with no samples yet offers Add samples in its head
-  const addSamples =
-    can("order.edit") && live && d.counts.samples === 0;
   const late = pastDue({ dueOn: d.dueOn, status: d.status });
   const sub = (
     <div className="col g6 order-sub">
@@ -253,25 +250,7 @@ export function OrderPage() {
           </span>
         }
         sub={sub}
-        actions={
-          phone ? undefined : (
-            <>
-              {addSamples && (
-                <Button
-                  type="primary"
-                  icon="plus"
-                  id="add-samples"
-                  onClick={() =>
-                    nav(`/orders/${no}/samples`, { state: { add: true } })
-                  }
-                >
-                  Add samples
-                </Button>
-              )}
-              {menu}
-            </>
-          )
-        }
+        actions={phone ? undefined : menu}
       />
       {d.status === "cancelled" ? (
         <Alert
@@ -281,7 +260,7 @@ export function OrderPage() {
         />
       ) : (
         <Card>
-          <Stepper steps={steps(d)} />
+          <Stepper steps={steps(d)} vertical={phone} />
         </Card>
       )}
       <Tabs
@@ -299,7 +278,12 @@ export function OrderPage() {
         />
       )}
       {tab === "samples" && (
-        <SamplesTab no={no} live={live} phone={phone} tablet={bp === "tablet"} />
+        <SamplesTab
+          no={no}
+          live={live}
+          phone={phone}
+          tablet={bp === "tablet"}
+        />
       )}
       {tab === "batches" && (
         <Card title="Batches">
@@ -320,7 +304,9 @@ export function OrderPage() {
           />
         </Card>
       )}
-      {tab === "history" && <HistoryTab no={no} phone={phone} />}
+      {tab === "history" && (
+        <HistoryTab no={no} phone={phone} tablet={bp === "tablet"} />
+      )}
       {editing && (
         <OrderForm detail={d} phone={phone} onClose={() => setSp({})} />
       )}
@@ -445,7 +431,9 @@ function Overview({
             </span>
             <span className="row g6 wrap">
               {d.parameters.map((p) => (
-                <Tag key={p.id} label={p.label} />
+                <span key={p.id} className="parpill">
+                  {p.label}
+                </span>
               ))}
             </span>
           </span>

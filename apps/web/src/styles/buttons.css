@@ -22,13 +22,10 @@ a.btn.secondary, a.btn.ghost, a.btn.tertiary { color: var(--action-brand-text); 
 .btn.accent:hover { background: var(--accent-soft); }
 .btn:disabled, .btn[aria-disabled="true"] { background: var(--surface-muted); color: var(--text-muted); border-color: var(--surface-border); }
 .btn.ghost:disabled { background: none; }
-.ib { width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--action-brand-text); flex: none; border: 1px solid transparent; }
-.ib.s28 { width: 28px; height: 28px; } .ib.s36 { width: 36px; height: 36px; } .ib.s44 { width: 44px; height: 44px; }
-.ib.secondary { background: var(--surface-card); border-color: var(--surface-border-strong); }
-.ib.tertiary { background: var(--primary-50); }
-.ib.primary { background: var(--action); color: var(--action-foreground); }
-.ib:hover { background: var(--primary-50); } .ib.primary:hover { background: var(--action-hover); }
-.ib:disabled { color: var(--text-muted); background: none; }
+/* icon only (Button iconOnly, FigCraft Icon button): a circle, sm 28, md 32, lg 36, touch 44 */
+.btn.icon { width: 32px; padding: 0; gap: 0; }
+.btn.icon.sm { width: 28px; } .btn.icon.lg { width: 36px; height: 36px; } .btn.icon.touch { width: 44px; padding: 0; }
+.btn.icon:disabled { background: none; } .btn.icon.ghost:disabled { border-color: transparent; }
 .linkbtn { display: inline-flex; align-items: center; gap: 6px; color: var(--action-brand-text); font: 600 13px/18px var(--f-body); }
 .linkbtn:hover { text-decoration: underline; }
 .linkbtn:disabled { color: var(--text-muted); text-decoration: none; }

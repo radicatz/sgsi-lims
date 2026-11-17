@@ -132,19 +132,62 @@ B.prototype.patchSamples = function () {
     } }));
   b.set(pan, "Table row samples", rv, { cols: 1, cw: 1200, ch: 90, W: 1240, H: 4 * 90 + 32 });
 };
+// Tablet sample table (Nov 17): no sideways scroll. # | Sample (ID, description, remarks) | Depth / lot (drill hole, depth) | Batch | Status | Action = 616 px
+const TCOLS = [["#", 32], ["Sample", 0], ["Depth / lot reference", 130], ["Batch", 100], ["Status", 132], ["", 52]];
+B.prototype.patchSamplesTablet = function () {
+  const b = this, N = b.reg.N;
+  if (b.reg.sets["Table row samples tablet"]) return;
+  const holder = Object.values(N).find((n) => n.type === "frame" && n.name === "Table row samples (set)");
+  if (!holder) throw new Error("Table row samples (set) not found");
+  const pan = holder.parent, W = 666;
+  b.set(pan, "Table header row samples tablet", [{ name: "Template=Default", w: W, h: 44, frame: { fill: "Primary/primary-50", r: 8, layout: "h", pad: 0, cross: "center", sizeH: "fixed", sizeV: "fixed" },
+    build(cid) { TCOLS.forEach(([h, w]) => { const f = b.frame(cid, { name: "Head", w: w || 220, h: 40, layout: "h", pad: w === 52 ? 0 : [0, 8, 0, 8], cross: "center", sizeH: w ? "fixed" : "fill", sizeV: "fixed" }); if (h) b.text(f, h, { style: "Caption/SemiBold", color: "Text/text-secondary", name: "Label" }); }); } }], { cols: 1, cw: 700, ch: 70, W: 740, H: 102 });
+  const rv = Object.keys({ None: 1, ...ACT }).map((a) => ({ name: `Action=${a}`, w: W, h: 57, frame: { fill: "Surface/card", layout: "v", sizeH: "fixed", sizeV: "hug" },
+    build(cid) {
+      const row = b.frame(cid, { name: "Row", w: W, h: 56, layout: "h", pad: 0, cross: "center", sizeH: "fill", sizeV: "hug" });
+      const cell = (w, o = {}) => b.frame(row, { name: "Cell", w: w || 220, h: 40, layout: o.v ? "v" : "h", gap: o.v ? 2 : 6, pad: w === 52 ? 0 : [10, 8, 10, 8], cross: o.v ? "min" : "center", main: w === 52 ? "center" : "min", sizeH: w ? "fixed" : "fill", sizeV: "hug" });
+      const o = {};
+      o.Index = b.text(cell(32), "1", { style: "Data", color: "Text/text-muted", name: "Index" });
+      const sc = cell(0, { v: true });
+      o["Sample ID"] = b.text(sc, "BNM-3401", { style: "Data/Strong", color: "Text/heading", name: "Sample ID" });
+      o.Description = b.text(sc, "Ply A1 upper", { style: "Caption/Regular", color: "Text/text-secondary", name: "Description", fill: true });
+      o.Remarks = b.text(sc, "Composite", { style: "Caption/Regular", color: "Text/text-muted", name: "Remarks", fill: true });
+      const dc = cell(130, { v: true });
+      o["Drill hole"] = b.text(dc, "DH-BNM-021", { style: "Body small/Regular", color: "Text/text-secondary", name: "Drill hole" });
+      o.Depth = b.text(dc, "14.20-14.55 m", { style: "Caption/Regular", color: "Text/text-muted", name: "Depth" });
+      o.Batch = b.text(cell(100), "B-2026-0420", { style: "Data", color: "Primary/primary", name: "Batch" });
+      o.Badge = b.instV(cell(132), "Status badge", "Status=Expected, Size=md");
+      const ac = cell(52);
+      if (ACT[a]) o.Action = b.instV(ac, "Icon button", `Type=Ghost, Size=44, State=${ACT[a][1]}`, { swaps: [[0, "Icon", `Glyph=${ACT[a][0]}, Size=20`]] });
+      b.frame(cid, { name: "Divider", w: W, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" });
+      return o;
+    } }));
+  b.set(pan, "Table row samples tablet", rv, { cols: 1, cw: 700, ch: 100, W: 740, H: 4 * 100 + 32 });
+};
+
 // text overrides keyed by the placeholder text of the library variant (names repeat in these sets)
 const T = (b, set, variant, map) => { const v = b.v(set, variant), o = {}; for (const [ph, t] of Object.entries(map)) { const i = v.texts.findIndex((x) => !/ source$/.test(x.name) && (x.chars === ph || x.chars === ph.split(" · ")[0])); if (i < 0) throw new Error("no placeholder " + ph + " in " + set); o[i] = t; } return o; };
 const SR = (b, variant, o) => { const ph = { Idx: "1", Id: "BNM-3401", Desc: "Ply A1 upper", Depth: "DH-BNM-021 · 14.20-14.55 m", Rem: "Composite", Batch: "B-2026-0420" }; const v = b.v("Table row samples", variant); if (!v.texts) { const r = {}; for (const [k, t] of Object.entries(o)) r[k === "Idx" ? "Index" : k] = t; return r; } const m = {}; for (const [k, t] of Object.entries(o)) m[ph[k]] = t; return T(b, "Table row samples", variant, m); };
 // one sample row: the tablet keeps the full table and scrolls it sideways
 const ROWW = (kind) => (kind === "tablet" ? { width: 1086 } : { sizingH: "fill" });
+function sRowTablet(b, parent, action, i, id, desc, depth, rem, batch, status) {
+  const variant = `Action=${action}`, v = b.v("Table row samples tablet", variant), nm = v.names || v.off;
+  const m = /^(\S+)\s*(?:·\s*)?(.*)$/.exec(depth) || [depth, depth, ""];
+  const texts = { Index: String(i + 1), "Sample ID": id, Description: desc, "Drill hole": m[1], Depth: m[2], Batch: batch || "—" };
+  if (rem) texts.Remarks = rem;
+  const rid = b.instV(parent, "Table row samples tablet", variant, { texts, hide: rem ? [] : ["Remarks"], swaps: status ? [[v.insts ? "Status badge" : "Badge", "Status badge", `Status=${status}, Size=md`]] : [], props: { sizingH: "fill" } });
+  if (!batch) { b.raw("node.set", { ids: [rid + nm.Batch], props: { fill: LIGHT["Text/text-muted"] } }); b.bind(rid + nm.Batch, "fill", "Text/text-muted"); }
+  return rid;
+}
 function sRow(b, parent, kind, action, i, id, desc, depth, rem, batch, status) {
+  if (kind === "tablet") return sRowTablet(b, parent, action, i, id, desc, depth, rem, batch, status);
   const variant = `Action=${action}`, v = b.v("Table row samples", variant);
   const rid = b.instV(parent, "Table row samples", variant, { texts: SR(b, variant, { Idx: String(i + 1), Id: id, Desc: desc, Depth: depth, Rem: rem, Batch: batch || "—" }), swaps: status ? [[v.insts ? "Status badge" : "Badge", "Status badge", `Status=${status}, Size=md`]] : [], props: ROWW(kind) });
   const nm = v.names || v.off;
   if (!batch) { b.raw("node.set", { ids: [rid + nm.Batch], props: { fill: LIGHT["Text/text-muted"] } }); b.bind(rid + nm.Batch, "fill", "Text/text-muted"); }
   return rid;
 }
-const sHead = (b, parent, kind) => b.instV(parent, "Table header row samples", "Template=Default", { props: ROWW(kind) });
+const sHead = (b, parent, kind) => (kind === "tablet" ? b.instV(parent, "Table header row samples tablet", "Template=Default", { props: { sizingH: "fill" } }) : b.instV(parent, "Table header row samples", "Template=Default", { props: ROWW(kind) }));
 function batchRow(b, parent, t, d) {
   const variant = "Template=" + t + ", State=Default", v = b.v("Table row batches", variant), pick = (ph) => v.texts.findIndex((x) => x.chars === ph);
   const texts = { Number: d[0], Date: d[1], Standard: d[2], Samples: d[3], Deadline: d[10] };
@@ -350,7 +393,7 @@ function samples(b, x, y, kind) {
     b.instV(ft, "Button", "Type=Secondary, Tone=Default, Size=touch, State=Default", { texts: { Label: "Add sample" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("plus") }, props: { sizingH: "fill" } });
     return s;
   }
-  const wrap = b.frame(c, { name: "Grid", w: 1112, h: 200, layout: "v", pad: 0, sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
+  const wrap = b.frame(c, { name: "Grid", w: 1112, h: 200, layout: "v", pad: 0, sizeH: "fill", sizeV: "hug" });
   sHead(b, wrap, kind);
   SAMPLES6.forEach(([id, d, depth, rem], i) => sRow(b, wrap, kind, "None", i, id, d, depth, rem, "", "Expected"));
   return s;
@@ -398,7 +441,7 @@ function mixed(b, x, y, kind, o = {}) {
     });
     return { s, c };
   }
-  const wrap = b.frame(c, { name: "Grid", w: 1112, h: 200, layout: "v", pad: 0, sizeH: "fill", sizeV: "hug", clip: kind === "tablet" });
+  const wrap = b.frame(c, { name: "Grid", w: 1112, h: 200, layout: "v", pad: 0, sizeH: "fill", sizeV: "hug" });
   sHead(b, wrap, kind);
   const rows = MIXED.map((d, i) => sampleRow(b, wrap, i, d, kind));
   return { s, c, rows, wrap };
@@ -428,6 +471,7 @@ function markDesktop(b, x, y, kind) {
   b.raw("node.set", { ids: [root], props: { sizingV: "fixed", height: kind === "desktop" ? 1180 : 1180 } });
   scrimOver(b, root, W, 1180);
   dialogAt(b, root, "md", Math.round((W - 560) / 2) + (kind === "desktop" ? 60 : 0), 260, "Mark BNM-3507 as not received?", "The sample stays on the job order with this reason. The job order can be completed without it. You can restore it if it arrives later.", "Cancel", "Mark as not received", (bd) => reasonBody(b, bd, 512));
+  return m.s;
 }
 
 function markPhone(b, x, y) {
@@ -565,4 +609,5 @@ exports.build = (b) => {
 };
 
 // shared with rows D and E
+exports.S = { samples, mixed, markDesktop };
 exports.H = { TITLE, page, card, cardHead, detailFrame, batches, awaiting, overview, scrimOver, dialogAt, KIND, JO0142, JO0139, WCONTENT };
