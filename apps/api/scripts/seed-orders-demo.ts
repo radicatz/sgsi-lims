@@ -49,7 +49,7 @@ if (process.argv.includes("--remove")) {
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit','on',true)`;
     await tx`delete from samples where job_order_id in (select id from job_orders where order_no = any(${NOS}::text[]))`;
-    await tx`delete from batches where batch_no = any(${BATCH_NOS}::text[])`;
+    await tx`delete from batches where batch_no = any(${BATCH_NOS}::text[]) or job_order_id in (select id from job_orders where order_no = any(${NOS}::text[]))`;   // also the batches of pnpm seed:batches
     const del = await tx`delete from job_orders where order_no = any(${NOS}::text[]) returning order_no`;
     console.log(`removed ${del.length} demo job orders`);
   });

@@ -181,6 +181,8 @@ Built against frames 03-03-06 to 12 (Samples, the three sizes where drawn), 02-0
 | Save with a duplicate | Save (3) stays primary | As drawn: pressing it puts the cursor on the first problem row |
 | History | Frames 13 and 14 (Revision 13) | As drawn after the owner feedback below; one save of many samples is one entry ("3 samples", each row in the open block); an edit of the parameter set shows only the net change |
 
+The job order's **Batches tab** and **Add batch** (frames 03-03-03, 04, 05 and 03-04) were built with phase 3, slice A (Nov 18, 2026): `features/orders/Batches.tsx`, `features/batches/AddBatch.tsx`, `../Batch/Batch_Build_Design.md`.
+
 **Owner feedback, Nov 17 (built the same day):**
 
 | Point | Change |

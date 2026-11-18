@@ -14,6 +14,10 @@ export async function cleanupTestData() {
   const orderFiles = await sql`select f.storage_path from job_order_files f join job_orders j on j.id = f.job_order_id
     where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
   if (orderFiles.length) await admin.storage.from("job-order-files").remove(orderFiles.map((f) => f.storage_path as string));
+  // reception photos of the test job orders' samples (their rows go with the samples below)
+  const photos = await sql`select a.storage_path from sample_attachments a join samples s on s.id = a.sample_id join job_orders j on j.id = s.job_order_id
+    where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
+  if (photos.length) await admin.storage.from("sample-photos").remove(photos.map((f) => f.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit', 'on', true)`;
     await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;
@@ -27,6 +31,12 @@ export async function cleanupTestData() {
     await tx`delete from parameters where code like 'ZT-%' or code like 'ZE-%'`;
     // contacts added from the job order form by the browser tests
     await tx`delete from company_contacts where full_name like 'ZE %' or full_name like 'ZT %'`;
+    // batches of the test job orders: the notifications that point at them, the samples' links to them, then the batches (the log and parameters go with them)
+    const testOrders = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
+    await tx`delete from notifications n using batches b where b.job_order_id in (${testOrders}) and n.link like '/batches/' || b.batch_no || '/%'`;
+    await tx`delete from notifications where link like '/orders/ZT-%' or link like '/orders/ZE-%'`;
+    await tx`update samples set batch_id = null, released_from_batch_id = null where job_order_id in (${testOrders})`;
+    await tx`delete from batches where job_order_id in (${testOrders})`;
     // Job orders made by the checks and the browser tests
     await tx`delete from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
     // Configuration slice B: services, methods and standards, template drafts made by the checks

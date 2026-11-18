@@ -4,7 +4,7 @@
 
 export interface Session { accessToken: string; refreshToken: string; expiresAt: number | null }
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, public title: string | undefined, public text: string, public field?: string) { super(text); }
+  constructor(public status: number, public code: string, public title: string | undefined, public text: string, public field?: string, public data?: unknown) { super(text); }
 }
 
 const KEY = "sgsi.session";
@@ -43,6 +43,6 @@ export async function api<T = unknown>(path: string, init: RequestInit & { json?
   }
   if (res.status === 204) return undefined as T;
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(res.status, body.code ?? "error", body.title, body.text ?? "Something went wrong.", body.field);
+  if (!res.ok) throw new ApiError(res.status, body.code ?? "error", body.title, body.text ?? "Something went wrong.", body.field, body);
   return body as T;
 }

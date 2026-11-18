@@ -11,7 +11,8 @@
     "test": "vitest run",
     "seed:demo": "tsx --env-file=../../.env scripts/seed-demo.ts",
     "seed:master": "tsx --env-file=../../.env scripts/seed-master-demo.ts",
-    "seed:orders": "tsx --env-file=../../.env scripts/seed-orders-demo.ts"
+    "seed:orders": "tsx --env-file=../../.env scripts/seed-orders-demo.ts",
+    "seed:batches": "tsx --env-file=../../.env scripts/seed-batches-demo.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",

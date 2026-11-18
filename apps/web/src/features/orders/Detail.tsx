@@ -29,6 +29,7 @@ import { OrderForm } from "./OrderForm";
 import { SamplesTab } from "./Samples";
 import { FilesTab } from "./Files";
 import { HistoryTab } from "./History";
+import { BatchesTab } from "./Batches";
 import {
   useCatalogue,
   STATUS_LABEL,
@@ -286,13 +287,7 @@ export function OrderPage() {
         />
       )}
       {tab === "batches" && (
-        <Card title="Batches">
-          <Empty
-            icon="stack"
-            title="No batches yet"
-            text="The lab creates a batch from the samples it receives."
-          />
-        </Card>
+        <BatchesTab no={no} live={live} phone={phone} tablet={bp === "tablet"} />
       )}
       {tab === "files" && <FilesTab no={no} live={live} phone={phone} />}
       {tab === "coa" && (

@@ -1,0 +1,310 @@
+/* Batches (Batch_Build_Design.md): the list, Add batch, the batch page's Reception tab, the photo and label dialogs. */
+
+/* ---------- list ---------- */
+.bl-card {
+  gap: 8px;
+}
+.bl-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+.bl-filters.stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+.note.warn {
+  background: var(--status-st-prep-100);
+  color: var(--status-st-prep);
+  border-radius: 8px;
+  padding: 10px 12px;
+  align-items: center;
+  font: 400 13px/18px var(--f-body);
+}
+
+/* ---------- Add batch ---------- */
+.ab-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.ab-row.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ab-row.stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ab-copy {
+  background: var(--primary-50);
+  border-radius: 8px;
+  padding: 10px 12px;
+  align-items: center;
+  font: 400 13px/18px var(--f-body);
+}
+.ab-samples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 16px;
+}
+.phone .ab-samples {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.ab-s {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 32px;
+}
+.phone .ab-s {
+  min-height: 36px;
+}
+.steps2 {
+  display: flex;
+  gap: 4px;
+}
+.steps2 i {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-border);
+}
+.steps2 i.on {
+  background: var(--action);
+}
+.ab-orders {
+  max-height: 260px;
+  overflow-y: auto;
+}
+.ab-o {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border-strong);
+  border-radius: 8px;
+  background: var(--surface-card);
+  text-align: left;
+}
+.ab-o:hover:not(:disabled) {
+  background: var(--primary-50);
+}
+.ab-o:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.ab-o.on {
+  background: var(--primary-50);
+  border-color: var(--action);
+}
+.ab-o .ph {
+  position: absolute;
+  right: 12px;
+  top: 14px;
+  color: var(--action-brand-text);
+}
+
+/* ---------- Reception ---------- */
+.search.sm {
+  height: 32px;
+  padding: 0 4px 0 12px;
+}
+.search.sm input {
+  font: 400 13px/20px var(--f-body);
+}
+.search.scan {
+  width: 220px;
+}
+.phone .search.scan {
+  width: 100%;
+  height: 44px;
+  padding: 0 8px 0 14px;
+}
+.tbl .cell.l {
+  text-align: left;
+}
+.tbl td .input {
+  height: 36px;
+  padding: 0 8px;
+  width: auto;
+}
+.tbl td .field {
+  gap: 0;
+}
+.rc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+}
+.rc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.rc input.cell {
+  height: 44px;
+  font-size: 14px;
+}
+.rc input.cell.l {
+  text-align: left;
+}
+.rc-photos {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pho-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+}
+.pho-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-muted);
+  flex: none;
+}
+.pho-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pho-cell.big .pho-thumb {
+  width: 56px;
+  height: 56px;
+}
+
+/* ---------- photos dialog ---------- */
+.pho-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.phone .pho-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.pho {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pho figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pho-img {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.pho-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pho-x {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--surface-card);
+  border-radius: 999px;
+}
+.pho-new {
+  aspect-ratio: 1 / 1;
+  border: 1.5px dashed var(--surface-border-strong);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--action-brand-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.pho-new:hover {
+  background: var(--primary-50);
+}
+.pho-new.sm {
+  aspect-ratio: auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+}
+
+/* ---------- labels, hold, confirm with fewer, log ---------- */
+.lbl-prev {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+}
+.lbl-prev .slbl {
+  border: 1px solid var(--surface-border-strong);
+}
+.fw-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.fw-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px 12px;
+  background: var(--surface-muted);
+  border-radius: 12px;
+}
+.blog {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.blog li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-divider);
+}
+.blog li:last-child {
+  border-bottom: 0;
+}
+.bp-meta a {
+  text-decoration: none;
+}
+.bp-meta a:hover {
+  text-decoration: underline;
+}

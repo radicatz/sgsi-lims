@@ -229,3 +229,7 @@ Phase 1 is **built, with its gate waiting on the lab's data**. Phase 2 (Job orde
 ### Phase 2 · Job orders (Nov 16, 2026)
 
 Build design: `../Job Order/Job_Order_Build_Design.md` (two slices: A list, form and detail; B samples, files and history). No schema change is needed. **Slice A built Nov 16, 2026** (API, list, New and Edit form, detail with Overview, submit, cancel, close, 14 demo job orders, 45 API checks, 21 browser runs). **Slice B built Nov 17, 2026** (Samples tab with paste preview, duplicates, locks, not received and restore; Files tab and the form's drop zone; History tab; bucket `job-order-files`; demo samples on JO-2026-0134 and 0139; 80 API checks, 30 browser runs). Phase 2 is complete; phase 3 (batches) is next.
+
+### Phase 3 · Batches (Nov 18, 2026)
+
+Build design: `../Batch/Batch_Build_Design.md` (two slices: A batch list, Add batch, the job order's Batches tab, the batch page and Reception; B Preparation, Analysis, the signed RoA and Complete batch, notifications). One small migration, C-20 (an insert policy on `batch_status_log`; `analyses.item_id` for Ash analysis and Trace elements values), run by the owner Nov 18. **Slice A built Nov 18, 2026** (83 API checks, 12 browser runs; see section 14 of the design for the frame differences). Slice B is next.

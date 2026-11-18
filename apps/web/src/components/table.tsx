@@ -320,11 +320,14 @@ export function Menu({
   label = "More actions",
   size = 32,
   vertical,
+  quiet,
 }: {
   items: Array<MenuItem | false | null | undefined>;
   label?: string;
   size?: 32 | 36;
   vertical?: boolean;
+  /** A ghost button of the row size (the Actions column of a table), not the secondary circle of a page head. */
+  quiet?: boolean;
 }) {
   /* top and right place the menu under its button, right edges together; `left` is the button's left edge, and `flip` (set after the menu is measured) places the menu from its left edge when the right-aligned one would leave the screen */
   const [open, setOpen] = useState<{
@@ -370,11 +373,11 @@ export function Menu({
   return (
     <span ref={ref} style={{ display: "inline-flex" }}>
       <Button
-        type="secondary"
+        type={quiet ? "ghost" : "secondary"}
         iconOnly
         icon={vertical ? "dots-three-vertical" : "dots-three"}
         label={label}
-        size="lg"
+        size={quiet ? "md" : "lg"}
         onClick={toggle}
       />
       {open &&
