@@ -110,6 +110,7 @@ export async function orderRoutes(app: FastifyInstance) {
   const Query = z.object({
     q: z.string().trim().max(80).optional(), status: z.enum(STATUSES).optional(), company: uuid.optional(), cso: uuid.optional(),
     dueFrom: z.string().regex(DATE).optional(), dueTo: z.string().regex(DATE).optional(),
+    sort: z.enum(["no", "client", "service", "samples", "batches", "due", "status", "coa"]).optional(), dir: z.enum(["asc", "desc"]).default("asc"),
     page: z.coerce.number().int().min(1).max(10000).default(1), size: z.coerce.number().int().min(1).max(100).default(25),
   });
   r.get("/orders", { preHandler: readOrders, schema: { querystring: Query } }, async (req) => run(req, async (tx) => {
@@ -122,6 +123,11 @@ export async function orderRoutes(app: FastifyInstance) {
       ${f.cso ? tx`and j.cso_id = ${f.cso}` : tx``}
       ${f.dueFrom ? tx`and j.due_on >= ${f.dueFrom}` : tx``}
       ${f.dueTo ? tx`and j.due_on <= ${f.dueTo}` : tx``}`;
+    // a sortable head sorts the whole list on the server (it is paged), empty values last
+    const dir = f.dir === "desc" ? tx`desc nulls last` : tx`asc nulls last`;
+    const key = { no: tx`j.order_no`, client: tx`lower(c.name)`, service: tx`lower(sv.name)`, samples: tx`(select count(*) from samples x where x.job_order_id = j.id and x.received_at is not null)`,
+      batches: tx`(select count(*) from batches b where b.job_order_id = j.id)`, due: tx`j.due_on`, status: tx`j.status`, coa: tx`(select r.status::text from reports r where r.job_order_id = j.id and r.kind = 'coa' and r.status <> 'void' order by r.created_at desc limit 1)` }[f.sort ?? "no"];
+    const orderBy = f.sort ? tx`${key} ${dir},` : tx``;
     const [csos, counts, [tot], rows] = await Promise.all([
       tx`select distinct p.id, p.full_name from job_orders j join profiles p on p.id = j.cso_id order by p.full_name`,
       tx`select j.status::text as status, count(*)::int as n from job_orders j join companies c on c.id = j.company_id where ${common} group by j.status`,
@@ -136,7 +142,7 @@ export async function orderRoutes(app: FastifyInstance) {
          from job_orders j join companies c on c.id = j.company_id
            left join company_contacts k on k.id = j.contact_id left join services sv on sv.id = j.service_id left join profiles cso on cso.id = j.cso_id
          where ${common} ${f.status ? tx`and j.status = ${f.status}` : tx``}
-         order by j.created_at desc, j.order_no desc limit ${f.size} offset ${(f.page - 1) * f.size}`,
+         order by ${orderBy} j.created_at desc, j.order_no desc limit ${f.size} offset ${(f.page - 1) * f.size}`,
     ]);
     const byStatus: Record<string, number> = Object.fromEntries(STATUSES.map((s) => [s, 0]));
     for (const c of counts) byStatus[c.status as string] = c.n as number;

@@ -18,6 +18,7 @@ import {
   Select,
   Table,
   Tag,
+  useSort,
   type Col,
 } from "../../components";
 import { useCompanyOptions } from "../master-data/shared";
@@ -57,6 +58,7 @@ const dueRange = (k: string): { dueFrom?: string; dueTo?: string } =>
         : k === "month"
           ? { dueFrom: todayIso(), dueTo: todayIso(30) }
           : {};
+const SORT_KEY: Record<string, string> = { "No.": "no", Client: "client", Company: "client", Service: "service", Samples: "samples", Batches: "batches", Due: "due", Status: "status", CoA: "coa" };
 const LONG_DAY = () =>
   new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Makassar",
@@ -85,13 +87,14 @@ export function Orders() {
     [cso, setCso] = useState(""),
     [due, setDue] = useState(""),
     [page, setPage] = useState(1);
+  const { sort, onSort } = useSort();   // a sortable head sorts the whole list on the server
   const [cancel, setCancel] = useState<OrderRow | null>(null),
     [sheet, setSheet] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setDq(q), 250);
     return () => clearTimeout(t);
   }, [q]);
-  useEffect(() => setPage(1), [dq, chip, company, cso, due]);
+  useEffect(() => setPage(1), [dq, chip, company, cso, due, sort]);
   const companies = useCompanyOptions("All companies");
   const params = new URLSearchParams({
     page: String(page),
@@ -101,6 +104,7 @@ export function Orders() {
     ...(company ? { company } : {}),
     ...(cso ? { cso } : {}),
     ...dueRange(due),
+    ...(sort ? { sort: SORT_KEY[sort.h] ?? "no", dir: sort.dir } : {}),
   });
   const list = useQuery({
     queryKey: ["orders", params.toString()],
@@ -128,6 +132,7 @@ export function Orders() {
   const open = (o: OrderRow) => nav(`/orders/${o.orderNo}`);
   const menu = (o: OrderRow) => (
     <Menu
+      quiet
       label={`More for ${o.orderNo}`}
       vertical
       items={[
@@ -155,11 +160,13 @@ export function Orders() {
   const cols: Array<Col<OrderRow> | false> = [
     {
       h: "No.",
+      sort: () => 0,
       w: desk ? 140 : 120,
       render: (o) => <b className="t-data-b c-brand">{o.orderNo}</b>,
     },
     {
       h: desk ? "Client" : "Company",
+      sort: () => 0,
       render: (o) => (
         <span className="col" style={{ gap: 0, minWidth: 0 }}>
           <b className="t-sm w6 ellip">{o.company}</b>
@@ -176,12 +183,14 @@ export function Orders() {
     },
     desk && {
       h: "Service",
+      sort: () => 0,
       render: (o) => (
         <span className="t-sm c-sec">{o.service ?? "Custom"}</span>
       ),
     },
     desk && {
       h: "Samples",
+      sort: () => 0,
       cls: "r",
       fit: true,
       render: (o) => (
@@ -192,6 +201,7 @@ export function Orders() {
     },
     desk && {
       h: "Batches",
+      sort: () => 0,
       cls: "r",
       fit: true,
       render: (o) => (
@@ -202,6 +212,7 @@ export function Orders() {
     },
     desk && {
       h: "Due",
+      sort: () => 0,
       fit: true,
       render: (o) => (
         <span className={pastDue(o) ? "c-err t-sm" : "t-sm"}>
@@ -211,6 +222,7 @@ export function Orders() {
     },
     {
       h: "Status",
+      sort: () => 0,
       fit: true,
       render: (o) => (
         <Badge label={STATUS_LABEL[o.status]} tone={STATUS_TONE[o.status]} sm />
@@ -218,11 +230,12 @@ export function Orders() {
     },
     {
       h: "CoA",
+      sort: () => 0,
       fit: true,
       render: (o) => (
         <Tag
           label={coaLabel(o.coa)}
-          tone={o.coa === "issued" ? "green" : "outline"}
+          tone={o.coa === "issued" ? "green" : "grey"}
           icon={o.coa ? "check-circle" : "file"}
         />
       ),
@@ -416,6 +429,8 @@ export function Orders() {
             keyOf={(o) => o.id}
             onRow={open}
             cols={cols}
+            sort={sort}
+            onSort={onSort}
             empty={
               <Empty
                 icon="clipboard-text"

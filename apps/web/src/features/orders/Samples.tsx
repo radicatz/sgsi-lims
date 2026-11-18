@@ -500,12 +500,12 @@ export function SamplesTab({
   );
 
   // frames: an editable Expected row has no action at rest; its icons show while the row is hovered or being typed in
-  const action = (v: View, size: 32 | 44 = 32) => {
+  const action = (v: View, size: 32 | 44 = 32, tap = false) => {
     const s = v.s,
       bs = size === 44 ? "touch" : "md";
     if (!s)
       return canEdit ? (
-        <span className="acts hov">
+        <span className="acts">
           <Button
             iconOnly
             icon="trash"
@@ -528,6 +528,7 @@ export function SamplesTab({
         />
       ) : (
         <LockTip
+          tap={tap}
           why={`Not received: ${s.notReceived?.reason ?? ""}`}
           size={size}
         />
@@ -535,13 +536,14 @@ export function SamplesTab({
     if (s.locked)
       return (
         <LockTip
+          tap={tap}
           why={s.lockWhy ?? "This sample can't be edited."}
           size={size}
         />
       );
     if (!canEdit) return null;
     return (
-      <span className={cx("acts", s.state === "expected" && "hov")}>
+      <span className="acts">
         {s.canMarkNotReceived && (
           <Button
             iconOnly
@@ -627,21 +629,15 @@ export function SamplesTab({
   /* ---------- desktop and tablet: the grid (frames D 06, 07, 11, 12; T 06, 07) ---------- */
   const head = canEdit && (
     <>
-      <Button size="sm" icon="plus" id="add-row" onClick={addRow}>
+      <Button icon="plus" id="add-row" onClick={addRow}>
         Add row
       </Button>
       {!tablet && (
-        <Button
-          size="sm"
-          icon="copy"
-          id="paste-excel"
-          onClick={() => setPaste("")}
-        >
+        <Button icon="copy" id="paste-excel" onClick={() => setPaste("")}>
           Paste from Excel
         </Button>
       )}
       <Button
-        size="sm"
         icon="floppy-disk"
         id="save-samples"
         type={changes ? "primary" : "secondary"}
@@ -656,11 +652,8 @@ export function SamplesTab({
   const ed = (v: View) =>
     canEdit && (!v.s || !v.s.locked) && v.s?.state !== "not_received";
   const showAct = canEdit || views.some((v) => v.s?.locked);
-  // an expected row can be marked not received and removed: two 44 px icons need a wider Action column than the frame's 52
-  const twoActs =
-    canEdit && views.some((v) => v.s?.canRemove && v.s.canMarkNotReceived);
   // tablet (frames T 06, 07; plan Revision 14): six columns that fit the card, no sideways scroll. The client reference, its
-  // description and remarks stack in "Sample"; the drill hole sits over its depths; the action icons are 44 px
+  // description and remarks stack in "Sample"; the drill hole sits over its depths; the action icons are 32 px (ref frame: 664 wide, Action 72)
   const tabletTable = (
     <div className="tblwrap">
       <table className="tbl sgrid tgrid">
@@ -671,7 +664,7 @@ export function SamplesTab({
             <th style={{ width: 130 }}>Depth / lot reference</th>
             <th style={{ width: 100 }}>Batch</th>
             <th style={{ width: 132 }}>Status</th>
-            {showAct && <th style={{ width: twoActs ? 96 : 52 }} aria-label="Action" />}
+            {showAct && <th style={{ width: 72 }} aria-label="Action" />}
           </tr>
         </thead>
         <tbody>
@@ -682,7 +675,7 @@ export function SamplesTab({
             return (
               <tr
                 key={v.key}
-                className={cx(v.s?.state === "not_received" && "dimrow")}
+                className={cx(v.s?.state === "not_received" && "dimrow", v.dirty && "edit")}
               >
                 <td>
                   <span className={cx("rn", v.dirty && "on")}>
@@ -773,7 +766,7 @@ export function SamplesTab({
                   )}
                 </td>
                 <td>{badge(v)}</td>
-                {showAct && <td className="act">{action(v, 44)}</td>}
+                {showAct && <td className="act">{action(v, 32, true)}</td>}
               </tr>
             );
           })}
@@ -1013,10 +1006,10 @@ function Unmatched({ hole }: { hole: string | null }) {
 /** Tablet: a hole over its depths ("DH-BNM-021" / "14.20-14.55 m"), or a lot reference on one line. */
 function DepthLines({ text }: { text: string }) {
   const p = parseDepth(text);
-  if (!text.trim()) return <span className="c-mut">—</span>;
-  if (p.depthFrom == null) return <span className="t-cap c-for">{text}</span>;
+  if (!text.trim()) return <span className="c-mut dep-lines">—</span>;
+  if (p.depthFrom == null) return <span className="t-cap c-for dep-lines">{text}</span>;
   return (
-    <span className="col" style={{ gap: 0 }}>
+    <span className="col dep-lines" style={{ gap: 0 }}>
       {p.drillHole && <span className="t-cap c-for">{p.drillHole}</span>}
       <span className="t-cap c-sec">
         {p.depthFrom.toFixed(2)}-{p.depthTo!.toFixed(2)} m
@@ -1025,7 +1018,13 @@ function DepthLines({ text }: { text: string }) {
   );
 }
 
-/** Tablet: the two lines turn into one field while they are edited ("DH-BNM-021 14.20-14.55"); a wrong depth keeps the field open. */
+/** Tablet (frame "Table row samples tablet ref"): the drill hole and its depths are two fields, 26 px each, one over the other. They join into the one
+ *  text the row keeps ("DH-BNM-021 14.20-14.55"). A lot reference has no depths and sits in the first field. */
+const RANGE = /^(.*?)\s*(\d+(?:[.,]\d+)?\s*(?:-|–|to)\s*\d+(?:[.,]\d+)?)\s*m?$/i;
+const splitDepth = (t: string): [string, string] => {
+  const m = t.trim().match(RANGE);
+  return m ? [m[1]!.replace(/[,;]$/, "").trim(), m[2]!.replace(/\s+/g, "")] : [t.trim(), ""];
+};
 function DepthEdit({
   value,
   err,
@@ -1037,35 +1036,48 @@ function DepthEdit({
   label: string;
   onChange: (t: string) => void;
 }) {
-  const [on, setOn] = useState(false);
-  if (on || err)
-    return (
-      <input
-        autoFocus={on}
-        className={cx("gc", err && "err")}
-        value={value}
-        placeholder="DH-001 10.00-10.35"
-        aria-label={label}
-        maxLength={90}
-        onChange={(x) => onChange(x.target.value)}
-        onBlur={() => setOn(false)}
-      />
-    );
+  const [init] = useState(() => splitDepth(value));
+  const [hole, setHole] = useState(init[0]),
+    [range, setRange] = useState(init[1]);
+  const join = (h: string, r: string) => [h.trim(), r.trim()].filter(Boolean).join(" ");
+  // a value that changed from outside (the row was reset) shows in both fields
+  useEffect(() => {
+    if (join(hole, range) !== value.replace(/\s*m$/i, "").trim()) {
+      const [h, r] = splitDepth(value);
+      setHole(h);
+      setRange(r);
+    }
+  }, [value]);
   return (
-    <button
-      type="button"
-      className="gcbtn"
-      aria-label={label}
-      onFocus={() => setOn(true)}
-      onClick={() => setOn(true)}
-    >
-      <DepthLines text={value} />
-    </button>
+    <span className="dep">
+      <input
+        className={cx("gc", err && "err")}
+        value={hole}
+        placeholder="Drill hole"
+        aria-label={`${label}, drill hole`}
+        maxLength={60}
+        onChange={(x) => {
+          setHole(x.target.value);
+          onChange(join(x.target.value, range));
+        }}
+      />
+      <input
+        className={cx("gc mut", err && "err")}
+        value={range}
+        placeholder="10.00-10.35"
+        aria-label={`${label}, depths in metres`}
+        maxLength={30}
+        onChange={(x) => {
+          setRange(x.target.value);
+          onChange(join(hole, x.target.value));
+        }}
+      />
+    </span>
   );
 }
 
 /** The lock of a row that can't change, with its reason in a tooltip (frame P5); on a phone a tap shows the reason. */
-function LockTip({ why, size = 32 }: { why: string; size?: 32 | 44 }) {
+function LockTip({ why, size = 32, tap = false }: { why: string; size?: 32 | 44; tap?: boolean }) {
   const [at, setAt] = useState<{ top: number; right: number } | null>(null);
   const show = (e: React.SyntheticEvent<HTMLSpanElement>) => {
     const fr = document.querySelector(".frame")!.getBoundingClientRect(),
@@ -1078,13 +1090,13 @@ function LockTip({ why, size = 32 }: { why: string; size?: 32 | 44 }) {
       tabIndex={0}
       role="img"
       aria-label={why}
-      onMouseEnter={show}
-      onFocus={show}
+      onMouseEnter={tap ? undefined : show}
+      onFocus={tap ? undefined : show}
       onMouseLeave={() => setAt(null)}
       onBlur={() => setAt(null)}
       onClick={(e) => {
         e.stopPropagation();
-        if (size === 44) toast(why);
+        if (size === 44 || tap) toast(why);
       }}
     >
       <Icon n="lock-simple" s={size === 44 ? 20 : 14} />

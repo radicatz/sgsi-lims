@@ -181,8 +181,8 @@
   color: var(--text-muted);
   font: 400 13px/20px var(--f-body);
 }
-.sgrid tr:hover input.gc,
-.sgrid input.gc:hover {
+.desktop .sgrid tr:hover input.gc,
+.desktop .sgrid input.gc:hover {   /* hover is a mouse thing: on a touch screen a tap leaves the row "hovered" */
   border-color: var(--surface-border);
   background: var(--surface-card);
 }
@@ -310,14 +310,7 @@
 .hcard .hist-x {
   margin-top: 2px;
 }
-/* frames 06 and 11: an editable row shows no action and no hints at rest; they appear while the row is hovered or typed in */
-.sgrid .acts.hov {
-  visibility: hidden;
-}
-.sgrid tr:hover .acts.hov,
-.sgrid tr:focus-within .acts.hov {
-  visibility: visible;
-}
+/* the row actions always show (owner, Nov 18); only the placeholders of an editable row stay quiet until it is hovered or typed in */
 .sgrid tr:not(:hover):not(:focus-within) input.gc::placeholder {
   color: transparent;
 }
@@ -340,12 +333,16 @@ table.sgrid.tgrid {
   min-width: 0;
   table-layout: fixed;
 }
+.tgrid td {
+  padding: 10px 8px;
+}
 .tgrid td.act {
-  padding: 4px 0;
+  padding: 0 8px 0 0;
 }
 .tgrid .scell {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 .tgrid .scell > .row {
@@ -358,36 +355,56 @@ table.sgrid.tgrid {
 .tgrid td .t-cap {
   overflow-wrap: anywhere;
 }
-.tgrid input.gc.ref {
-  height: 24px;
-}
-.sgrid input.gc.cap {
-  height: 18px;
-  padding-top: 0;
-  padding-bottom: 0;
+/* the fields of a row (frame "Table row samples tablet ref"): at rest a field is plain text, as tall as its font; while the row is being edited or
+   filled every field is 26 px high with a 1 px border, radius 4 and padding 2 / 4, 2 px apart (the row grows once, and stays steady while typing) */
+.tgrid input.gc {
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
   font: 400 12px/16px var(--f-body);
   color: var(--text-secondary);
 }
-.sgrid input.gc.cap.mut {
+.tgrid input.gc.ref {
+  height: 20px;
+  font: 600 13px/20px var(--f-mono);
+  color: var(--text-heading);
+}
+.tgrid input.gc.mut {
   color: var(--text-muted);
 }
-.sgrid input.gc.cap::placeholder {
+.tgrid input.gc::placeholder {
   font: 400 12px/16px var(--f-body);
 }
+.tgrid tr.edit input.gc,
+.tgrid tr:focus-within input.gc {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+}
+.tgrid tr.edit input.gc.err,
+.tgrid input.gc.err {
+  border: 1px solid var(--feedback-error);
+}
+.tgrid tr.edit input.gc:focus,
+.tgrid input.gc:focus {
+  border-color: var(--primary);
+}
+.sgrid tr:not(:hover):not(:focus-within):not(.edit) input.gc::placeholder {
+  color: transparent;
+}
 /* an empty description or remarks line takes no room until the row is being typed in */
-.tgrid tr:not(:focus-within) input.gc.opt:placeholder-shown {
+.tgrid tr:not(:focus-within):not(.edit) input.gc.opt:placeholder-shown {
   display: none;
 }
-.gcbtn {
-  display: block;
-  width: 100%;
-  min-height: 32px;
-  padding: 0;
-  border: 0;
-  background: none;
-  text-align: left;
-  cursor: text;
-  color: inherit;
+.tgrid .dep {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 .sgrid td .row {
   flex-wrap: nowrap;

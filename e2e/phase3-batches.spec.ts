@@ -141,6 +141,10 @@ test.describe.serial("batches, slice A", () => {
     await page.locator("#ph-file").setInputFiles({ name: "ze wet.png", mimeType: "image/png", buffer: PNG });
     await expect(page.getByText("Photo added")).toBeVisible();
     await expect(dlg(page).getByRole("img", { name: /photo of ZE-A2/ })).toBeVisible();
+    await dlg(page).getByRole("button", { name: /^Open the/ }).click();           // a thumbnail opens the photo large
+    await expect(page.getByRole("img", { name: /large/ })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("img", { name: /large/ })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(rowOf(page, phone, "ZE-A2").getByRole("button", { name: "Photos of ZE-A2, 1" })).toBeVisible();
     // labels: the checklist wants them; Confirm stays off until all are printed
@@ -237,5 +241,27 @@ test.describe.serial("batches, slice A", () => {
     await page.goto("/batches");
     await expect(page.getByRole("button", { name: /^Prep finished \d+/ })).toHaveAttribute("aria-pressed", "true");   // the analyst's own queue
     if (!phone) await expect(page.locator("#add-batch")).toHaveCount(0);
+  });
+
+  test("the job order and batch tables sort on their heads", async ({ page }, info) => {
+    test.skip(info.project.name === "phone", "the phone shows cards, not a table");
+    await signIn(page, "maya@sgsi.co.id");
+    await page.goto("/batches");
+    await page.getByRole("button", { name: /^All \d+/ }).click();
+    const first = () => page.locator("tbody tr").first().locator("td").first();
+    await expect(page.locator("tbody tr").first()).toBeVisible();
+    const head = page.locator("th", { hasText: "Batch no." });
+    await page.getByRole("button", { name: "Batch no." }).click();               // ascending
+    await expect(head).toHaveAttribute("aria-sort", "ascending");
+    await expect.poll(async () => (await first().innerText()).slice(0, 11)).toBe("B-2026-0413");
+    await page.getByRole("button", { name: "Batch no." }).click();               // descending
+    await expect(head).toHaveAttribute("aria-sort", "descending");
+    await expect.poll(async () => (await first().innerText()).slice(0, 11)).not.toBe("B-2026-0413");
+    await page.goto("/orders");
+    await expect(page.locator("tbody tr").first()).toBeVisible();
+    await page.getByRole("button", { name: "Status" }).click();
+    await expect(page.locator("th", { hasText: "Status" })).toHaveAttribute("aria-sort", "ascending");
+    await page.getByRole("button", { name: "Status" }).click();
+    await expect(page.locator("th", { hasText: "Status" })).toHaveAttribute("aria-sort", "descending");
   });
 });

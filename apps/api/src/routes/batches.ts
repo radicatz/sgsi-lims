@@ -17,6 +17,7 @@ const ListQuery = z.object({
   // one or several statuses, comma separated ("created,preparation": the Preparation team's own queue)
   q: z.string().trim().max(80).optional(), status: z.string().regex(/^[a-z_]+(,[a-z_]+)*$/).refine((s) => s.split(",").every((x) => (STAGES as readonly string[]).includes(x)), "Unknown status.").optional(), company: uuid.optional(), standard: z.enum(["ASTM", "ISO", "GBT"]).optional(), order: z.string().trim().max(40).optional(),
   from: z.string().regex(DATE).optional(), to: z.string().regex(DATE).optional(), dueFrom: z.string().regex(DATE).optional(), dueTo: z.string().regex(DATE).optional(),
+  sort: z.enum(["batch", "order", "standard", "samples", "status", "deadline", "roa"]).optional(), dir: z.enum(["asc", "desc"]).default("asc"),
   page: z.coerce.number().int().min(1).max(10000).default(1), size: z.coerce.number().int().min(1).max(100).default(25),
 });
 const Create = z.object({
@@ -58,6 +59,9 @@ export async function batchRoutes(app: FastifyInstance) {
       ${f.from ? tx`and b.batch_date >= ${f.from}` : tx``} ${f.to ? tx`and b.batch_date <= ${f.to}` : tx``}
       ${f.dueFrom ? tx`and b.deadline_on >= ${f.dueFrom}` : tx``} ${f.dueTo ? tx`and b.deadline_on <= ${f.dueTo}` : tx``}`;
     const today = todayIso();
+    const dir = f.dir === "desc" ? tx`desc nulls last` : tx`asc nulls last`;
+    const key = { batch: tx`b.batch_no`, order: tx`j.order_no`, standard: tx`b.standard::text`, samples: tx`(select count(*) from samples s where s.batch_id = b.id and s.arrived_at is not null)`, status: tx`b.status`, deadline: tx`b.deadline_on`, roa: tx`d.roa_no` }[f.sort ?? "batch"];
+    const orderBy = f.sort ? tx`${key} ${dir},` : tx``;
     const [orders, counts, [tot], rows] = await Promise.all([
       tx`select distinct j.order_no, c.name as company_name from batches b join job_orders j on j.id = b.job_order_id join companies c on c.id = j.company_id order by j.order_no desc`,
       tx`select b.status::text as status, count(*)::int as n from batches b join job_orders j on j.id = b.job_order_id join companies c on c.id = b.company_id where ${common} group by b.status`,
@@ -68,7 +72,7 @@ export async function batchRoutes(app: FastifyInstance) {
           (select count(*)::int from samples s where s.batch_id = b.id and s.arrived_at is not null) as arrived, b.expected_at_confirm
          from batches b join job_orders j on j.id = b.job_order_id join companies c on c.id = b.company_id left join batch_documents d on d.batch_id = b.id
          where ${common} ${f.status ? tx`and b.status = any(${f.status.split(",")}::batch_status[])` : tx``}
-         order by b.batch_date desc, b.batch_no desc limit ${f.size} offset ${(f.page - 1) * f.size}`,
+         order by ${orderBy} b.batch_date desc, b.batch_no desc limit ${f.size} offset ${(f.page - 1) * f.size}`,
     ]);
     const byStatus: Record<string, number> = Object.fromEntries(STAGES.map((s) => [s, 0]));
     for (const c of counts) byStatus[c.status as string] = c.n as number;

@@ -377,7 +377,7 @@ export function Menu({
         iconOnly
         icon={vertical ? "dots-three-vertical" : "dots-three"}
         label={label}
-        size={quiet ? "md" : "lg"}
+        size="lg"
         onClick={toggle}
       />
       {open &&
