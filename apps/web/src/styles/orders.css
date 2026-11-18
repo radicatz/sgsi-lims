@@ -268,13 +268,21 @@
 .tbl tr.xrow:hover td {
   background: none;
 }
+/* no line between an open row and its block */
+.htbl tr:has(+ .xrow) td {
+  border-bottom-color: transparent;
+}
+/* tablet (frame Tablet 03-03-14, Revision 15): Field 180, Before 120, After fills */
+.tablet .hist-grid {
+  grid-template-columns: 180px 120px minmax(0, 1fr);
+}
 .hist-x {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: var(--surface-muted);
+  background: var(--surface-shell);
 }
 .hist-grid {
   display: grid;

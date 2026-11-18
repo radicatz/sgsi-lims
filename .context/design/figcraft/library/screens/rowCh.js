@@ -24,10 +24,12 @@ const closing = (a) => `${a[3]} by ${a[2]} on the Job orders screen.`;
 
 function diff(b, rr, a, kind) {
   const d = vframe(b, rr, "Diff", 6, { fill: "Surface/muted", r: 10, pad: [8, 12, 8, 12] });
+  if (kind === "tablet") { const w = hframe(b, d, "Who", 8, { cross: "center", pad: [2, 0, 6, 0] }); b.instV(w, "Avatar", "Size=24", { texts: { Initials: a[1] } }); txt(b, w, a[2], "Body small/Medium", "Text/foreground", "User"); }
+  const FW = kind === "tablet" ? 180 : 260, BW = kind === "tablet" ? 120 : 260;
   if (kind !== "phone") {
     const hd = hframe(b, d, "Diff head", 0, { sizeH: "fill", pad: [4, 0, 4, 0] });
-    [["Field", 260], ["Before", 260], ["After", 0]].forEach(([l, w]) => { const f = b.frame(hd, { name: "Head", w: w || 200, h: 20, layout: "h", sizeH: w ? "fixed" : "fill", sizeV: "hug" }); txt(b, f, l, "Caption/SemiBold", "Text/text-secondary", "Head label"); });
-    a[7].forEach(([fd, be, af]) => { const r = hframe(b, d, "Diff row", 0, { sizeH: "fill", pad: [4, 0, 4, 0], cross: "min" }); const c1 = b.frame(r, { name: "Field", w: 260, h: 20, layout: "h", sizeH: "fixed", sizeV: "hug" }); txt(b, c1, fd, "Body small/Medium", "Text/heading", "Field"); const c2 = b.frame(r, { name: "Before", w: 260, h: 20, layout: "h", sizeH: "fixed", sizeV: "hug" }); val(b, c2, be, false); const c3 = b.frame(r, { name: "After", w: 200, h: 20, layout: "h", sizeH: "fill", sizeV: "hug" }); val(b, c3, af, true); });
+    [["Field", FW], ["Before", BW], ["After", 0]].forEach(([l, w]) => { const f = b.frame(hd, { name: "Head", w: w || 200, h: 20, layout: "h", sizeH: w ? "fixed" : "fill", sizeV: "hug" }); txt(b, f, l, "Caption/SemiBold", "Text/text-secondary", "Head label"); });
+    a[7].forEach(([fd, be, af]) => { const r = hframe(b, d, "Diff row", 0, { sizeH: "fill", pad: [4, 0, 4, 0], cross: "min" }); const c1 = b.frame(r, { name: "Field", w: FW, h: 20, layout: "h", sizeH: "fixed", sizeV: "hug" }); txt(b, c1, fd, "Body small/Medium", "Text/heading", "Field"); const c2 = b.frame(r, { name: "Before", w: BW, h: 20, layout: "h", sizeH: "fixed", sizeV: "hug" }); val(b, c2, be, false); const c3 = b.frame(r, { name: "After", w: 200, h: 20, layout: "h", sizeH: "fill", sizeV: "hug" }); val(b, c3, af, true); });
   } else {
     a[7].forEach(([fd, be, af]) => { const g = vframe(b, d, "Change", 2); txt(b, g, fd, "Caption/Medium", "Text/text-secondary", "Field"); const r = hframe(b, g, "Values", 6, { wrap: true, cross: "center" }); if (be !== "—") { val(b, r, be, false); icon(b, r, "arrow-right", "Text/text-muted", 14); } val(b, r, af, true); });
   }
@@ -56,7 +58,7 @@ function body(b, s, kind, open) {
     if (h === "Action") txt(b, cell, a[3], "Body small/Medium", "Text/heading", "Action");
     if (h === "Record") { const v = vframe(b, cell, "Record", 0); txt(b, v, a[4], "Caption/Regular", "Text/text-muted", "Type"); txt(b, v, a[5], /^\d+ samples$/.test(a[5]) ? "Body small/Regular" : "Data", /^\d+ samples$/.test(a[5]) ? "Text/foreground" : "Primary/primary", "ID"); }
     if (h === "Changes") { txt(b, cell, a[6], "Body small/Regular", a[7] ? "Text/text-secondary" : "Text/text-muted", "Changes"); if (a[7]) icon(b, cell, "caret-down", "Text/text-muted", 14); }
-    if (h === "" && a[7]) iconBtn(b, cell, "caret-down");
+    if (h === "" && a[7]) iconBtn(b, cell, open >= 0 && ROWS[open] === a ? "caret-up" : "caret-down");
   }, { h: 56, after: (rr, a, ri) => { if (open === ri && a[7]) diff(b, rr, a, kind); } });
   pager(b, c, "Showing 1–10 of 10", kind);
 }
@@ -65,7 +67,11 @@ exports.build = (b) => {
   const N = b.reg.N, SZ = { desktop: "Desktop", tablet: "Tablet", phone: "Phone" };
   const names = [["13", "History"], ["14", "History_row_expanded"]];
   const mine = new Set(); for (const k of Object.values(SZ)) for (const [vv, v] of names) mine.add(`${k}-03-Job_orders-03-Job_order_detail-${vv}-${v}`);
-  const old = []; for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) if (mine.has(N[id].name)) old.push(id);
+  const ONLY = process.env.CH_ONLY ? process.env.CH_ONLY.split(",") : null; // e.g. tablet-14
+  const want = (kind, vv) => !ONLY || ONLY.includes(`${kind}-${vv}`);
+  const nameOf = (kind, vv) => `${SZ[kind]}-03-Job_orders-03-Job_order_detail-${vv}-${names.find((x) => x[0] === vv)[1]}`;
+  const own = new Set(["desktop", "tablet", "phone"].flatMap((k) => ["13", "14"].filter((vv) => want(k, vv)).map((vv) => nameOf(k, vv))));
+  const old = []; for (const pid of Object.values(b.pageIds)) for (const id of N[pid].children || []) if (own.has(N[id].name)) old.push(id);
   if (old.length) b.raw("edit.delete", { ids: old });
   const slot = (kind) => { // right of the last job order detail frame in the first detail row
     const fr = []; for (const id of N[b.pageIds[kind]].children || []) { const n = N[id]; if (/^(Desktop|Tablet|Phone)-03-Job_orders-03-Job_order_detail-/.test(n.name || "") && !mine.has(n.name)) fr.push(n); }
@@ -73,6 +79,7 @@ exports.build = (b) => {
     return { x: Math.max(...row.map((n) => n.transform[4] + n.width)) + 120, y, step: kind === "desktop" ? 1560 : kind === "tablet" ? 954 : 510 };
   };
   const mk = (kind, vv, v, open) => {
+    if (!want(kind, vv)) return;
     const p = slot(kind); const x = p.x + (vv === "14" ? p.step : 0);
     page(b, kind);
     const s = detailFrame(b, x, p.y, kind, { ...JO0139, name: `${SZ[kind]}-03-Job_orders-03-Job_order_detail-${vv}-${v}`, tab: "History" });
@@ -80,6 +87,6 @@ exports.build = (b) => {
   };
   // the second frame of a size sits one step right of the first: slot() runs before either exists, so both use the same origin
   mk("desktop", "13", "History", -1); mk("desktop", "14", "History_row_expanded", 6);
-  mk("tablet", "13", "History", -1);
+  mk("tablet", "13", "History", -1); mk("tablet", "14", "History_row_expanded", 6);
   mk("phone", "13", "History", -1); mk("phone", "14", "History_row_expanded", 0);
 };

@@ -1236,3 +1236,20 @@ Rows without remarks are two lines, rows with remarks three. The desktop table (
 Library: two new sets next to the desktop ones, **Table header row samples tablet** and **Table row samples tablet** (Action = None, Locked, Mark, Restore; Remarks is a layer that is hidden when empty). The three tablet frames were rebuilt in place, at their old positions, with `library/screens/rowCt.js` (`build-screens.js Ct`, add-only; it uses `rowC.js` `samples`, `mixed` and `markDesktop` with a tablet branch in `sRow` and `sHead`). The grid is no longer clipped. Frame heights: 06 is 1058, 07 is 1116, 08 is 1180. Backup: `backup/SGSI-LIMS-screens.before-tablet-samples.figcraft`.
 
 The web app (`apps/web/src/features/orders/Samples.tsx`) follows this layout on the tablet since Nov 17, 2026 (see `Job_Order_Build_Design.md`, slice B, owner feedback).
+
+## Revision 15 · History row expanded on the tablet (BUILT Nov 18, 2026)
+
+Written for: the product owner, and whoever builds or reviews the frames.
+
+Revision 13 drew the expanded History row on desktop and phone only. This adds **`Tablet-03-Job_orders-03-Job_order_detail-14-History_row_expanded`**, next to the tablet `13-History` frame.
+
+| Part | Spec |
+| --- | --- |
+| Base | The tablet History frame (JO-2026-0139, columns When, Record, Action and a caret) |
+| Open row | **Samples added** (15 Oct 2026, 10:48), the same row as on desktop; its caret turns to `caret-up` |
+| Expanded block | The tinted block under the row, full table width. First line: **who**, Avatar 24 and "Rina Kartika", because the tablet table has no User column. Then the grid **Field** (180) / **Before** (120) / **After** (fills), one line per sample: BNM-3501 to BNM-3508, "—" before, description, drill hole and depth after. Closing line "Samples added by Rina Kartika on the Job orders screen." |
+| Rest | The other 9 rows and the pager as in `13-History` |
+
+Built with `library/screens/rowCh.js`, limited to this frame (`CH_ONLY=tablet-14`), so the other History frames are not rebuilt. Fit only this frame.
+
+Built as planned (frame height 1486, to the right of the tablet 13-History frame). Backup: `backup/SGSI-LIMS-screens.before-tablet-history-expanded.figcraft`.
