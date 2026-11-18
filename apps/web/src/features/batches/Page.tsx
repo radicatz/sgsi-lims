@@ -163,7 +163,7 @@ export function BatchPage() {
           </span>
         )}
         <span className="row g6">
-          <Icon n="stack" />
+          <Icon n="cylinder" />
           {arrivedText}
         </span>
       </span>
