@@ -29,7 +29,7 @@ async function seedOrder(request: APIRequestContext, no: string) {
   const s = await request.put(`${API}/orders/${no}/samples`, { headers: h, data: { rows: ["ZE-A1", "ZE-A2", "ZE-A3", "ZE-A4", "ZE-A5", "ZE-A6"].map((c) => ({ clientRef: c, description: `Ply ${c}` })), removed: [] } });
   expect(s.status()).toBe(200);
 }
-const rowOf = (page: Page, phone: boolean, ref: string) => (phone ? page.locator(".rc", { hasText: ref }) : page.locator("tbody tr", { hasText: ref }));
+const rowOf = (page: Page, phone: boolean, ref: string) => (phone ? page.locator(".prow", { hasText: ref }) : page.locator("tbody tr", { hasText: ref }));
 
 test.describe.serial("batches, slice A", () => {
   test.beforeAll(() => { cleanup(); });

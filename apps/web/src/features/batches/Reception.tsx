@@ -327,7 +327,7 @@ export function ReceptionTab({
   const scanField = <ScanField onScan={scan} />;
 
   /* ----- cells ----- */
-  const rowMenu = (r: RecRow) => {
+  const rowMenu = (r: RecRow, big = false) => {
     const items = [
       canReceive &&
         r.arrived &&
@@ -354,14 +354,23 @@ export function ReceptionTab({
         className="row g4"
         style={{ flexWrap: "nowrap", justifyContent: "flex-end" }}
       >
-        {!open && (
-          <span
-            className="c-mut"
-            title="Reception is confirmed, so the rows can't change."
-          >
-            <Icon n="lock-simple" />
-          </span>
-        )}
+        {!open &&
+          (big ? (
+            <Button
+              iconOnly
+              icon="lock-simple"
+              label="Reception is confirmed"
+              disabled
+              why="Reception is confirmed, so the rows can't change."
+            />
+          ) : (
+            <span
+              className="c-mut"
+              title="Reception is confirmed, so the rows can't change."
+            >
+              <Icon n="lock-simple" />
+            </span>
+          ))}
         <Menu label={`More for ${r.clientRef}`} items={items} quiet />
       </span>
     );
@@ -541,7 +550,7 @@ export function ReceptionTab({
         { h: "Condition", w: 120, render: (r) => condCell(r, true) },
         { h: "Photos", w: 60, render: photoCell },
         { h: "Label", w: 100, render: (r) => labelCell(r, true) },
-        { h: "", w: 40, cls: "r", render: rowMenu },
+        { h: "", w: 40, cls: "r", render: (r: RecRow) => rowMenu(r) },
       ]
     : [
         {
@@ -557,7 +566,7 @@ export function ReceptionTab({
         { h: "Remarks", fill: true, render: remarkCell },
         { h: "Photos", w: 84, render: photoCell },
         { h: "Label", w: 116, render: (r) => labelCell(r, true) },
-        { h: "", w: 64, cls: "r", render: rowMenu },
+        { h: "", w: 64, cls: "r", render: (r: RecRow) => rowMenu(r) },
       ];
 
   const checklist = open && rec.checks.length > 0 && (
@@ -636,153 +645,117 @@ export function ReceptionTab({
     return (
       <div className="col g12">
         {scanField}
-        {!rows.length ? (
-          <Card>
+        <Card title="Reception">
+          {!rows.length ? (
             <Empty icon="stack" title="No samples" />
-          </Card>
-        ) : (
-          rows.map((r) => (
-            <div key={r.id} className="rc" id={`rc-${r.id}`}>
-              <div
-                className="row between"
-                style={{ flexWrap: "nowrap", alignItems: "center" }}
-              >
-                <span
-                  className="row g8"
-                  style={{ flexWrap: "nowrap", minWidth: 0 }}
-                >
-                  <b className="t-data-b c-head">{r.clientRef}</b>
-                  {r.sampleCode && (
-                    <span className="t-data-sm c-sec ellip">
-                      {r.sampleCode}
+          ) : (
+            <div className="col">
+              {rows.map((r) => (
+                <div key={r.id} className="prow" id={`rc-${r.id}`}>
+                  <div className="prow-top">
+                    <span className="row g8" style={{ flexWrap: "nowrap", minWidth: 0 }}>
+                      <b className="t-data-b c-head">{r.clientRef}</b>
+                      {r.sampleCode && <span className="t-data-sm c-sec ellip">{r.sampleCode}</span>}
+                    </span>
+                    {rowMenu(r, true)}
+                  </div>
+                  <span className="row g8" style={{ flexWrap: "nowrap" }}>
+                    <ArrivedBox
+                      on={r.arrived}
+                      name={r.clientRef}
+                      disabled={!canReceive || !!r.hold}
+                      onChange={(v) => patch(r.id, { arrived: v }).catch(() => undefined)}
+                    />
+                    <span className="t-sm">Arrived</span>
+                  </span>
+                  {r.hold && (
+                    <span className="t-cap" style={{ color: "var(--feedback-error)" }}>
+                      Held: {r.hold.reason}
                     </span>
                   )}
-                </span>
-                <span className="row g8" style={{ flexWrap: "nowrap" }}>
-                  <ArrivedBox
-                    on={r.arrived}
-                    name={r.clientRef}
-                    disabled={!canReceive || !!r.hold}
-                    onChange={(v) =>
-                      patch(r.id, { arrived: v }).catch(() => undefined)
-                    }
-                  />
-                  <span className="t-sm">Arrived</span>
-                </span>
-              </div>
-              {r.hold && (
-                <span
-                  className="t-cap"
-                  style={{ color: "var(--feedback-error)" }}
-                >
-                  Held: {r.hold.reason}
-                </span>
-              )}
-              {r.arrived && (
-                <>
-                  <div className="rc-grid">
-                    <label className="col g4">
-                      <span className="flabel">Mass (kg)</span>
-                      {canReceive ? (
-                        <Field
-                          id={`mass-${r.id}`}
-                          mono
-                          value={r.mass ?? ""}
-                          label={`Mass in kg, ${r.clientRef}`}
-                          className={cx("rc-in", massWarn(r.mass) && "warn")}
-                          onSave={(v) => patch(r.id, { mass: v || null })}
-                        />
-                      ) : (
-                        <span className="t-data-sm">{r.mass ?? "—"}</span>
-                      )}
-                    </label>
-                    <div className="col g4">
-                      <span className="flabel">Condition</span>
-                      {canReceive ? (
-                        <Select
-                          value={r.condition ?? ""}
-                          onChange={(v) =>
-                            patch(r.id, { condition: v || null }).catch(
-                              () => undefined,
-                            )
-                          }
-                          options={[
-                            ["", "Choose"],
-                            ...rec.conditions.map(
-                              (c) => [c.value, c.value] as [string, string],
-                            ),
-                          ]}
-                        />
-                      ) : (
-                        <span className="t-sm">{r.condition ?? "—"}</span>
-                      )}
-                    </div>
-                  </div>
-                  {(needsRemark(r) || r.conditionRemark) &&
-                    (canReceive ? (
-                      <Field
-                        value={r.conditionRemark ?? ""}
-                        label={`Remark, ${r.clientRef}`}
-                        className="rc-in"
-                        onSave={(v) =>
-                          patch(r.id, { conditionRemark: v || null })
-                        }
-                      />
-                    ) : (
-                      <span className="t-cap c-sec">{r.conditionRemark}</span>
-                    ))}
-                  <div className="rc-photos">
-                    {r.photos.count > 0 && (
-                      <button
-                        type="button"
-                        className="pho-cell big"
-                        aria-label={`Photos of ${r.clientRef}, ${r.photos.count}`}
-                        onClick={() => setPhotos(r)}
-                      >
-                        <span className="pho-thumb">
-                          {r.photos.thumb ? (
-                            <img src={r.photos.thumb} alt="" />
+                  {r.arrived && (
+                    <>
+                      <div className="rc-grid">
+                        <label className="col g4">
+                          <span className="flabel">Mass (kg)</span>
+                          {canReceive ? (
+                            <Field
+                              id={`mass-${r.id}`}
+                              mono
+                              value={r.mass ?? ""}
+                              label={`Mass in kg, ${r.clientRef}`}
+                              className={cx("rc-in", massWarn(r.mass) && "warn")}
+                              onSave={(v) => patch(r.id, { mass: v || null })}
+                            />
                           ) : (
-                            <Icon n="image" />
+                            <span className="t-data-sm">{r.mass ?? "—"}</span>
                           )}
-                        </span>
-                        {r.photos.count > 1 && (
-                          <span className="t-cap c-sec">
-                            +{r.photos.count - 1}
+                        </label>
+                        <div className="col g4">
+                          <span className="flabel">Condition</span>
+                          {canReceive ? (
+                            <Select
+                              value={r.condition ?? ""}
+                              onChange={(v) => patch(r.id, { condition: v || null }).catch(() => undefined)}
+                              options={[
+                                ["", "Choose"],
+                                ...rec.conditions.map((c) => [c.value, c.value] as [string, string]),
+                              ]}
+                            />
+                          ) : (
+                            <span className="t-sm">{r.condition ?? "—"}</span>
+                          )}
+                        </div>
+                      </div>
+                      {(needsRemark(r) || r.conditionRemark) &&
+                        (canReceive ? (
+                          <Field
+                            value={r.conditionRemark ?? ""}
+                            label={`Remark, ${r.clientRef}`}
+                            className="rc-in"
+                            onSave={(v) => patch(r.id, { conditionRemark: v || null })}
+                          />
+                        ) : (
+                          <span className="t-cap c-sec">{r.conditionRemark}</span>
+                        ))}
+                      <div className="rc-photos">
+                        {r.photos.count > 0 ? (
+                          <button
+                            type="button"
+                            className="pho-cell big"
+                            aria-label={`Photos of ${r.clientRef}, ${r.photos.count}`}
+                            onClick={() => setPhotos(r)}
+                          >
+                            <span className="pho-thumb">
+                              {r.photos.thumb ? <img src={r.photos.thumb} alt="" /> : <Icon n="image" />}
+                            </span>
+                            {r.photos.count > 1 && <span className="t-cap c-sec">+{r.photos.count - 1}</span>}
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+                        {canPhoto && (
+                          <Button size="touch" icon="plus" onClick={() => setPhotos(r)}>
+                            Add photo
+                          </Button>
+                        )}
+                      </div>
+                      <div className="row between" style={{ flexWrap: "nowrap", alignItems: "center" }}>
+                        {labelCell(r, false)}
+                        {r.label.printed && r.label.at && (
+                          <span className="t-cap c-mut">
+                            {dShort(r.label.at)} {dTime(r.label.at)}
                           </span>
                         )}
-                      </button>
-                    )}
-                    {canPhoto && (
-                    <Button
-                      size="touch"
-                      icon="plus"
-                      onClick={() => setPhotos(r)}
-                    >
-                      Add photo
-                    </Button>
+                      </div>
+                    </>
                   )}
-                  </div>
-                  <div
-                    className="row between"
-                    style={{ flexWrap: "nowrap", alignItems: "center" }}
-                  >
-                    <span className="row g8" style={{ flexWrap: "nowrap" }}>
-                      {labelCell(r, false)}
-                      {r.label.printed && r.label.at && (
-                        <span className="t-cap c-mut">
-                          {dShort(r.label.at)} {dTime(r.label.at)}
-                        </span>
-                      )}
-                    </span>
-                    {rowMenu(r)}
-                  </div>
-                </>
-              )}
+                </div>
+              ))}
             </div>
-          ))
-        )}
-        {checklist && <Card>{checklist}</Card>}
+          )}
+          {checklist}
+        </Card>
         {returned}
         {(canLabel || canReceive) && (
           <div className="sticky-bar">

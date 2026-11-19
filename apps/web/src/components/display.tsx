@@ -1,5 +1,5 @@
 // Component layer, part of the FigCraft library port (Stack_Decision_Record S-7, S-8): display.
-import { type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { cx } from "./utils";
 
@@ -26,9 +26,15 @@ export function Chips<T extends string>({ items, value, onChange, scroll }: { it
 
 /* ---------- page tabs (list switches, owner rule) ---------- */
 /** The job order's life as steps (Stepper in the library): a mark per step, its name and a short note. */
-/** `vertical`: the phone stepper (frame Phone 03-03-01), one step a row with a line joining the markers. */
-export function Stepper({ steps, vertical }: { steps: Array<{ name: string; note?: string; state: "done" | "cur" | "up" }>; vertical?: boolean }) {
-  return <div className={cx("stepper", vertical && "vert")} role="list">{steps.map((s) => <div key={s.name} role="listitem" className={cx("step", s.state)} aria-current={s.state === "cur" ? "step" : undefined}>
+/** On a narrow screen the steps keep their width and the row scrolls sideways (frame Phone 04-02-01); it opens with the current step in the middle. */
+export function Stepper({ steps }: { steps: Array<{ name: string; note?: string; state: "done" | "cur" | "up" }> }) {
+  const ref = useRef<HTMLDivElement>(null), cur = steps.find((s) => s.state === "cur")?.name ?? steps.filter((s) => s.state === "done").pop()?.name;
+  useLayoutEffect(() => {
+    const el = ref.current, step = el?.querySelector<HTMLElement>(".step.cur") ?? el?.querySelector<HTMLElement>(".step.done:last-of-type");
+    if (!el || !step || el.scrollWidth <= el.clientWidth) return;
+    el.scrollLeft = step.offsetLeft - (el.clientWidth - step.offsetWidth) / 2;   // instant: only this row moves, never the page
+  }, [cur]);
+  return <div ref={ref} className="stepper" role="list">{steps.map((s) => <div key={s.name} role="listitem" className={cx("step", s.state)} aria-current={s.state === "cur" ? "step" : undefined}>
     <span className="mk">{s.state === "done" && <Icon n="check" s={14} />}</span><b>{s.name}</b>{s.note && <small>{s.note}</small>}</div>)}</div>;
 }
 

@@ -50,6 +50,7 @@ export function PageHead({
   actions,
   crumb,
   badge,
+  trailing,
   sub,
   avatar,
 }: {
@@ -58,14 +59,17 @@ export function PageHead({
   actions?: ReactNode;
   crumb?: Array<[string, string?]>;
   badge?: ReactNode;
+  /** At the very right of the title row (the phone's `…` menu). */
+  trailing?: ReactNode;
   sub?: ReactNode;
   avatar?: ReactNode;
 }) {
   const head = (
-    <div className="col g6" style={{ minWidth: 0 }}>
-      <div className="row g12 wrap">
+    <div className="col g6" style={{ minWidth: 0, ...(trailing ? { flex: 1 } : {}) }}>
+      <div className="row g12 wrap" style={trailing ? { flexWrap: "nowrap", alignItems: "center" } : undefined}>
         <h1 className="t-display">{title}</h1>
         {badge}
+        {trailing && <span style={{ marginLeft: "auto", flex: "none" }}>{trailing}</span>}
       </div>
       {sub}
     </div>
@@ -83,7 +87,7 @@ export function PageHead({
         </nav>
       )}
       <div className="page-head">
-        <div className="tt">
+        <div className="tt" style={trailing ? { flex: 1, minWidth: 0 } : undefined}>
           {overline && <span className="t-over">{overline}</span>}
           {avatar ? (
             <div className="row g16" style={{ alignItems: "center" }}>

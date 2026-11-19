@@ -192,20 +192,16 @@ export function BatchPage() {
       <PageHead
         crumb={[["Batches", "/batches"], [b.batchNo]]}
         title={title}
-        badge={
-          <span className="row g8">
-            <Badge
+        badge={<Badge
               label={STATUS_LABEL(b.status)}
               tone={STATUS_TONE(b.status)}
-            />
-            {phone && menu}
-          </span>
-        }
+            />}
+        trailing={phone ? menu : undefined}
         sub={sub}
         actions={phone ? undefined : menu}
       />
       <Card>
-        <Stepper steps={steps(b)} vertical={phone} />
+        <Stepper steps={steps(b)} />
       </Card>
       <Tabs
         items={[

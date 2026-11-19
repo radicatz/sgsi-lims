@@ -241,15 +241,11 @@ export function OrderPage() {
       <PageHead
         crumb={[["Job orders", "/orders"], [d.orderNo]]}
         title={d.orderNo}
-        badge={
-          <span className="row g8">
-            <Badge
+        badge={<Badge
               label={STATUS_LABEL[d.status]}
               tone={STATUS_TONE[d.status]}
-            />
-            {phone && menu}
-          </span>
-        }
+            />}
+        trailing={phone ? menu : undefined}
         sub={sub}
         actions={phone ? undefined : menu}
       />
@@ -261,7 +257,7 @@ export function OrderPage() {
         />
       ) : (
         <Card>
-          <Stepper steps={steps(d)} vertical={phone} />
+          <Stepper steps={steps(d)} />
         </Card>
       )}
       <Tabs

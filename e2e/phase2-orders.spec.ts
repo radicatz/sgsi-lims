@@ -195,7 +195,7 @@ test.describe.serial("job orders, slice B", () => {
     no = await makeOrder(page, phone, `ZE samples ${info.project.name} ${Date.now() % 100000}`);
     await expect(page.getByText("No samples yet")).toBeVisible();
     await expect(page.locator("#add-samples")).toHaveCount(0);                 // no Add samples in the head (the frames have none)
-    await expect(page.locator(".stepper.vert")).toHaveCount(phone ? 1 : 0);   // the phone stepper is vertical
+    await expect(page.locator(".stepper.vert")).toHaveCount(0);   // the stepper is horizontal on every size
     if (phone) {
       await page.locator("#add-sample").click();
       await page.locator("#sheet-ref").fill("ZE-1");
