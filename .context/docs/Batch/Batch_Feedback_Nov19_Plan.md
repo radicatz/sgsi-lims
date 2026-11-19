@@ -101,7 +101,7 @@ The card head keeps "26 of 36 values saved", Started, and the analyst.
 
 ## 3. Horizontal stepper on the phone (batch and job order)
 
-**Frame:** the stepper card in Phone-04-02-01 Reception_receiving ref.
+**Frame:** the stepper card in Phone-04-02-01 Reception_receiving ref. **Nov 19, 2026:** the same design is now applied to all phone frames that had the vertical stepper (14 frames, batch and job order): see `../Job Order/Job_Order_Screen_Plan.md` Revision 16.
 
 ### Layout
 

@@ -395,3 +395,7 @@ A batch can be reached from the Batches list and from a job order's Batches tab.
 - Build chain: `build-screens.js C,D,E,G,F`, `rev8.js D`, `naming.js`, `cards.js`, `fit.js`, deploy, `export_all.js`.
 
 **Nov 4, 2026 (later):** all cards are padded 16 on all sides (Component_Library_Plan, Card anatomy). The owner also set Card content to no top padding in the Analysis and RoA frames; the generators and `library/cards.js` follow, and the returned-samples note on Reception_confirmed is a "Card note" (padding 0 / 8) inside Card content, as in the owner's edit.
+
+## Update Nov 19, 2026 · Phone stepper
+
+The batch page stepper on the phone is the owner's horizontal design (steps 104 px wide, line through the markers, the current step centred in a 326 px window), not the vertical list. Seven phone batch frames were updated in place (Reception receiving, Print labels, Photos, Scan label, Preparation entering ADL, Analysis entering results, Analysis finished upload RoA). Details and the job order frames: `../Job Order/Job_Order_Screen_Plan.md` Revision 16; the app: `Batch_Feedback_Nov19_Plan.md` section 3.

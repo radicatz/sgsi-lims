@@ -547,7 +547,7 @@ PT Bara Nusantara Mandiri · Attn. Budi Hartono · PO 4500-2231 · Due 24 Oct 20
 | Batches card | One row per batch: number, **standard**, status badge, samples, RoA status, and **who did what** (prep and analysis performers, spec V-25). A row whose parameters differ from the job order shows "Custom parameters" |
 | CoA card | Empty state with the condition ("needs every batch's RoA issued"); when published: number, revision, published by/date, signatory, **Download**, **Mark sent**; when sent: channel icon (hard copy, email, WhatsApp), recipient, date |
 
-Tablet: Properties above Batches and CoA (one column); stepper scrolls sideways if needed. Mobile: header compacts to number + status + client; actions go into a `⋯` menu; stepper becomes a vertical list with the current step expanded; tabs scroll sideways.
+Tablet: Properties above Batches and CoA (one column); stepper scrolls sideways if needed. Mobile: header compacts to number + status + client; actions go into a `⋯` menu; the stepper is a **horizontal row that scrolls sideways** (steps 104 px wide, the current step centred; changed Nov 19, 2026, see Revision 16, it was a vertical list); tabs scroll sideways.
 
 ## 3 · Job Order · Detail · Samples
 
@@ -649,7 +649,7 @@ New reusable components (needed again by later screens):
 | Component | Used later by |
 | --- | --- |
 | `Status Chip Filter` (label + count, selected/unselected) | Batches, Reports, My work |
-| `Stepper/Horizontal` and `Stepper/Vertical` (done, current, upcoming) | Batch detail, Report review |
+| `Stepper/Horizontal` (done, current, upcoming); the vertical variant is no longer used on screens since Nov 19, 2026 | Batch detail, Report review |
 | `Tabs/Underline` (with count) | Batch detail, Report review |
 | `Side Sheet` (header, scrolling body, sticky footer) | Every create/edit form |
 | `Dialog` (title, body, footer actions) | Mark sent, confirmations |
@@ -1253,3 +1253,19 @@ Revision 13 drew the expanded History row on desktop and phone only. This adds *
 Built with `library/screens/rowCh.js`, limited to this frame (`CH_ONLY=tablet-14`), so the other History frames are not rebuilt. Fit only this frame.
 
 Built as planned (frame height 1486, to the right of the tablet 13-History frame). Backup: `backup/SGSI-LIMS-screens.before-tablet-history-expanded.figcraft`.
+
+## Revision 16 · Phone stepper is horizontal (BUILT Nov 19, 2026)
+
+Written for: the product owner, and whoever builds or reviews the frames.
+
+The owner redrew the phone stepper in `Phone-04-Batches-02-Batch_detail-01-Reception_receiving ref`: the same horizontal stepper as on desktop, instead of a vertical list that took 250 px. The job order uses the same stepper.
+
+| Part | Spec |
+| --- | --- |
+| Card | The Stepper card, padded 16 as every card, with a 326 px window (clipped) around the row |
+| Row | One Stepper step (Orientation = Horizontal) per step, **104 px wide, never shrinking**; 6 steps make 624 px, wider than the window |
+| Line | 2 px through the markers: green up to the current step, the border colour after it |
+| Window | Shows the **current step in the middle** (the row is moved left by `current x 104 + 52 - 163`, never less than 0 or more than 298). So a job order in analysis opens on Samples received, Analysis, RoA approved; the first steps open on the first three, the last steps on the last three. The app scrolls to the same place (`Stepper` in `components/display.tsx`, no animation, only the row moves) |
+| Height | The card is 98 px (was 250), so every phone detail frame is about 150 px shorter |
+
+**Frames updated in place** (generator `library/stepperphone.js`, 14 frames, no other change): job order Overview, Batches, Samples, Samples mixed states, Mark sent sheet, History and History row expanded (phone); batch Reception receiving, Print labels, Photos, Scan label, Preparation entering ADL, Analysis entering results and Analysis finished upload RoA (phone). The owner's `ref` frames were left alone. The app already has this (`Batch/Batch_Feedback_Nov19_Plan.md` section 3). Backup: `backup/SGSI-LIMS-screens.before-phone-stepper.figcraft`.

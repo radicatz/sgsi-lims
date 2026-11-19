@@ -168,7 +168,7 @@ Grouped by the frame they live in. Every set gets a short usage note beside it. 
 | **Page header** (New) | Title, Status badge, meta line, Person chip, Overflow menu, Actions slot · Desktop and Mobile |
 | **Tab** + **Tab bar** | State + Active · Count |
 | **Stepper step** | State (Done, Current, Upcoming) × Orientation (Horizontal, Vertical) · Title, Meta |
-| **Stepper** (New as a set) | 5 or 6 steps, connector Done or Upcoming; Vertical for Mobile |
+| **Stepper** (New as a set) | 5 or 6 steps, connector Done or Upcoming; on the phone the same horizontal row inside a clipped 326 px window with the current step centred (Nov 19, 2026; the Vertical variant is no longer used on screens) |
 | **Mobile step progress** (New) | "Step 1 of 2" bar for Create on Mobile |
 | **Pager** | Desktop and Mobile |
 | **Sticky action bar** | Desktop, Mobile (Print (2), Start Preparation); bulk-select count |
@@ -390,3 +390,4 @@ Checked against the Library page of the main file: 97 component sets and single 
 | Field label, Parameter group row, Quick-pick chips | Not sets: field labels are part of each field; group rows are frames of Parameter pills; quick picks are Ghost Buttons |
 | Logo | **Logo** (6) and **ptba-logo** (the client logo used on the client page and in tables) |
 
+**Nov 19, 2026 (owner):** the phone **Stepper** is horizontal: steps 104 px wide in a clipped window that shows the current step in the middle (Job Order plan, Revision 16). The `Stepper step` variants with Orientation = Vertical stay in the library but no screen uses them.
