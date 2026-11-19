@@ -7,6 +7,7 @@ import { z } from "zod";
 import { authenticate, requireAny } from "../auth";
 import { BATCH_RE, NoParam, SCREEN, dayText, fail, logStep, nextBatchNo, notify, runAs, runAsActor, shownStatus, todayIso, uuid } from "../batch-lib";
 import { batchReceptionRoutes } from "./batches-reception";
+import { batchResultsRoutes } from "./batches-results";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const STAGES = ["created", "preparation", "prep_finished", "analysis", "analysis_finished", "completed"] as const;
@@ -274,4 +275,5 @@ export async function batchRoutes(app: FastifyInstance) {
   });
 
   await batchReceptionRoutes(app);
+  await batchResultsRoutes(app);
 }

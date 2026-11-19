@@ -7,6 +7,7 @@ import { SessionProvider, useSession } from "./app/session";
 import { Guard, Shell } from "./app/Shell";
 import { Forgot, SetPassword, SignIn } from "./features/auth/Auth";
 import { Coming, NotFound, Profile } from "./features/common/Basics";
+import { NotificationsPage } from "./features/notifications/Notifications";
 import { Clients, ClientPage } from "./features/master-data/Clients";
 import { DrillHoles, Lithologies, Seams } from "./features/master-data/Lists";
 import { UserPage, Users } from "./features/admin/Users";
@@ -48,7 +49,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     { path: "/users/:id", element: <Guard anyOf={["user.manage"]}><UserPage /></Guard> },
     { path: "/config/:section", element: <Guard anyOf={["config.write"]}><Config /></Guard> },
     { path: "/profile", element: <Profile /> },
-    { path: "/notifications", element: <Coming path="/notifications" /> },
+    { path: "/notifications", element: <NotificationsPage /> },
     { path: "/start", element: <Start /> },
     { path: "*", element: <NotFound /> },
   ] },

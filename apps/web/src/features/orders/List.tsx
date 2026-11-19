@@ -58,7 +58,17 @@ const dueRange = (k: string): { dueFrom?: string; dueTo?: string } =>
         : k === "month"
           ? { dueFrom: todayIso(), dueTo: todayIso(30) }
           : {};
-const SORT_KEY: Record<string, string> = { "No.": "no", Client: "client", Company: "client", Service: "service", Samples: "samples", Batches: "batches", Due: "due", Status: "status", CoA: "coa" };
+const SORT_KEY: Record<string, string> = {
+  "No.": "no",
+  Client: "client",
+  Company: "client",
+  Service: "service",
+  Samples: "samples",
+  Batches: "batches",
+  Due: "due",
+  Status: "status",
+  CoA: "coa",
+};
 const LONG_DAY = () =>
   new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Makassar",
@@ -68,7 +78,6 @@ const LONG_DAY = () =>
     year: "numeric",
   })
     .format(new Date())
-    .replace(/,/g, "")
     .toUpperCase();
 
 export function Orders() {
@@ -87,7 +96,7 @@ export function Orders() {
     [cso, setCso] = useState(""),
     [due, setDue] = useState(""),
     [page, setPage] = useState(1);
-  const { sort, onSort } = useSort();   // a sortable head sorts the whole list on the server
+  const { sort, onSort } = useSort(); // a sortable head sorts the whole list on the server
   const [cancel, setCancel] = useState<OrderRow | null>(null),
     [sheet, setSheet] = useState(false);
   useEffect(() => {

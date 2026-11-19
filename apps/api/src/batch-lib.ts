@@ -71,12 +71,13 @@ export const EVENTS = {
 } as const;
 export interface Note { event: keyof typeof EVENTS; title: string; body: string; link: string }
 /** One notification for every active user holding one of the roles (or the given people), except the person who did the action. */
-export async function notify(tx: Tx, n: Note, to: { roles?: string[]; users?: string[] }, actor: string | null): Promise<number> {
+export async function notify(tx: Tx, n: Note, to: { roles?: string[]; users?: string[] }, actor: string | null, once = false): Promise<number> {
   const rows = await tx`insert into notifications (user_id, event, icon, title, body, link)
     select distinct p.id, ${n.event}, ${EVENTS[n.event].icon}, ${n.title}, ${n.body}, ${n.link}
     from profiles p left join user_roles ur on ur.user_id = p.id left join roles r on r.id = ur.role_id
     where p.status = 'active' and (r.code = any(${to.roles ?? []}::text[]) or p.id = any(${to.users ?? []}::uuid[]))
       ${actor ? tx`and p.id <> ${actor}` : tx``}
+      ${once ? tx`and not exists (select 1 from notifications x where x.user_id = p.id and x.event = ${n.event} and x.link = ${n.link})` : tx``}
     returning id`;
   return rows.length;
 }

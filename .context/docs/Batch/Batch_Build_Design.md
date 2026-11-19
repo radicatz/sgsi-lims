@@ -1,6 +1,6 @@
 # Batches: build design (phase 3)
 
-Written Nov 18, 2026, for phase 3 of `../Project/V1_Build_Plan.md`. **Status: approved Nov 18, 2026, with the defaults of section 13. Slice A built Nov 18, 2026 (section 14); slice B is next.**
+Written Nov 18, 2026, for phase 3 of `../Project/V1_Build_Plan.md`. **Status: approved Nov 18, 2026, with the defaults of section 13. Slice A built Nov 18, 2026 (section 14); the slice B plan is section 15, approved Nov 19, 2026 with the answers in 15.9.**
 
 Written for: the product owner, and whoever builds and reviews phase 3.
 
@@ -140,7 +140,7 @@ Each slice is committed when its checks pass.
 | --- | --- |
 | Backend | `apps/api/src/routes/batches.ts` (list, Add batch, page, number, log, the job order's Batches tab), `batches-reception.ts` (reception rows, photos, labels, hold, confirm) and `batches-results.ts` (ADL, analysis, RoA, complete), plus `notify.ts` (the events and the deadline timer). Every route runs as the signed-in user (`asUser`), so RLS checks again, and the audit trigger records the screen "Batches". Each step change locks the batch row (`select … for update`), checks the state and the guard, writes `batch_status_log` and changes the status in one transaction. Field errors return `{code, text, field}` as before |
 | Frontend | `apps/web/src/features/batches/`: `List.tsx`, `AddBatch.tsx`, `Page.tsx` (header, stepper, tabs, menu), `Reception.tsx`, `Labels.tsx`, `Photos.tsx`, `Preparation.tsx`, `Analysis.tsx`, `Roa.tsx`. `features/orders/Batches.tsx` holds the job order's tab. Routes: `/batches` and `/batches/:no/:tab?`. Components come from `components/`, plus two new ones: a value grid cell (normal, unsaved, warning, calculated) and a checklist |
-| Security | Parameterised SQL only. Batch numbers are checked against their pattern. Photos (images only, up to 10 MB) and RoAs (PDF only, up to 20 MB) are checked by extension and first bytes, stored under a random path with their SHA-256, and downloaded through one-hour signed links. Result values reach only roles with `result.read`: the CSO gets counts ("26 of 36 values saved"), never values (B-3, BA6). The signed RoA file needs `roa.download`. Every write route answers 403 to a role without its permission (section 5) |
+| Security | Parameterised SQL only. Batch numbers are checked against their pattern. Photos (images only, up to 10 MB) and RoAs (PDF only, up to 10 MB) are checked by extension and first bytes, stored under a random path with their SHA-256, and downloaded through one-hour signed links. Result values reach only roles with `result.read`: the CSO gets counts ("26 of 36 values saved"), never values (B-3, BA6). The signed RoA file needs `roa.download`. Every write route answers 403 to a role without its permission (section 5) |
 
 ## 5 · Backend routes
 
@@ -316,7 +316,7 @@ B-2026-0418 (Analysis, part of the values entered) and B-2026-0417 (Completed, R
 
 | Item | Result |
 | --- | --- |
-| Migrations | C-20 (`20261118000100_batch_log_and_group_items.sql`, run by the owner Nov 18). Data step `20261118000200_batch_buckets.sql`: private buckets `sample-photos` (10 MB, PNG, JPG, WebP) and `batch-documents` (20 MB, PDF), applied through the database tool |
+| Migrations | C-20 (`20261118000100_batch_log_and_group_items.sql`, run by the owner Nov 18). Data step `20261118000200_batch_buckets.sql`: private buckets `sample-photos` (10 MB, PNG, JPG, WebP) and `batch-documents` (10 MB, PDF; set to 10 MB on Nov 19, 2026 to follow the frames), applied through the database tool |
 | API | `routes/batches.ts` (list with several statuses at once, `GET /orders/:no/batches`, `/orders/:no/batch-form`, `POST /batches`, `/batches/open-orders`, the batch page, `PUT /batches/:no/number`, the log) and `routes/batches-reception.ts` (reception rows, `PATCH` of one row, arrive-all, hold and release, photos, labels, Confirm reception); `batch-lib.ts` (the status shown to people, identifier patterns, log row, notifications). N1 and N2 are written. Every step runs as the user; the job order's move to In progress and the notifications use the API's own connection, stamped with the same account |
 | Shared | `packages/shared/src/code128.ts` (Code 128 B, no dependency; a unit test checks that all 107 patterns have 11 modules, the stop 13, and the check symbol) |
 | Screens | `apps/web/src/features/batches/`: `List.tsx`, `AddBatch.tsx` (dialog, phone steps, the job order chooser), `Page.tsx`, `Reception.tsx`, `Dialogs.tsx` (print labels, photos, hold, Confirm with fewer, edit number, log), `labels.ts`; `features/orders/Batches.tsx` is the job order's tab. Styles in `styles/batches.css`. `ApiError` now carries the response body (Confirm's 409 sends the counts) |
@@ -343,3 +343,157 @@ B-2026-0418 (Analysis, part of the values entered) and B-2026-0417 (Completed, R
 
 **Open for later:** a real sample label test with the lab's printer and scanner. The Sample ID of a sample that is unticked is not given again (the running number moves on), as designed; the lab may want a different rule once it has seen it.
 
+## 15 · Slice B plan (Nov 19, 2026) · approved
+
+Written for: the product owner, and whoever builds and reviews slice B.
+
+Slice B finishes the batch:
+- the Preparation team enters the air-dried loss (ADL);
+- the analyst enters the final values from the signed RoA;
+- the Lab admin uploads that RoA and completes the batch;
+- everyone reads the hand-offs in the bell.
+
+The frames are listed in section 2.1 under "Slice B": Batch_detail 10 to 14, and App 08 Notifications 01 to 04.
+
+### 15.1 Preparation tab (frames 04-02-10, 11; T 10; P 10)
+
+| Part | Build |
+| --- | --- |
+| Card head | **Preparation**, the count "4 of 6 saved" beside **Save all**, then **Finish Preparation**. Finish is disabled with the reason until the checklist passes. When finished, the head shows "Ready for analysis" with a check on the right, and no buttons |
+| Desktop columns | #, **Sample code**, **Sample ID**, **ADL (%)** field, **Entered by** (avatar, name, date and time), **Saved** (a Saved or Pending tag), **Status** (Received or Held). The frame's "Sample ID" and "Lab code" columns are renamed by spec 6.1 |
+| Tablet columns | #, Sample (the sample code, with the Sample ID as its tooltip), ADL (%), Entered by (avatar only), Saved |
+| Phone | One card per sample: the sample code and Sample ID, the ADL field, who entered it and when. A sticky bar holds **Save all** and **Finish Preparation** |
+| Field states | **Unsaved:** amber fill, no icon. **Warning:** amber fill with a warning icon when the value is outside the ADL typical range in Configuration > Validation rules; it also adds a checklist line such as "KEP-3303 is above 20 %: check the value". **Locked** after Finish: muted fill with a lock |
+| Checklist | "Before you can finish preparation". The first line requires an ADL for every received, not-held sample when TM is ordered ("4 of 6"). Then one warning line per sample out of range; a warning does not block |
+| Held samples | Listed with "On hold" in place of the field, and not counted |
+| Who | ADL is entered by Preparation (`result.write.prep`). Finish Preparation needs `batch.transition.prep` (Preparation, Supervisor). Everyone else reads only. The CSO has no `result.read`, so the tab shows only the count ("4 of 6 ADL saved"), never the values (flow BA6) |
+| After Finish | The batch moves to Prep finished, N3 goes to the analysts, and ADL locks |
+
+### 15.2 Analysis tab (frames 04-02-12, 13, 14; T 12; P 12, 13)
+
+| Part | Build |
+| --- | --- |
+| Card head | **Analysis**, **Save all**, **Finish Analysis**. Under the title, as separate texts: "26 of 36 values saved", "Started 23 Oct", and the analyst's avatar and name |
+| Grid | One row per sample and one column per batch parameter. Columns are grouped under their category (MOISTURE, PROXIMATE, SULFUR, CALORIFIC, PHYSICAL, …), with the basis and unit under each name ("% ar", "% adb", "kcal/kg adb"). Ash analysis and Trace elements get one column per item chosen on the job order, under their group (this uses C-20b) |
+| Row key | The sample code, with the Sample ID as its tooltip; the RoA prints both (spec 6.1) |
+| Calculated cells | FC = 100 − (IM + Ash + VM). Net CV, when ordered, uses the batch's standard and the Seyler hydrogen estimate. Both show as a muted cell with the ƒ mark, filled once the inputs exist, and are never typed. They are stored as calculated values so the CoA reads them like the others |
+| Entry rules | Numbers, with a comma accepted. No more decimals than the parameter allows ("Use at most 2 decimals"). A % value outside 0 to 100 is refused. "<" is accepted only for parameters that allow it (detection limits). A text or list parameter, for example Gray King, takes text |
+| Checks | Warn rules from Configuration > Validation rules mark the cell amber with a warning icon. They also add one checklist line per sample, such as "BNM-3415 has Ash and GCV outside the typical range: check them". Block rules, such as V-12 (TM not below IM), stop **Finish Analysis** with their message |
+| Saving | Unsaved cells stay amber until **Save all**. Leaving the tab or the page with unsaved cells asks first. A saved value can be cleared before Finish. The first save moves the batch from Prep finished to Analysis and records the date and the analyst |
+| Finish | "Before you can finish analysis" needs a value for every ordered parameter of every received, not-held sample ("26 of 36"), and no broken Block rule. Then the values lock, the batch becomes Analysis finished, and N4 goes to the Lab admin |
+| Tablet | The same grid as desktop. It scrolls sideways inside its card; the **#** and **Sample code** columns are sticky on the left while it scrolls (owner, Nov 19), with a quiet shadow edge once content slides under them. Frame T 12 is wider than the card (B1) |
+| Phone | One card per sample, with a field per parameter showing its name, unit and basis. A sticky bar holds **Save all** and **Finish Analysis** |
+| Who | Values are entered by the Analyst (`result.write`). Finish Analysis needs `batch.transition.analysis` (Analyst, Supervisor). The CSO sees "26 of 36 values saved" and no values |
+
+### 15.3 Signed RoA and Complete batch (frames 04-02-13, 14; P 13)
+
+| Part | Build |
+| --- | --- |
+| Where | A **Signed RoA** card above the Analysis card, once the batch is Analysis finished |
+| Upload | "Upload the RoA signed by the supervisor, then complete the batch." It takes a **RoA number** (required, unique, free text such as RoA-0418) and a drop zone: "PDF, up to 10 MB", as drawn. The file can be replaced until the batch is completed |
+| Complete batch | Enabled once the RoA is uploaded. A confirm dialog asks "Complete B-2026-0418?" and names the RoA number. Completing does four things: marks every value of the batch as verified, locks the values (C-10), sets the batch to Completed, and sends N5 to the Lab admin if it was the job order's last open batch |
+| Completed | The card reads "The batch is complete. Every tab is read-only." and shows the file row (name, size, uploaded by, date) with **Download**, a one-hour signed link that needs `roa.download`. Roles without `roa.download` (CSO, Preparation) see the RoA number as plain text |
+| Who | Upload needs `batch.document.upload`; Complete needs `batch.complete`. The Lab admin and the Superadmin have both |
+
+### 15.4 Notifications (frames 00-08-01 to 04; T 01; P 03)
+
+| Part | Build |
+| --- | --- |
+| Bell | The unread badge already comes from `/me`; it refreshes after any read |
+| Panel (desktop, tablet) | Opens under the bell, 400 wide. It has the title **Notifications** with **Mark all read**, tabs All and Unread (Unread shows its count), up to 6 items, and **See all notifications**. Each item shows the event icon in a round tint, title, text, time ("10 min ago", "3 h ago", then the date) and an unread dot. Clicking an item marks it read and opens its link |
+| Page `/notifications` | On the phone the bell opens this page directly. It has the overline NOTIFICATIONS, a title and **Mark all read**, tabs All and Unread, and a card per day group (Today, Yesterday, Earlier). It shows 20 items, then **Load more**. The empty state reads "You're all caught up" |
+| Events added in slice B | N1 and N2 already work. Slice B adds:<br>• N3, Preparation finished: to Analysts<br>• N4, Analysis finished: to the Lab admin<br>• N5, last batch of a job order completed: to the Lab admin<br>• N7, due within 24 hours: to the roles of the batch's queue<br>• N8, past its deadline: to the Supervisor and Manager |
+| N7 and N8 | A timer in the API runs every 15 minutes and once at start. It runs under a database lock so two API processes never send twice. N7 fires when the deadline is today or tomorrow and the batch is not completed. N8 fires when the deadline has passed. Each is sent once per batch and person |
+
+### 15.5 Backend
+
+New routes go in `routes/batches-results.ts` and `routes/notifications.ts`; section 5 lists them. In short:
+
+| Route | Does |
+| --- | --- |
+| `GET`, `PUT /batches/:no/adl`; `POST /batches/:no/finish-prep` | ADL rows and Save all, with values checked as in 15.2; Finish Preparation |
+| `GET`, `PUT /batches/:no/analysis`; `POST /batches/:no/finish-analysis` | The grid definition (columns, groups, units, decimals, rules) and the values. Save all also recomputes the calculated values in the same step. Finish Analysis |
+| `GET /batches/:no/progress` | Counts only (ADL saved, values saved), for roles without `result.read` |
+| `POST`, `DELETE /batches/:no/roa`; `GET /batches/:no/roa/file` | Upload or replace the signed RoA (the PDF is checked by its first bytes and its SHA-256 is kept); remove it before Complete; download |
+| `POST /batches/:no/complete` | Complete batch (15.3) |
+| `GET /notifications?unread=&before=`; `POST /notifications/:id/read`, `/notifications/read-all` | The user's own notifications; mark one or all as read |
+
+Values are stored as analyses (`source` entered or calculated), each with one primary value on the parameter's reporting basis. ADL and TM are reported as received; the others air-dried, as configured. No new migration is needed: C-20 already added `analyses.item_id`.
+
+### 15.6 Demo data
+
+`pnpm seed:batches` grows so that every slice B frame has a batch to show:
+
+| Batch | Job order | State |
+| --- | --- | --- |
+| B-2026-0421 | JO-2026-0139 | Preparation: 2 samples, 1 ADL saved |
+| B-2026-0420 | JO-2026-0139 | Analysis: 4 samples, some of the values entered |
+| B-2026-0418 | JO-2026-0142 | Analysis: 6 samples (BNM-3413 to 3418), 26 of 36 values, one Ash and one GCV out of range, as in frame 12 |
+| B-2026-0417 | JO-2026-0142 | Completed: 12 samples, all values verified, RoA-0417 attached (a small demo PDF) |
+
+The 18 samples of JO-2026-0142 are added with their Sample IDs. B-2026-0422 and 0413 stay as they are, for Reception.
+
+### 15.7 Tests
+
+- **`scripts/check-batches-b.ts`** (live API) covers:
+  - ADL rules and Finish Preparation, with TM ordered and not;
+  - value entry: decimals, 0 to 100, "<" where allowed, text parameters, Warn and Block rules;
+  - FC and Net CV against the workbook figures;
+  - the first save starting Analysis, and Finish Analysis;
+  - RoA upload, replacement and download rights;
+  - Complete and the value freeze;
+  - N3 to N5, and the N7 and N8 timer sending only once;
+  - the CSO getting counts only, and 403 for every write by the wrong role.
+- **`e2e/phase3-batches-b.spec.ts`** at 1440, 834 and 390 covers:
+  - BA4: ADL and Finish Preparation;
+  - BA5: values with a range warning, Finish Analysis, RoA upload and Complete batch;
+  - BA6: the CSO reading a completed batch;
+  - the bell: the panel on desktop and tablet, the page on the phone, and mark read.
+
+### 15.8 Where the build will differ from the frames (known now)
+
+| Point | Frame | Build |
+| --- | --- | --- |
+| Identifier columns | "Sample ID" holds the client's name; "Lab code" | Sample code and Sample ID (spec 6.1) |
+| Decimal sign and thousands | "8,42", "5 912" | "8.42", "5912": a dot and no thousands space. A typed comma is still accepted |
+| Future stepper notes | "6 of 8 arrived" | The step's date, "Current" or "—", as in slice A |
+| Notifications filter | The App plan said a segmented control | Tabs All and Unread, as the frames draw them (owner rule: list filters use page Tabs) |
+
+### 15.9 Open points (defaults used unless you say otherwise)
+
+| # | Question | Default |
+| --- | --- | --- |
+| B1 | In the frame, the tablet Analysis grid is wider than its card. Keep the sideways scroll (with # and Sample code fixed), or fold it like the tablet Samples table? | **Answered Nov 19, 2026: keep the sideways scroll**, with the **#** and **Sample code** columns sticky while it scrolls (desktop too, if the grid ever overflows) |
+| B2 | ADL warning: the frame says "above 20 %", but Configuration had ADL's typical range at 0 to 15 % (from the seed) | **Done by the owner Nov 19, 2026:** ADL's typical high is 20 % in Configuration. The seed (`20261110000500_reference_data.sql`) still says 15 for a fresh database |
+| B3 | RoA file size: the frame says 10 MB; section 6 planned 20 MB | **Answered Nov 19, 2026: 10 MB**, as drawn. Sections 4 and 14 and the `batch-documents` bucket now say 10 MB |
+| B4 | Can a saved value be cleared before Finish Analysis? | **Decided Nov 19, 2026: yes.** The spec (F-RES-07, S-18) and the batch plan say values are stamped with account and time and lock at Finish Analysis; nothing forbids a correction before that, and Finish already requires a value for every ordered parameter, so a cleared cell blocks Finish until it is filled again. The removal stays in the audit log |
+| B5 | Text and list parameters (Gray King coke type, CSN) | **Default (owner, Nov 19, 2026):** free text in v1; a pick list can come with the lab's method list |
+| B6 | What "due within 24 hours" means for N7, when the deadline is a date without a time | **Default (owner, Nov 19, 2026):** the deadline is today or tomorrow |
+
+### 15.10 Order of work and size
+
+1. **Preparation tab and its API.** The smallest part; it sets up Save all, the unsaved and warning cells, and the checklist that the Analysis tab reuses.
+2. **Analysis tab and its API**, with the calculated values and the validation rules. The largest part.
+3. **Signed RoA and Complete batch.**
+4. **Notifications:** the events, the timer, the panel and the page.
+5. **Finishing:** demo data, checks, browser tests at three sizes, the frame comparison and the docs.
+
+Slice B is about two to three times the size of slice A. Each part is compared with its frames at 1440, 834 and 390 before the next one starts. The slice is committed when its checks pass.
+
+
+## 16 · Slice B build status (Nov 19, 2026)
+
+Written for: the product owner, and whoever reviews slice B.
+
+Built as planned in section 15, in this order:
+
+| Part | Built |
+| --- | --- |
+| Preparation | `GET`, `PUT /batches/:no/adl`, `POST /batches/:no/finish-prep`; tab with Saved and Pending tags, warning field, checklist, Finish, locked state, count-only view for the CSO |
+| Analysis | `GET`, `PUT /batches/:no/analysis`, `POST /batches/:no/finish-analysis`, `GET /batches/:no/progress`. Grid grouped by category; sticky **#** and **Sample code** (B1); FC and Net CV stored as calculated; V-01 and V-12 stop Finish; Warn rules add checklist lines; clearing a value is allowed before Finish (B4); text parameters take free text (B5); phone cards with a sticky bar |
+| Signed RoA and Complete | `GET`, `POST`, `DELETE /batches/:no/roa`, `GET /batches/:no/roa/file`, `POST /batches/:no/complete`. PDF checked by its first bytes, SHA-256 kept, 10 MB (B3); Complete verifies every value and sends N5 when it was the job order's last open batch |
+| Notifications | `GET /notifications`, `POST /notifications/:id/read`, `/notifications/read-all`; bell panel (desktop, tablet), `/notifications` page; N3 and N4 on the steps; N7 and N8 from the 15-minute timer with an advisory lock, once per batch and person (B6) |
+
+Known differences from the frames: the ones in 15.8, and the Net CV column is shown only when NCV is ordered. Column **O** (oxygen by difference) has no formula in v1 and is left out of the grid.
+
+Checks: `scripts/check-batches-b.ts` (live API, builds and removes B-2026-9901) and `e2e/phase3-batches-b.spec.ts` at 1440, 834 and 390. Demo data: `pnpm seed:batches` adds B-2026-0420 (18 of 24 values), B-2026-0418 (26 of 36, Ash and GCV out of range) and B-2026-0417 (completed, RoA-0417). `test-fixture-b.ts` makes the batches the browser tests need.

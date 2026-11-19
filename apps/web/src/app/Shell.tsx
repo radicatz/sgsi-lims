@@ -1,6 +1,7 @@
 // App shell: top bar, sidebar by role (expanded or collapsed), tablet rail, phone drawer, user menu
 // (Navigation_Screen_Plan.md, App_Screen_Plan.md). Pages render in <Outlet/>.
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { BellPanel } from "../features/notifications/Notifications";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { navFor, startPath } from "@sgsi/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -164,6 +165,8 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
   const [menu, setMenu] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useOutside(ref, () => setMenu(false), menu);
+  const [bell, setBell] = useState(false), bellRef = useRef<HTMLDivElement>(null);
+  useOutside(bellRef, () => setBell(false), bell);
   useEsc(() => setMenu(false), menu);
   return (
     <header className="topbar">
@@ -196,16 +199,17 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
           </span>
         </label>
       )}
-      <div className="bellwrap">
+      <div className="bellwrap" ref={bellRef}>
         <Button
           iconOnly
           icon="bell"
           type="secondary"
           size="lg"
           label={`Notifications${me!.unread ? `, ${me!.unread} unread` : ""}`}
-          onClick={() => nav("/notifications")}
+          onClick={() => (bp === "phone" ? nav("/notifications") : setBell(!bell))}
         />
         {me!.unread > 0 && <span className="badge-n">{me!.unread}</span>}
+        {bell && bp !== "phone" && <BellPanel unread={me!.unread} onClose={() => setBell(false)} />}
       </div>
       <div ref={ref} style={{ position: "relative" }}>
         <button

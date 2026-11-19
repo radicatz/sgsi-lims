@@ -18,6 +18,10 @@ export async function cleanupTestData() {
   const photos = await sql`select a.storage_path from sample_attachments a join samples s on s.id = a.sample_id join job_orders j on j.id = s.job_order_id
     where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
   if (photos.length) await admin.storage.from("sample-photos").remove(photos.map((f) => f.storage_path as string));
+  // signed RoA files of the test job orders' batches
+  const roas = await sql`select d.storage_path from batch_documents d join batches b on b.id = d.batch_id join job_orders j on j.id = b.job_order_id
+    where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
+  if (roas.length) await admin.storage.from("batch-documents").remove(roas.map((f) => f.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit', 'on', true)`;
     await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;
@@ -37,6 +41,8 @@ export async function cleanupTestData() {
     await tx`delete from notifications where link like '/orders/ZT-%' or link like '/orders/ZE-%'`;
     await tx`update samples set batch_id = null, released_from_batch_id = null where job_order_id in (${testOrders})`;
     await tx`delete from batches where job_order_id in (${testOrders})`;
+    // notifications that point at a batch that no longer exists (left by an interrupted run)
+    await tx`delete from notifications n where n.link ~ '^/batches/B-[0-9]{4}-[0-9]{4}/' and not exists (select 1 from batches b where n.link like '/batches/' || b.batch_no || '/%')`;
     // Job orders made by the checks and the browser tests
     await tx`delete from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
     // Configuration slice B: services, methods and standards, template drafts made by the checks

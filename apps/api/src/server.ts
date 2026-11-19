@@ -12,6 +12,7 @@ import { userRoutes } from "./routes/users";
 import { configRoutes } from "./routes/config";
 import { orderRoutes } from "./routes/orders";
 import { batchRoutes } from "./routes/batches";
+import { notificationRoutes, startDeadlineTimer } from "./routes/notifications";
 
 const app = Fastify({
   logger: process.env.NODE_ENV === "production" ? true : { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -46,6 +47,8 @@ await app.register(async (api) => {
   await api.register(configRoutes);
   await api.register(orderRoutes);
   await api.register(batchRoutes);
+  await api.register(notificationRoutes);
 }, { prefix: "/api" });
 
 await app.listen({ port: env.API_PORT, host: "0.0.0.0" });
+startDeadlineTimer(app.log);

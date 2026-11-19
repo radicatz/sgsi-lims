@@ -17,6 +17,9 @@ import {
   Tabs,
 } from "../../components";
 import { LogDialog, NumberDialog } from "./Dialogs";
+import { PreparationTab } from "./Preparation";
+import { AnalysisTab } from "./Analysis";
+import { RoaCard } from "./Roa";
 import { ReceptionTab } from "./Reception";
 import {
   STATUS_LABEL,
@@ -221,31 +224,10 @@ export function BatchPage() {
         <ReceptionTab b={b} phone={phone} tablet={tablet} />
       )}
       {tab === "preparation" && (
-        <Card title="Preparation">
-          <Empty
-            icon="flask"
-            title={
-              created
-                ? "Preparation starts after reception"
-                : "Preparation is entered here"
-            }
-            text={
-              created
-                ? "Confirm reception first. Then the Preparation team enters the air-dried loss (ADL) of each sample."
-                : "The air-dried loss (ADL) of each sample is entered here."
-            }
-          />
-        </Card>
+        <PreparationTab b={b} phone={phone} tablet={tablet} />
       )}
-      {tab === "analysis" && (
-        <Card title="Analysis">
-          <Empty
-            icon="test-tube"
-            title="Analysis starts after preparation"
-            text="The analyst enters one final value for each sample and parameter once preparation is finished."
-          />
-        </Card>
-      )}
+      {tab === "analysis" && <RoaCard b={b} phone={phone} />}
+      {tab === "analysis" && <AnalysisTab b={b} phone={phone} tablet={tablet} />}
       {num && (
         <NumberDialog
           b={b}

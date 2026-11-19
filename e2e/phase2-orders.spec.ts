@@ -271,7 +271,7 @@ test.describe.serial("job orders, slice B", () => {
       await page.locator(".lockic").first().click();
       await expect(page.getByText(/Received on .+\. Received samples can't be edited\./)).toBeVisible();
     } else {
-      await expect(page.getByText("007.RI.001.Lot01")).toBeVisible();
+      await expect(page.getByText("007.RI.001.Lot01").first()).toBeVisible();
       if (tablet) {
         // tablet (plan Revision 14): six columns, no sideways scroll; the 44 px lock says why on a tap
         await expect(page.locator(".tgrid th")).toHaveCount(6);
