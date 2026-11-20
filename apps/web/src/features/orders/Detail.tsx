@@ -30,12 +30,12 @@ import { SamplesTab } from "./Samples";
 import { FilesTab } from "./Files";
 import { HistoryTab } from "./History";
 import { BatchesTab } from "./Batches";
+import { CoaCard } from "../reports/CoaCard";
 import {
   useCatalogue,
   STATUS_LABEL,
   STATUS_TONE,
   STD_LABEL,
-  coaLabel,
   pastDue,
   shortDate,
   type OrderDetail,
@@ -115,7 +115,7 @@ export function OrderPage() {
   const [cancel, setCancel] = useState(false),
     [close, setClose] = useState(false);
   const can = (p: string) => !!me?.permissions.includes(p);
-  useCatalogue(can("order.edit"));
+  const cat = useCatalogue(can("order.edit"));
   const q = useQuery({
     queryKey: ["order", no],
     queryFn: () => api<OrderDetail>(`/orders/${no}`),
@@ -272,6 +272,8 @@ export function OrderPage() {
           d={d}
           canEdit={can("order.edit")}
           onEdit={() => setSp({ edit: "" })}
+          signers={cat.data?.signatories ?? []}
+          phone={phone}
         />
       )}
       {tab === "samples" && (
@@ -287,13 +289,13 @@ export function OrderPage() {
       )}
       {tab === "files" && <FilesTab no={no} live={live} phone={phone} />}
       {tab === "coa" && (
-        <Card title="Certificate of Analysis">
-          <Empty
-            icon="certificate"
-            title="The CoA is not ready"
-            text="It can be generated once every batch has an approved RoA."
-          />
-        </Card>
+        <CoaCard
+          no={no}
+          signatory={d.signatory}
+          signers={cat.data?.signatories ?? []}
+          canEdit={can("order.edit")}
+          phone={phone}
+        />
       )}
       {tab === "history" && (
         <HistoryTab no={no} phone={phone} tablet={bp === "tablet"} />
@@ -361,10 +363,14 @@ function Overview({
   d,
   canEdit,
   onEdit,
+  signers,
+  phone,
 }: {
   d: OrderDetail;
   canEdit: boolean;
   onEdit: () => void;
+  signers: Array<{ id: string; name: string; title: string }>;
+  phone: boolean;
 }) {
   const same =
     d.service &&
@@ -440,7 +446,7 @@ function Overview({
         </KV>
         <KV k="Priority">{d.priority}</KV>
         <KV k="Due date">{d.dueOn ? shortDate(d.dueOn) : "—"}</KV>
-        <KV k="Default signatory">
+        <KV k="Signatory">
           {d.signatory ? (
             <span className="row g12 wrap">
               <span>{d.signatory.name}</span>
@@ -481,19 +487,13 @@ function Overview({
             </span>
           )}
         </Card>
-        <Card
-          title="Certificate of Analysis"
-          actions={
-            <Tag
-              label={coaLabel(null) === "No CoA" ? "Pending" : coaLabel(null)}
-              icon="clock"
-            />
-          }
-        >
-          <span className="t-sm c-mut">
-            The CoA can be generated once every batch has an approved RoA.
-          </span>
-        </Card>
+        <CoaCard
+          no={d.orderNo}
+          signatory={d.signatory}
+          signers={signers}
+          canEdit={false}
+          phone={phone}
+        />
       </div>
     </div>
   );

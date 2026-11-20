@@ -22,6 +22,10 @@ export async function cleanupTestData() {
   const roas = await sql`select d.storage_path from batch_documents d join batches b on b.id = d.batch_id join job_orders j on j.id = b.job_order_id
     where j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %'`;
   if (roas.length) await admin.storage.from("batch-documents").remove(roas.map((f) => f.storage_path as string));
+  // certificates of the test job orders: the stored PDFs first, then the rows
+  const certs = await sql`select r.storage_path from reports r join job_orders j on j.id = r.job_order_id
+    where r.storage_path is not null and (j.order_no like 'ZT-%' or j.order_no like 'ZE-%' or j.client_reference like 'ZT %' or j.client_reference like 'ZE %')`;
+  if (certs.length) await admin.storage.from("reports").remove(certs.map((f) => f.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit', 'on', true)`;
     await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;
@@ -35,6 +39,11 @@ export async function cleanupTestData() {
     await tx`delete from parameters where code like 'ZT-%' or code like 'ZE-%'`;
     // contacts added from the job order form by the browser tests
     await tx`delete from company_contacts where full_name like 'ZE %' or full_name like 'ZT %'`;
+    const ordersOf = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
+    await tx`delete from notifications n using reports r where r.job_order_id in (${ordersOf}) and n.link like '/reports/coa/' || r.id || '%'`;
+    await tx`delete from report_deliveries where report_id in (select id from reports where job_order_id in (${ordersOf}))`;
+    await tx`delete from report_sources where report_id in (select id from reports where job_order_id in (${ordersOf}))`;
+    await tx`delete from reports where job_order_id in (${ordersOf})`;
     // batches of the test job orders: the notifications that point at them, the samples' links to them, then the batches (the log and parameters go with them)
     const testOrders = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
     await tx`delete from notifications n using batches b where b.job_order_id in (${testOrders}) and n.link like '/batches/' || b.batch_no || '/%'`;

@@ -16,7 +16,7 @@ export function ago(iso: string, now = Date.now()) {
   if (m < 1440) return `${Math.floor(m / 60)} h ago`;
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Asia/Makassar" });
 }
-const TINT: Record<string, string> = { N1: "blue", N2: "amber", N3: "blue", N4: "blue", N5: "green", N6: "green", N7: "amber", N8: "red" };
+const TINT: Record<string, string> = { N1: "blue", N2: "amber", N3: "blue", N4: "blue", N5: "green", N6: "green", N7: "amber", N8: "red", N9: "amber", N10: "amber" };
 
 function useNotes(unreadOnly: boolean, limit: number) {
   return useQuery({ queryKey: ["notes", unreadOnly, limit], refetchInterval: 30_000, queryFn: () => api<Page>(`/notifications?limit=${limit}${unreadOnly ? "&unread=true" : ""}`) });

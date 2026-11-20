@@ -68,6 +68,7 @@ export const normLot = (t: string): string | null => { const m = t.trim().match(
 /* ---------- notifications (App plan 5.1): written by the API after the permission check, because a user may only read their own ---------- */
 export const EVENTS = {
   N1: { icon: "package" }, N2: { icon: "warning-circle" }, N3: { icon: "flask" }, N4: { icon: "upload-simple" }, N5: { icon: "certificate" }, N6: { icon: "paper-plane-tilt" }, N7: { icon: "alarm" }, N8: { icon: "alarm" },
+  N9: { icon: "pencil-simple-line" }, N10: { icon: "arrow-u-up-left" },   // phase 4: a CoA waits for a signature, a signatory returned it (App_Screen_Plan.md 18.1)
 } as const;
 export interface Note { event: keyof typeof EVENTS; title: string; body: string; link: string }
 /** One notification for every active user holding one of the roles (or the given people), except the person who did the action. */

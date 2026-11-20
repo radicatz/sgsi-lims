@@ -426,7 +426,7 @@ function ContactEdit({
   );
 }
 
-/* ---------- default signatory: the people who may sign (the Manager first), or a name typed in ---------- */
+/* ---------- signatory: only people with signing rights (the Manager first); a typed name is not allowed (Reports_Build_Design 7.1) ---------- */
 function SignatoryPicker({
   cat,
   form,
@@ -438,8 +438,6 @@ function SignatoryPicker({
   set: (p: Partial<Form>) => void;
   phone: boolean;
 }) {
-  const [adding, setAdding] = useState(false),
-    [draft, setDraft] = useState({ name: "", title: "" });
   const shown = form.signatoryName && (
     <span className="row g12 wrap">
       <b className="t-sm w6">{form.signatoryName}</b>
@@ -451,7 +449,7 @@ function SignatoryPicker({
   return (
     <Picker
       id="jo-signatory"
-      label="Default signatory (optional)"
+      label="Signatory (optional)"
       shown={shown}
       placeholder="Choose who signs the CoA"
       phone={phone}
@@ -487,57 +485,6 @@ function SignatoryPicker({
               </button>
             </div>
           ))}
-          {adding ? (
-            <div className="prow editing">
-              <div className="col g8" style={{ flex: 1 }}>
-                <TextField
-                  id="sg-name"
-                  label="Name"
-                  req
-                  value={draft.name}
-                  onChange={(t) => setDraft({ ...draft, name: t })}
-                />
-                <TextField
-                  id="sg-title"
-                  label="Title"
-                  value={draft.title}
-                  onChange={(t) => setDraft({ ...draft, title: t })}
-                />
-              </div>
-              <div className="col g8">
-                <Button
-                  iconOnly
-                  icon="check"
-                  label="Use this signatory"
-                  disabled={!draft.name.trim()}
-                  onClick={() => {
-                    set({
-                      signatoryId: null,
-                      signatoryName: draft.name.trim(),
-                      signatoryTitle: draft.title.trim(),
-                    });
-                    setAdding(false);
-                    close();
-                  }}
-                />
-                <Button
-                  iconOnly
-                  icon="x"
-                  label="Cancel"
-                  onClick={() => setAdding(false)}
-                />
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="prow add"
-              onClick={() => setAdding(true)}
-            >
-              <Icon n="plus" />
-              <span className="t-sm w6">Add signatory</span>
-            </button>
-          )}
           {form.signatoryName && (
             <button
               type="button"
@@ -552,7 +499,7 @@ function SignatoryPicker({
               }}
             >
               <Icon n="x" />
-              <span className="t-sm w6">No default signatory</span>
+              <span className="t-sm w6">No signatory yet</span>
             </button>
           )}
         </div>

@@ -46,3 +46,18 @@ export async function api<T = unknown>(path: string, init: RequestInit & { json?
   if (!res.ok) throw new ApiError(res.status, body.code ?? "error", body.title, body.text ?? "Something went wrong.", body.field, body);
   return body as T;
 }
+
+/** Fetch a file (the certificate PDF) with the session's token; the browser cannot send the header for an iframe or a link. */
+export async function apiBlob(path: string): Promise<Blob> {
+  let s = loadSession();
+  let res = await raw(path, {}, s?.accessToken);
+  if (res.status === 401 && s) {
+    s = await refresh();
+    if (s) res = await raw(path, {}, s.accessToken); else onExpired?.();
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, body.code ?? "error", body.title, body.text ?? "Something went wrong.", body.field, body);
+  }
+  return res.blob();
+}

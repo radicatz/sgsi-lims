@@ -16,6 +16,7 @@ import { Orders } from "./features/orders/List";
 import { OrderPage } from "./features/orders/Detail";
 import { Batches } from "./features/batches/List";
 import { BatchPage } from "./features/batches/Page";
+import { CoaPage } from "./features/reports/CoaPage";
 import { Toasts } from "./components";
 import "./styles/index.css";
 
@@ -45,6 +46,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : BUILT[p.path] ? <Built path={p.path} /> : <Coming path={p.path} />}</Guard> })),
     { path: "/orders/:no/:tab?", element: <Guard anyOf={["order.read"]}><OrderPage /></Guard> },
     { path: "/batches/:no/:tab?", element: <Guard anyOf={["batch.read"]}><BatchPage /></Guard> },
+    { path: "/reports/coa/:id", element: <Guard anyOf={["coa.download", "report.publish", "report.sign"]}><CoaPage /></Guard> },
     { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
     { path: "/users/:id", element: <Guard anyOf={["user.manage"]}><UserPage /></Guard> },
     { path: "/config/:section", element: <Guard anyOf={["config.write"]}><Config /></Guard> },

@@ -280,3 +280,114 @@ Deviations from the plan:
 ## 15 · Owner edits (Nov 6, 2026)
 
 The search field in the Reports list toolbar is 360 wide on desktop (was 300); the Status, Period and Company controls move with it. Built into `rowL.js`. The tablet and phone lists keep their width.
+
+## 16 · Revision 2 · Digital signing and the new certificate (Nov 20, 2026) · PLAN
+
+Why:
+- **Digital signature (lab, Nov 20):** the lab wants CoAs signed digitally.
+- **Signing rule (owner, Nov 20):** only the signed-in user named as signatory can sign. To delegate, change the signatory.
+- **Certificate design:** the lab's sample CoA and RoA (`../../source-documents/`) settle the certificate's content. The build design is `Reports_Build_Design.md` (sections 6.2 and 7.1).
+
+This revision changes who publishes, adds the signing screens, and redraws the certificate in every preview. Generator: `library/screens/rowLs.js` (add-only, `build-screens.js Ls`). It never rebuilds row L, so the owner's edits on the existing frames stay.
+
+### 16.1 The flow
+
+| Step | Who | Screen |
+| --- | --- | --- |
+| Generate CoA, fill the draft | Lab admin | 02-01 Draft (as built), with **Send for signature** in place of Publish |
+| Send for signature | Lab admin | 02-03 Send_for_signature_confirm (was Publish_confirm) |
+| Wait; withdraw to edit again | Lab admin | **02-10 Awaiting_signature** |
+| Review the certificate | The signatory | **02-11 Sign_review** |
+| Sign and publish with their password | The signatory | **02-12 Sign_dialog** |
+| Or return it with a comment | The signatory | **02-13 Return_dialog**, then the Lab admin sees **02-14 Returned** |
+| Published, then sent | CSO | 02-04 to 02-06 (as built) |
+
+### 16.2 New frames (module 07, screen 02 CoA)
+
+Personas: Lab admin Maya Lestari (10, 14), Manager Ir. Bambang Sutrisno, M.T. (11 to 13). Demo: JO-2026-0132, CV Sumber Batu Hitam, reference SBH-077, the same draft as 02-01. It becomes **CoA-JO-2026-0132-1** at signing.
+
+| VV | Variant | Desktop (1440) | Tablet (834) | Phone (390) |
+| --- | --- | --- | --- | --- |
+| 03 | Send_for_signature_confirm | Existing frame, renamed and reworded: Dialog md "Send CoA for signature?" / "Ir. Bambang Sutrisno, M.T. is asked to sign it. You can't change the contents until it is signed, returned or withdrawn." / **Cancel**, **Send for signature** | **New:** the same dialog over the tablet draft | **New:** Bottom sheet over the phone draft, same text, touch buttons |
+| 10 | Awaiting_signature | Header "Draft CoA" with the status badge **Awaiting signature** (amber, the Awaiting samples colour). Actions: **Withdraw** (secondary lg) and ⋯. Inline alert Info: "Waiting for Ir. Bambang Sutrisno, M.T. to sign" / "Sent by Maya Lestari on 4 Nov 2026. Withdraw it to change the contents." Preview with the DRAFT mark. Right column: **Contents** read-only (Key-value rows: Template, Bases, Parameters, Samples, Attention, Client reference, Remarks, Signatory, On behalf of) | Preview on top, the alert and the read-only Contents below, actions in the header | Header compact; alert; document card (thumbnail, **Open PDF**); read-only Contents; sticky bar with **Withdraw** |
+| 11 | Sign_review | Signatory's view. Badge **Awaiting signature**. Actions: **Return** (secondary lg) and **Sign and publish** (primary lg). Inline alert Info: "Maya Lestari asks you to sign this certificate" / "Sent on 4 Nov 2026. Check every page, then sign or return it with a comment." Preview with the DRAFT mark; read-only Contents | Same, stacked | Document card, alert, Contents; sticky bar **Return** and **Sign and publish** |
+| 12 | Sign_dialog | Dialog md over 11: "Sign and publish CoA for JO-2026-0132?" / "It gets the number CoA-JO-2026-0132-1, your signature and the lab stamp, and can no longer be edited." Body: a **signature preview** panel (the signature and the stamp as they print, the name "Ir. Bambang Sutrisno, M.T.", the title "Laboratory Manager", and the On behalf of line when set), then a **Password** field "Enter your password to sign". Buttons **Cancel**, **Sign and publish** | The same dialog over the tablet frame | Bottom sheet over the phone frame, same content |
+| 13 | Return_dialog | Dialog md over 11: "Return the draft to Maya Lestari?" / "Maya Lestari can change it and send it again." Body: **Comment** textarea, required ("e.g. Remarks missing for sample 3"). Buttons **Cancel**, **Return draft** | Same dialog | Bottom sheet |
+| 14 | Returned | The Lab admin's draft after a return: badge **Draft**; Inline alert Warning "Returned by Ir. Bambang Sutrisno, M.T. on 4 Nov 2026" / the comment; Contents editable again; **Send for signature** | Same, stacked | Alert above the document card; sticky bar **Preview PDF**, **Send for signature** |
+
+### 16.3 Changes to the existing frames (in place)
+
+| Frame | Change |
+| --- | --- |
+| 02-01 Draft (D, T, P) | **Publish** becomes **Send for signature**. Under the Signatory select a note reads "People with signing rights. They sign with their own login." A new field **On behalf of (optional)**, placeholder "e.g. Laboratory Manager", sits under the Signatory |
+| 02-02 Draft_signatory (D) | The list shows only users with signing rights: Ir. Bambang Sutrisno, M.T. (Laboratory Manager) and Hendra Wijaya, S.T. (Technical Supervisor). No edit or delete icons, no **Type manually** |
+| 02-03 Publish_confirm (D) | Renamed `Send_for_signature_confirm`, text as 16.2 |
+| 02-04 to 02-09 (D, T, P) | Details: "Published" shows the signer (Bambang Sutrisno) instead of the Lab admin |
+| Every CoA preview: 02-01 to 02-14 (D, T), and Configuration 06-02 New_version | The **new certificate drawing** (16.4) replaces the old document page |
+
+### 16.4 The certificate drawing
+
+It replaces the old "Document page". The new page is **600 × 849**, still A4 proportions (the old one was 560 × 792): the table needs the width for the long parameter names. The preview Canvas hugs its content, so every card keeps its layout. It follows `Reports_Build_Design.md` 6.1 and 6.2 and the lab's samples, in SGSI branding:
+
+1. **Letterhead:** the full SGSI logo (the library Logo, Type=Full, the SVG) on the left. On the right: "PT Sentra Geo Survey Indonesia", the address, "Accreditation LP-1234-IDN". The certificate number and the date issued sit under the logo (as on the lab sample CoA), so there is no separate number block.
+2. **Number lines** (left, under the logo): "Certificate No. CoA-JO-2026-0132-1" and "Date issued 4 Nov 2026"; "Revision 1" sits under the laboratory on the right. On a draft: "Assigned at signing" and "At signing".
+3. **Title:** "CERTIFICATE OF ANALYSIS", centred, Heading/H2.
+4. **Client block**, two columns of label : value rows:
+   - Left: Principal, Address, Attention, Reference.
+   - Right (200 wide): Job order, Date received, Sample (11 coal samples), Standard.
+5. **Statement**, one line: "Samples were analysed in accordance with ASTM methods." (The template's longer wording wraps in the real renderer.)
+6. **Two sample tables**, bordered (Surface/border-strong, 1 px), as the RoA:
+   - Head: CODE SAMPLE over Basis, Test Method, then the sample code over the Sample ID over Air Dried, Dry, Dry Ash Free and As Received.
+   - Rows: Mass as Received (kg) (one value across), Total Moisture, Moisture in the Analysis Sample, Ash Content, Volatile Matter, Fixed Carbon, Total Sulphur, Gross Calorific Value (kcal/kg). The two long names wrap to two lines. The table is a grid: the row frame is the border colour and shows through 1 px gaps between white cells.
+   - Methods: ASTM D3302-19, D3173-17, D3174-12, D3175-20, D3172-13, D4239-18, D5865-19.
+   - Values: dot decimals, no thousands separator (5980). Ash has "-" on DAF; TM shows AR only; IM shows ADB only.
+   - Identifiers per spec 6.1: sample code `005.RI.001.Lot01` over Sample ID `SG.261029.005.RI.001`.
+7. **Signature block**, right:
+   - "Issued at Samarinda, 4 Nov 2026".
+   - On a signed CoA, the signature (Newsreader italic "B. Sutrisno" as the demo stand-in) over a round stamp: two navy rings with "SGSI" and "LAB" inside, slightly overlapping the signature. The signature is marked **DEMO** (the stamp is marked DEMO on the Profile). For review, the drawing shows the signature block on page 1; the real renderer puts it on the last page (Build design 6.2). A draft shows a dashed box "Signature placed at signing".
+   - The name; the title; "On behalf of the Laboratory Manager" when set.
+8. **Footer:** the terms line; "Page 1 of 2"; "Verify 7F3A-91C2", "FM-LAB-014 rev 2" (rev 3 on the Configuration preview of the draft template).
+9. **DRAFT mark** on every unsigned version, as before.
+
+### 16.5 Open points for this revision
+
+| # | Question | Default |
+| --- | --- | --- |
+| 1 | Badge colour for Awaiting signature | The amber of Awaiting samples, with its own label; no new library variant |
+| 2 | Who sees 02-11 Sign_review | Only the named signatory; everyone else with access sees 02-10 |
+| 3 | The stamp's ring text | "SGSI" and "LAB" inside two rings, a stand-in; replaced by the lab's real stamp image when it arrives |
+
+### 16.6 Build status (Nov 20, 2026)
+
+Built with `library/screens/rowLs.js` and `library/screens/certpage.js` (the certificate drawing, also used by `rowL.js` for a future rebuild of row L). The run was add-only on a copy of the main file, then `stepperphone.js` and `fitcfg.js` (limited to the changed frames, never the whole file), and was deployed to the main file. Backup: `backup/SGSI-LIMS-screens.before-signing.figcraft`. 17,889 steps, 0 errors.
+
+- **New frames (22):** on the row "P  Digital signing (Nov 20, 2026)" at the bottom of each page.
+  - **Desktop (5):** 10 Awaiting_signature, 11 Sign_review, 12 Sign_dialog, 13 Return_dialog, 14 Returned.
+  - **Tablet and phone (6 each):** the same five, plus 03 Send_for_signature_confirm.
+  - Dialogs over the desktop and tablet frames are centred Dialog md; on the phone they are Bottom sheets.
+- **Changed in place:**
+  - The new certificate drawing in 12 previews: Desktop 02-01 to 02-09, Tablet 02-01 and 02-04, and Configuration 06-02 New_version (desktop).
+  - **Send for signature** replaces Publish in 02-01 to 02-03 at every size.
+  - The Contents card gets the signatory note and the **On behalf of (optional)** field.
+  - 02-02 lists only the two people with signing rights.
+  - 02-03 is renamed `Send_for_signature_confirm` and reworded.
+  - Details shows the signer, Bambang Sutrisno.
+- **Not changed:** the RoA pages keep their own drawing (it is the lab's uploaded paper). The phone CoA frames show the certificate card and "Open PDF", so they have no drawing.
+- **Deviations:** the page is 600 × 849 (16.4); the drawing puts the signature block on page 1 for review; the comment of a returned draft shows in the alert only.
+- **Not exported:** the PNG exports are stale (export only on request).
+
+### 16.7 Placeholder signature and stamp, mono numbers (Nov 20, 2026, owner)
+
+- **Placeholders:** the owner's placeholder images replace the drawn stand-ins everywhere a signature or stamp shows: the signed certificates, the Sign dialog, and the Profile Signature, Lab stamp and upload frames. The signature is `.context/assets/images/b_sutrisno-sign.png` and the stamp is `.context/assets/images/sgsi-stamp.svg`. Both are now components on the Library page (`b_sutrisno-sign`, `sgsi-stamp`). The DEMO marks are gone. The real images replace them when the lab sends its own (Build design 14).
+- **Numbers in JetBrains Mono:** every value in the certificate tables, the mass, and the sample code and Sample ID use the **Data/Small** text style (JetBrains Mono). The head row with the sample code and Sample ID is 40 high, for the two mono lines.
+- **Built** in place on the owner's saved file with `library/signassets.js` (0 errors), then deployed. Backup: `backup/SGSI-LIMS-screens.before-sign-assets.figcraft`. `certpage.js` and `rowLs.js` now draw the same, so a rebuild matches.
+
+### 16.8 The preview is the real PDF page (Nov 20, 2026, owner)
+
+The owner's question was whether the PDF table is cropped and whether it is prepared for a table too wide for the print size. The answer was that the drawing used the app's text styles: 12 px on a 600 px page, about twice the print size. So it is replaced.
+
+- **Method:** the certificate and the RoA are written as HTML in the print scale of the Configuration > Report templates preview (Build design 6.2), rendered to PDF by Gotenberg, and rasterised page by page (PyMuPDF, 3×). Generator and files: `.context/design/figcraft/samples/` (`make-samples.js`; `coa-draft-sbh`, `coa-signed-ptba`, `coa-signed-bnm-r1`, `coa-draft-ptba-rev3`, `roa-0412`, each as `.html`, `.pdf` and `-p1.png` to `-p4.png`).
+- **In the frames:** every CoA preview (Desktop and Tablet 02-01 to 02-14), the Configuration New_version preview and the two RoA pages show the image of page 1, with the pager "Page 1 of 4". The sample has 11 samples (the RoA 12, one held), so it runs to 4 pages.
+- **New frame:** `Desktop-07-Reports-02-CoA-15-Published_last_page` shows page 4 of the signed CoA: the last tables, the signature, the stamp and the footer.
+- **What changed from 16.4:** the drawing described there (600 × 849, app text styles, primary-50 head fill, a dashed signature box) is dropped. The head rows have no fill, the unsigned certificate has an empty signature space and a line, and cells wrap. The signature and stamp are the owner's placeholder images.
+- **Rebuild:** `certpage.js` places the same images, so a rebuild matches. To refresh the images after a design change, run `node make-samples.js` (Gotenberg on :3000), then `library/signpreview.js` on the main file.

@@ -230,12 +230,15 @@ export async function orderRoutes(app: FastifyInstance) {
     if (b.companyAddress !== undefined && (b.companyAddress ?? "") !== (c.address ?? "")) await tx`update companies set address = ${b.companyAddress ?? null} where id = ${b.companyId}`;
     return null;
   };
-  const signatoryOf = async (tx: Tx, b: OrderBody): Promise<{ id: string | null; name: string | null; title: string | null }> => {
+  /** The signatory signs with their own login, so it must be a person with signing rights; a typed name has no account and can't sign (Reports_Build_Design.md 7.1). */
+  const signatoryOf = async (tx: Tx, b: OrderBody): Promise<{ id: string | null; name: string | null; title: string | null } | [string, string]> => {
     if (b.signatoryId) {
-      const [p] = await tx`select full_name, title from profiles where id = ${b.signatoryId}`;
-      return p ? { id: b.signatoryId, name: p.full_name, title: b.signatoryTitle ?? p.title ?? null } : { id: null, name: b.signatoryName, title: b.signatoryTitle };
+      const [p] = await tx`select p.full_name, coalesce(p.title, case when exists (select 1 from user_roles u2 join roles r2 on r2.id = u2.role_id where u2.user_id = p.id and r2.code = 'manager') then 'Laboratory Manager' end) as title
+        from profiles p where p.id = ${b.signatoryId} and p.status = 'active'
+          and exists (select 1 from user_roles ur join role_permissions rp on rp.role_id = ur.role_id where ur.user_id = p.id and rp.permission_code = 'report.sign')`;
+      return p ? { id: b.signatoryId, name: p.full_name, title: p.title ?? null } : ["signatoryId", "Choose a person with signing rights."];
     }
-    return { id: null, name: b.signatoryName, title: b.signatoryTitle };
+    return { id: null, name: null, title: null };
   };
 
   r.post("/orders", { preHandler: createOrders, schema: { body: Body } }, async (req, reply) => {
@@ -246,7 +249,7 @@ export async function orderRoutes(app: FastifyInstance) {
         await tx`select pg_advisory_xact_lock(hashtext('job_order_no'))`;      // two CSOs never get the same number
         const bad = await checkCompany(tx, b); if (bad) return bad;
         const no = b.orderNo ?? (await nextOrderNo(tx));
-        const sig = await signatoryOf(tx, b);
+        const sig = await signatoryOf(tx, b); if (Array.isArray(sig)) return sig;
         const preparation = b.parameterIds.length ? !!(await tx`select 1 from parameters where id = any(${b.parameterIds}::uuid[]) and code = 'PREP'`).length : true;
         const [row] = await tx`insert into job_orders (order_no, company_id, contact_id, client_reference, service_id, standards, preparation, expected_samples, sample_type, due_on, priority,
             signatory_id, signatory_name, signatory_title, notes, status, cso_id, submitted_at, created_by)
@@ -274,7 +277,7 @@ export async function orderRoutes(app: FastifyInstance) {
       const d = await detail(tx, req.params.no);
       if (!d!.can.edit.ok) return { locked: d!.can.edit.why! };
       const bad = await checkCompany(tx, b); if (bad) return bad;
-      const sig = await signatoryOf(tx, b);
+      const sig = await signatoryOf(tx, b); if (Array.isArray(sig)) return sig;
       const preparation = b.parameterIds.length ? !!(await tx`select 1 from parameters where id = any(${b.parameterIds}::uuid[]) and code = 'PREP'`).length : true;
       const submit = b.submit && cur.status === "draft";
       await tx`update job_orders set company_id = ${b.companyId}, contact_id = ${b.contactId ?? null}, client_reference = ${b.clientReference}, service_id = ${b.serviceId ?? null},

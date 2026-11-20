@@ -1269,3 +1269,44 @@ The owner redrew the phone stepper in `Phone-04-Batches-02-Batch_detail-01-Recep
 | Height | The card is 98 px (was 250), so every phone detail frame is about 150 px shorter |
 
 **Frames updated in place** (generator `library/stepperphone.js`, 14 frames, no other change): job order Overview, Batches, Samples, Samples mixed states, Mark sent sheet, History and History row expanded (phone); batch Reception receiving, Print labels, Photos, Scan label, Preparation entering ADL, Analysis entering results and Analysis finished upload RoA (phone). The owner's `ref` frames were left alone. The app already has this (`Batch/Batch_Feedback_Nov19_Plan.md` section 3). Backup: `backup/SGSI-LIMS-screens.before-phone-stepper.figcraft`.
+
+## Revision 17 · Signatory for digital signing (Nov 20, 2026) · PLAN
+
+Written for: the product owner, and whoever builds or reviews the frames.
+
+**Why:**
+- The lab wants CoAs signed digitally.
+- **The owner's rule (Nov 20):** only the signed-in user named as signatory can sign, and delegating means changing the signatory on the job order. The CSO may change it.
+
+A typed name has no account and could never sign, so the signatory list no longer accepts one (`../Reports/Reports_Build_Design.md` 7.1). Generator: `library/screens/rowLs.js` (add-only, with the Reports frames).
+
+### 17.1 Signatory on the New and Edit job order form
+
+| Part | Spec |
+| --- | --- |
+| Field | "Default signatory (optional)" is renamed **"Signatory (optional)"** in every form frame (a helper line was left out: it would push the open dropdown). The CoA draft carries the note "People with signing rights. They sign with their own login." The Overview key "Default signatory" becomes **"Signatory"** |
+| List | Only users with signing rights (`report.sign`): Ir. Bambang Sutrisno, M.T. (Laboratory Manager, first and pre-selected) and Hendra Wijaya, S.T. (Technical Supervisor). Option rows show the name and title, no edit or delete icons, no **Add signatory** |
+| Who may change it | Everyone who may edit the job order, the CSO included; the change is in the History tab |
+
+Frames changed in place:
+- `Desktop-03-Job_orders-02-New_job_order-06-Signatory_dropdown_list` and `Phone-03-Job_orders-02-New_job_order-06-Signatory_sheet_list`: the list as above.
+- `Desktop-…-07-Signatory_dropdown_edit` and `Phone-…-07-Signatory_sheet_edit` showed adding a typed signatory, which no longer exists. They are **renamed with the suffix `_retired`** (`...-07-Signatory_dropdown_edit_retired`, `...-07-Signatory_sheet_edit_retired`; kept, not deleted, so nothing of the owner's is lost).
+
+### 17.2 New frames (module 03, screen 05 CoA_and_actions)
+
+Demo: JO-2026-0141, PT Kaltara Energi Prima, as the other CoA card frames. Signatory Ir. Bambang Sutrisno, M.T.
+
+| VV | Variant | Desktop (1440) | Tablet (834) | Phone (390) |
+| --- | --- | --- | --- | --- |
+| 06 | Awaiting_signature | CoA tab, Lab admin. The CoA card: title, the badge **Awaiting signature**; a note row (primary-50) "Waiting for **Ir. Bambang Sutrisno, M.T.** to sign. Sent by Maya Lestari on 4 Nov 2026."; ghost **Open in Reports** | The same card at tablet width | The same card, stacked; stepper horizontal |
+| 07 | Signatory_change_confirm | CoA tab, CSO, after saving the job order with a new signatory while a CoA waits. Dialog md "Move the signature request?" / "The CoA for JO-2026-0141 waits for Ir. Bambang Sutrisno, M.T. If Hendra Wijaya, S.T. becomes the signatory, the request moves to the new signatory and both are notified." Buttons **Cancel**, **Move request** | The same dialog over the tablet frame | Bottom sheet over the phone frame |
+
+The stepper of these frames shows **CoA published** as the current step. In the app, the CoA card states are now: not ready, ready, draft, **awaiting signature**, published, sent.
+
+### 17.3 Build status (Nov 20, 2026)
+
+Built with `library/screens/rowLs.js` (add-only run on a copy of the main file, then `stepperphone.js` and `fitcfg.js` on the new frames), deployed to the main file. Backup: `backup/SGSI-LIMS-screens.before-signing.figcraft`.
+- **New frames (6):** 06 Awaiting_signature and 07 Signatory_change_confirm at desktop, tablet and phone, on the new row "P  Digital signing (Nov 20, 2026)" at the bottom of each page. The phone frames have the horizontal stepper.
+- **Changed in place:** the label "Signatory (optional)" in all 10 job order form frames; the signatory list of `New_job_order-06` (desktop and phone): two people with signing rights, no edit icons, no **Add signatory**; "Signatory" on the four Overview frames and the phone sheet title.
+- **Retired:** `New_job_order-07-Signatory_dropdown_edit_retired` and `Phone-...-07-Signatory_sheet_edit_retired`.
+- **To change in the app when it is built:** `OrderForm.tsx` (label, no typed name) and `Detail.tsx` (the Overview key).

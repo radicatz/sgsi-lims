@@ -264,3 +264,50 @@ Deviations from the plan:
 
 - **Notifications filter:** All / Unread uses the page **Tabs** of the Dashboard (the "Point_tooltip" frame): library Tab instances, underlined when selected, the unread count in the tab's Count pill ("Unread 3"). It replaces the Segmented control in the panel, the panel's Unread state, the page and the empty page.
 - **Bell badge:** the Unread badge now has the **Elevation/xs** effect style. It also moved with the bell: the Top bar's bell and badge share a 36 × 36 **Bell** frame, so the badge stays on the bell's top-right corner however wide the user chip is (before, Rina Kartika's longer role put it on her avatar). Patch: `library/topbell.js`.
+
+## 18 · Revision 2 · Signature and stamp on the Profile, N9 and N10 (Nov 20, 2026) · PLAN
+
+Written for: the product owner, and whoever builds or reviews the frames.
+
+**Why:**
+- The lab wants CoAs signed digitally.
+- Each signatory places **their own** signature, which only they can upload.
+- The lab stamp is uploaded by the Laboratory Manager only. The Manager has no Configuration access, so the stamp lives on the Manager's Profile.
+
+Rules: `../Reports/Reports_Build_Design.md` 7.1. Generator: `library/screens/rowLs.js` (add-only).
+
+### 18.1 Two new events (section 5.1)
+
+| # | Event | Goes to | Title and text (example) | Opens |
+| --- | --- | --- | --- | --- |
+| N9 | A CoA is sent for signature, or its signatory changes while it waits | The signatory | "CoA for JO-2026-0132 waits for your signature" / "Sent by Maya Lestari." | Report page (Sign_review) |
+| N10 | The signatory returns a CoA | The Lab admin who sent it | "CoA for JO-2026-0132 was returned" / the comment | Report page (Returned) |
+
+Icons: `signature` for N9, `arrow-u-up-left` for N10 (Phosphor Regular). If the library lacks them, `pencil-simple` and `arrow-left`. The Profile's Notifications card gets the switches **CoA waiting for my signature** (signatories) and **CoA returned to me** (Lab admin).
+
+### 18.2 Profile cards for signatories
+
+| Card | Who sees it | Content |
+| --- | --- | --- |
+| **Signature** | Users with signing rights (Manager, Supervisor) | A preview box (240 × 96, Surface/muted, rounded 12) showing the signature image on a transparent background; "Set on 3 Nov 2026"; **Replace signature** (Secondary md); the note "Only you can change your signature. It is placed on the certificates you sign." Without a signature: Empty state Size=Card "No signature yet" / "Upload a PNG with a transparent background." / **Upload signature** |
+| **Lab stamp** | The Laboratory Manager only | The same preview box with the stamp; "Set on 3 Nov 2026"; **Replace stamp**; the note "Printed only beside an authorised signature." |
+
+On desktop both cards sit in the left column under Password. On the tablet and phone they stack after Password.
+
+### 18.3 New frames (module 00, screen 09 Profile)
+
+Persona: Ir. Bambang Sutrisno, M.T., Laboratory Manager (bambang@sgsi.co.id, initials BS, role badge Manager).
+
+| VV | Variant | Desktop (1440) | Tablet (834) | Phone (390) |
+| --- | --- | --- | --- | --- |
+| 04 | Signing | Profile with Personal, Password, **Signature**, **Lab stamp** (left) and Preferences, Notifications (right) | One column: Personal, Password, Signature, Lab stamp, Preferences, Notifications | The same stacked, full-width Sign out under the header |
+| 05 | Signature_upload | Dialog md over 04: "Replace your signature" / "Use a PNG with a transparent background, at most 1 MB. It replaces the old one on new certificates only." Body: the drop zone ("Drop the PNG here, or click to browse"), a preview of the chosen file, the note "Older certificates keep the signature they were signed with." Buttons **Cancel**, **Save signature** | The same dialog over the tablet frame | Bottom sheet over the phone frame |
+
+### 18.4 Build status (Nov 20, 2026)
+
+Built with `library/screens/rowLs.js` and deployed to the main file (backup `backup/SGSI-LIMS-screens.before-signing.figcraft`).
+- **New frames (6):** `09-Profile-04-Signing` and `09-Profile-05-Signature_upload` at desktop, tablet and phone, on the row "P  Digital signing (Nov 20, 2026)". The persona is Bambang Sutrisno, Manager.
+- **Profile 04:** Personal (with the Title row), Password, **Signature**, **Lab stamp** (left on desktop) and Preferences, Notifications with the two switches **Batch past its deadline** and **CoA waiting for my signature** (right). There is no Start page choice for the Manager. The stamp and the signature are drawn stand-ins marked **DEMO**.
+- **Profile 05:** Dialog md on desktop and tablet, Bottom sheet on the phone: drop zone, the chosen file with a preview, and the note about older certificates.
+- **Not drawn yet:** the Supervisor's Profile (it has only the Signature card) and the Lab admin's "CoA returned to me" switch; they follow the same cards.
+- **Events N9 and N10** have no frame of their own: they appear in the Notifications panel when the app is built.

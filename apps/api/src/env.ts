@@ -9,6 +9,7 @@ const Env = z.object({
   API_PORT: z.coerce.number().default(4000),
   WEB_ORIGIN: z.string().url().default("http://localhost:5173"),
   LAB_TIMEZONE: z.string().default("Asia/Makassar"),
+  GOTENBERG_URL: z.string().url().default("http://localhost:3000"),   // the PDF service (Stack_Decision_Record S-11)
 });
 
 const parsed = Env.safeParse(process.env);

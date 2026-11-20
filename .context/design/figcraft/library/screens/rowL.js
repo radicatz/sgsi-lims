@@ -169,37 +169,7 @@ const SAMPLES = [
   ["BA-0142-02", "LBA-26-1102", [["Total moisture", "%", "—", "—", "—", "13.80", "ASTM D3302"], ["Inherent moisture", "%", "7.90", "—", "—", "—", "ASTM D3173"], ["Ash", "%", "6.10", "6.62", "—", "5.71", "ASTM D3174"], ["Volatile matter", "%", "38.90", "42.24", "45.23", "36.41", "ASTM D3175"], ["Fixed carbon", "%", "47.10", "51.14", "54.77", "44.09", "By calculation"], ["Total sulphur", "%", "0.51", "0.55", "0.59", "0.48", "ASTM D4239"], ["Gross calorific value", "kcal/kg", "5,890", "6,395", "6,849", "5,513", "ASTM D5865"]]],
 ];
 const DW = [100, 44, 52, 52, 52, 52, 144];
-function docPage(b, parent, o = {}) {
-  const roa = o.kind === "roa";
-  const pg = b.frame(parent, { name: "Document page", w: 560, h: 792, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 4, layout: "v", gap: 10, pad: [28, 32, 20, 32], sizeH: "fixed", sizeV: "fixed", clip: true });
-  const h = hframe(b, pg, "Header", 10, { sizeH: "fill", main: "spaceBetween", cross: "min" });
-  const lab = hframe(b, h, "Laboratory", 8); b.instV(lab, "Logo", "Type=Icon, Color=Default", { props: { width: 34, height: 35 } });
-  const lt = vframe(b, lab, "Text", 1, { sizeH: "hug" }); txt(b, lt, "Sentra Geo Survey Indonesia", "Body small/SemiBold", "Text/heading", "Name"); txt(b, lt, "Jl. Pangeran Antasari 12, Samarinda", "Caption/Regular", "Text/text-muted", "Address");
-  const no = vframe(b, h, "Number", 1, { sizeH: "hug", cross: "max" });
-  txt(b, no, o.number || (roa ? "RoA-0412" : "CoA-JO-2026-0142-1"), "Data/Strong", "Text/heading", "Number"); txt(b, no, roa ? "Internal, not for distribution" : "Revision " + (o.rev || 1), "Caption/Regular", roa ? "Feedback/error" : "Text/text-secondary", "Revision"); txt(b, no, o.draft ? "Draft" : "Issued " + (o.issued || "2 Nov 2026"), "Caption/Regular", "Text/text-secondary", "Issued");
-  txt(b, pg, roa ? "Report of Analysis" : "Certificate of Analysis", "Heading/H2", "Text/heading", "Title", { align: "center", fill: true });
-  b.frame(pg, { name: "Divider", w: 496, h: 1, fill: "Surface/divider", sizeH: "fill", sizeV: "fixed" });
-  const cl = hframe(b, pg, "Client block", 24, { sizeH: "fill", cross: "min" });
-  const kvl = (p, k, v) => { const r = hframe(b, p, "Line", 6, { sizeH: "fill", cross: "min" }); const kf = b.frame(r, { name: "Key", w: 76, h: 14, layout: "h", sizeH: "fixed", sizeV: "hug" }); txt(b, kf, k, "Caption/Regular", "Text/text-muted", "Key"); txt(b, r, v, "Caption/SemiBold", "Text/heading", "Value", { fill: true }); };
-  const l1 = vframe(b, cl, "Left", 3); kvl(l1, "Principal", o.client || "PT Bukit Asam Tbk"); kvl(l1, "Attention", "Budi Santoso"); kvl(l1, "Reference", o.ref || "PTBA-2210");
-  const l2 = vframe(b, cl, "Right", 3); kvl(l2, "Job order", o.jo || "JO-2026-0142"); kvl(l2, "Received", "14 Oct 2026"); kvl(l2, "Samples", "11 coal samples");
-  txt(b, pg, roa ? "Results as entered by the Analyst and signed by the Supervisor. The values are reported on four bases." : "Samples were prepared and analysed in accordance with the ASTM methods listed. The results relate to the samples as received.", "Caption/Regular", "Text/text-secondary", "Statement", { fill: true });
-  SAMPLES.forEach(([sid, lid, rows]) => {
-    const sb = vframe(b, pg, "Sample", 2);
-    const sh = hframe(b, sb, "Sample head", 10, { sizeH: "fill", fill: "Primary/primary-50", pad: [3, 8, 3, 8], r: 4 }); txt(b, sh, "Sample " + sid.replace("BA-0142", (o.init || "BA") + "-" + (o.jo || "JO-2026-0142").slice(-4)), "Caption/SemiBold", "Text/heading", "Sample"); txt(b, sh, "Lab ID " + lid, "Caption/Regular", "Text/text-secondary", "Lab ID");
-    const hd = hframe(b, sb, "Table head", 0, { sizeH: "fill", pad: [0, 8, 0, 8] }); ["Parameter", "Unit", "ADB", "DB", "DAF", "AR", "Method"].forEach((l, i) => { const f = b.frame(hd, { name: "Head", w: DW[i], h: 14, layout: "h", main: i > 1 && i < 6 ? "max" : "min", pad: i > 1 && i < 6 ? [0, 8, 0, 0] : 0, sizeH: "fixed", sizeV: "hug" }); txt(b, f, l, "Caption/SemiBold", "Text/text-secondary", "Head label"); });
-    rows.forEach((rw) => { const rr = hframe(b, sb, "Row", 0, { sizeH: "fill", pad: [0, 8, 0, 8] }); rw.forEach((v, i) => { const f = b.frame(rr, { name: "Cell", w: DW[i], h: 15, layout: "h", main: i > 1 && i < 6 ? "max" : "min", pad: i > 1 && i < 6 ? [0, 8, 0, 0] : 0, sizeH: "fixed", sizeV: "hug" }); txt(b, f, v, i === 0 ? "Caption/Medium" : "Caption/Regular", i === 6 ? "Text/text-muted" : "Text/foreground", "Cell"); }); });
-  });
-  if (o.remarks) txt(b, pg, "Remarks: " + o.remarks, "Caption/Regular", "Text/text-secondary", "Remarks", { fill: true });
-  const sg = hframe(b, pg, "Signature block", 16, { sizeH: "fill", main: "spaceBetween", cross: "max" });
-  const iss = vframe(b, sg, "Issued", 1, { sizeH: "hug" }); txt(b, iss, "Issued at Samarinda", "Caption/Regular", "Text/text-secondary", "Place"); txt(b, iss, o.issued || "2 Nov 2026", "Caption/SemiBold", "Text/heading", "Date");
-  const sn = vframe(b, sg, "Signatory", 1, { sizeH: "hug", cross: "min" }); b.frame(sn, { name: "Signature space", w: 150, h: 26, sizeH: "fixed", sizeV: "fixed" }); b.frame(sn, { name: "Signature line", w: 150, h: 1, fill: "Surface/border-strong", sizeH: "fixed", sizeV: "fixed" });
-  txt(b, sn, roa ? "Hendra Wijaya, S.T." : "Ir. Bambang Sutrisno, M.T.", "Caption/SemiBold", "Text/heading", "Name"); txt(b, sn, roa ? "Technical Supervisor" : "Laboratory Manager", "Caption/Regular", "Text/text-secondary", "Title");
-  b.frame(pg, { name: "Spacer", w: 10, h: 10, sizeH: "fixed", sizeV: "fill" });
-  const ft = vframe(b, pg, "Footer", 1); txt(b, ft, roa ? "Internal, not for distribution. Signed copy kept in the laboratory file." : "This certificate may not be reproduced except in full.", "Caption/Regular", "Text/text-muted", "Terms", { fill: true }); const f2 = hframe(b, ft, "Codes", 12, { sizeH: "fill", main: "spaceBetween" }); txt(b, f2, "Page 1 of 2", "Caption/Regular", "Text/text-muted", "Page"); txt(b, f2, roa ? "FM-LAB-021 rev 1" : "Verify 7F3A-91C2   FM-LAB-014 rev 2", "Caption/Regular", "Text/text-muted", "Form");
-  if (o.draft) { const wm = txt(b, pg, "DRAFT", "Display/XL", "Text/text-muted", "Watermark"); b.raw("node.set", { ids: [wm], props: { absolute: true, x: 150, y: 330, rotation: -28, opacity: 0.18, fontSize: 96 } }); }
-  return pg;
-}
+function docPage(b, parent, o = {}) { return require("./certpage.js").docPage(b, parent, { signed: !o.draft, ...o }, exports.U); } // an image of the real PDF page (certpage.js)
 function previewCard(b, parent, kind, o = {}) {
   const c = card(b, parent, "Preview card"); b.raw("node.set", { ids: [c], props: { sizingH: "fill" } });
   const hd = cardTop(b, c, "Preview"); const pn = hframe(b, hd, "Pages", 4); iconBtn(b, pn, "caret-left"); txt(b, pn, "Page 1 of 2", "Body small/Regular", "Text/text-secondary", "Page"); iconBtn(b, pn, "caret-right");
@@ -228,7 +198,7 @@ function kvCard(b, parent, title, rows, o = {}) {
 }
 const detailsRows = (o) => o.roa
   ? [["Batch", "B-2026-0412", "", true], ["Job order", "JO-2026-0142", "", true], ["Client", "PT Bukit Asam Tbk"], ["Samples", "12 samples"], ["Standard", "ASTM"], ["Uploaded", "1 Nov 2026", "Maya Lestari"], ["Batch completed", "1 Nov 2026", "Maya Lestari"], ["File", "RoA-0412.pdf", "1.8 MB"]]
-  : [["Job order", o.jo || "JO-2026-0142", "", true], ["Client", o.client || "PT Bukit Asam Tbk"], ["Attention", "Budi Santoso"], ["Reference", o.ref || "PTBA-2210"], ["Bases", "ADB, DB, DAF, AR"], ["Parameters", "8 parameters"], ["Samples", "11 samples"], ["Published", o.pub || "2 Nov 2026", "Maya Lestari"], ["Signatory", "Ir. Bambang Sutrisno, M.T."], ["Title", "Laboratory Manager"], ["Printed", "2 times", "last 3 Nov 2026"]];
+  : [["Job order", o.jo || "JO-2026-0142", "", true], ["Client", o.client || "PT Bukit Asam Tbk"], ["Attention", "Budi Santoso"], ["Reference", o.ref || "PTBA-2210"], ["Bases", "ADB, DB, DAF, AR"], ["Parameters", "8 parameters"], ["Samples", "11 samples"], ["Published", o.pub || "2 Nov 2026", "Bambang Sutrisno"], ["Signatory", "Ir. Bambang Sutrisno, M.T."], ["Title", "Laboratory Manager"], ["Printed", "2 times", "last 3 Nov 2026"]];
 function deliveryCard(b, parent, sent) {
   const c = card(b, parent, "Delivery card"); cardTop(b, c, "Delivery");
   if (!sent) { txt(b, c, "Not sent yet.", "Body small/Regular", "Text/text-secondary", "Empty", { fill: true }); return c; }
@@ -259,6 +229,8 @@ function contentsCard(b, parent, kind) {
   b.instV(c, "Text field", `State=Filled, Size=${sz}`, { texts: { Label: "Client reference or PO", Value: "PTBA-2210" }, setProps: { "Show helper": false }, props: { sizingH: "fill" } });
   b.instV(c, "Textarea", `State=Default, Size=${sz}`, { texts: { Label: "Remarks", Value: "Printed under the results" }, setProps: { "Show helper": false }, props: { sizingH: "fill" } });
   const sg = b.instV(c, "Select", `State=Filled, Size=${sz}`, { texts: { Label: "Signatory", Value: "Ir. Bambang Sutrisno, M.T." }, setProps: { "Show helper": false }, props: { sizingH: "fill" } });
+  txt(b, c, "People with signing rights. They sign with their own login.", "Caption/Regular", "Text/text-muted", "Signatory note", { fill: true });
+  b.instV(c, "Text field", `State=Default, Size=${sz}`, { texts: { Label: "On behalf of (optional)", Value: "e.g. Laboratory Manager" }, setProps: { "Show helper": false }, props: { sizingH: "fill" } });
   return { c, sg };
 }
 
@@ -281,7 +253,7 @@ function reportPage(b, x, y, kind, o) {
   txt(b, sub, o.jo || "JO-2026-0142", "Data", "Primary/primary", "Job order"); txt(b, sub, o.client || "PT Bukit Asam Tbk", "Body small/Regular", "Text/text-secondary", "Client"); txt(b, sub, roa ? "B-2026-0412" : "Revision " + (o.rev || 1), roa ? "Data" : "Body small/Regular", roa ? "Primary/primary" : "Text/text-secondary", "Revision");
   const act = hframe(b, hd, "Actions", 8);
   if (kind !== "phone") {
-    if (st === "draft") { btn(b, act, "Primary", "Publish", "check"); iconBtn(b, act, "dots-three", 36); }
+    if (st === "draft") { btn(b, act, "Primary", "Send for signature", "paper-plane-tilt"); iconBtn(b, act, "dots-three", 36); }
     else { btn(b, act, "Secondary", "Download", "download-simple"); if (st !== "superseded") btn(b, act, "Secondary", "Print", "printer"); if (o.role === "CSO" && (st === "published" || st === "sent")) btn(b, act, "Primary", st === "sent" ? "Add another send" : "Mark sent", "paper-plane-tilt"); if (!roa && st !== "superseded") iconBtn(b, act, "dots-three", 36); }
   }
   if (roa) b.instV(m, "Inline alert", "Tone=Info", { texts: { 0: "Internal, not for distribution", 1: "This is the lab's signed paper RoA, uploaded when the batch was completed." }, hide: ["Action"], props: { sizingH: "fill" } });
@@ -328,12 +300,12 @@ function markSentFields(b, body, Wd, phone, again) {
   ["Hard copy", "Email", "WhatsApp", "Other"].forEach((l) => b.instV(cb, "Checkbox", `Checked=${l === "WhatsApp" ? "On" : "Off"}, State=Default`, { texts: { Label: l } }));
   b.instV(f, "Text field", `State=Default, Size=${sz}`, { texts: { Label: "Note (optional)", Value: "e.g. courier receipt no." }, setProps: { "Show helper": false }, props: { sizingH: "fill" } });
 }
-const SIGNERS = [["Ir. Bambang Sutrisno, M.T.", "Laboratory Manager"], ["Dr. Ratna Dewi", "Quality Manager"], ["Hendra Wijaya, S.T.", "Technical Supervisor"]];
-function signatoryPanel(b, s) {
-  const p = b.frame(s.root, { name: "Signatory dropdown", w: 346, h: 200, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, layout: "v", gap: 2, pad: [8, 8, 8, 8], sizeH: "fixed", sizeV: "hug", absolute: true, x: 1046, y: 886 });
+// only people with signing rights (report.sign): no edit or delete icons, no "Type manually" (Reports_Screen_Plan.md 16.3)
+const SIGNERS = [["Ir. Bambang Sutrisno, M.T.", "Laboratory Manager"], ["Hendra Wijaya, S.T.", "Technical Supervisor"]];
+function signatoryPanel(b, s, y = 886) {
+  const p = b.frame(s.root, { name: "Signatory dropdown", w: 346, h: 120, fill: "Surface/card", stroke: "Surface/border", sw: 1, r: 12, layout: "v", gap: 2, pad: [8, 8, 8, 8], sizeH: "fixed", sizeV: "hug", absolute: true, x: 1046, y });
   b.raw("style.apply", { ids: [p], style: "Elevation/md" });
-  SIGNERS.forEach(([n, d], i) => b.instV(p, "Option row", `State=${i === 0 ? "Selected" : "Default"}`, { texts: { Name: n, Detail: d }, props: { sizingH: "fill" } }));
-  b.instV(p, "Button", "Type=Tertiary, Tone=Default, Size=lg, State=Default", { texts: { Label: "Type manually" }, setProps: { "Leading icon": true, "Leading glyph": b.iconId("pencil-simple") } });
+  SIGNERS.forEach(([n, d], i) => b.instV(p, "Option row", `State=${i === 0 ? "Selected" : "Default"}`, { texts: { Name: n, Detail: d }, hide: ["Actions"], props: { sizingH: "fill" } }));
   return p;
 }
 
@@ -355,7 +327,7 @@ exports.build = (b) => {
   // ---- 02 CoA
   reportPage(b, ...D(8), "desktop", { vv: "01", variant: "Draft", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" });
   { const s = reportPage(b, ...D(9), "desktop", { vv: "02", variant: "Draft_signatory", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" }); signatoryPanel(b, s); }
-  { const s = reportPage(b, ...D(10), "desktop", { vv: "03", variant: "Publish_confirm", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" }); dialog(b, s, "desktop", HH, "md", "Publish CoA for JO-2026-0132?", "It gets the number CoA-JO-2026-0132-1 and can no longer be edited. To change it later, revise it.", "Cancel", "Publish", null); }
+  { const s = reportPage(b, ...D(10), "desktop", { vv: "03", variant: "Send_for_signature_confirm", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" }); dialog(b, s, "desktop", HH, "md", "Send CoA for signature?", "Ir. Bambang Sutrisno, M.T. is asked to sign it. You can't change the contents until it is signed, returned or withdrawn.", "Cancel", "Send for signature", null); }
   reportPage(b, ...D(11), "desktop", { vv: "04", variant: "Published", role: "Lab", kind: "coa", state: "published" });
   { const s = reportPage(b, ...D(12), "desktop", { vv: "05", variant: "Mark_sent", role: "CSO", kind: "coa", state: "published" }); dialog(b, s, "desktop", HH, "md", "Mark CoA as sent", "CoA-JO-2026-0142-1 for PT Bukit Asam Tbk.", "Cancel", "Confirm", (bd) => markSentFields(b, bd, 512, false)); }
   reportPage(b, ...D(13), "desktop", { vv: "06", variant: "Sent", role: "CSO", kind: "coa", state: "sent" });
@@ -372,7 +344,7 @@ exports.build = (b) => {
   // ---- phone
   reportsList(b, 0, p, "phone", { vv: "01", variant: "CoA_tab", role: "Lab", tab: "coa", tabs: true });
   { const s = reportsList(b, PX, p, "phone", { vv: "08", variant: "Filters", role: "Lab", tab: "coa", tabs: true }); const HP = 1100; overlay(b, s, "phone", HP); const v = b.v("Bottom sheet"); const id = b.instV(s.root, "Bottom sheet", undefined, { texts: { Title: "Filters" }, props: { absolute: true, x: 0, y: HP - 520, width: 390 } }); const bt = v.insts.filter((i) => i.name === "Button"); b.raw("node.set", { ids: [id + bt[0].pos + 3], props: { characters: "Clear all" } }); b.raw("node.set", { ids: [id + bt[1].pos + 3], props: { characters: "Apply" } }); b.raw("node.set", { ids: [id + v.names.Body], props: { sizingV: "hug", fill: "none", mainAlign: "min", gap: 14 } }); b.raw("node.set", { ids: [id], props: { sizingV: "hug" } }); const bd = id + v.names.Body; [["Period", "Last 90 days"], ["Company", "All companies"], ["Status", "All"]].forEach(([l, val]) => b.instV(bd, "Select", "State=Filled, Size=touch", { texts: { Label: l, Value: val }, setProps: { "Show helper": false }, props: { sizingH: "fill" } })); }
-  { const s = reportPage(b, PX * 2, p, "phone", { vv: "01", variant: "Draft", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" }); phoneBar(b, s, "Preview PDF", "Publish"); }
+  { const s = reportPage(b, PX * 2, p, "phone", { vv: "01", variant: "Draft", role: "Lab", kind: "coa", state: "draft", jo: "JO-2026-0132", client: "CV Sumber Batu Hitam", ref: "SBH-077" }); phoneBar(b, s, "Preview PDF", "Send for signature"); }
   { const s = reportPage(b, PX * 3, p, "phone", { vv: "04", variant: "Published", role: "CSO", kind: "coa", state: "published" }); phoneBar(b, s, "Download", "Mark sent"); }
   { const s = reportPage(b, 0, p + 3300, "phone", { vv: "01", variant: "Default", role: "Lab", kind: "roa", state: "published" }); phoneBar(b, s, "Print", "Download"); }
   b.lEnd = { desktop: d + RY * 5 + 400, tablet: t + 2800, phone: p + 3300 + 2000 };
@@ -383,4 +355,4 @@ function phoneBar(b, s, left, right) {
   b.raw("node.set", { ids: [bar + v.texts[1].pos], props: { characters: left } }); b.raw("node.set", { ids: [bar + v.texts[2].pos], props: { characters: right } });
   b.raw("node.set", { ids: [bar + v.names.Note], props: { visible: false } });
 }
-exports.U = { icon, txt, hframe, vframe, btn, iconBtn, cardTop, pill, avatar, badge, CLIENT, dialog, overlay, KIND, W, CW, docPage };
+exports.U = { icon, txt, hframe, vframe, btn, iconBtn, cardTop, pill, avatar, badge, CLIENT, dialog, overlay, KIND, W, CW, docPage, previewCard, thumbCard, contentsCard, kvCard, versionsCard, deliveryCard, phoneBar, signatoryPanel, markSentFields };
