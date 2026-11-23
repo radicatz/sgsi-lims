@@ -5,7 +5,7 @@ import { cx } from "./utils";
 
 export function Alert({ tone = "info", title, text, action }: { tone?: "error" | "warning" | "info" | "success"; title: string; text?: ReactNode; action?: ReactNode }) {
   const ic = { error: "warning-circle", warning: "warning", info: "info", success: "check-circle" }[tone];
-  return <div className={`alert al-${tone}`} role={tone === "error" ? "alert" : "status"}><Icon n={ic} /><div className="grow"><b>{title}</b>{text && <span>{text}</span>}</div>{action}</div>;
+  return <div className={`alert al-${tone}`} role={tone === "error" ? "alert" : "status"}><Icon n={ic} /><div className="grow"><b>{title}</b>{text && <span>{text}</span>}</div>{action && <div className="act">{action}</div>}</div>;
 }
 
 export function Empty({ icon = "question", title, text, action }: { icon?: string; title: string; text?: string; action?: ReactNode }) {

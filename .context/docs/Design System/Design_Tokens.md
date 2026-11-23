@@ -1,12 +1,19 @@
 # SGSI LIMS Design Tokens
 
-Nov 4, 2026 (values updated; first written Oct 29) · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
+Nov 23, 2026 (values updated; first written Oct 29) · source of truth: the colour variables in `.context/design/figcraft/SGSI-LIMS-screens.figcraft` (collection **SGSI tokens**, exported to `.context/design/figcraft/tokens/sgsi-tokens.json` and `sgsi-tokens.css`)
 
 Written for: designers and developers who build or restyle screens.
 
 ## 1. What changed, and where the values come from
 
 **Change log after Oct 29, 2026.** The product owner adjusts values in the FigCraft file; `tokens/sgsi-tokens.json` and `tokens/sgsi-tokens.css` are re-exported from it and the tables below show the current values.
+
+Nov 23, 2026 (owner: the secondary text read too blue; it is now a warm dark grey between `foreground` and `text-muted`):
+
+| Token | Mode | Before | Now |
+| --- | --- | --- | --- |
+| `Text/text-secondary` | Light | `#4A5876` | `#5C5B55` |
+| `Text/text-secondary` | Dark | `#92AEDD` | `#B0AFA9` |
 
 Nov 4, 2026 (light mode):
 
@@ -111,7 +118,7 @@ Reading the dark changes: `primary` is now a mid blue (`#3D69B0`) instead of a n
 | --- | --- | --- | --- |
 | `Text/foreground` | `#1A1A1A` | `#EDF1F7` | Body text |
 | `Text/heading` | `#0E2A4E` | `#C0D8F9` | Headings |
-| `Text/text-secondary` | `#4A5876` | `#92AEDD` | Secondary text, labels |
+| `Text/text-secondary` | `#5C5B55` | `#B0AFA9` | Secondary text, labels |
 | `Text/text-muted` | `#A4A39A` | `#435C86` | Hints, placeholders, units |
 | `Text/text-inverse` | `#FFFFFF` | `#FFFFFF` | Text on filled primary surfaces |
 
@@ -199,7 +206,7 @@ WCAG 2 contrast ratios computed from the exported values (4.5 is the AA minimum 
 | --- | --- | --- |
 | `Text/foreground` on `Surface/card` | 17.4 | 14.4 |
 | `Text/heading` on `Surface/card` | 14.4 | 11.2 |
-| `Text/text-secondary` on `Surface/card` | 7.1 | 7.3 |
+| `Text/text-secondary` on `Surface/card` | 6.8 | 7.4 |
 | `Text/text-muted` on `Surface/card` | 2.5 (below 4.5) | 2.4 (below 4.5) |
 | `Text/text-muted` on `Surface/muted` | 2.4 (below 4.5) | 2.0 (below 4.5) |
 | `Action/action-foreground` on `Action/action` | 11.2 | 8.2 |

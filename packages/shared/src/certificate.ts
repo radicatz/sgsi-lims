@@ -117,7 +117,7 @@ export const fmtDate = (iso: string | null | undefined): string => {
 export const verifyCodeOf = (sha256hex: string): string => { const h = sha256hex.slice(0, 8).toUpperCase(); return `${h.slice(0, 4)}-${h.slice(4)}`; };
 export const esc = (s: string | null | undefined): string => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const C = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#4a5876", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };   // tokens.css, light
+const C = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#5c5b55", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };   // tokens.css, light
 const css = (fontCss: string) => `${fontCss}
 @page { size: 595pt 842pt; }
 * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }

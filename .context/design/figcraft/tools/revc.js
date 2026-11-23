@@ -4,7 +4,7 @@ const vm = require("vm");
 const cv = require("./convert.js");
 
 const ICONS = (() => { const w = {}; vm.runInNewContext(fs.readFileSync("D:/SGSI/LIMS/.context/prototype/src/icons.js", "utf8"), { window: w }); return w.ICONS; })();
-const RED = "#C04020", NAVY = "#0E2A4E", BLUE = "#1B3A6F", MUTED = "#7D8699", INK = "#1A1A1A", SLATE = "#4A5876", LINE = "#D9CFB8", CREAM = "#F3EEE3", GREEN = "#2E7D5B";
+const RED = "#C04020", NAVY = "#0E2A4E", BLUE = "#1B3A6F", MUTED = "#7D8699", INK = "#1A1A1A", SLATE = "#5C5B55", LINE = "#D9CFB8", CREAM = "#F3EEE3", GREEN = "#2E7D5B";
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const walk = (n, f, p) => { f(n, p); (n.ch || []).forEach((c) => walk(c, f, n)); };

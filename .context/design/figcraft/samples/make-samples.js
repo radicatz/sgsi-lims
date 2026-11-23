@@ -12,7 +12,7 @@ const FONT_CSS = `
 @font-face { font-family: "Newsreader"; src: url(${b64(FONTS + "/Newsreader.ttf", "font/ttf")}); font-weight: 200 800; }
 @font-face { font-family: "JetBrains Mono"; src: url(${b64(FONTS + "/JetBrainsMono.ttf", "font/ttf")}); font-weight: 100 800; }`;
 // tokens.css, light: --text-foreground, --text-heading, --text-secondary, --text-muted, --surface-border, --feedback-error
-const C = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#4a5876", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };
+const C = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#5c5b55", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };
 
 // ---------- values: ADB measured, the other bases converted, FC by difference on each basis from the rounded values (spec D-13) ----------
 const r2 = (x) => x.toFixed(2), r0 = (x) => String(Math.round(x));

@@ -52,9 +52,10 @@ export function Search({ value, onChange, placeholder, id, width, label }: { val
   return <div className="field" style={width ? { width, maxWidth: "100%" } : undefined}><label className="flabel" htmlFor={fid}>{label}</label>{box}</div>;
 }
 
-export function Check({ on, onChange, label, id }: { on: boolean; onChange: (v: boolean) => void; label: string; id?: string }) {
-  return <label className={cx("cb", on && "on")} id={id} onClick={(e) => { e.preventDefault(); onChange(!on); }}>
-    <span className="box" role="checkbox" aria-checked={on} tabIndex={0} onKeyDown={(e) => { if (e.key === " ") { e.preventDefault(); onChange(!on); } }}>{on && <Icon n="check" />}</span>{label}</label>;
+/** `disabled` greys the box and ignores clicks; `title` explains why (shown on hover). */
+export function Check({ on, onChange, label, id, disabled, title }: { on: boolean; onChange: (v: boolean) => void; label: string; id?: string; disabled?: boolean; title?: string }) {
+  return <label className={cx("cb", on && "on", disabled && "dis")} id={id} title={title} onClick={(e) => { e.preventDefault(); if (!disabled) onChange(!on); }}>
+    <span className="box" role="checkbox" aria-checked={on} aria-disabled={disabled || undefined} aria-label={label || title} tabIndex={disabled ? -1 : 0} onKeyDown={(e) => { if (e.key === " ") { e.preventDefault(); if (!disabled) onChange(!on); } }}>{on && <Icon n="check" />}</span>{label}</label>;
 }
 
 export function Radio({ on, onChange, label }: { on: boolean; onChange: () => void; label: string }) {

@@ -63,7 +63,10 @@ test.describe.serial("reports, slice B", () => {
     if (!phone) {
       await page.locator("#rp-q").fill("");
       await expect(page.getByText("CoA-JO-2026-0120-1").first()).toBeVisible();
-      const picks = page.locator("[id^=rp-pick-]");
+      // a CoA with no PDF yet (draft, awaiting signature) can't be picked: its box is disabled
+      const off = page.locator("[id^=rp-pick-].dis");
+      if (await off.count()) { await off.first().click(); await expect(page.getByText(/selected/)).toHaveCount(0); }
+      const picks = page.locator("[id^=rp-pick-]:not(.dis)");
       await picks.nth(0).click(); await picks.nth(1).click();
       await expect(page.getByText("2 selected")).toBeVisible();
       const [dl] = await Promise.all([page.waitForEvent("download"), page.locator("#rp-zip").click()]);

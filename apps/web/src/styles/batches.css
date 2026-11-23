@@ -586,6 +586,39 @@
   display: inline-flex;
   color: var(--feedback-error);
 }
+/* Reports, phone: the file block of the Certificate / Signed RoA card (DocThumb), no border or padding of its own */
+.doc-thumb {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.doc-thumb .pg {
+  width: 72px;
+  height: 100px;
+  flex: none;
+  border-radius: 4px;
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px 9px;
+}
+.doc-thumb .pg i {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-border-strong);
+}
+.doc-thumb .acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.doc-thumb .acts .btn {
+  flex: 1 1 auto;
+}
 
 /* ---------- Notifications: the bell panel and the page ---------- */
 .npanel {

@@ -324,7 +324,8 @@ export function Menu({
 }: {
   items: Array<MenuItem | false | null | undefined>;
   label?: string;
-  size?: 32 | 36;
+  /** 40 matches lg (40 px) buttons beside it, as in a page head's actions. */
+  size?: 32 | 36 | 40;
   vertical?: boolean;
   /** A ghost button of the row size (the Actions column of a table), not the secondary circle of a page head. */
   quiet?: boolean;
@@ -371,7 +372,11 @@ export function Menu({
     });
   };
   return (
-    <span ref={ref} style={{ display: "inline-flex" }}>
+    <span
+      ref={ref}
+      style={{ display: "inline-flex" }}
+      className={size === 40 ? "menu40" : undefined}
+    >
       <Button
         type={quiet ? "ghost" : "secondary"}
         iconOnly

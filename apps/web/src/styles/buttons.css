@@ -24,6 +24,7 @@ a.btn.secondary, a.btn.ghost, a.btn.tertiary { color: var(--action-brand-text); 
 .btn.ghost:disabled { background: none; }
 /* icon only (Button iconOnly, FigCraft Icon button): a circle, sm 28, md 32, lg 36, touch 44 */
 .btn.icon { width: 32px; padding: 0; gap: 0; }
+.menu40 > .btn.icon.lg { width: 40px; height: 40px; }   /* Menu size 40: the page head's "…" beside lg buttons (owner, Nov 23) */
 .btn.icon.sm { width: 28px; } .btn.icon.lg { width: 36px; height: 36px; } .btn.icon.touch { width: 44px; padding: 0; }
 .btn.icon:disabled { background: none; } .btn.icon.ghost:disabled { border-color: transparent; }
 .linkbtn { display: inline-flex; align-items: center; gap: 6px; color: var(--action-brand-text); font: 600 13px/18px var(--f-body); }
