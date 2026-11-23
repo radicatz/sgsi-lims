@@ -16,7 +16,8 @@
     "seed:demo": "pnpm --filter @sgsi/api seed:demo",
     "seed:master": "pnpm --filter @sgsi/api seed:master",
     "seed:orders": "pnpm --filter @sgsi/api seed:orders",
-    "seed:batches": "pnpm --filter @sgsi/api seed:batches"
+    "seed:batches": "pnpm --filter @sgsi/api seed:batches",
+    "seed:reports": "pnpm --filter @sgsi/api seed:reports"
   },
   "devDependencies": {
     "@playwright/test": "1.49.1"

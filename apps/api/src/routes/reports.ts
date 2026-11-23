@@ -13,6 +13,7 @@ import { admin, authClient } from "../supabase";
 import { NoParam, fail, notify, runAsActor, todayIso, uuid } from "../batch-lib";
 import { buildPayload, leftOut, orderedParameters, signingImages, type ReportRow } from "../certificate-data";
 import { PdfUnavailable, certAssets, renderPdf } from "../pdf";
+import { issueCertificate } from "../certificate-issue";
 
 const SCREEN = "Reports";
 const IdParam = z.object({ id: uuid });
@@ -31,6 +32,13 @@ const PatchBody = z.object({
 const SignBody = z.object({ password: z.string().min(1).max(200) });
 const ReturnBody = z.object({ comment: z.string().trim().min(1, "Write what to change.").max(1000) });
 const SignatoryBody = z.object({ signatoryId: uuid });
+const DeliveryBody = z.object({
+  sentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose the date it was sent."),
+  channels: z.array(z.string().trim().min(1).max(40)).min(1, "Choose at least one way it was sent.").max(6),
+  recipient: z.string().trim().min(1, "Enter who it was sent to.").max(120),
+  note: z.string().trim().max(300).nullable().optional(),
+});
+const ReasonBody = z.object({ reason: z.string().trim().min(1, "Write the reason.").max(300) });
 
 type R = { user?: { userId: string; claims: Record<string, unknown>; permissions: string[]; email: string } | undefined; id: string };
 
@@ -99,7 +107,7 @@ export async function reportRoutes(app: FastifyInstance) {
         current: sees ? fmt(cur) : null,
         open: sees && open && (can(req, "report.publish") || mine) ? fmt(open) : null,
         sends: cur?.sends ?? 0,
-        can: { generate: can(req, "report.publish"), download: can(req, "coa.download") || can(req, "report.publish"), open: can(req, "report.publish") || mine || (!!cur && sees) },
+        can: { markSent: !!cur && can(req, "coa.mark_sent"), generate: can(req, "report.publish"), download: can(req, "coa.download") || can(req, "report.publish"), open: can(req, "report.publish") || mine || (!!cur && sees) },
       };
     });
     return res ?? fail(reply, 404, "not_found", "This job order was not found.");
@@ -158,7 +166,11 @@ export async function reportRoutes(app: FastifyInstance) {
       const who = open ? await signers(tx) : [];
       const left = open ? await leftOut(tx, rep.job_order_id) : null;
       const reported = open ? (await tx`select count(*)::int as n from samples s join batches b on b.id = s.batch_id where b.job_order_id = ${rep.job_order_id} and b.status = 'completed' and s.received_at is not null and not s.on_hold and s.not_received_at is null`)[0]!.n as number : (x!.payload as { samples?: unknown[] } | null)?.samples?.length ?? 0;
-      return { rep, x: x as Record<string, any>, versions, deliveries, ordered, contacts, who, left, reported };
+      const [dco] = await tx`select coa_bases from companies where id = ${x!.company_id}`;
+      const [drule] = await tx`select signatory_id from signatory_rules where kind = 'coa' and active and company_id = ${x!.company_id} and signatory_id is not null order by priority limit 1`;
+      const channels = rep.status === "issued" ? await tx`select value, needs_remark from lookups where list_key = 'send_channel' and active order by sort_order` : [];
+      const voided = rep.status === "void" ? (await tx`select r.void_reason as reason, r.voided_at as at, (select full_name from profiles where id = r.voided_by) as by from reports r where r.id = ${rep.id}`)[0] : null;
+      return { rep, x: x as Record<string, any>, versions, deliveries, ordered, contacts, who, left, reported, channels, voided, defaults: { bases: (dco?.coa_bases as string[] | null) ?? null, signatoryId: (drule?.signatory_id as string | undefined) ?? null } };
     });
     if (!d) return fail(reply, 404, "not_found", "This certificate was not found.");
     const { rep, x } = d, open = rep.status === "draft" || rep.status === "awaiting_signature", mine = rep.signatory_id === uid(req);
@@ -168,6 +180,10 @@ export async function reportRoutes(app: FastifyInstance) {
     const reasons = {
       send: !rep.signatory_id ? "Choose who signs it first." : !(rep.bases as string[]).length ? "Choose at least one basis." : !chosen.size ? "Keep at least one parameter." : d.reported === 0 ? "No sample is left to report." : null,
     };
+    // what the signatory's Sign dialog shows: their own signature and the lab stamp, or a warning when one is missing
+    const assets = rep.status === "awaiting_signature" && mine && can(req, "report.sign")
+      ? { signature: !!(await sql`select 1 from signing_assets where kind = 'signature' and retired_at is null and user_id = ${uid(req)}`).length, stamp: !!(await sql`select 1 from signing_assets where kind = 'stamp' and retired_at is null`).length }
+      : null;
     return {
       id: rep.id, number: rep.report_no, revision: rep.revision, status: rep.status, orderNo: x.order_no, company: x.company, companyId: x.company_id,
       sent: d.deliveries.length > 0, pages: rep.page_count,
@@ -185,13 +201,18 @@ export async function reportRoutes(app: FastifyInstance) {
         publishedAt: x.issued_at, publishedBy: x.signed_by_name, signatory: { name: x.signatory_name ?? "", title: x.signatory_title ?? "", onBehalfOf: rep.on_behalf_of ?? "" },
         printed: { count: x.print_count ?? 0, last: x.last_printed_at }, verifyCode: x.verify_code,
       },
-      signing: { sentBy: x.sent_by_name, sentAt: rep.sent_for_signature_at, returned: x.return_comment ? { by: x.returned_by_name, at: x.returned_at, comment: x.return_comment } : null, draftedBy: x.drafted_by_name },
+      signing: { assets, sentBy: x.sent_by_name, sentAt: rep.sent_for_signature_at, returned: x.return_comment ? { by: x.returned_by_name, at: x.returned_at, comment: x.return_comment } : null, draftedBy: x.drafted_by_name },
+      clientDefaults: d.defaults,
+      channels: d.channels.map((c) => ({ value: c.value as string, needsRemark: !!c.needs_remark })),
+      voided: d.voided ? { reason: d.voided.reason, at: d.voided.at, by: d.voided.by ?? null } : null,
+      newer: rep.status === "superseded" ? (d.versions.find((v) => v.revision > rep.revision && v.status !== "void")?.id ?? null) : null,
       deliveries: d.deliveries.map((e) => ({ id: e.id, sentOn: e.sent_on, channels: e.channels, recipient: e.recipient, note: e.note, by: e.by })),
       versions: d.versions.map((v) => ({ id: v.id, revision: v.revision, status: v.status, number: v.report_no, at: v.issued_at ?? v.created_at, reason: v.revision_reason ?? v.void_reason ?? "", current: v.id === rep.id })),
       can: {
         edit: rep.status === "draft" && pub, send: rep.status === "draft" && pub, sendWhy: reasons.send, withdraw: rep.status === "awaiting_signature" && pub, remove: rep.status === "draft" && pub,
         sign: rep.status === "awaiting_signature" && mine && can(req, "report.sign"), return: rep.status === "awaiting_signature" && mine && can(req, "report.sign"),
-        download: !open && (can(req, "coa.download") || pub), print: !open && (can(req, "coa.download") || pub), preview: true,
+        saveDefaults: rep.status === "issued" && pub, markSent: rep.status === "issued" && can(req, "coa.mark_sent"), revise: rep.status === "issued" && can(req, "report.revise"), void: rep.status === "issued" && can(req, "report.void"),
+        download: !open && (can(req, "coa.download") || pub), print: rep.status === "issued" && (can(req, "coa.download") || pub), preview: true,
       },
     };
   });
@@ -293,27 +314,8 @@ export async function reportRoutes(app: FastifyInstance) {
       const res = await runAsActor(req, SCREEN, async (tx) => {
         const rep = await reportOf(tx, req.params.id, true);
         if (!rep || rep.status !== "awaiting_signature" || rep.signatory_id !== uid(req)) return { code: 409, key: "locked", text: "It changed while you were signing. Open it again." };
-        const number = `CoA-${rep.order_no}-${rep.revision}`, issuedOn = todayIso();
-        const frozen = await buildPayload(tx, rep, { draft: false, number, issuedOn, verifyCode: null });
-        if (!frozen.reported) return { code: 409, key: "no_samples", text: "No sample is left to report." };
-        const { reported: _n, ...clean } = frozen;
-        const verify = verifyCodeOf(createHash("sha256").update(JSON.stringify(clean)).digest("hex"));
-        const payload = { ...clean, verifyCode: verify };
-        const img = await signingImages(uid(req));
-        const { pdf, pages } = await renderPdf(payload, certAssets(img.signature, img.stamp));
-        const path = `coa/${rep.order_no}/${number}.pdf`;
-        const up = await admin.storage.from(BUCKET).upload(path, pdf, { contentType: "application/pdf", upsert: false });
-        if (up.error) throw up.error;
-        uploaded = path;
-        await tx`update reports set status = 'issued', report_no = ${number}, issued_at = now(), issued_by = ${uid(req)}, signed_by = ${uid(req)}, signed_at = now(),
-            storage_path = ${path}, sha256 = ${createHash("sha256").update(pdf).digest("hex")}, payload = ${tx.json(payload as never)}, verify_code = ${verify}, page_count = ${pages}, template_revision = ${payload.template.revision},
-            signatory_name = ${payload.signatory.name}, signatory_title = ${payload.signatory.title}, signature_sha256 = ${img.signatureSha}, stamp_sha256 = ${img.stampSha}, return_comment = null
-          where id = ${rep.id}`;
-        await tx`update reports set status = 'superseded', superseded_at = now() where job_order_id = ${rep.job_order_id} and kind = 'coa' and status = 'issued' and id <> ${rep.id}`;
-        await tx`update job_orders set status = 'reported' where id = ${rep.job_order_id} and status in ('in_progress', 'reported', 'delivered')`;
-        await tx`insert into report_sources (report_id, batch_id) select ${rep.id}, b.id from batches b where b.job_order_id = ${rep.job_order_id} and b.status = 'completed' on conflict do nothing`;
-        const [co] = await tx`select c.name from companies c where c.id = ${rep.company_id}`;
-        return { ok: true as const, number, id: rep.id, company: co!.name as string, order: rep.order_no };
+        const done = await issueCertificate(tx, rep as never, uid(req), { onUploaded: (p) => { uploaded = p; } });
+        return done.ok ? done : { code: done.code, key: done.key, text: done.text };
       });
       if ("code" in res) { const e = res as { code: number; key: string; text: string }; return fail(reply, e.code, e.key, e.text); }
       await noteAll(req, (tx) => notify(tx, { event: "N6", title: `${res.number} is published`, body: `Send it to ${res.company}.`, link: `/reports/coa/${res.id}` }, { roles: ["cso"] }, uid(req)));
@@ -384,6 +386,55 @@ export async function reportRoutes(app: FastifyInstance) {
       });
     }
     return { ok: true, moved: !!res.moved };
+  });
+
+  /* ================= Mark sent: every send of the current revision is kept ================= */
+  r.post("/reports/coa/:id/deliveries", { preHandler: requireAny("coa.mark_sent"), schema: { params: IdParam, body: DeliveryBody } }, async (req, reply) => {
+    const b = req.body;
+    const res = await runAsActor(req, SCREEN, async (tx) => {
+      const rep = await reportOf(tx, req.params.id, true); if (!rep || rep.kind !== "coa") return { code: 404, key: "not_found", text: "This certificate was not found." };
+      if (rep.status !== "issued") return { code: 409, key: "locked", text: rep.status === "superseded" ? "A newer revision replaced this certificate. Send the newer one." : rep.status === "void" ? "This certificate was voided." : "Only a published certificate is sent." };
+      if (b.sentOn > todayIso()) return { code: 422, key: "invalid", text: "The date can't be in the future.", field: "sentOn" };
+      const ok = await tx`select value, needs_remark from lookups where list_key = 'send_channel' and active and value = any(${b.channels}::text[])`;
+      if (ok.length !== new Set(b.channels).size) return { code: 422, key: "invalid", text: "Choose from the listed ways of sending.", field: "channels" };
+      if (ok.some((c) => c.needs_remark) && !b.note) return { code: 422, key: "invalid", text: "Say how it was sent in the note.", field: "note" };
+      const [n] = await tx`select count(*)::int as n from report_deliveries where report_id = ${rep.id}`;
+      await tx`insert into report_deliveries (report_id, sent_on, channels, recipient, note, by_user) values (${rep.id}, ${b.sentOn}, ${[...new Set(b.channels)]}::text[], ${b.recipient}, ${b.note ?? null}, ${uid(req)})`;
+      if (n!.n === 0) await tx`update job_orders set status = 'delivered' where id = ${rep.job_order_id} and status = 'reported'`;   // the first send of the current revision
+      return { ok: true as const, first: n!.n === 0 };
+    });
+    if ("code" in res) { const e = res as { code: number; key: string; text: string; field?: string }; return fail(reply, e.code, e.key, e.text, e.field); }
+    return reply.code(201).send({ ok: true, first: res.first });
+  });
+
+  /* ================= Revise: a draft of the next revision, the published one stays current until the new one is signed ================= */
+  r.post("/reports/coa/:id/revise", { preHandler: requireAny("report.revise"), schema: { params: IdParam, body: ReasonBody } }, async (req, reply) => {
+    const res = await as(req, async (tx) => {
+      const rep = await reportOf(tx, req.params.id, true); if (!rep || rep.kind !== "coa") return { code: 404, key: "not_found", text: "This certificate was not found." };
+      if (rep.status !== "issued") return { code: 409, key: "locked", text: rep.status === "superseded" ? "A newer revision exists. Revise that one." : "Only the current published certificate is revised." };
+      const [open] = await tx`select id from reports where job_order_id = ${rep.job_order_id} and kind = 'coa' and status in ('draft', 'awaiting_signature')`;
+      if (open) return { code: 409, key: "exists", text: "A revision is already being prepared for this job order.", id: open.id as string };
+      const [rev] = await tx`select coalesce(max(revision), 0) + 1 as n from reports where job_order_id = ${rep.job_order_id} and kind = 'coa'`;
+      const [row] = await tx`insert into reports (kind, job_order_id, revision, status, template_id, bases, parameter_ids, attention_contact_id, client_reference, remarks, on_behalf_of, signatory_id, drafted_by, supersedes_id, revision_reason)
+        select 'coa', job_order_id, ${rev!.n}, 'draft', template_id, bases, parameter_ids, attention_contact_id, client_reference, remarks, on_behalf_of, signatory_id, ${uid(req)}, id, ${req.body.reason}
+        from reports where id = ${rep.id} returning id`;
+      return { ok: true as const, id: row!.id as string };
+    });
+    if ("code" in res) { const e = res as { code: number; key: string; text: string; id?: string }; return fail(reply, e.code, e.key, e.text, undefined, e.id ? { id: e.id } : undefined); }
+    return reply.code(201).send({ id: res.id });
+  });
+
+  /* ================= Void: the certificate keeps its file, its number is never reused ================= */
+  r.post("/reports/coa/:id/void", { preHandler: requireAny("report.void"), schema: { params: IdParam, body: ReasonBody } }, async (req, reply) => {
+    const res = await runAsActor(req, SCREEN, async (tx) => {
+      const rep = await reportOf(tx, req.params.id, true); if (!rep || rep.kind !== "coa") return { code: 404, key: "not_found", text: "This certificate was not found." };
+      if (rep.status !== "issued") return { code: 409, key: "locked", text: rep.status === "void" ? "It is already void." : rep.status === "superseded" ? "A newer revision replaced it. Void that one." : "Only a published certificate is voided." };
+      await tx`update reports set status = 'void', void_reason = ${req.body.reason}, voided_by = ${uid(req)}, voided_at = now() where id = ${rep.id}`;
+      await tx`update job_orders set status = 'in_progress' where id = ${rep.job_order_id} and status in ('reported', 'delivered')`;
+      return { ok: true as const };
+    });
+    if ("code" in res) { const e = res as { code: number; key: string; text: string }; return fail(reply, e.code, e.key, e.text); }
+    return { ok: true };
   });
 
   void fmtDate;

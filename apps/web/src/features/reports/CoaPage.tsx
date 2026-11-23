@@ -7,6 +7,8 @@ import { api, apiBlob, ApiError } from "../../app/api";
 import { useBreakpoint } from "../../app/session";
 import { Alert, Badge, Button, Card, Check, Dialog, Empty, Icon, KV, Menu, PageHead, PasswordField, Select, TextArea, TextField, fmtDate, toast } from "../../components";
 import { COA_STATUS } from "./status";
+import { useSigningImage } from "../common/SigningCards";
+import { MarkSentDialog } from "./MarkSentDialog";
 
 interface Coa {
   id: string; number: string | null; revision: number; status: "draft" | "awaiting_signature" | "issued" | "superseded" | "void";
@@ -19,10 +21,11 @@ interface Coa {
     signatory: { id: string; name: string; title: string } | null; signers: { id: string; name: string; title: string }[];
   };
   details: null | { reference: string; attention: string; bases: string[]; parameters: number; samples: number; publishedAt: string; publishedBy: string; signatory: { name: string; title: string; onBehalfOf: string }; printed: { count: number; last: string | null }; verifyCode: string };
-  signing: { sentBy: string | null; sentAt: string | null; returned: { by: string | null; at: string; comment: string } | null; draftedBy: string | null };
+  signing: { assets: { signature: boolean; stamp: boolean } | null; sentBy: string | null; sentAt: string | null; returned: { by: string | null; at: string; comment: string } | null; draftedBy: string | null };
   deliveries: { id: string; sentOn: string; channels: string[]; recipient: string; note: string | null; by: string | null }[];
   versions: { id: string; revision: number; status: string; number: string | null; at: string; reason: string; current: boolean }[];
-  can: { edit: boolean; send: boolean; sendWhy: string | null; withdraw: boolean; remove: boolean; sign: boolean; return: boolean; download: boolean; print: boolean; preview: boolean };
+  clientDefaults: { bases: string[] | null; signatoryId: string | null }; channels: { value: string; needsRemark: boolean }[]; voided: { reason: string; at: string; by: string | null } | null; newer: string | null;
+  can: { saveDefaults: boolean; markSent: boolean; revise: boolean; void: boolean; edit: boolean; send: boolean; sendWhy: string | null; withdraw: boolean; remove: boolean; sign: boolean; return: boolean; download: boolean; print: boolean; preview: boolean };
 }
 const BASES: Array<[string, string]> = [["adb", "ADB"], ["db", "DB"], ["daf", "DAF"], ["ar", "AR"]];
 const whenText = (iso: string | null | undefined) => (iso ? fmtDate(iso) : "");
@@ -63,7 +66,9 @@ export function CoaPage() {
   const { id = "" } = useParams(), nav = useNavigate(), qc = useQueryClient(), phone = useBreakpoint() === "phone";
   const q = useQuery({ queryKey: ["coa", id], queryFn: () => api<Coa>(`/reports/coa/${id}`) });
   const [ver, setVer] = useState(0), [busy, setBusy] = useState(false);
-  const [dlg, setDlg] = useState<null | "sign" | "return" | "delete" | "withdraw" | "send">(null);
+  const [dlg, setDlg] = useState<null | "sign" | "return" | "delete" | "withdraw" | "send" | "sent" | "revise" | "void">(null);
+  const [reason, setReason] = useState(""), [rErr, setRErr] = useState("");
+  const [skipDefaults, setSkipDefaults] = useState(() => { try { return !!localStorage.getItem(`sgsi.skipDefaults.${id}`); } catch { return false; } });
   const [pw, setPw] = useState(""), [pwErr, setPwErr] = useState(""), [comment, setComment] = useState(""), [cErr, setCErr] = useState("");
   // the draft's form; `saved` is what the server has, so typing is never overwritten by a refresh
   type Form = { bases: string[]; params: string[]; attention: string; ref: string; remarks: string; onBehalf: string; signatory: string };
@@ -74,6 +79,7 @@ export function CoaPage() {
     const form: Form = { bases: c.contents.bases, params: c.contents.parameters.filter((p) => p.on).map((p) => p.id), attention: c.contents.attention.id ?? "", ref: c.contents.clientReference, remarks: c.contents.remarks, onBehalf: c.contents.onBehalfOf, signatory: c.contents.signatory?.id ?? "" };
     setF(form); setSaved(form);
   }, [c]);
+  const sigImg = useSigningImage("signature", dlg === "sign" && !!c?.signing.assets?.signature), stampImg = useSigningImage("stamp", dlg === "sign" && !!c?.signing.assets?.stamp);
   const key = (x: Form | null) => (x ? JSON.stringify([x.bases, x.params.slice().sort(), x.attention, x.ref, x.remarks, x.onBehalf, x.signatory]) : "");
   const dirty = !!c && c.status === "draft" && key(f) !== key(saved);
   const write = async (x: Form) => {
@@ -92,7 +98,7 @@ export function CoaPage() {
   if (q.error || !c || !f) {
     return <div className="page"><Card><Empty icon="certificate" title="Certificate not found" text="It may have been removed, or you may not have access." action={<Button onClick={() => nav("/reports")}>Back to reports</Button>} /></Card></div>;
   }
-  const open = c.status === "draft" || c.status === "awaiting_signature", [stText, stTone] = COA_STATUS[c.status]!;
+  const open = c.status === "draft" || c.status === "awaiting_signature", [stText, stTone] = c.status === "issued" && c.sent ? (["Sent", "green"] as const) : COA_STATUS[c.status]!;
   const refresh = () => { for (const k of ["coa", "order-coa", "order", "orders"]) qc.invalidateQueries({ queryKey: [k] }); };
   const run = async (fn: () => Promise<unknown>, done?: string) => {
     setBusy(true);
@@ -120,6 +126,22 @@ export function CoaPage() {
     try { const b = await apiBlob(`/reports/coa/${c.id}/pdf`), u = URL.createObjectURL(b); window.open(u, "_blank", "noopener"); await api(`/reports/coa/${c.id}/print`, { method: "POST" }); refresh(); }
     catch (e) { toast((e as ApiError).message, "error"); }
   };
+  const revise = async () => {
+    if (!reason.trim()) return setRErr("Write the reason.");
+    setBusy(true);
+    try { const r = await api<{ id: string }>(`/reports/coa/${c.id}/revise`, { method: "POST", json: { reason } }); toast(`Revision ${c.revision + 1} started as a draft`); setDlg(null); setReason(""); refresh(); nav(`/reports/coa/${r.id}`); }
+    catch (e) { const a = e as ApiError, id2 = (a.data as { id?: string } | undefined)?.id; if (id2) { setDlg(null); nav(`/reports/coa/${id2}`); } else setRErr(a.message); } finally { setBusy(false); }
+  };
+  const voidIt = async () => {
+    if (!reason.trim()) return setRErr("Write the reason.");
+    setBusy(true);
+    try { await api(`/reports/coa/${c.id}/void`, { method: "POST", json: { reason } }); toast("Certificate voided"); setDlg(null); setReason(""); refresh(); }
+    catch (e) { setRErr((e as ApiError).message); } finally { setBusy(false); }
+  };
+  const saveDefaults = async () => {
+    try { await api(`/companies/${c.companyId}/coa-defaults`, { method: "PUT", json: { bases: (c.details?.bases ?? c.contents.bases).map((b) => b.toLowerCase()), signatoryId: c.contents.signatory?.id ?? null } }); toast(`Saved as ${c.company}'s default`); refresh(); }
+    catch (e) { toast((e as ApiError).message, "error"); }
+  };
   const previewPdf = async () => { try { const b = await apiBlob(`/reports/coa/${c.id}/pdf`); window.open(URL.createObjectURL(b), "_blank", "noopener"); } catch (e) { toast((e as ApiError).message, "error"); } };
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const draft = c.status === "draft" && c.can.edit, waitingNow = c.status === "awaiting_signature";
@@ -132,10 +154,16 @@ export function CoaPage() {
       {c.can.withdraw && <Button id="coa-withdraw" onClick={() => setDlg("withdraw")}>Withdraw</Button>}
       {c.can.return && <Button icon="arrow-u-up-left" id="coa-return" onClick={() => { setCErr(""); setDlg("return"); }}>Return</Button>}
       {c.can.sign && <Button type="primary" icon="pencil-simple-line" id="coa-sign" onClick={() => { setPw(""); setPwErr(""); setDlg("sign"); }}>Sign and publish</Button>}
+      {c.can.markSent && <Button type="primary" icon="paper-plane-tilt" id="coa-marksent" onClick={() => setDlg("sent")}>{c.sent ? "Add another send" : "Mark sent"}</Button>}
       {c.can.send && <Button type="primary" icon="check" id="coa-send" disabled={busy || !!c.can.sendWhy} why={c.can.sendWhy ?? undefined} onClick={() => setDlg("send")}>Send for signature</Button>}
     </>
   );
-  const menu = draft && c.can.remove ? <Menu label="More actions" size={36} items={[{ label: "Delete draft", icon: "trash", onClick: () => setDlg("delete") }]} /> : null;
+  const menuItems = [
+    draft && c.can.remove && { label: "Delete draft", icon: "trash", onClick: () => setDlg("delete") },
+    c.can.revise && { label: "Revise", icon: "arrows-clockwise", onClick: () => { setReason(""); setRErr(""); setDlg("revise"); } },
+    c.can.void && { label: "Void", icon: "prohibit", onClick: () => { setReason(""); setRErr(""); setDlg("void"); } },
+  ];
+  const menu = menuItems.some(Boolean) ? <Menu label="More actions" size={36} items={menuItems} /> : null;
   const sub = (
     <span className="row g16 wrap t-sm c-sec">
       <Link to={`/orders/${c.orderNo}`} className="c-act t-data" id="coa-order">{c.orderNo}</Link>
@@ -151,8 +179,14 @@ export function CoaPage() {
       : <Alert tone="info" title={`Waiting for ${c.contents.signatory?.name ?? "the signatory"} to sign`} text={`Sent by ${c.signing.sentBy ?? "the lab"} on ${sentOn}.${c.can.withdraw ? " Withdraw it to change the contents." : ""}`} />
   ) : c.signing.returned && c.status === "draft" ? (
     <Alert tone="warning" title={`Returned by ${c.signing.returned.by ?? "the signatory"} on ${whenText(c.signing.returned.at)}`} text={c.signing.returned.comment} />
+  ) : c.status === "issued" && c.can.saveDefaults && c.details && !skipDefaults && (c.clientDefaults.bases?.join() !== c.details.bases.map((b) => b.toLowerCase()).join() || (c.contents.signatory && c.clientDefaults.signatoryId !== c.contents.signatory.id)) ? (
+    <Alert tone="info" title={`Save these bases and signatory as ${c.company}'s default?`} text="The next CoA for this client starts with them."
+      action={<span className="row g8"><Button size="sm" onClick={() => { try { localStorage.setItem(`sgsi.skipDefaults.${c.id}`, "1"); } catch { /* storage blocked */ } setSkipDefaults(true); }}>Not now</Button><Button size="sm" type="primary" id="coa-save-defaults" onClick={saveDefaults}>Save as default</Button></span>} />
   ) : c.status === "superseded" ? (
-    <Alert tone="info" title="A newer revision replaced this certificate" text="Open the latest revision under Versions." />
+    <Alert tone="warning" title={`Superseded by revision ${(c.versions.find((v) => v.id === c.newer)?.revision) ?? c.revision + 1}${c.versions.find((v) => v.id === c.newer)?.at ? ` on ${whenText(c.versions.find((v) => v.id === c.newer)!.at)}` : ""}`}
+      text={<>This version is kept for the record. You can only download it.{c.newer && <> <Link to={`/reports/coa/${c.newer}`} className="c-act" id="coa-newer">Open the newer revision</Link>.</>}</>} />
+  ) : c.status === "void" && c.voided ? (
+    <Alert tone="error" title={`Void since ${whenText(c.voided.at)}${c.voided.by ? ` by ${c.voided.by}` : ""}`} text={`${c.voided.reason}. The number is not reused.`} />
   ) : null;
 
   const ct = c.contents, left = ct.left && ct.left.notReceived + ct.left.held + ct.left.awaiting > 0 ? [ct.left.notReceived ? `${ct.left.notReceived} not received` : "", ct.left.held ? `${ct.left.held} on hold` : "", ct.left.awaiting ? `${ct.left.awaiting} not in a batch yet` : ""].filter(Boolean).join(", ") : "";
@@ -215,7 +249,11 @@ export function CoaPage() {
   );
   const deliveries = !open && (
     <Card title="Delivery">
-      {c.deliveries.length ? <div className="col g8">{c.deliveries.map((d) => <div key={d.id} className="col" style={{ gap: 0 }}><b className="t-sm c-head">{d.recipient}</b><span className="t-cap c-sec">{[whenText(d.sentOn), d.channels.join(", "), d.by ? `by ${d.by}` : ""].filter(Boolean).join(", ")}</span></div>)}</div>
+      {c.deliveries.length ? <div className="col g8">{c.deliveries.map((d) => (
+        <div key={d.id} className="row g8 wrap" style={{ background: "var(--status-success-bg, #e8f3ec)", borderRadius: 8, padding: "8px 12px", alignItems: "center" }}>
+          <b className="t-sm c-head">{d.channels.join(", ")}</b><span className="t-sm">{d.recipient}</span><span className="t-sm c-sec">{whenText(d.sentOn)}</span>{d.by && <span className="t-sm c-act">{d.by}</span>}
+          {d.note && <span className="t-cap c-sec" style={{ flexBasis: "100%" }}>{d.note}</span>}
+        </div>))}</div>
         : <span className="t-sm c-mut">Not sent yet.</span>}
     </Card>
   );
@@ -250,11 +288,19 @@ export function CoaPage() {
         <Dialog title={`Sign and publish CoA for ${c.orderNo}?`} size="md" phone={phone} onClose={() => setDlg(null)} footer={<><Button onClick={() => setDlg(null)}>Cancel</Button><Button type="primary" id="coa-sign-ok" disabled={busy} onClick={sign}>Sign and publish</Button></>}>
           <div className="col g16">
             <span className="t-sm c-sec">It gets the number CoA-{c.orderNo}-{c.revision}, your signature and the lab stamp, and can no longer be edited.</span>
-            <div className="col g4" style={{ background: "var(--primary-50)", borderRadius: 12, padding: 16 }}>
-              <b className="t-sm c-head">{ct.signatory?.name}</b>
-              {ct.signatory?.title && <span className="t-sm c-sec">{ct.signatory.title}</span>}
-              <span className="t-sm c-mut">Printed on the certificate with the lab stamp.</span>
+            <div className="row g12" style={{ background: "var(--primary-50)", borderRadius: 12, padding: 16, alignItems: "center" }}>
+              {(sigImg || stampImg) && <span className="row g8" style={{ flex: "none", alignItems: "center" }}>
+                {sigImg && <img src={sigImg} alt="Your signature" style={{ height: 48, maxWidth: 140, objectFit: "contain" }} />}
+                {stampImg && <img src={stampImg} alt="Lab stamp" style={{ height: 48, width: 48, objectFit: "contain" }} />}
+              </span>}
+              <span className="col g4" style={{ minWidth: 0 }}>
+                <b className="t-sm c-head">{ct.signatory?.name}</b>
+                {ct.signatory?.title && <span className="t-sm c-sec">{ct.signatory.title}</span>}
+                <span className="t-sm c-mut">Printed on the certificate with the lab stamp.</span>
+              </span>
             </div>
+            {c.signing.assets && !c.signing.assets.signature && <Alert tone="warning" title="You have no signature yet" text={<>The certificate prints your name over a line. <Link to="/profile" className="c-act">Add your signature on your Profile</Link>.</>} />}
+            {c.signing.assets && !c.signing.assets.stamp && <Alert tone="warning" title="The lab has no stamp yet" text="The certificate prints without the stamp. The Manager adds it on their Profile." />}
             <PasswordField id="coa-password" label="Password" value={pw} onChange={(v) => { setPw(v); setPwErr(""); }} error={pwErr} help="Signing needs your own password." placeholder="Enter your password" />
           </div>
         </Dialog>
@@ -276,6 +322,25 @@ export function CoaPage() {
       {dlg === "delete" && (
         <Dialog title="Delete this draft?" size="sm" phone={phone} onClose={() => setDlg(null)} footer={<><Button onClick={() => setDlg(null)}>Cancel</Button><Button type="primary" tone="danger" id="coa-delete-ok" disabled={busy} onClick={async () => { setBusy(true); try { await api(`/reports/coa/${c.id}`, { method: "DELETE" }); toast("Draft deleted"); refresh(); nav(`/orders/${c.orderNo}/coa`); } catch (e) { toast((e as ApiError).message, "error"); } finally { setBusy(false); } }}>Delete draft</Button></>}>
           <p className="t-sm c-sec" style={{ margin: 0 }}>The draft is removed. The job order can generate a new one.</p>
+        </Dialog>
+      )}
+      {dlg === "sent" && <MarkSentDialog id={c.id} phone={phone} onClose={() => setDlg(null)} onDone={() => { setDlg(null); refresh(); }} />}
+      {dlg === "revise" && (
+        <Dialog title={`Revise ${c.number}?`} size="sm" phone={phone} onClose={() => setDlg(null)} footer={<><Button onClick={() => setDlg(null)}>Cancel</Button><Button type="primary" id="coa-revise-ok" disabled={busy} onClick={revise}>Create revision</Button></>}>
+          <div className="col g12">
+            <span className="t-sm c-sec">Revision {c.revision} stays current until revision {c.revision + 1} is published. Revision {c.revision + 1} starts as a draft with the same contents.</span>
+            <TextArea id="coa-reason" label="Reason" req rows={3} placeholder="e.g. Wrong client reference" value={reason} onChange={(v) => { setReason(v); setRErr(""); }} />
+            {rErr && <span className="help err">{rErr}</span>}
+          </div>
+        </Dialog>
+      )}
+      {dlg === "void" && (
+        <Dialog title={`Void ${c.number}?`} size="sm" phone={phone} onClose={() => setDlg(null)} footer={<><Button onClick={() => setDlg(null)}>Keep CoA</Button><Button type="primary" tone="danger" id="coa-void-ok" disabled={busy} onClick={voidIt}>Void CoA</Button></>}>
+          <div className="col g12">
+            <span className="t-sm c-sec">The number is never reused. Anyone who downloaded this certificate should be told it is void.</span>
+            <TextArea id="coa-reason" label="Reason" req rows={3} placeholder="e.g. Issued for the wrong job order" value={reason} onChange={(v) => { setReason(v); setRErr(""); }} />
+            {rErr && <span className="help err">{rErr}</span>}
+          </div>
         </Dialog>
       )}
     </div>

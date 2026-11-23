@@ -17,6 +17,8 @@ import { OrderPage } from "./features/orders/Detail";
 import { Batches } from "./features/batches/List";
 import { BatchPage } from "./features/batches/Page";
 import { CoaPage } from "./features/reports/CoaPage";
+import { RoaPage } from "./features/reports/RoaPage";
+import { Reports } from "./features/reports/List";
 import { Toasts } from "./components";
 import "./styles/index.css";
 
@@ -36,7 +38,7 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
-const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches };
+const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches, "/reports": Reports };
 const CLIENT_READ = ["company.read"];
 function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [
@@ -47,6 +49,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     { path: "/orders/:no/:tab?", element: <Guard anyOf={["order.read"]}><OrderPage /></Guard> },
     { path: "/batches/:no/:tab?", element: <Guard anyOf={["batch.read"]}><BatchPage /></Guard> },
     { path: "/reports/coa/:id", element: <Guard anyOf={["coa.download", "report.publish", "report.sign"]}><CoaPage /></Guard> },
+    { path: "/reports/roa/:no", element: <Guard anyOf={["roa.download"]}><RoaPage /></Guard> },
     { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
     { path: "/users/:id", element: <Guard anyOf={["user.manage"]}><UserPage /></Guard> },
     { path: "/config/:section", element: <Guard anyOf={["config.write"]}><Config /></Guard> },

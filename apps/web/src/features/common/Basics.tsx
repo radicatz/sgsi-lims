@@ -4,7 +4,8 @@ import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navFor, startPath } from "@sgsi/shared";
 import { api } from "../../app/api";
-import { useSession } from "../../app/session";
+import { useBreakpoint, useSession } from "../../app/session";
+import { SigningCards } from "./SigningCards";
 import { Avatar, Button, Card, Empty, PageHead, Seg, TextField, toast } from "../../components";
 
 const PHASE: Record<string, [number, string]> = {
@@ -26,6 +27,7 @@ export function NotFound() {
 
 export function Profile() {
   const { me, signOut } = useSession();
+  const phone = useBreakpoint() === "phone";
   const qc = useQueryClient();
   const [name, setName] = useState(me!.fullName);
   const [start, setStart] = useState(me!.prefs.startPage ?? startPath(me!.permissions));
@@ -41,6 +43,7 @@ export function Profile() {
       <Card title="Your account"><div className="row g12"><Avatar name={me!.fullName} size={64} /><div className="col g4"><b className="t-h3">{me!.fullName}</b>
         <span className="row g6 wrap">{me!.roles.map((r) => <span key={r} className="role">{r.replace("_", " ")}</span>)}</span></div></div>
         <TextField label="Name" value={name} onChange={setName} /><TextField label="Email" value={me!.email} onChange={() => undefined} help="Your lab admin changes the email." /></Card>
+      <SigningCards phone={phone} />
       <Card title="Layout"><div className="field"><span className="flabel">Sidebar</span>
         <Seg label="Sidebar" items={[["expanded", "Expanded"], ["collapsed", "Collapsed"]]} value={collapsed ? "collapsed" : "expanded"} onChange={(v) => save.mutate({ prefs: { sidebar: v } })} />
         <span className="help">Applies on desktop. Tablets always show the rail.</span></div>

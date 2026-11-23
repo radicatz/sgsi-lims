@@ -4,19 +4,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
+import { MarkSentDialog } from "./MarkSentDialog";
 import { Badge, Button, Card, Confirm, Empty, KV, Note, Select, fmtDate, toast, type Tone } from "../../components";
 
 interface Slot { id: string; number: string | null; revision: number; status: string; createdAt: string; signatory: { name: string; title: string } | null; signedBy: string | null; signedAt: string | null; publishedAt: string | null; sentForSignatureAt: string | null; sentBy: string | null; draftedBy: string | null; pages: number | null }
 export interface OrderCoa {
   state: "not_ready" | "ready" | "preparing" | "draft" | "awaiting_signature" | "published" | "sent"; orderNo: string; orderStatus: string;
-  batches: { total: number; done: number }; current: Slot | null; open: Slot | null; sends: number; can: { generate: boolean; download: boolean; open: boolean };
+  batches: { total: number; done: number }; current: Slot | null; open: Slot | null; sends: number; can: { generate: boolean; download: boolean; open: boolean; markSent: boolean };
 }
 export const useOrderCoa = (no: string, enabled = true) => useQuery({ queryKey: ["order-coa", no], queryFn: () => api<OrderCoa>(`/orders/${no}/coa`), enabled });
 
 /** The Overview and the CoA tab show the same card; `signers` fills the signatory control for those who may edit the job order. */
 export function CoaCard({ no, signatory, signers, canEdit, phone }: { no: string; signatory: { id: string | null; name: string } | null; signers: Array<{ id: string; name: string; title: string }>; canEdit: boolean; phone: boolean }) {
   const q = useOrderCoa(no), nav = useNavigate(), qc = useQueryClient();
-  const [busy, setBusy] = useState(false), [pick, setPick] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false), [pick, setPick] = useState<string | null>(null), [sent, setSent] = useState(false);
   const d = q.data;
   if (!d) return <Card title="Certificate of Analysis"><Empty icon="certificate" title="Loading" /></Card>;
   const slot = d.open ?? d.current;
@@ -74,7 +75,10 @@ export function CoaCard({ no, signatory, signers, canEdit, phone }: { no: string
               <KV k="Signed by">{slot.signedBy ?? slot.signatory?.name ?? "—"}</KV>
               <KV k="Delivery">{d.sends ? `Sent ${d.sends} ${d.sends === 1 ? "time" : "times"}` : "Not sent to the client yet"}</KV>
             </div>
-            {d.can.open && <span className="row g8"><Button type="ghost" icon="arrow-right" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>Open in Reports</Button></span>}
+            <span className="row g8 wrap">
+              {d.can.markSent && <Button type="primary" icon="paper-plane-tilt" id="coa-marksent" onClick={() => setSent(true)}>{d.sends ? "Add another send" : "Mark sent"}</Button>}
+              {d.can.open && <Button type="ghost" icon="arrow-right" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>Open in Reports</Button>}
+            </span>
           </div>
         );
     }
@@ -90,6 +94,7 @@ export function CoaCard({ no, signatory, signers, canEdit, phone }: { no: string
             help="Only this person can sign, signed in as themselves." />
         )}
       </div>
+      {sent && d.current && <MarkSentDialog id={d.current.id} phone={phone} onClose={() => setSent(false)} onDone={() => { setSent(false); refresh(); }} />}
       {pick && (
         <Confirm title="Move the signature request?" text={`The CoA for ${no} waits for ${endDot(slot?.signatory?.name ?? "the current signatory")} If ${nextName} becomes the signatory, the request moves to the new signatory and both are notified.`} ok="Move request" busy={busy} onOk={() => changeSignatory(pick, true)} onClose={() => setPick(null)} />
       )}

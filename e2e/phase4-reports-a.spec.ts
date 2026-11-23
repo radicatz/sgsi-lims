@@ -36,6 +36,7 @@ test.describe.serial("reports, slice A", () => {
   let order = "", coaUrl = "";
 
   test("RA1: the card says ready, the Lab admin generates the draft and sees the real PDF", async ({ page, request }, info) => {
+    test.setTimeout(150_000);   // two real PDF renders, the first one cold
     const phone = info.project.name === "phone", idx = ["desktop", "tablet", "phone"].indexOf(info.project.name);
     order = `ZE-JO-06${idx}`;
     await seedOrder(request, order);
