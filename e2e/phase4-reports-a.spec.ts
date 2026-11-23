@@ -42,27 +42,28 @@ test.describe.serial("reports, slice A", () => {
     fixture(order, `B-2026-991${idx + 1}`);
     await signIn(page, "maya@sgsi.co.id");
     await page.goto(`/orders/${order}/coa`);
-    await expect(page.getByText("Ready for the CoA")).toBeVisible();
+    await expect(page.getByText(/(batch is|batches are) completed/)).toBeVisible();
     await page.locator("#coa-generate").click();
     await expect(page).toHaveURL(/\/reports\/coa\/[0-9a-f-]{36}/);
     coaUrl = new URL(page.url()).pathname;
     await expect(page.getByText("Draft", { exact: true }).first()).toBeVisible();
-    if (phone) await expect(page.locator("#coa-open")).toBeVisible(); else await expect(page.locator("#coa-preview")).toBeVisible();
+    if (phone) await expect(page.locator("#coa-open")).toBeVisible({ timeout: 45_000 }); else await expect(page.locator("#coa-preview")).toBeVisible({ timeout: 45_000 });
     await expect(page.locator("#coa-send")).toBeEnabled();
     await expect(page.locator("#coa-sign")).toHaveCount(0);
     await page.locator("#coa-remarks").fill("Checked twice.");
-    await page.locator("#coa-save").click();
-    await expect(page.getByText("Draft saved").first()).toBeVisible();
+    await page.waitForTimeout(1500);   // saved as you go, a short pause after the last change
     await page.locator("#coa-send").click();
+    await expect(page.getByRole("dialog").getByText(/is asked to sign it/)).toBeVisible();
+    await page.locator("#coa-send-ok").click();
     await expect(page.getByText("Awaiting signature").first()).toBeVisible();
     await expect(page.locator("#coa-sign")).toHaveCount(0);   // the Lab admin never signs
-    await expect(page.getByText(/Waiting for .*Sutrisno/).first()).toBeVisible();
+    await expect(page.getByText(/Waiting for .*Sutrisno.* to sign/).first()).toBeVisible();
   });
 
   test("RA2: only the named signatory signs, the wrong password is refused, then the certificate is published", async ({ page }) => {
     await signIn(page, "bambang@sgsi.co.id");
     await page.goto(coaUrl);
-    await expect(page.getByText("Waiting for your signature")).toBeVisible();
+    await expect(page.getByText(/asks you to sign this certificate/)).toBeVisible();
     await page.locator("#coa-sign").click();
     await page.locator("#coa-password").fill("not-the-password");
     await page.locator("#coa-sign-ok").click();

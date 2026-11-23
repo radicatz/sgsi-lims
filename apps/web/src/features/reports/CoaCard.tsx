@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
-import { Alert, Badge, Button, Card, Confirm, Empty, KV, Select, fmtDate, toast, type Tone } from "../../components";
-import { COA_STATUS } from "./status";
+import { Badge, Button, Card, Confirm, Empty, KV, Note, Select, fmtDate, toast, type Tone } from "../../components";
 
-interface Slot { id: string; number: string | null; revision: number; status: string; signatory: { name: string; title: string } | null; signedBy: string | null; signedAt: string | null; publishedAt: string | null; sentForSignatureAt: string | null; sentBy: string | null; draftedBy: string | null; pages: number | null }
+interface Slot { id: string; number: string | null; revision: number; status: string; createdAt: string; signatory: { name: string; title: string } | null; signedBy: string | null; signedAt: string | null; publishedAt: string | null; sentForSignatureAt: string | null; sentBy: string | null; draftedBy: string | null; pages: number | null }
 export interface OrderCoa {
   state: "not_ready" | "ready" | "preparing" | "draft" | "awaiting_signature" | "published" | "sent"; orderNo: string; orderStatus: string;
   batches: { total: number; done: number }; current: Slot | null; open: Slot | null; sends: number; can: { generate: boolean; download: boolean; open: boolean };
@@ -37,35 +36,52 @@ export function CoaCard({ no, signatory, signers, canEdit, phone }: { no: string
   };
   const nextName = signers.find((s) => s.id === pick)?.name ?? "the new signatory";
 
+  const endDot = (t: string) => (t.endsWith(".") ? t : t + ".");   // a name that ends with a full stop already ends the sentence
   const body = (() => {
     switch (d.state) {
       case "not_ready":
         return <Empty icon="certificate" title="The CoA is not ready" text={d.batches.total ? `Every batch needs its signed RoA and to be completed first (${d.batches.done} of ${d.batches.total} done).` : "The lab has not created a batch for this job order yet."} />;
       case "ready":
-        return <Empty icon="certificate" title="Ready for the CoA" text="Every batch is completed. The draft takes its values from the verified analyses." action={d.can.generate ? <Button type="primary" icon="plus" id="coa-generate" disabled={busy} onClick={generate}>Generate CoA</Button> : undefined} />;
+        return (
+          <div className="col g12">
+            <Note icon="check-circle">{d.batches.total === 1 ? "The batch is completed." : `All ${d.batches.total} batches are completed.`}</Note>
+            {d.can.generate && <span className="row g8"><Button type="primary" icon="file-text" id="coa-generate" disabled={busy} onClick={generate}>Generate CoA</Button></span>}
+          </div>
+        );
       case "preparing":
-        return <Empty icon="clock" title="The lab is preparing the CoA" text="You will be asked to sign it when it is ready." />;
+        return <Note icon="pencil-simple">The lab is preparing the CoA. You will be asked to sign it when it is ready.</Note>;
+      case "draft":
+        return slot && (
+          <div className="col g12">
+            <Note icon="pencil-simple">Draft started by <b>{slot.draftedBy ?? "the lab"}</b> {fmtDate(slot.createdAt)}</Note>
+            {d.can.open && <span className="row g8"><Button type="primary" icon="pencil-simple" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>Continue draft</Button></span>}
+          </div>
+        );
+      case "awaiting_signature":
+        return slot && (
+          <div className="col g12">
+            <Note icon="hourglass">Waiting for <b>{slot.signatory?.name ?? "the signatory"}</b> to sign.</Note>
+            {slot.sentForSignatureAt && <span className="t-sm c-sec">{`Sent for signature by ${slot.sentBy ?? "the lab"} on ${fmtDate(slot.sentForSignatureAt)}.`}</span>}
+            {d.can.open && <span className="row g8"><Button type="ghost" icon="arrow-right" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>Open in Reports</Button></span>}
+          </div>
+        );
       default:
         return slot && (
           <div className="col g12">
-            <div className="row between wrap"><b className="t-data-b c-head" id="coa-no">{slot.number ?? `Draft, revision ${slot.revision}`}</b><Badge sm label={COA_STATUS[slot.status]?.[0] ?? slot.status} tone={COA_STATUS[slot.status]?.[1] ?? "grey"} /></div>
-            {d.state === "awaiting_signature" && <Alert tone="info" title={`Waiting for ${slot.signatory?.name ?? "the signatory"}`} {...(slot.sentForSignatureAt ? { text: `Sent ${fmtDate(slot.sentForSignatureAt)}${slot.sentBy ? ` by ${slot.sentBy}` : ""}.` } : {})} />}
-            {(d.state === "published" || d.state === "sent") && (
-              <div className="col g8">
-                <KV k="Published">{slot.publishedAt ? fmtDate(slot.publishedAt) : "—"}</KV>
-                <KV k="Signed by">{slot.signedBy ?? slot.signatory?.name ?? "—"}</KV>
-                <KV k="Delivery">{d.sends ? `Sent ${d.sends} ${d.sends === 1 ? "time" : "times"}` : "Not sent to the client yet"}</KV>
-              </div>
-            )}
-            {d.state === "draft" && <span className="t-sm c-sec">The draft is not sent for signature yet.</span>}
-            {d.can.open && <span className="row g8"><Button type={d.state === "draft" ? "primary" : undefined} icon="arrow-square-out" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>{d.state === "draft" ? "Continue draft" : d.state === "awaiting_signature" ? "Open" : "Open in Reports"}</Button></span>}
+            <div className="row between wrap"><b className="t-data-b c-head" id="coa-no">{slot.number}</b></div>
+            <div className="col g8">
+              <KV k="Published">{slot.publishedAt ? fmtDate(slot.publishedAt) : "—"}</KV>
+              <KV k="Signed by">{slot.signedBy ?? slot.signatory?.name ?? "—"}</KV>
+              <KV k="Delivery">{d.sends ? `Sent ${d.sends} ${d.sends === 1 ? "time" : "times"}` : "Not sent to the client yet"}</KV>
+            </div>
+            {d.can.open && <span className="row g8"><Button type="ghost" icon="arrow-right" id="coa-open" onClick={() => nav(`/reports/coa/${slot.id}`)}>Open in Reports</Button></span>}
           </div>
         );
     }
   })();
   const edit = canEdit && !["published", "sent"].includes(d.state) && !["cancelled", "closed"].includes(d.orderStatus);
   return (
-    <Card title="Certificate of Analysis" actions={<Badge sm label={label[0]} tone={label[1]} />}>
+    <Card title="Certificate of Analysis" actions={d.state === "ready" || d.state === "not_ready" ? undefined : <Badge sm label={label[0]} tone={label[1]} />}>
       <div className="col g16">
         {body}
         {edit && (
@@ -75,7 +91,7 @@ export function CoaCard({ no, signatory, signers, canEdit, phone }: { no: string
         )}
       </div>
       {pick && (
-        <Confirm title="Move the signature request?" text={`The certificate waits for ${slot?.signatory?.name ?? "the current signatory"}. It will wait for ${nextName} instead, and both are notified.`} ok="Move request" busy={busy} onOk={() => changeSignatory(pick, true)} onClose={() => setPick(null)} />
+        <Confirm title="Move the signature request?" text={`The CoA for ${no} waits for ${endDot(slot?.signatory?.name ?? "the current signatory")} If ${nextName} becomes the signatory, the request moves to the new signatory and both are notified.`} ok="Move request" busy={busy} onOk={() => changeSignatory(pick, true)} onClose={() => setPick(null)} />
       )}
     </Card>
   );

@@ -320,13 +320,18 @@ export function OrderPage() {
 
 /** The six steps of a job order's life, with what is known so far (spec 9.3). Later steps fill in with batches and reports. */
 function steps(d: OrderDetail) {
+  // every batch completed means the RoA step is done and the CoA is the current step (frame 03-05 Draft_in_progress)
+  const batchesDone =
+    d.counts.batches > 0 && d.batches.every((b) => b.status === "completed");
   const at =
     d.status === "draft"
       ? 0
       : d.status === "awaiting_samples"
         ? 1
         : d.status === "in_progress"
-          ? 2
+          ? batchesDone
+            ? 4
+            : 2
           : d.status === "reported"
             ? 5
             : 6;
@@ -349,7 +354,7 @@ function steps(d: OrderDetail) {
       ? `${d.counts.batches} batch${d.counts.batches === 1 ? "" : "es"}`
       : "No batch yet",
     `${d.batches.filter((b) => b.status === "completed").length} of ${d.counts.batches}`,
-    d.status === "reported" || at > 5 ? "Published" : "Not yet",
+    d.status === "reported" || at > 5 ? "Published" : at === 4 ? "Current" : "Not yet",
     at > 5 ? "Sent" : "Not yet",
   ];
   return names.map((n, i) => ({
