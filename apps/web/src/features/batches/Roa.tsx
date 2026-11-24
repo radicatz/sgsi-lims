@@ -2,7 +2,7 @@
 // analysis is finished. The Lab admin uploads the signed PDF with its RoA number, then completes the batch, which freezes the values (C-10).
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, ApiError } from "../../app/api";
+import { api, apiBlob, ApiError } from "../../app/api";
 import { useSession } from "../../app/session";
 import { Button, Card, Confirm, Icon, TextField, cx, fileSize, toast } from "../../components";
 import { dShort, dTime, type BatchPageData } from "./shared";
@@ -15,7 +15,7 @@ export function RoaCard({ b, phone }: { b: BatchPageData; phone: boolean }) {
   const can = (p: string) => !!me?.permissions.includes(p);
   const q = useQuery({ queryKey: ["roa", b.batchNo], queryFn: () => api<Roa>(`/batches/${b.batchNo}/roa`), enabled: b.stored === "analysis_finished" || b.stored === "completed" });
   const [no, setNo] = useState(""), [file, setFile] = useState<File | null>(null), [busy, setBusy] = useState(false), [ask, setAsk] = useState(false), [replace, setReplace] = useState(false);
-  const [err, setErr] = useState<{ roaNo?: string; file?: string }>({}), pick = useRef<HTMLInputElement>(null);
+  const [err, setErr] = useState<{ roaNo?: string; file?: string }>({}), pick = useRef<HTMLInputElement>(null), [making, setMaking] = useState(false);
   const d = q.data;
   if (!d) return null;
   const refresh = () => { for (const k of ["roa", "batch", "batches", "analysis", "adl", "order-batches"]) qc.invalidateQueries({ queryKey: [k] }); };
@@ -63,6 +63,19 @@ export function RoaCard({ b, phone }: { b: BatchPageData; phone: boolean }) {
     try { const { url } = await api<{ url: string }>(`/batches/${b.batchNo}/roa/file`); window.open(url, "_blank", "noopener"); }
     catch (x) { toast((x as ApiError).message, "error"); }
   };
+  // the RoA the app drafts from this batch's values (SGSI template, owner Nov 24): printed, signed by the Supervisor, then uploaded below
+  const canDraft = can("batch.document.upload") || can("report.sign");
+  const draftRoa = async () => {
+    setMaking(true);
+    try { const blob = await apiBlob(`/batches/${b.batchNo}/roa/draft`); window.open(URL.createObjectURL(blob), "_blank", "noopener"); }
+    catch (x) { toast((x as ApiError).message, "error"); } finally { setMaking(false); }
+  };
+  const draftRow = canDraft && (
+    <div className="row g12" style={{ alignItems: "center", flexWrap: phone ? "wrap" : "nowrap" }}>
+      <span className="t-sm c-sec grow" style={{ minWidth: 0 }}>{done ? "The RoA as drafted from this batch's values." : "Print the RoA drafted from this batch's values, have the Supervisor sign it, then upload the signed copy."}</span>
+      <Button size={phone ? "lg" : "md"} icon="file-pdf" id="roa-draft" disabled={making} onClick={draftRoa}>{making ? "Preparing" : "Download RoA"}</Button>
+    </div>
+  );
 
   const fileRow = r && (
     <div className="roa-file">
@@ -81,6 +94,7 @@ export function RoaCard({ b, phone }: { b: BatchPageData; phone: boolean }) {
     ) : done ? <span className="row g6 c-ok t-sm"><Icon n="check-circle" />Completed</span> : undefined}>
       <div className="col g12">
         {done && <span className="t-sm c-sec" id="roa-done">The batch is complete. Every tab is read-only.</span>}
+        {draftRow}
         {!done && !form && <span className="t-sm c-sec">{canComplete ? "Complete the batch when the signed RoA is right." : "Waiting for the Lab admin to complete the batch."}</span>}
         {r && <span className="row g8 t-sm"><span className="c-sec">RoA number</span><b className="t-data-b c-head" id="roa-no">{r.roaNo}</b></span>}
         {!form && fileRow}

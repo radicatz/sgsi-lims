@@ -107,10 +107,13 @@ export function AnalysisTab({
     cols = d?.cols ?? [],
     rows = d?.rows ?? [];
   const dirty = Object.keys(edits).length;
-  const refresh = () => {
-    for (const k of ["analysis", "batch", "batches", "order-batches"])
-      qc.invalidateQueries({ queryKey: [k] });
-  };
+  // resolves when the refetches are back, so a save can keep the typed values on screen until the saved ones replace them
+  const refresh = () =>
+    Promise.all(
+      ["analysis", "batch", "batches", "order-batches"].map((k) =>
+        qc.invalidateQueries({ queryKey: [k] }),
+      ),
+    );
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       dirty > 0 && currentLocation.pathname !== nextLocation.pathname,
@@ -206,8 +209,9 @@ export function AnalysisTab({
         method: "PUT",
         json: { values: list.map(({ k: _k, ...x }) => x) },
       });
+      // clear the typed values only once the saved ones are back: until then the count and Finish Analysis would read the old "0 saved"
+      await refresh().catch(() => undefined);
       setEdits({});
-      refresh();
       toast("Values saved");
       return true;
     } catch (e) {

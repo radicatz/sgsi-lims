@@ -312,7 +312,7 @@ export function Batches() {
       >
         <Search
           id="bl-q"
-          {...(phone ? {} : { label: "Search" })}
+          label="Search"
           value={q}
           onChange={setQ}
           placeholder={
@@ -341,7 +341,12 @@ export function Batches() {
           />
         )}
         <span className="grow" />
-        <Button icon="funnel" id="bl-filters" onClick={() => setFilters(true)}>
+        <Button
+          icon="funnel"
+          size="lg"
+          id="bl-filters"
+          onClick={() => setFilters(true)}
+        >
           Filters
         </Button>
         {reset && !phone && (

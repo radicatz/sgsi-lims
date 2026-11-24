@@ -492,6 +492,67 @@ Two rules keep them safe:
 
 **M.** Steps 1 to 4 carry the rules and the security; steps 5 and 6 are list and detail pages in the existing patterns; step 9 is the longest script.
 
+## 17 · The RoA the app drafts (Nov 24, 2026, owner)
+
+Written for: the developers and the lab people checking what the RoA prints.
+
+**What changed.** D-49 stays: the Supervisor signs a **paper** RoA and the Lab admin uploads the signed copy with its number. New is that the app **drafts that RoA** from the batch's values, so the lab prints it instead of typing it. The RoA page's preview, and the demo files of `pnpm seed:reports`, use the same renderer, so the preview shows a real report. The owner's call (Nov 24): the app drafts the RoA; one table per sample.
+
+**Where.** `packages/shared/src/roa.ts` (layout and rules), `apps/api/src/roa-data.ts` (reads the batch, builds the payload, makes the PDF through Gotenberg), route `GET /batches/:no/roa/draft` (`batch.document.upload` or `report.sign`; the batch must be Analysis finished or Completed), button **Download RoA** on the batch's Signed RoA card. Values come from `buildRows` of the certificate, so a number prints the same on both.
+
+**The two vendor templates against ours.** Sources: the SGSI RoA template (`.context/deliverables/SGSI_ROA_Template.docx`), the other lab's RoA (`pdf-roa-contoh.pdf`, PT Jasa Mutu Mineral Indonesia) and its CoA (`pdf-p-COA contoh.pdf`, Sucofindo's Certificate of Sampling and Analysis).
+
+| Field | SGSI RoA (the app) | Other lab's RoA | Sucofindo CoA | SGSI CoA (the app) |
+| --- | --- | --- | --- | --- |
+| Title | Report of Analysis | Report of Analysis | Certificate of Sampling and Analysis | Certificate of Analysis |
+| Report number and date | Report No. and Date Reported, top | Date Issued in the header block | Certificate No. and date, top left | Number, revision, issued date, top right |
+| Client | Principal, Address, Attention, Reference Order | Principle, Attention, Email, Reference | Shipper, Consignee | Principal, Address, Attention, Reference |
+| Order | Batch, Job order (ours) | Job Number | none | Job order |
+| Goods | Consignment: Coal | none | Quantity in M/T, tug boat or barge, ports, date loaded (a bulk shipment) | none |
+| Sample | Sample Code and Lab Sample ID, per sample | CODE SAMPLE and a lab number (SS-1172), per sample | none (one composite result) | CODE SAMPLE and sample number, per sample |
+| Count and dates | Number of Samples, Date Received, Date Tested | Amount of Sample, Date of Received | Date of loaded | Samples, Received |
+| Bases | AR, ADB, DB, DAF (all four) | Air Dried, Dry, Dry Ash Free, As Received | AR, ADB, DB, DAF | the bases the client chose |
+| Columns | Parameter, **Unit**, bases, Test Method | Parameter, Test Method, bases (no unit column) | Parameters, Unit, bases, Methods | Parameter, Test Method, bases (the unit sits in the name) |
+| Mass | Mass as Received, kg | Mass as Received (kg) | none | Mass as Received (kg) |
+| Fixed carbon | Footnote: calculated by difference | no note | none | no note |
+| Signature | "For and on behalf of", the Supervisor signs on paper | Name and title: Laboratory Manager, plus a form code | Stamped signature of the Dept of Testing and Consultancy | Signed in the app: signature and stamp |
+| Footer | Results apply only to the samples tested, page n of m, form code | Form code only | Terms and Conditions line, a number and a barcode | Terms, page n of m, verify code, form code |
+
+**Decisions.**
+- **One table per sample** under one set of report-level fields. The SGSI template is drawn for a single sample (Sample Code and Lab Sample ID in the header); a batch has many, so each sample gets a block headed by those two fields, as the other lab does.
+- **All four bases, in SGSI order AR, ADB, DB, DAF.** The RoA is the lab's full record; the CoA prints what the client chose. Total Moisture is AR only and Inherent Moisture ADB only (a dash elsewhere), as in the template.
+- **A Unit column** (wt. %, kcal/kg) as the template and Sucofindo have; the CoA keeps the unit in the parameter name.
+- **Fixed carbon footnote** kept ("calculated by difference on the corresponding reporting basis"), from the template.
+- **Not taken from the others:** the shipment fields of the Sucofindo CoA (quantity in tonnes, barge, shipper, consignee, ports, date loaded) belong to a sampling-at-loading service; SGSI's v1 is laboratory analysis of received samples, so none is built. If the lab starts selling that service it is a new template. The other lab's e-mail field is not printed; the client's contact stays in the CoA's delivery record.
+- **Report No.** is the number typed when the signed RoA was uploaded (D-49). On a batch with no upload yet the draft prints a line to write the number in.
+- **Date Tested** is the span from the first to the last value entered (or the batch's analysis start and finish).
+- **Placeholders in the template** the app fills: lab name, address and accreditation from Configuration > Laboratory; the signature line says "Laboratory Supervisor" for the Supervisor to sign by hand.
+- **Form code** FM-LAB-021 is a placeholder until the lab confirms its RoA form code.
+
+**Checked.** Unit tests (`roa.test.ts`) use the first sample of the other lab's RoA: AR, ADB, DB and DAF values match its printed rows after the order change. The 11 demo RoA files (`pnpm seed:reports --roa`) are made by this renderer, and the RoA page's preview shows them.
+
+## 18 · Phase 4 gate checklist (Nov 24, 2026)
+
+Written for: the owner and whoever runs the gate check with the lab.
+
+Phase 4 is **built** (CoA generate, draft, sign, PDF, Mark sent, revise, void, Reports list, RoA page, job order CoA card, N6, N9, N10, the app-drafted RoA). Its **gate** in the build plan is: *a CoA for the real job order matches the lab's current CoA layout (R-10), with the right signatory (R-21)*. It is open until every line below is closed. Phase 5 runs in the meantime; none of these blocks it.
+
+| # | Gate item | Today | Needs | Where in the app |
+| --- | --- | --- | --- | --- |
+| G1 | A real job order with completed batches | Demo data only (`pnpm seed:reports`, JO-2026-0120 to 0129) | The lab's first real job order entered, its batches completed with their signed RoAs | Whole chain |
+| G2 | Fixed carbon on AR | The app takes FC by difference on each basis (D-13): 32.99 where the lab's paper shows 33.00 | The lab's rule for the AR column (round the converted value, or the difference of rounded values) | `certificate.ts` buildRows, `calc.ts` |
+| G3 | Methods list and detection limits | Configuration defaults print as they are (answer 6, Nov 20) | The lab's methods with editions and detection limits | Configuration > Methods and standards |
+| G4 | Signature and stamp images | Placeholders (`b_sutrisno-sign.png`, `sgsi-stamp.svg`, a generated one for the Supervisor), stored as `demo-` files | The real PNGs, transparent background, from each signatory and the lab stamp. **Retire the demo images before go-live** | Profile > Signature, Lab stamp (Manager) |
+| G5 | Form codes and terms | CoA `FM-LAB-014 rev 1` and RoA `FM-LAB-021` are placeholders; the terms line is a default | The lab's form code and revision for each report and the exact terms wording | Configuration > Report templates |
+| G6 | Who may sign | Manager signs; a Supervisor may sign "on behalf of" when named on the job order | The lab's rule: Manager only, or Supervisor on their own; does a delegate's signature carry the stamp (open point 15) | Roles (`report.sign`), job order signatory |
+| G7 | Certified signature (PSrE) | Not built; the signature is an image, the signing is by password | Whether any client or KAN needs a certified signature (open point 12) | Spec open point 12 |
+| G8 | RoA fields | SGSI RoA template filled by the app (section 17): Date Tested = first to last value entered, Reference order = the job order's client reference | The lab's confirmation of those two, and of the "Laboratory Supervisor" signature line | `roa.ts` |
+| G9 | Layout match | Built from the SGSI template and the two sample vendors' documents | Side by side with the lab's current CoA on the first real certificate | CoA PDF |
+
+**Known differences from the frames (not gate items):** the full Profile page with Change password (Phase 5 builds the Profile), Configuration > Report templates preview still draws its own certificate (needs fonts served to the browser), no select-all checkbox on the Reports list.
+
+**How the gate is closed.** Run G1 with the lab; for each of G2 to G9, record the lab's answer here, change the default or setting, and re-issue a certificate. When the lab signs off the printed CoA and RoA, mark the phase's gate met in `V1_Build_Plan.md`.
+
 ## Build status
 
 **Slice A built (Nov 20, 2026).** Migrations C-21 applied. API: card, Generate, draft page and edit, Send, Withdraw, Return, Sign with password, PDF, Print, signatory change, N6/N9/N10 (`apps/api/src/routes/reports.ts`, `scripts/check-reports.ts` all pass). Web: job order CoA card (five states plus the signatory control), CoA page at `/reports/coa/:id` (draft, awaiting signature, signatory view, published), Notifications tint, job order form without a typed signatory. Deviations: the preview is the PDF itself in a frame (phone: Open PDF), not an HTML render; the CSO opens a published certificate from the job order card. Browser tests: `e2e/phase4-reports-a.spec.ts` at 1440, 834 and 390. Slice B (Mark sent, revise, void, list, RoA page, signature and stamp uploads, client default, seed) is next.

@@ -100,6 +100,7 @@ test.describe.serial("batches, slice A", () => {
   });
 
   test("receive: scan, tick, mass, condition, remark, a photo and the labels; Confirm with fewer samples (BA1, BA2)", async ({ page }, info) => {
+    test.setTimeout(150_000);   // the whole reception in one test: over 60 s on the phone against the remote database
     const phone = info.project.name === "phone", tablet = info.project.name === "tablet";
     await signIn(page, "dedi@sgsi.co.id");
     await page.goto(`/batches/${batch}/reception`);

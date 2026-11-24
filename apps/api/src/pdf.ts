@@ -9,7 +9,7 @@ const asset = (p: string) => readFileSync(fileURLToPath(new URL(`../assets/${p}`
 const dataUri = (mime: string, b: Buffer) => `data:${mime};base64,${b.toString("base64")}`;
 let base: { fontCss: string; logo: string } | null = null;
 /** The fonts (Noto Sans, Newsreader, JetBrains Mono: OFL) and the lab logo, read once. */
-function baseAssets() {
+export function baseAssets() {
   if (!base) {
     const face = (family: string, file: string, weight: string) => `@font-face { font-family: "${family}"; src: url(${dataUri("font/ttf", asset(`fonts/${file}`))}); font-weight: ${weight}; }`;
     base = {

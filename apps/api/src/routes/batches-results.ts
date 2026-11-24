@@ -10,6 +10,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { admin } from "../supabase";
 import { system, type Tx } from "../db";
 import { NoParam, SCREEN, fail, logStep, notify, runAs, runAsActor, uuid } from "../batch-lib";
+import { buildRoaPayload, renderRoaPdf } from "../roa-data";
+import { PdfUnavailable } from "../pdf";
 
 /** "8,42" and "8.42" are both accepted; the value is kept with a dot. Null when it is not a plain number. */
 export const parseValue = (t: string): string | null => {
@@ -443,6 +445,25 @@ export async function batchResultsRoutes(app: FastifyInstance) {
     const { data, error } = await admin.storage.from(DOCS).createSignedUrl(d.storage_path as string, 3600, { download: d.file_name as string });
     if (error || !data) throw error ?? new Error("no link");
     return { url: data.signedUrl, fileName: d.file_name };
+  });
+
+  // the RoA drafted from the batch's values (SGSI template, owner Nov 24): the lab prints it, the Supervisor signs it, the Lab admin uploads the signed copy
+  r.get("/batches/:no/roa/draft", { preHandler: requireAny("batch.document.upload", "report.sign"), schema: { params: NoParam } }, async (req, reply) => {
+    const res = await runAs(req, async (tx) => {
+      const b = await batchOf(tx, req.params.no);
+      if (!b) return { code: 404, key: "not_found", text: "This batch was not found." };
+      if (b.status !== "analysis_finished" && b.status !== "completed") return { code: 409, key: "not_ready", text: "The RoA can be printed once the analysis is finished." };
+      return { payload: await buildRoaPayload(tx, b.batch_no as string) };
+    });
+    if (!("payload" in res)) return fail(reply, res.code!, res.key!, res.text!);
+    if (!res.payload) return fail(reply, 404, "not_found", "This batch was not found.");
+    try {
+      const pdf = await renderRoaPdf(res.payload);
+      return reply.header("content-type", "application/pdf").header("content-disposition", `inline; filename="RoA-${res.payload.batchNo}.pdf"`).send(pdf);
+    } catch (e) {
+      if (e instanceof PdfUnavailable) return fail(reply, 503, "pdf_unavailable", e.message);
+      throw e;
+    }
   });
 
   r.post("/batches/:no/complete", { preHandler: requireAny("batch.complete"), schema: { params: NoParam } }, async (req, reply) => {

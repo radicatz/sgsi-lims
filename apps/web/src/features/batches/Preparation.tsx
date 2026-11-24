@@ -71,10 +71,13 @@ export function PreparationTab({
   const d = q.data,
     items = d?.items ?? [];
   const dirty = Object.keys(edits).length;
-  const refresh = () => {
-    for (const k of ["adl", "batch", "batches", "order-batches"])
-      qc.invalidateQueries({ queryKey: [k] });
-  };
+  // resolves when the refetches are back (see Analysis.tsx: a save keeps the typed values until the saved ones replace them)
+  const refresh = () =>
+    Promise.all(
+      ["adl", "batch", "batches", "order-batches"].map((k) =>
+        qc.invalidateQueries({ queryKey: [k] }),
+      ),
+    );
   // unsaved values: ask before leaving the tab or the page
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -125,8 +128,8 @@ export function PreparationTab({
           })),
         },
       });
+      await refresh().catch(() => undefined);
       setEdits({});
-      refresh();
       toast("ADL saved");
       return true;
     } catch (e) {

@@ -16,7 +16,8 @@ export interface CertParam {
 /** One stored value (the primary one): `basis` is the basis it was entered on. */
 export interface CertValue { value: string | null; qualifier: "<" | ">" | null; text: string | null; basis: string }
 export interface CertSampleInput { sampleCode: string; sampleNo: string; mass: string | null; values: Record<string, CertValue> }   // key: code, or code:itemId
-export interface CertRow { name: string; method: string; cells: string[]; span: string | null }   // cells follow the chosen bases; span: one value across them
+/** cells follow the chosen bases; span: one value across them. `label` and `unit` are the name without the unit and the unit alone, for a report with a Unit column (the RoA). */
+export interface CertRow { name: string; method: string; cells: string[]; span: string | null; code: string; label: string; unit: string | null }
 export interface CertSample { sampleCode: string; sampleNo: string; mass: string | null; rows: CertRow[] }
 
 export const valueKey = (code: string, itemId?: string | null) => (itemId ? `${code}:${itemId}` : code);
@@ -27,8 +28,9 @@ const PRINT_NAME: Record<string, string> = {
 const NOT_PRINTED = new Set(["PREP", "ADL", "O"]);   // preparation values and the oxygen that has no formula in v1 never reach the certificate
 const DASH = "-";
 
+export const plainName = (p: CertParam): string => (p.itemId ? `${PRINT_NAME[p.code] ?? p.name}, ${p.itemLabel ?? ""}` : PRINT_NAME[p.code] ?? p.name);
 export const printName = (p: CertParam): string => {
-  const base = p.itemId ? `${PRINT_NAME[p.code] ?? p.name}, ${p.itemLabel ?? ""}` : PRINT_NAME[p.code] ?? p.name;
+  const base = plainName(p);
   return p.unit && p.unit !== "%" && !base.includes(`(${p.unit})`) ? `${base} (${p.unit})` : base;
 };
 /** "ASTM D3175-20", "ISO 1171:2010", "GB/T 212-2008" */
@@ -57,7 +59,7 @@ export function buildRows(params: CertParam[], s: CertSampleInput, bases: CertBa
   const rows: CertRow[] = [];
   const ordered = params.filter((p) => !NOT_PRINTED.has(p.code)).sort((a, b) => a.sort - b.sort || (a.itemLabel ?? "").localeCompare(b.itemLabel ?? ""));
   const withMade = ordered.filter((p) => ["TM", "IM", "ASH", "VM"].includes(p.code));
-  const row = (p: CertParam, cells: string[] | null, span: string | null = null) => rows.push({ name: printName(p), method: p.method ?? "", cells: cells ?? [], span });
+  const row = (p: CertParam, cells: string[] | null, span: string | null = null) => rows.push({ name: printName(p), method: p.method ?? "", cells: cells ?? [], span, code: p.code, label: plainName(p), unit: p.unit ?? null });
   // detection limit and "<": the value prints as typed on its own basis and the conversions are "-"
   const qualified = (p: CertParam, x: CertValue): { q: string; shown: string } | null => {
     if (x.qualifier && x.value != null) return { q: x.qualifier, shown: round(x.value, p.decimals) ?? x.value };
@@ -117,7 +119,11 @@ export const fmtDate = (iso: string | null | undefined): string => {
 export const verifyCodeOf = (sha256hex: string): string => { const h = sha256hex.slice(0, 8).toUpperCase(); return `${h.slice(0, 4)}-${h.slice(4)}`; };
 export const esc = (s: string | null | undefined): string => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const C = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#5c5b55", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };   // tokens.css, light
+/** The printed documents' colours (tokens.css, light); shared by the CoA and the RoA. */
+export const PRINT_COLORS = { fg: "#1a1a1a", head: "#0e2a4e", sec: "#5c5b55", mut: "#a4a39a", line: "#e8dfc9", err: "#c0392b" };
+const C = PRINT_COLORS;
+/** The CoA's stylesheet; the RoA builds on it so both documents print with the same fonts, colours and borders. */
+export const certCss = (fontCss: string) => css(fontCss);
 const css = (fontCss: string) => `${fontCss}
 @page { size: 595pt 842pt; }
 * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }

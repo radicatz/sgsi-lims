@@ -483,8 +483,8 @@ export function Reports() {
   );
   const filtersBtn = (
     <Button
-      icon="funnel-simple"
-      size="touch"
+      icon="funnel"
+      size="lg"
       id="rp-filters"
       onClick={() => setFilters(true)}
     >
@@ -499,7 +499,6 @@ export function Reports() {
           <span className="t-over">REPORTS</span>
           <h1 className="t-display">Reports</h1>
         </div>
-        {phone && filtersBtn}
       </div>
       {both && (
         <Tabs
@@ -522,13 +521,18 @@ export function Reports() {
       {phone ? (
         /* phone (frame Phone-07-Reports-01-Reports_list-01-CoA_tab): no card around the list; the search and the status chips sit on the page (owner, Nov 23) */
         <>
-          <Search
-            id="rp-q"
-            value={q}
-            onChange={setQ}
-            placeholder="Search reports"
-            width="100%"
-          />
+          {/* the Filters button beside the search, lg like Batches and Job orders (owner, Nov 24) */}
+          <div className="row g12" style={{ alignItems: "flex-end", flexWrap: "nowrap" }}>
+            <Search
+              id="rp-q"
+              label="Search"
+              value={q}
+              onChange={setQ}
+              placeholder="Search reports"
+              width="100%"
+            />
+            {filtersBtn}
+          </div>
           {chipRow}
           <div className="col g12" id="rp-cards">
             {rows.map((r) => (
@@ -604,11 +608,13 @@ export function Reports() {
           {d && d.total > 0 && <Pager {...pager} />}
         </>
       ) : (
-        <Card>
-          <div className="col g12">
-            <div className="row g12 wrap" style={{ alignItems: "flex-end" }}>
+        /* desktop and tablet (frame Desktop-07-Reports-01-Reports_list-01-CoA_tab_ref, owner Nov 24): Search, Period and Company and the status
+           chips sit on the page; the card holds the table and the pager only */
+        <>
+          <div className="row g12 wrap" style={{ alignItems: "flex-end" }}>
               <Search
                 id="rp-q"
+                label="Search"
                 value={q}
                 onChange={setQ}
                 placeholder={
@@ -634,20 +640,21 @@ export function Reports() {
                 options={companies.options}
                 width={220}
               />
-            </div>
-            {chipRow}
           </div>
-          <Table
-            cols={kind === "coa" ? coaCols : roaCols}
-            rows={rows}
-            keyOf={(r) => r.id}
-            onRow={open}
-            empty={empty}
-            sort={sort}
-            onSort={onSort}
-          />
-          {d && d.total > 0 && <Pager {...pager} />}
-        </Card>
+          {chipRow}
+          <Card>
+            <Table
+              cols={kind === "coa" ? coaCols : roaCols}
+              rows={rows}
+              keyOf={(r) => r.id}
+              onRow={open}
+              empty={empty}
+              sort={sort}
+              onSort={onSort}
+            />
+            {d && d.total > 0 && <Pager {...pager} />}
+          </Card>
+        </>
       )}
       {picked.length > 0 && !phone && (
         <div

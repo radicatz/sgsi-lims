@@ -333,12 +333,14 @@ export function Orders() {
       >
         {filters}
         {phone && (
+          // the same labelled lg Filters button as Batches, level with the 40 px search (owner, Nov 24)
           <Button
             icon="funnel"
-            aria-label="Filters"
+            size="lg"
+            id="jo-filters"
             onClick={() => setSheet(true)}
           >
-            {""}
+            Filters
           </Button>
         )}
         {reset && !phone ? (

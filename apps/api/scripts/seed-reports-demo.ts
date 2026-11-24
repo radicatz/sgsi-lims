@@ -8,6 +8,7 @@
 // Needs `pnpm seed:master`, `pnpm seed:demo` and the Phase 4 migrations. Safe to run again. Not audited (bulk demo load).
 //   pnpm seed:reports            load
 //   pnpm seed:reports --remove   take it out again (the demo images are retired)
+//   pnpm seed:reports --roa      only make the demo batches' RoA files again with the app's RoA renderer (roa-data.ts), keeping everything else
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fixedCarbon } from "@sgsi/shared";
@@ -16,6 +17,7 @@ import { env } from "../src/env";
 import { admin } from "../src/supabase";
 import { orderedParameters } from "../src/certificate-data";
 import { issueCertificate } from "../src/certificate-issue";
+import { buildRoaPayload, renderRoaPdf } from "../src/roa-data";
 
 const IMG = new URL("../../../.context/assets/images/", import.meta.url);
 const ORDERS = Array.from({ length: 10 }, (_, i) => `JO-2026-01${20 + i}`);
@@ -36,7 +38,6 @@ async function gotenberg(route: string, parts: Array<[string, Blob, string?]>, f
   if (!res.ok) throw new Error(`Gotenberg ${route}: ${res.status} ${await res.text().catch(() => "")}`);
   return Buffer.from(await res.arrayBuffer());
 }
-const pdfOf = (html: string) => gotenberg("/forms/chromium/convert/html", [["files", new Blob([html], { type: "text/html" }), "index.html"]]);
 const pngOf = (html: string, w: number, h: number) => gotenberg("/forms/chromium/screenshot/html", [["files", new Blob([html], { type: "text/html" }), "index.html"]], { format: "png", omitBackground: "true", width: String(w), height: String(h) });
 
 if (process.argv.includes("--remove")) {
@@ -99,7 +100,35 @@ const VALUES = (i: number): Array<[string, string, string]> => {
   const im = (7.9 + (i % 5) * 0.35).toFixed(2), ash = (5.1 + (i % 6) * 0.9).toFixed(2), vm = (38.6 + (i % 4) * 0.8).toFixed(2);
   return [["TM", "ar", (13.4 + (i % 5) * 0.9).toFixed(2)], ["IM", "adb", im], ["ASH", "adb", ash], ["VM", "adb", vm], ["FC", "adb", fixedCarbon(im, ash, vm) ?? "46.00"], ["TS", "adb", (0.31 + (i % 4) * 0.11).toFixed(2)], ["GCV", "adb", String(5640 + (i % 7) * 55)]];
 };
-const roaPdf = (no: string, batch: string, order: string, company: string) => pdfOf(`<html><body style="font-family:sans-serif;padding:60px"><h1>Report of Analysis ${no}</h1><p>Batch ${batch}, job order ${order}, ${company}.</p><p style="color:#a33;font-weight:600">Internal, not for distribution</p><p>Demo file made by pnpm seed:reports. The lab's signed paper RoA is uploaded here when a batch is completed.</p></body></html>`);
+const ymdIn = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar" }).format(d);
+/** The demo "signed" RoA: the RoA the app drafts for the batch (SGSI template), numbered and dated as the lab would, uploaded as the signed copy. */
+async function attachRoa(batchNo: string, roaNo: string, at: Date) {
+  const payload = await sql.begin((tx) => buildRoaPayload(tx, batchNo, { number: roaNo, reportedOn: ymdIn(at) }));
+  if (!payload) throw new Error(`${batchNo} is missing`);
+  const pdf = await renderRoaPdf(payload);
+  const path = `demo/${roaNo}-${randomUUID().slice(0, 8)}.pdf`;
+  const up = await admin.storage.from("batch-documents").upload(path, pdf, { contentType: "application/pdf" });
+  if (up.error) throw up.error;
+  const [old] = await sql`select d.storage_path from batch_documents d join batches b on b.id = d.batch_id where b.batch_no = ${batchNo}`;
+  await sql.begin(async (tx) => {
+    await tx`select set_config('app.skip_audit','on',true)`;
+    await tx`delete from batch_documents where batch_id = (select id from batches where batch_no = ${batchNo})`;
+    await tx`insert into batch_documents (batch_id, kind, roa_no, storage_path, file_name, size_bytes, sha256, uploaded_by, uploaded_at)
+      select id, 'signed_roa', ${roaNo}, ${path}, ${`${roaNo}.pdf`}, ${pdf.length}, ${createHash("sha256").update(pdf).digest("hex")}, ${adm.id}, ${at} from batches where batch_no = ${batchNo}`;
+  });
+  if (old) await admin.storage.from("batch-documents").remove([old.storage_path as string]);
+}
+if (process.argv.includes("--roa")) {
+  // the ten Reports demo batches, and B-2026-0417 of `pnpm seed:batches`, which carries a placeholder file too
+  for (const [batchNo, roaNo] of [...BATCHES.map((b, i) => [b, `RoA-04${50 + i}`] as const), ["B-2026-0417", "RoA-0417"] as const]) {
+    const [b] = await sql`select d.uploaded_at from batches b left join batch_documents d on d.batch_id = b.id where b.batch_no = ${batchNo}`;
+    if (!b) { console.log(`${batchNo}: not loaded`); continue; }
+    await attachRoa(batchNo, roaNo, (b.uploaded_at as Date | null) ?? new Date());
+    console.log(`${batchNo}: ${roaNo} made again`);
+  }
+  await sql.end();
+  process.exit(0);
+}
 
 const [tpl] = await sql`select id from report_templates where kind = 'coa' and status = 'current' order by company_id nulls first limit 1`;
 if (!tpl) throw new Error("No CoA template is active (Configuration, Report templates).");
@@ -114,11 +143,6 @@ for (const [i, no] of ORDERS.entries()) {
   if (!co) throw new Error(`Client ${code} is missing: run pnpm seed:master first.`);
   const ago = 40 - i * 3, ref = `${code}-${2600 + i}`;
   const status = plan.kind <= 2 ? (plan.kind === 0 ? "delivered" : "reported") : "in_progress";
-  const roa = await roaPdf(roaNo, batchNo, no, co.name as string);
-  const roaPath = `demo/${roaNo}-${randomUUID().slice(0, 8)}.pdf`;
-  const up = await admin.storage.from("batch-documents").upload(roaPath, roa, { contentType: "application/pdf" });
-  if (up.error) throw up.error;
-
   const report = await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit','on',true)`;
     const [j] = await tx`insert into job_orders (order_no, company_id, contact_id, client_reference, standards, preparation, expected_samples, status, cso_id, signatory_id, signatory_name, signatory_title, created_by, submitted_at, created_at)
@@ -140,12 +164,12 @@ for (const [i, no] of ORDERS.entries()) {
         await tx`insert into analysis_values (analysis_id, basis, value_num, is_primary) values (${a!.id}, ${basis}, ${v}, true)`;
       }
     }
-    await tx`insert into batch_documents (batch_id, kind, roa_no, storage_path, file_name, size_bytes, sha256, uploaded_by, uploaded_at) values (${b!.id}, 'signed_roa', ${roaNo}, ${roaPath}, ${`${roaNo}.pdf`}, ${roa.length}, ${createHash("sha256").update(roa).digest("hex")}, ${adm.id}, ${day(ago - 7)})`;
     for (const [f, t, a, who2] of [[null, "created", "Batch created", cso.id], ["created", "preparation", "Reception confirmed", prep.id], ["preparation", "prep_finished", "Preparation finished", prep.id], ["prep_finished", "analysis", "Analysis started", ana.id],
       ["analysis", "analysis_finished", "Analysis finished", ana.id], ["analysis_finished", "completed", "Batch completed", adm.id]] as const)
       await tx`insert into batch_status_log (batch_id, from_status, to_status, action, by_user) values (${b!.id}, ${f}::batch_status, ${t}::batch_status, ${a}, ${who2})`;
     return { jobId: j!.id as string };
   });
+  await attachRoa(batchNo, roaNo, day(ago - 7));
 
   /* ---------- the certificate(s), by the same code as the Sign and publish button ---------- */
   const params = (await sql.begin((tx) => orderedParameters(tx, report.jobId))).map((p) => p.id as string);
