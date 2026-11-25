@@ -34,7 +34,7 @@ const lockWhy = (s: { state: SampleState; batch_no: string | null; received_at: 
 
 const Ref = z.string().trim().min(1, "Enter the client reference.").max(60, "At most 60 characters.").regex(/^[^\t\r\n]+$/, "One line only.");
 const Depth = z.number().min(0, "Zero or more.").max(99999.99, "Too deep.").nullable().optional();
-const SampleRow = z.object({ id: uuid.optional(), clientRef: Ref, description: opt(200), drillHole: opt(60), depthFrom: Depth, depthTo: Depth, remarks: opt(300) });
+const SampleRow = z.object({ id: uuid.optional(), clientRef: Ref, description: opt(200), plyComp: z.enum(["ply", "comp"]).nullable().optional(), drillHole: opt(60), depthFrom: Depth, depthTo: Depth, remarks: opt(300) });
 const SamplesBody = z.object({ rows: z.array(SampleRow).max(2000), removed: z.array(uuid).max(2000).default([]) });
 
 /* ================= files ================= */
@@ -65,7 +65,7 @@ const JO_FIELDS: Record<string, string> = {
 };
 const S_FIELDS: Record<string, string> = {
   client_ref: "Client reference", client_description: "Client description", drill_hole_text: "Drill hole or lot", depth_from: "Depth from (m)", depth_to: "Depth to (m)", remarks: "Remarks",
-  sample_type: "Sample type", batch_id: "Batch", released_from_batch_id: "Released from batch", sample_no: "Sample ID", sample_code: "Sample code", lot: "Lot", received_at: "Received",
+  sample_type: "Sample type", ply_comp: "Ply or composite", batch_id: "Batch", released_from_batch_id: "Released from batch", sample_no: "Sample ID", sample_code: "Sample code", lot: "Lot", received_at: "Received",
   arrived_at: "Arrived", mass_received_kg: "Mass received (kg)", condition: "Condition", condition_remark: "Condition remark", on_hold: "On hold", hold_reason: "Hold reason",
   not_received_reason: "Not received reason", not_received_note: "Note",
 };
@@ -84,7 +84,7 @@ export async function orderSliceBRoutes(app: FastifyInstance) {
 
   /* ---------- the sample list ---------- */
   const sampleRows = (tx: Tx, orderId: string) => tx`
-    select s.id, s.row_no, s.client_ref, s.client_description, s.remarks, s.drill_hole_text, s.depth_from::text as depth_from, s.depth_to::text as depth_to,
+    select s.id, s.row_no, s.client_ref, s.client_description, s.ply_comp, s.remarks, s.drill_hole_text, s.depth_from::text as depth_from, s.depth_to::text as depth_to,
       s.state, s.batch_id, b.batch_no, s.sample_no, s.sample_code, s.received_at, rp.full_name as received_by, s.released_from_batch_id, rb.batch_no as released_from,
       s.not_received_reason, s.not_received_note, s.not_received_at, np.full_name as not_received_by, (i.sample_id is not null) as matched
     from v_samples s left join batches b on b.id = s.batch_id left join batches rb on rb.id = s.released_from_batch_id
@@ -107,7 +107,7 @@ export async function orderSliceBRoutes(app: FastifyInstance) {
       canEdit: !closed, why: closed,
       reasons: out.reasons.map((x) => ({ value: x.value as string, needsNote: x.needs_remark as boolean })),
       items: out.rows.map((s) => ({
-        id: s.id, rowNo: s.row_no, clientRef: s.client_ref, description: s.client_description, remarks: s.remarks, drillHole: s.drill_hole_text, depthFrom: s.depth_from, depthTo: s.depth_to,
+        id: s.id, rowNo: s.row_no, clientRef: s.client_ref, description: s.client_description, plyComp: s.ply_comp, remarks: s.remarks, drillHole: s.drill_hole_text, depthFrom: s.depth_from, depthTo: s.depth_to,
         state: s.state, batchNo: s.batch_no, sampleNo: s.sample_no, sampleCode: s.sample_code, receivedAt: s.received_at, receivedBy: s.received_by, releasedFrom: s.released_from,
         notReceived: s.not_received_at ? { reason: s.not_received_reason, note: s.not_received_note, at: s.not_received_at, by: s.not_received_by } : null,
         matched: s.matched, locked: !editable(s.state as SampleState), lockWhy: lockWhy(s as never),
@@ -151,17 +151,17 @@ export async function orderSliceBRoutes(app: FastifyInstance) {
       const changedRef = updates.filter((u) => byId.get(u.id!)!.client_ref !== u.clientRef);
       const taken = new Set(cur.filter((c) => !removed.has(c.id)).map((c) => (c.client_ref as string)));
       if (changedRef.some((u) => taken.has(u.clientRef))) await tx`update samples set client_ref = '~' || id::text where id = any(${changedRef.map((u) => u.id!)}::uuid[])`;
-      const pack = (x: z.infer<typeof SampleRow>) => ({ id: x.id ?? null, ref: x.clientRef, descr: x.description, hole: x.drillHole, dfrom: x.depthFrom ?? null, dto: x.depthTo ?? null, remarks: x.remarks });
-      if (updates.length) await tx`update samples s set client_ref = v.ref, client_description = v.descr, drill_hole_text = v.hole, depth_from = v.dfrom, depth_to = v.dto, remarks = v.remarks
-        from jsonb_to_recordset(${tx.json(updates.map(pack) as never)}) as v(id uuid, ref text, descr text, hole text, dfrom numeric, dto numeric, remarks text)
+      const pack = (x: z.infer<typeof SampleRow>) => ({ id: x.id ?? null, ref: x.clientRef, descr: x.description, ply: x.plyComp ?? null, hole: x.drillHole, dfrom: x.depthFrom ?? null, dto: x.depthTo ?? null, remarks: x.remarks });
+      if (updates.length) await tx`update samples s set client_ref = v.ref, client_description = v.descr, ply_comp = v.ply, drill_hole_text = v.hole, depth_from = v.dfrom, depth_to = v.dto, remarks = v.remarks
+        from jsonb_to_recordset(${tx.json(updates.map(pack) as never)}) as v(id uuid, ref text, descr text, ply text, hole text, dfrom numeric, dto numeric, remarks text)
         where s.id = v.id and s.job_order_id = ${j.id}`;
       let added: string[] = [];
       if (adds.length) {
         const start = Math.max(0, ...cur.filter((c) => !removed.has(c.id)).map((c) => c.row_no as number));
         const rows = adds.map((a, i) => ({ ...pack(a), row_no: start + i + 1 }));
-        added = (await tx`insert into samples (job_order_id, row_no, client_ref, client_description, drill_hole_text, depth_from, depth_to, remarks, sample_type)
-          select ${j.id}, v.row_no, v.ref, v.descr, v.hole, v.dfrom, v.dto, v.remarks, ${j.sample_type}
-          from jsonb_to_recordset(${tx.json(rows as never)}) as v(row_no int, ref text, descr text, hole text, dfrom numeric, dto numeric, remarks text) order by v.row_no
+        added = (await tx`insert into samples (job_order_id, row_no, client_ref, client_description, ply_comp, drill_hole_text, depth_from, depth_to, remarks, sample_type)
+          select ${j.id}, v.row_no, v.ref, v.descr, v.ply, v.hole, v.dfrom, v.dto, v.remarks, ${j.sample_type}
+          from jsonb_to_recordset(${tx.json(rows as never)}) as v(row_no int, ref text, descr text, ply text, hole text, dfrom numeric, dto numeric, remarks text) order by v.row_no
           returning id`).map((x) => x.id as string);
       }
       // drill holes: a row whose hole matches one of the client's codes (any case) and has both depths gets its interval (section 6)
@@ -305,6 +305,7 @@ function buildHistory(rows: AuditRow[], names: Map<string, string>, orderNo: str
     if (Array.isArray(v)) return v.length ? v.map((x) => (x === "GBT" ? "GB/T" : String(x))).join(", ") : null;
     if (typeof v === "boolean") return v ? "Yes" : "No";
     if (k === "status") return STATUS_WORD[v as string] ?? String(v);
+    if (k === "ply_comp") return v === "comp" ? "Composite" : "Ply";
     if (k.endsWith("_id")) return names.get(v as string) ?? "Removed record";
     if (k === "due_on") return new Date(`${v}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
     if (k.endsWith("_at")) return new Date(v as string).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: TZ });

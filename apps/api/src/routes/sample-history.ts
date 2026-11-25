@@ -48,7 +48,7 @@ export type SampleHistory = NonNullable<Awaited<ReturnType<typeof loadHistory>>>
 async function loadHistory(user: User, requestId: string, id: string) {
     const sees = user.permissions.includes("result.read");
     const found = await asUser(user, { requestId, screen: SCREEN }, async (tx: Tx) => {
-      const [s] = await tx`select s.id, s.client_ref, s.sample_no, s.sample_code, s.client_description, s.sample_type, s.drill_hole_text, s.depth_from::float as depth_from, s.depth_to::float as depth_to,
+      const [s] = await tx`select s.id, s.client_ref, s.sample_no, s.sample_code, s.client_description, s.ply_comp, s.sample_type, s.drill_hole_text, s.depth_from::float as depth_from, s.depth_to::float as depth_to,
           s.mass_received_kg::float as mass, s.condition, s.on_hold, s.hold_reason, s.state, s.created_at, s.arrived_at, s.arrived_by, s.received_at, s.received_by, s.released_at, s.released_by,
           s.not_received_at, s.not_received_by, s.not_received_reason, s.batch_id, s.job_order_id, s.attributes->>'holdNote' as hold_note,
           j.order_no, j.created_by as order_by, j.created_at as order_at, c.name as company, c.id as company_id, b.batch_no, b.status::text as batch_status,
@@ -131,7 +131,7 @@ async function loadHistory(user: User, requestId: string, id: string) {
       sample: {
         id: found.id, title: found.sample_no ?? found.client_ref, sampleNo: found.sample_no, sampleCode: found.sample_code, clientRef: found.client_ref, status: label, statusTone: tone,
         orderNo: found.order_no, batchNo: found.batch_no, companyId: found.company_id, company: found.company, drillHole: found.drill_hole_text, depthFrom: found.depth_from, depthTo: found.depth_to,
-        description: found.client_description, sampleType: found.sample_type, mass: found.mass, condition: found.condition, held: found.on_hold ? { reason: found.hold_reason, note: found.hold_note } : null,
+        description: found.client_description, plyComp: found.ply_comp, sampleType: found.sample_type, mass: found.mass, condition: found.condition, held: found.on_hold ? { reason: found.hold_reason, note: found.hold_note } : null,
       },
       events: [...ev, ...pending], values: sees, lab: out.lab,
     };

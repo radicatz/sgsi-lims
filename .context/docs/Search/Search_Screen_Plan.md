@@ -217,12 +217,12 @@ Card anatomy (padding 16, Card head 32); centered dialogs, Bottom sheet on the p
 
 | # | Question | Default |
 | --- | --- | --- |
-| 1 | Does the Preparation team see result values in search? | No: Results target hidden for Preparation as for the CSO (values are Analyst work) |
+| 1 | Does the Preparation team see result values in search? | **Changed Nov 25, 2026 (Phase 5 B-5): yes.** Values follow `result.read`, which Preparation has (spec 8.2); only the CSO sees no values. Was: hidden for Preparation |
 | 2 | AND / OR per row, or one Match all / any switch | One switch in v1; per-row and groups later |
 | 3 | What does a scan open | The sample history |
 | 4 | Recent items kept | Last 5 records and 3 searches per user, on this device and account |
 | 5 | Shared queries | Read-only for others, who can duplicate them |
-| 6 | Export limit | Every matching row, CSV or XLSX, filtered by permission |
+| 6 | Export limit | Every matching row, filtered by permission. **CSV in v1; XLSX with phase 6's export on every list** (Phase 5 decision 1). The screen shows the first 500 rows |
 | 7 | Does search find archived masters (archived drill holes, clients) | Yes, with an Archived tag |
 
 ## 13 · Build steps (after go)

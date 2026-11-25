@@ -76,7 +76,7 @@ Desktop, 1440, sidebar expanded (content 1128 wide):
 | O5 | **Mean turnaround** | Days from Confirm reception to Completed. The colour band (achieved, 100–110%, 110–125%, 125–150%, 150–200%, 200–300%, >300% of the service turnaround) colours the value and a small label | Card KPI, Kind=Progress |
 | O6 | **Batch workflow** | One bar per v1 step: Created, Receiving, Preparation, Prep finished, Analysis, Analysis finished, Completed, with counts. "Now" | Workflow bars |
 | O7 | **Job orders by status** | Draft, Awaiting samples, In progress, Reported, Delivered (spec 9.3); Closed and Cancelled are left out. "Now" | Bar chart (horizontal) |
-| O8 | **Sample type mix** | Ply, Composite, Roof and floor, Parting (categories open, R-07) | Donut, Legend item |
+| O8 | **Sample type mix** | Ply, Composite and Not set, from the Ply/Comp recorded per sample (built Nov 25, 2026; open point 1) | Donut, Legend item |
 | O9 | **Samples received per day** | Bars per day for the period (per week when the period is longer than 31 days) | Bar chart |
 | O10 | **Turnaround by company** | Mean days per company, bar coloured by its band; target line | Bar chart |
 | O11 | **Active batches** | Filter tabs All, Due (within 7 days), Late. Columns: Batch, Company, Job order, Deadline, Progress (values saved or samples received, by step), Status. The row's deadline is coloured by the turnaround band. Rows open the batch page. 8 rows and pager. "Now" | Table card, Status badge, Progress bar, Pager |
@@ -163,7 +163,7 @@ The sidebar is already built in the library as **Sidebar** (Collapsed=No 248 px,
 | Mean turnaround, Turnaround by company, bands | Confirm reception and Completed stamps; service turnaround as the target | Yes; the target per service needs confirming with the lab |
 | Job orders by status | Derived job order status (spec 9.3) | Yes |
 | Your queues | The My work queue counts (S-19) | Yes |
-| Sample type mix | Ply or composite, and lithology (roof, floor, parting) | Yes, categories open (R-07) |
+| Sample type mix | Ply or composite per sample (built); lithology kind (Coal, Parting, No lithology) waits for seam and lithology per sample (next goal, spec D-19) | Yes |
 | RoA uploaded, Drill holes with CoA | Batch documents (D-49); drill-hole CoA uploads | Yes |
 | Determinations, quality charts, trend | Saved final values per sample and parameter (D-47); basis conversion formulas | Yes |
 | Awaiting review, recheck flags | Review step | **Next goal**: no widget in v1 |
@@ -180,7 +180,7 @@ The sidebar is already built in the library as **Sidebar** (Collapsed=No 248 px,
 
 | # | Question | Default |
 | --- | --- | --- |
-| 1 | Sample type categories (R-07) | Ply, Composite, Roof and floor, Parting |
+| 1 | Sample type categories | **Settled Nov 25, 2026:** Ply, Composite and Not set, from the Ply/Comp recorded per sample (SIM Lab has the column; "Roof and floor" is in no source). Lithology kinds (Coal, Parting, No lithology) follow when seam and lithology are recorded per sample (spec D-19, next goal) |
 | 2 | Drill-hole list: all master drill holes, or only those with samples in the period? | Only those with samples in the period, so it obeys the filters |
 | 3 | Turnaround target per service | Basic 5 days, Full 10 days until the lab gives its own |
 | 4 | Your queues strip on the dashboard repeats My work | Keep it as a one-line strip (S-01); it hides when every count is 0 |

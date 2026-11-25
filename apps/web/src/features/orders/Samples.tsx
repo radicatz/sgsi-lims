@@ -38,6 +38,7 @@ export interface SampleRow {
   rowNo: number;
   clientRef: string;
   description: string | null;
+  plyComp: "ply" | "comp" | null;
   remarks: string | null;
   drillHole: string | null;
   depthFrom: string | null;
@@ -129,12 +130,55 @@ const tidyDepth = (t: string) => {
     : depthCell(p.drillHole, p.depthFrom.toFixed(2), p.depthTo!.toFixed(2));
 };
 
-/* ---------- Excel paste: tab-separated rows (client reference, description, depth or hole + from + to, remarks) ---------- */
+/* ---------- Ply or composite (spec section 10 "Ply/Comp*", as SIM Lab's Input ROA) ---------- */
+type Ply = "" | "ply" | "comp";
+const PLY_WORD: Record<"ply" | "comp", string> = {
+  ply: "Ply",
+  comp: "Composite",
+};
+const plyOf = (t: string): Ply =>
+  /^ply$/i.test(t.trim())
+    ? "ply"
+    : /^comp(osite)?$/i.test(t.trim())
+      ? "comp"
+      : "";
+/** The Ply/Comp choice of one row: a select while editing, plain text otherwise. */
+function PlyCell({
+  value,
+  edit,
+  label,
+  onChange,
+}: {
+  value: Ply;
+  edit: boolean;
+  label: string;
+  onChange: (v: Ply) => void;
+}) {
+  return edit ? (
+    <select
+      className="gc"
+      value={value}
+      aria-label={label}
+      onChange={(x) => onChange(x.target.value as Ply)}
+    >
+      <option value="">Not set</option>
+      <option value="ply">Ply</option>
+      <option value="comp">Composite</option>
+    </select>
+  ) : value ? (
+    <span className="t-sm">{PLY_WORD[value]}</span>
+  ) : (
+    <span className="t-cap c-mut">Not set</span>
+  );
+}
+
+/* ---------- Excel paste: tab-separated rows (client reference, description, depth or hole + from + to, remarks; a cell reading Ply or Composite after the reference is the Ply/Comp) ---------- */
 interface Draft {
   key: string;
   id?: string;
   clientRef: string;
   description: string;
+  plyComp: Ply;
   depth: string;
   remarks: string;
 }
@@ -154,11 +198,16 @@ export function parsePaste(text: string): Array<Omit<Draft, "key">> {
     rows.shift(); // a header row
   return rows
     .filter((r) => r[0])
-    .map((c) => {
+    .map((cells) => {
+      // a Ply or Composite cell (SIM Lab's Ply/Comp column) is taken out first, so the other columns keep their places
+      const at = cells.findIndex((x, i) => i > 0 && plyOf(x) !== "");
+      const plyComp: Ply = at > 0 ? plyOf(cells[at]!) : "";
+      const c = at > 0 ? cells.filter((_, i) => i !== at) : cells;
       if (isNum(c[2]) && isNum(c[3]))
         return {
           clientRef: c[0]!.slice(0, 60),
           description: c[1] ?? "",
+          plyComp,
           depth: `${c[2]}-${c[3]}`,
           remarks: c[4] ?? "",
         };
@@ -166,12 +215,14 @@ export function parsePaste(text: string): Array<Omit<Draft, "key">> {
         return {
           clientRef: c[0]!.slice(0, 60),
           description: c[1] ?? "",
+          plyComp,
           depth: `${c[2] ?? ""} ${c[3]}-${c[4]}`.trim(),
           remarks: c[5] ?? "",
         };
       return {
         clientRef: c[0]!.slice(0, 60),
         description: c[1] ?? "",
+        plyComp,
         depth: c[2] ?? "",
         remarks: c[3] ?? "",
       };
@@ -183,12 +234,14 @@ const draftOf = (s: SampleRow): Draft => ({
   id: s.id,
   clientRef: s.clientRef,
   description: s.description ?? "",
+  plyComp: s.plyComp ?? "",
   depth: depthCell(s.drillHole, s.depthFrom, s.depthTo),
   remarks: s.remarks ?? "",
 });
 const same = (a: Draft, b: Draft) =>
   a.clientRef.trim() === b.clientRef.trim() &&
   a.description.trim() === b.description.trim() &&
+  a.plyComp === b.plyComp &&
   a.depth.trim() === b.depth.trim() &&
   a.remarks.trim() === b.remarks.trim();
 const blank = (d: Draft) =>
@@ -201,6 +254,7 @@ const newDraft = (p: Partial<Draft> = {}): Draft => ({
   key: `n${++seq}`,
   clientRef: "",
   description: "",
+  plyComp: "",
   depth: "",
   remarks: "",
   ...p,
@@ -338,6 +392,7 @@ export function SamplesTab({
       ...(d.id ? { id: d.id } : {}),
       clientRef: d.clientRef.trim(),
       description: d.description.trim() || null,
+      plyComp: d.plyComp || null,
       drillHole: p.drillHole,
       depthFrom: p.depthFrom,
       depthTo: p.depthTo,
@@ -610,6 +665,9 @@ export function SamplesTab({
                   <div className="row g8 between">
                     <span className="t-sm c-sec ellip">
                       {v.d.description || "No description"}
+                      {v.d.plyComp && (
+                        <span className="c-mut">{` ${PLY_WORD[v.d.plyComp]}`}</span>
+                      )}
                     </span>
                     {v.s?.batchNo ? (
                       <span className="t-data-sm c-act">{v.s.batchNo}</span>
@@ -672,10 +730,10 @@ export function SamplesTab({
           <tr>
             <th style={{ width: 32 }}>#</th>
             <th>Sample</th>
-            <th style={{ width: 130 }}>Depth / lot reference</th>
-            <th style={{ width: 100 }}>Batch</th>
-            <th style={{ width: 132 }}>Status</th>
-            {showAct && <th style={{ width: 72 }} aria-label="Action" />}
+            <th style={{ width: 122 }}>Depth / lot reference</th>
+            <th style={{ width: 96 }}>Batch</th>
+            <th style={{ width: 128 }}>Status</th>
+            {showAct && <th style={{ width: 104 }} aria-label="Action" />}
           </tr>
         </thead>
         <tbody>
@@ -739,6 +797,12 @@ export function SamplesTab({
                         <span className="t-cap c-sec">{v.d.description}</span>
                       )
                     )}
+                    <PlyCell
+                      value={v.d.plyComp}
+                      edit={e}
+                      label={`Ply or composite, row ${i + 1}`}
+                      onChange={(x) => setDraft(v, { plyComp: x })}
+                    />
                     {e ? (
                       <input
                         className="gc cap mut opt"
@@ -854,6 +918,7 @@ export function SamplesTab({
                   <th style={{ width: 124 }}>Client reference</th>
                   <th style={{ width: 140 }}>Sample ID</th>
                   <th>Client description</th>
+                  <th style={{ width: 108 }}>Ply / Comp</th>
                   <th style={{ width: 228 }}>Depth / lot reference</th>
                   <th style={{ width: 110 }}>Remarks</th>
                   <th style={{ width: 108 }}>Batch</th>
@@ -927,6 +992,14 @@ export function SamplesTab({
                         ) : (
                           <span className="t-sm">{v.d.description}</span>
                         )}
+                      </td>
+                      <td>
+                        <PlyCell
+                          value={v.d.plyComp}
+                          edit={e}
+                          label={`Ply or composite, row ${i + 1}`}
+                          onChange={(x) => setDraft(v, { plyComp: x })}
+                        />
                       </td>
                       <td>
                         {e ? (
@@ -1236,6 +1309,7 @@ function PasteDialog({
                   <th style={{ width: 40 }}>#</th>
                   <th>Client reference</th>
                   <th>Client description</th>
+                  <th style={{ width: 100 }}>Ply / Comp</th>
                   <th>Depth / lot reference</th>
                   <th style={{ width: 110 }}>Status</th>
                 </tr>
@@ -1252,6 +1326,9 @@ function PasteDialog({
                         </b>
                       </td>
                       <td className="t-sm">{r.description}</td>
+                      <td className="t-sm">
+                        {r.plyComp ? PLY_WORD[r.plyComp] : ""}
+                      </td>
                       <td className="t-sm">
                         {depthText(
                           p.drillHole,
@@ -1437,6 +1514,22 @@ function SampleSheet({
         onChange={(t) => set({ description: t })}
         placeholder="Ply A1 upper"
       />
+      <div className="field">
+        <label className="flabel" htmlFor="sheet-ply">
+          Ply or composite
+        </label>
+        <div className="input">
+          <select
+            id="sheet-ply"
+            value={f.plyComp}
+            onChange={(x) => set({ plyComp: x.target.value as Ply })}
+          >
+            <option value="">Not set</option>
+            <option value="ply">Ply</option>
+            <option value="comp">Composite</option>
+          </select>
+        </div>
+      </div>
       <TextField
         id="sheet-depth"
         label="Depth / lot reference"

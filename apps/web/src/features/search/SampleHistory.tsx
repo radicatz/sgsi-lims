@@ -55,6 +55,7 @@ interface Data {
     depthFrom: number | null;
     depthTo: number | null;
     description: string | null;
+    plyComp: "ply" | "comp" | null;
     sampleType: string | null;
     mass: number | null;
     condition: string | null;
@@ -140,6 +141,9 @@ export function SampleHistoryPage() {
         <KV k="Drill hole">{s.drillHole ?? "-"}</KV>
         <KV k="Depth">{depth ?? "-"}</KV>
         <KV k="Description">{s.description ?? "-"}</KV>
+        <KV k="Ply or composite">
+          {s.plyComp === "comp" ? "Composite" : s.plyComp === "ply" ? "Ply" : "-"}
+        </KV>
         <KV k="Sample type">{s.sampleType ?? "-"}</KV>
         <KV k="Mass received">
           {s.mass != null ? `${s.mass.toFixed(2)} kg` : "-"}

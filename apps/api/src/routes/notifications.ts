@@ -50,6 +50,8 @@ export async function deadlineSweep(): Promise<number> {
     if (!lock?.ok) return 0;
     const today = todayIso(), tomorrow = todayIso(1);
     const batches = await tx`select batch_no, status::text as status, deadline_on::text as deadline from batches where status <> 'completed' and deadline_on is not null and deadline_on <= ${tomorrow}::date`;
+    // notifications are kept 90 days, then removed (App plan open point 7)
+    await tx`delete from notifications where created_at < now() - interval '90 days'`;
     let sent = 0;
     for (const b of batches) {
       const no = b.batch_no as string, status = b.status as string, due = b.deadline as string;

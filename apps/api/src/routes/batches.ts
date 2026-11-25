@@ -263,6 +263,26 @@ export async function batchRoutes(app: FastifyInstance) {
     return { ok: true, batchNo: to };
   });
 
+  /* ================= delete (spec D-30, S-07; Open_Points_Check_Nov25.md M-4) ================= */
+  // Only a Created batch where nothing has arrived: its samples go back to the job order as they were (expected, or awaiting arrival when they had been returned earlier).
+  // The parameters and the log go with it; the audit log keeps the record. The N1 notices that point to it are removed so nobody opens a missing batch.
+  // batches have no delete policy for users, so after the permission check (batch.create) the API deletes on the person's behalf, stamped with their name in the audit log, as Complete batch does
+  r.delete("/batches/:no", { preHandler: createBatches, schema: { params: NoParam } }, async (req, reply) => {
+    const res = await runAsActor(req, SCREEN, async (tx) => {
+      const [b] = await tx`select b.id, b.batch_no, b.status::text as status, j.order_no from batches b join job_orders j on j.id = b.job_order_id where b.batch_no = ${req.params.no} for update of b`;
+      if (!b) return { code: 404, key: "not_found", text: "This batch was not found." };
+      if (b.status !== "created") return { code: 409, key: "locked", text: "Only a Created batch can be deleted." };
+      const [n] = await tx`select count(*)::int as all, count(*) filter (where arrived_at is not null)::int as arrived from samples where batch_id = ${b.id}`;
+      if ((n?.arrived ?? 0) > 0) return { code: 409, key: "locked", text: "Samples of this batch have arrived, so it can't be deleted." };
+      await tx`update samples set batch_id = null where batch_id = ${b.id}`;
+      await tx`delete from batches where id = ${b.id}`;
+      return { ok: true as const, orderNo: b.order_no as string, samples: n?.all ?? 0 };
+    });
+    if ("code" in res) { const e = res as { code: number; key: string; text: string }; return fail(reply, e.code, e.key, e.text); }
+    await runAsActor(req, SCREEN, (tx) => tx`delete from notifications where link like ${`/batches/${req.params.no}/%`} or link = ${`/batches/${req.params.no}`}`);
+    return { ok: true, orderNo: res.orderNo, samples: res.samples };
+  });
+
   /* ================= the log ================= */
   r.get("/batches/:no/log", { preHandler: readBatches, schema: { params: NoParam } }, async (req, reply) => {
     const rows = await runAs(req, async (tx) => {

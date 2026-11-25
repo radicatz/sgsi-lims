@@ -65,16 +65,17 @@ The choices below follow from what the v1 screens need, not from the original fo
 | 1 | API framework: Fastify (lean) or NestJS (more structure)? | Fastify |
 | 2 | Where does production run: Supabase Cloud (Singapore) with our containers on a VPS, or everything on the client's own server? Data protection under UU PDP may decide it (R-11) | Cloud for development and staging now; production waits for R-11 |
 | 3 | The web app calls only the API (S-6), or also Supabase directly for simple lists? | API only |
-| 4 | Charts in ECharts (S-9), or keep the prototype's SVG charts? | ECharts |
+| 4 | Charts in ECharts (S-9), or keep the prototype's SVG charts? | ECharts. **Changed Nov 24, 2026:** hand-drawn SVG (section 5) |
 | 5 | Lab time zone: Asia/Makassar (WITA) for Samarinda? | Asia/Makassar |
 | 6 | Who builds: Claude builds phase by phase and you review each phase on a staging link, or a development team takes over with this record and the plan? | Claude builds, you review each phase |
 
 ## 5 · As built (Nov 16, 2026)
 
-Phases 0 and 1 kept every decision above except these three. The record follows the code; nothing is planned to change back.
+Phases 0 to 5 kept every decision above except these four. The record follows the code; nothing is planned to change back.
 
 | # | Decision | As built | Why |
 | --- | --- | --- | --- |
 | S-5 | Drizzle ORM for typed queries | **postgres.js tagged SQL** in the API, with zod schemas on every body | Each request runs in one transaction as the signed-in user (S-6); plain parameterised SQL kept that small and fast, and the risk spike in section 3 never needed the ORM |
 | S-8 | CSS Modules | **One global stylesheet per component family** in `apps/web/src/styles/` (tokens, base, shell, buttons, forms, tables, overlays, badges, cards, pages), imported through `index.css` | The prototype's `styles.css` ported family by family with the same class names, so the frames, the prototype and the app share one vocabulary |
+| S-9 | ECharts 5 | **Hand-drawn SVG and CSS** in the token colours (Phase 5 decision 3, owner, Nov 24, 2026) | The charts match the frames exactly (bar containers, pill colours, mono values) without a chart library; the regression and R² are computed on the server, so nothing needs ECharts' statistics |
 | S-12 | Buckets `client-logos`, `coa-drill-hole`, … | **`logos`** and **`coa`** (migration 0700), private, signed links of one hour | Named when phase 1 needed them; the remaining buckets (`signed-roa`, `job-order-files`, `sample-photos`, `reports`) keep the names above when their phases add them |

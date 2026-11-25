@@ -577,6 +577,8 @@ function UserForm({
     roles: user?.roles ?? ([] as RoleCode[]),
   });
   const [err, setErr] = useState<Record<string, string>>({});
+  // Admin plan open point 4: an invited user's email can still be corrected (never signed in)
+  const emailOpen = !!user && user.status === "invited" && !user.lastSignInAt;
   const save = useSave(
     () =>
       user
@@ -587,6 +589,7 @@ function UserForm({
               title: f.title,
               phone: f.phone,
               roles: f.roles,
+              ...(emailOpen && f.email !== user.email ? { email: f.email } : {}),
             },
           })
         : api<{ inviteLink: string | null }>("/users", {
@@ -598,7 +601,8 @@ function UserForm({
       done: user ? "User saved" : undefined,
       onDone: (r) => {
         onClose();
-        if (!user) onInvite((r as { inviteLink: string | null }).inviteLink);
+        const l = (r as { inviteLink?: string | null } | undefined)?.inviteLink;
+        if (!user || l !== undefined) onInvite(l ?? null);
       },
       onField: (field, text) => setErr({ [field ?? "form"]: text }),
     },
@@ -606,7 +610,7 @@ function UserForm({
   const submit = () => {
     const e: Record<string, string> = {};
     if (f.fullName.trim().length < 2) e.fullName = "Enter the name.";
-    if (!user && !/^\S+@\S+\.\S+$/.test(f.email))
+    if ((!user || emailOpen) && !/^\S+@\S+\.\S+$/.test(f.email))
       e.email = "Enter a valid email.";
     if (!f.roles.length) e.roles = "Pick at least one role.";
     setErr(e);
@@ -662,7 +666,7 @@ function UserForm({
           value={f.email}
           onChange={(v) => setF({ ...f, email: v })}
           error={err.email ?? null}
-          {...(user ? { help: "The email cannot be changed here." } : {})}
+          {...(user ? { help: emailOpen ? "Can change until the first sign-in. Saving gives a new invite link." : "The email cannot be changed after the first sign-in." } : {})}
         />
         <TextField
           label="Title"
@@ -676,7 +680,7 @@ function UserForm({
           onChange={(v) => setF({ ...f, phone: v })}
         />
       </div>
-      {user && (
+      {user && !emailOpen && (
         <style>{`#us-email { pointer-events: none; opacity: .6 }`}</style>
       )}
       <div className="field">
@@ -1025,7 +1029,7 @@ export function UserPage() {
         <UserForm
           user={u}
           onClose={() => setForm(false)}
-          onInvite={() => undefined}
+          onInvite={(l) => setLinkOf({ title: "New invite link", link: l })}
         />
       )}
       {deact && (

@@ -9,13 +9,16 @@ import {
   Badge,
   Button,
   Card,
+  Confirm,
   Empty,
   Icon,
   Menu,
   PageHead,
   Stepper,
   Tabs,
+  toast,
 } from "../../components";
+import { ApiError } from "../../app/api";
 import { LogDialog, NumberDialog } from "./Dialogs";
 import { PreparationTab } from "./Preparation";
 import { AnalysisTab } from "./Analysis";
@@ -80,7 +83,9 @@ export function BatchPage() {
   const { me } = useSession();
   const can = (p: string) => !!me?.permissions.includes(p);
   const [num, setNum] = useState(false),
-    [log, setLog] = useState(false);
+    [log, setLog] = useState(false),
+    [del, setDel] = useState(false),
+    [deleting, setDeleting] = useState(false);
   const q = useQuery({
     queryKey: ["batch", no],
     queryFn: () => api<BatchPageData>(`/batches/${no}`),
@@ -137,6 +142,15 @@ export function BatchPage() {
           icon: "clock-counter-clockwise",
           onClick: () => setLog(true),
         },
+        // spec D-30: a Created batch where nothing has arrived can be deleted
+        can("batch.create") &&
+          created &&
+          b.counts.arrived === 0 && {
+            label: "Delete batch",
+            icon: "trash",
+            danger: true,
+            onClick: () => setDel(true),
+          },
       ]}
     />
   );
@@ -233,6 +247,28 @@ export function BatchPage() {
             setNum(false);
             nav(`/batches/${n}/reception`, { replace: true });
           }}
+        />
+      )}
+      {del && (
+        <Confirm
+          title={`Delete ${b.batchNo}?`}
+          text={`Its ${b.counts.inBatch} ${b.counts.inBatch === 1 ? "sample goes" : "samples go"} back to ${b.order.orderNo}, ready for another batch. Nothing has arrived, so nothing is lost. The audit log keeps the record.`}
+          ok="Delete batch"
+          danger
+          busy={deleting}
+          onOk={async () => {
+            setDeleting(true);
+            try {
+              await api(`/batches/${b.batchNo}`, { method: "DELETE" });
+              toast(`${b.batchNo} deleted`);
+              nav(`/orders/${b.order.orderNo}/batches`, { replace: true });
+            } catch (e) {
+              toast((e as ApiError).text ?? "The batch could not be deleted.", "error");
+              setDeleting(false);
+              setDel(false);
+            }
+          }}
+          onClose={() => setDel(false)}
         />
       )}
       {log && (

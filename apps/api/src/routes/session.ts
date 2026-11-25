@@ -22,7 +22,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     const { email, password } = req.body;
     const sec = await getSetting<Security>("security");
     const meta = { requestId: req.id, screen: "Sign in" };
-    const [p] = await sql`select id, status, failed_attempts, locked_until from profiles where email = ${email}`;
+    const [p] = await sql`select id, status, failed_attempts, failed_since, locked_until from profiles where email = ${email}`;
     const tz = env.LAB_TIMEZONE;
     const lockedText = (until: Date) => `Try again at ${until.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: tz })}, or reset your password.`;
     if (p?.locked_until && new Date(p.locked_until) > new Date())
@@ -33,14 +33,16 @@ export async function sessionRoutes(app: FastifyInstance) {
     const { data, error } = await authClient().auth.signInWithPassword({ email, password });
     if (error || !data.session) {
       if (p) {
-        const n = (p.failed_attempts ?? 0) + 1;
+        // App plan open point 1: the failures count only within the window (the Security setting's lock minutes) from the first one; an older run starts again at 1
+        const fresh = !p.failed_since || Date.now() - new Date(p.failed_since).getTime() > sec.lock_minutes * 60_000;
+        const n = fresh ? 1 : (p.failed_attempts ?? 0) + 1, since = fresh ? new Date() : new Date(p.failed_since);
         const lock = n >= sec.lock_after_attempts ? new Date(Date.now() + sec.lock_minutes * 60_000) : null;
-        await system(meta, (tx) => tx`update profiles set failed_attempts = ${lock ? 0 : n}, locked_until = ${lock}, status = ${lock ? "locked" : p.status} where id = ${p.id}`);
+        await system(meta, (tx) => tx`update profiles set failed_attempts = ${lock ? 0 : n}, failed_since = ${lock ? null : since}, locked_until = ${lock}, status = ${lock ? "locked" : p.status} where id = ${p.id}`);
         if (lock) return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(lock) });
       }
       return reply.code(401).send({ code: "wrong_credentials", title: "The email or password is not correct.", text: "Check both and try again." });
     }
-    await system(meta, (tx) => tx`update profiles set failed_attempts = 0, locked_until = null, last_sign_in_at = now(),
+    await system(meta, (tx) => tx`update profiles set failed_attempts = 0, failed_since = null, locked_until = null, last_sign_in_at = now(),
                                    status = case when status = 'locked' then 'active' else status end where id = ${data.user.id}`);
     return session(data.session);
   });
@@ -64,7 +66,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     const { error } = await admin.auth.admin.updateUserById(req.user!.userId, { password: req.body.password });
     if (error) return reply.code(422).send({ code: "weak_password", field: "password", text: error.message });
     await system({ requestId: req.id, screen: "Set password" }, (tx) =>
-      tx`update profiles set status = 'active', failed_attempts = 0, locked_until = null where id = ${req.user!.userId} and status in ('invited','locked','active')`);
+      tx`update profiles set status = 'active', failed_attempts = 0, failed_since = null, locked_until = null where id = ${req.user!.userId} and status in ('invited','locked','active')`);
     return reply.code(204).send();
   });
 

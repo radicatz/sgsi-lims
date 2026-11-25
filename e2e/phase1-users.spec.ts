@@ -56,6 +56,14 @@ test.describe.serial("users", () => {
     await page.getByRole("dialog").getByText("Preparation", { exact: true }).click();
     await page.locator("#us-save").click();
     await expect(page.locator(".role", { hasText: "Preparation" }).first()).toBeVisible();
+    // an invited user's email can still be corrected (Admin plan open point 4); saving gives a new invite link
+    email = email.replace("zt-e2e-", "zt-e2f-");
+    await page.locator("#edit-user").click();
+    await page.locator("#us-email").fill(email);
+    await page.locator("#us-save").click();
+    await expect(page.getByRole("dialog", { name: "New invite link" })).toBeVisible();
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(page.getByText(email).first()).toBeVisible();
     await page.getByRole("button", { name: "Resend invite" }).click();
     await expect(page.getByRole("dialog", { name: "New invite link" })).toBeVisible();
     await page.getByRole("button", { name: "Done" }).click();

@@ -306,8 +306,8 @@ B-2026-0418 (Analysis, part of the values entered) and B-2026-0417 (Completed, R
 | 5 | Undo of Confirm reception | None in v1 (identifiers are given and samples move) |
 | 6 | Ash analysis and Trace elements values on the Analysis tab | Entered per chosen item, as columns under their group (C-20b) |
 | 7 | Net CV: calculated, or typed from the RoA? (request item 13 is still open with the lab) | Calculated by the batch's standard with the Seyler hydrogen |
-| 8 | Batch number unique across the lab (database) or per company (D-45) | Across the lab, as the database already checks |
-| 9 | Delete a batch (S-07: only while Created and nothing arrived) | Not in phase 3; the frames have no Delete |
+| 8 | Batch number unique across the lab (database) or per company (D-45) | **Decided Nov 25, 2026 (owner): across the lab**, as the database checks; spec D-45 changed to match |
+| 9 | Delete a batch (S-07: only while Created and nothing arrived) | Not in phase 3. **Built Nov 25, 2026:** Delete batch in the batch page's menu (people with `batch.create`), only while Created with nothing arrived; the samples go back to the job order (`e2e/batch-delete.spec.ts`) |
 | 10 | The signed RoA number format | Free text, unique (for example RoA-0418) |
 
 ## 14 · Build status

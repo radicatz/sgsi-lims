@@ -84,12 +84,24 @@ export async function userRoutes(app: FastifyInstance) {
     return reply.code(201).send({ id, inviteLink: made.data.properties?.action_link ?? null, emailed: false });
   });
 
-  r.patch("/users/:id", { schema: { params: Id, body: UserBody } }, async (req, reply) => {
+  // the email can change only while the person has never signed in (Admin plan open point 4): the auth account and the profile move together, and a fresh invite link is returned
+  r.patch("/users/:id", { schema: { params: Id, body: UserBody.extend({ email: z.string().trim().toLowerCase().email("Enter a valid email.").optional() }) } }, async (req, reply) => {
     const b = req.body;
+    const [cur] = await run(req, "User page", (tx) => tx`select email, status, last_sign_in_at from profiles where id = ${req.params.id}`);
+    if (!cur) return fail(reply, 404, "not_found", "This user was not found.");
+    const newEmail = b.email && b.email !== cur.email ? b.email : null;
+    if (newEmail) {
+      if (cur.status !== "invited" || cur.last_sign_in_at) return fail(reply, 409, "email_locked", "The email can be changed only before the first sign-in.", "email");
+      const [dup] = await run(req, "User page", (tx) => tx`select id from profiles where email = ${newEmail}`);
+      if (dup) return fail(reply, 409, "duplicate", `${newEmail} already has an account.`, "email");
+      const { error } = await admin.auth.admin.updateUserById(req.params.id, { email: newEmail, email_confirm: true });
+      if (error) return fail(reply, 409, "duplicate", "The email could not be changed. Check the address.", "email");
+    }
     const res = await run(req, "User page", async (tx) => {
       const [u] = await tx`select id from profiles where id = ${req.params.id}`;
       if (!u) return "missing" as const;
       if (!b.roles.includes("superadmin") && (await lastSuperadmin(tx, req.params.id))) return "last" as const;
+      if (newEmail) await tx`update profiles set email = ${newEmail}, invited_at = now(), invite_expires_at = ${inviteUntil(tx)} where id = ${req.params.id}`;
       await tx`update profiles set full_name = ${b.fullName}, title = ${b.title}, phone = ${b.phone} where id = ${req.params.id}`;
       await tx`delete from user_roles where user_id = ${req.params.id}`;
       await tx`insert into user_roles (user_id, role_id) select ${req.params.id}, id from roles where code = any(${b.roles})`;
@@ -98,6 +110,7 @@ export async function userRoutes(app: FastifyInstance) {
     if (res === "missing") return fail(reply, 404, "not_found", "This user was not found.");
     if (res === "last") return fail(reply, 409, "last_superadmin", LAST, "roles");
     forgetUser(req.params.id);
+    if (newEmail) { const made = await link("recovery", newEmail); return { ok: true, inviteLink: made.data?.properties?.action_link ?? null }; }
     return { ok: true };
   });
 
@@ -113,13 +126,13 @@ export async function userRoutes(app: FastifyInstance) {
     return { ok: true };
   });
   r.post("/users/:id/reactivate", { schema: { params: Id } }, async (req, reply) => {
-    const rows = await run(req, "User page", (tx) => tx`update profiles set status = case when last_sign_in_at is null then 'invited' else 'active' end, failed_attempts = 0, locked_until = null
+    const rows = await run(req, "User page", (tx) => tx`update profiles set status = case when last_sign_in_at is null then 'invited' else 'active' end, failed_attempts = 0, failed_since = null, locked_until = null
       where id = ${req.params.id} and status = 'inactive' returning id`);
     forgetUser(req.params.id);
     return rows.length ? { ok: true } : fail(reply, 404, "not_found", "This user is not deactivated.");
   });
   r.post("/users/:id/unlock", { schema: { params: Id } }, async (req, reply) => {
-    const rows = await run(req, "User page", (tx) => tx`update profiles set status = 'active', failed_attempts = 0, locked_until = null where id = ${req.params.id} and (status = 'locked' or locked_until is not null) returning id`);
+    const rows = await run(req, "User page", (tx) => tx`update profiles set status = 'active', failed_attempts = 0, failed_since = null, locked_until = null where id = ${req.params.id} and (status = 'locked' or locked_until is not null) returning id`);
     return rows.length ? { ok: true } : fail(reply, 404, "not_found", "This user is not locked.");
   });
 

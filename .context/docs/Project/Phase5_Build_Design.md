@@ -1,6 +1,6 @@
 # Phase 5 · Monitoring and search · Build design
 
-Nov 25, 2026 · **Slice A built and pushed (29cb3ca); slice B planned (section 10), waiting for go** · phase 5 of `V1_Build_Plan.md` section 2
+Nov 25, 2026 · **Slice A pushed (29cb3ca), slice B pushed (99c2e1a); slice C planned (section 12), waiting for go** · phase 5 of `V1_Build_Plan.md` section 2
 
 Written for: the product owner (decisions in section 8) and the developers who build it.
 
@@ -41,7 +41,7 @@ Each screen follows its own plan; this section lists only what the build must ad
 - **Operations tab** O1 to O13 and **Quality & reports tab** Q1 to Q7 as planned; tabs only for roles with `dashboard.quality`; Period and Company filters on every widget except the "now" ones; KPI and bar links open the lists filtered.
 - **Charts:** drawn as SVG in the app with the token colours (no chart library), the same bar patterns as the frames (Bar container, values in one column). Scatter regression and R² computed on the server (spec S-01).
 - **Turnaround band** uses each job order's service turnaround (Configuration > Services); a custom set falls back to open point 3 (5 or 10 days).
-- **Sample type mix** groups by the job order's sample type until the lab gives categories (R-07).
+- **Sample type mix** groups by Ply, Composite and Not set, from the Ply/Comp recorded per sample (`Open_Points_Check_Nov25.md` M-1, built Nov 25, 2026).
 
 ### 3.3 Search · `../Search/Search_Screen_Plan.md`
 
@@ -126,7 +126,7 @@ Defaults are used if you say go without answering.
 | 4 | Does Preparation see result values in search (Search plan open point 1)? | No (reopened as B-5 in section 10.11: the role grid gives Preparation `result.read`) |
 | 5 | Turnaround target for a custom parameter set (no service) | 5 days for Basic-sized sets, 10 for the rest, until the lab says |
 | 6 | Frames: update in FigCraft per slice where the Nov 23 and 24 rules change them (section 4), or leave the frames as drawn and follow the rules in the app only? | Update per slice |
-| 7 | Sample type categories for the mix chart (R-07) | The job order's sample type as entered |
+| 7 | Sample type categories for the mix chart | The job order's sample type as entered (see `Open_Points_Check_Nov25.md` M-1) |
 
 ## 9 · Build status
 
@@ -508,3 +508,236 @@ Built, **not committed**.
   - **Tablet** (frame `Tablet-08-Search-04-Sample_history-01-Default`): one column; the Sample card shows two key-value columns.
 - **Tests:** SR7 added (no-match button, Close back to the work page and to the results, dialog vs sheet, phone rows, PDF download). SR1 to SR7 pass at the three sizes.
 - **Cleanup:** two leftover "E2E query" saved queries from earlier runs were deleted.
+
+### Slice B, FigCraft frames updated (Nov 25, 2026)
+
+Saved to the main file (not committed; the file is 130 MB).
+- **Day overline:** every Search frame that has a title now reads "WEDNESDAY, 25 NOVEMBER 2026" (results, advanced search and their states, at 1440, 834 and 390).
+- **Close button:** added to the header of all Advanced search frames (desktop 01 to 06, tablet, phone; phone at size touch, 44).
+- **Phone Search:** `Phone-08-Search-02-Search_results-05-Phone_start` is titled "Search"; it and the phone results frame carry an Advanced search button (touch) under the title.
+- **Already matching the app:** the funnel icon on Advanced search, the No_match frame's ghost button, the Save_query dialog, Sample history Export PDF (desktop and tablet).
+- **Search label (done, Nov 25):** every search field in the page body that had no label now has "Search" above it, as the Batches list and the Reports lists already did: 84 on Desktop, 27 on Tablet, 24 on Phone (results, lists of clients, drill holes, lithology, users, batches, job orders, parameters, settings, Reception scan fields, and their dialog and filter-sheet variants). The top bar search is unchanged.
+- **Not drawn:** the sticky Types card (a still frame can't show it).
+
+## 12 · Slice C plan: Dashboard Quality & reports, Audit log, Profile (Nov 25, 2026)
+
+**Status:** waiting for the owner's go and for the SQL in 12.6.
+
+**Sources** (checked against the project documents; see 12.2):
+- `../Dashboard/Dashboard_v2_Screen_Plan.md` sections 3, 4, 6, 7, 10, 12, and the owner edits of section 15;
+- `../Admin/Admin_Screen_Plan.md` sections 3, 5 (Audit log) and 12 (open points);
+- `../App/App_Screen_Plan.md` sections 2, 4 (user menu), 5.1 (events), 6 (Profile), 14 (open points), 17 and 18 (signature and stamp);
+- spec S-01, S-13, S-14, S-30, D-29, F-AUTH-03, and sections 8.2, 13.4, 13.6, 14 and 15;
+- `V1_Build_Plan.md` phase 5 and `Stack_Decision_Record.md`;
+- the rules of section 4 here, and the owner rules since: no underlined links, the date above every Work page title, the Search label over list searches.
+
+### 12.1 What exists today
+
+- **Dashboard:** the Operations tab is built (slice A). The tab switch is hidden because Quality & reports does not exist yet, and there is no `GET /dashboard/quality`.
+- **Drill hole list** (`/master/drill-holes`): it has the All and Missing CoA chips and the **Upload CoA** dialog (`CoaUpload` in `master-data/Lists.tsx`). The dashboard's Drill holes card can reuse both.
+- **Audit log data:** every table has the audit trigger (`audit_row()`): one row per insert, update or delete, with before and after as JSON, the actor, the screen and the request. Reading it needs `audit.read` (Supervisor, Manager, Superadmin). `/audit` is a holding page.
+- **Sign-in events** are not rows of their own. A sign-in, a failed attempt and a lock change the person's profile, and the trigger records that change.
+- **Exports** (the advanced search CSV, the Sample history PDF) are not recorded anywhere.
+- **Profile** (`common/Basics.tsx`): name, sidebar, start page, and the Signature and Lab stamp cards, in an older layout. It has no Change password and no Notifications card, and profiles have no `password_changed_at`.
+- **Notifications:** `notify()` sends N1 to N10 to every active user with the role. Nobody can mute an event yet.
+- **User menu:** name, email, Profile and Sign out. It has no role badges and no Notification settings item. On the phone, the drawer shows the person at the top, without Sign out.
+
+### 12.2 Checked against the project documentation
+
+| Document | What it says | Effect on this plan |
+| --- | --- | --- |
+| Spec S-01 | Quality tab: KPIs (Batches, RoA issued, CoA coverage), CV vs Ash, RD vs Ash, FC vs GCV with regression and R², Trend CV with a basis switch, drill-hole list with a Missing CoA chip. Regression on the server (13.6); never round below stored precision | All in, as C1. The Determinations KPI is the dashboard plan's Q4 (from AssayNet) |
+| Spec S-01, open point | All 100 drill holes, or only those with samples? | Dashboard plan open point 2: only those with samples in the period, so the card follows the filters. The Drill holes with CoA KPI counts the same set |
+| Dashboard plan section 3 | Tabs only with `dashboard.quality`: Lab admin, Supervisor, Manager, Superadmin | The tab switch shows for these roles. CSO, Preparation and Analyst keep Operations alone |
+| Dashboard plan 15.1 (D-1) | Page tabs are library **Tab** instances. The Segmented item stays for the basis switch in Trend CV | As drawn |
+| Spec S-14 and Admin plan section 5 | Filters: record, date, user, record type, action; expandable before and after; read only; Export CSV; opened pre-filtered from Sample history or a user page | All in, as C2. The Nov 24 rule puts the filters **above** the table card (the frame has them inside) |
+| Spec D-29 | All core tables audited, kept without expiry | The screen only reads; nothing is ever deleted from the log |
+| Spec S-30 | Each Sample history entry links to its audit rows | An **Audit** link on each history entry for roles with `audit.read`, opening `/audit` filtered to the sample. The filter takes the sample's analyses and values too |
+| Admin plan section 9 | Demo entries include "Hendra exporting the audit log" and "Bagus locked after 5 failures" | Exports are written to the log by the API (12.5). Sign-in, failed attempt and lock are read from the profile change (12.5) |
+| Spec S-13 and App plan section 6 | Name, email read-only, change password, sidebar, language, start page, notification switches | All in, as C3 |
+| App plan section 14, point 3 | Password rules: at least 10 characters, a letter and a number, not the email | The rules come from Configuration > Security through `passwordProblem`, as Set password already does |
+| Spec 14 | `POST /me/password`; `GET /dashboard/quality` (period, company); `GET /audit` (filters, CSV) | The endpoints as listed |
+| Spec 15 | Routes `/`, `/audit`, `/profile`; touch 44; the page never scrolls sideways | As listed. The Quality tab is `/?tab=quality`, so a link or a reload keeps it |
+| Navigation plan section 4 | A link to a page the role cannot open shows as plain text | Audit records link to their page only when the role can open it |
+| Section 4 rules here | Filters outside cards with the Search label; phone Filters button lg beside the search; touch 44; chips scroll | Applied to the Dashboard Drill holes card, the Audit log and the phone sheets |
+
+### 12.3 Screens and their frames
+
+Frame names are the FigCraft names.
+
+**C1 Dashboard, Quality & reports tab** (`/?tab=quality`)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-02-Dashboard-02-Quality_and_reports-01-Default`, `Tablet-02-Dashboard-02-Quality_and_reports-01-Default`, `Phone-02-Dashboard-02-Quality_and_reports-01-Default` | The tabs, four KPIs, three scatters, Trend CV, Drill holes |
+| `Desktop-02-Dashboard-02-Quality_and_reports-02-Missing_CoA` | The Drill holes card with Missing CoA chosen |
+| `Desktop-02-Dashboard-02-Quality_and_reports-03-Point_tooltip` | A tooltip on a CV vs Ash point |
+
+- **Tabs:** Operations and Quality & reports, as library Tabs under the title. The Period and Company filters apply to both.
+- **KPIs:**
+  - **Batches completed** in the period, with the change from the previous period as a pill. The caption gives every batch in the period, whatever its status ("27 total"; SIM Lab's Total Batch, decision C-6).
+  - **RoA uploaded** in the period, with its change. The caption gives the batches waiting for the upload (analysis finished, no RoA).
+  - **Drill holes with CoA:** "62 of 74", a progress bar with the percentage, and "12 missing". It counts the drill holes with samples in the period.
+  - **Determinations:** values saved in the period (one parameter of one sample is one determination), with the change in percent.
+- **Scatters** CV vs Ash, RD vs Ash and FC vs GCV:
+  - The first-named value runs across and the second up, as in SIM Lab (decision C-2): CV across and Ash up; RD across and Ash up; FC across and GCV up.
+  - They use the ADB values of samples in batches completed in the period.
+  - The server computes the regression line, R² and n; the card head shows "R² 0.81, n 312".
+  - A point's tooltip shows the Sample ID, the sample code, the drill hole and both values.
+  - Above 2,000 points the chart draws an even sample of them; n still counts all.
+  - With fewer than 3 points the card shows its empty state, "Not enough results in this period".
+- **Trend CV:**
+  - The mean CV of each batch completed in the period, by completion date (decision C-7).
+  - The basis switch (ADB, AR, DB, DAF) opens on **AR**, as the frame and SIM Lab's "Trend CV (arb)". It converts each value with the shared `fromAdb`, which needs IM (and TM for AR). A batch without the needed moisture is left out of that basis.
+  - No limit line (decision C-1).
+- **Drill holes card:**
+  - The chips All and Missing CoA (with counts) and the labelled Search sit above the card (Nov 24 rule). The card holds the table and a pager of 10.
+  - Columns: Code; Company; Samples (in the period); RoA (the RoA numbers of the batches that hold its samples, a download where the role has `roa.download`); CoA (the Uploaded tag with the file name, or the Missing tag); Actions.
+  - Actions: **Upload CoA** or **Replace CoA** for roles with `coa.upload` (Lab admin, Superadmin), with the existing dialog.
+  - Tablet: no Company column. Phone: cards with the same actions.
+- **Phone:** the tabs are full width under the title and stick when the page scrolls. The Filters button opens the sheet, as on Operations. The scatters stack, and Trend CV scrolls sideways inside its card.
+
+**C2 Audit log** (`/audit`: Supervisor, Manager, Superadmin)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-15-Audit_log-01-Audit_log-01-Default`, `Tablet-15-Audit_log-01-Audit_log-01-Default`, `Phone-15-Audit_log-01-Audit_log-01-Default` | Last 7 days, 10 rows per page |
+| `Desktop-15-Audit_log-01-Audit_log-02-Row_expanded` | The Field, Before and After diff under a row |
+| `Desktop-15-Audit_log-01-Audit_log-03-Filtered_by_record` | Opened from Sample history, with a removable record chip |
+| `Phone-15-Audit_log-01-Audit_log-04-Filters` | The filter sheet |
+
+- **Head:** the overline stays **ADMIN** (the Audit log is not a Work page, so the date rule doesn't apply). **Export CSV** sits at the right.
+- **Filters** above the card: Search (record ID, labelled), Date (Today, Last 7 days, Last 30 days, Custom range), User, Record type, Action. A filter that came from a link shows as a removable chip.
+- **Columns:**
+  - **When:** "Today, 10:42", "Yesterday, 16:05", or "4 Nov 2026, 14:20".
+  - **User:** avatar and name. A sign-in row shows the person who signed in.
+  - **Action.**
+  - **Record:** the record type above the record's ID, which links to the record when the role can open it.
+  - **Changes:** the field ("Ash (ADB)") or "3 fields", with a caret that opens the diff.
+- **Diff:** Field, Before and After. Before is struck through in the muted colour.
+- **Read only:** nothing can be changed here.
+- **Tablet:** the Changes column folds into the opened row. **Phone:** cards (when, user, action, record); the Filters button lg beside the search opens the sheet.
+- **Export CSV:** every row of the current filters (all pages), with the same columns plus the changed fields as text. The export is itself written to the log as **Exported**.
+
+**C3 Profile** (`/profile`) and the **user menu**
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-00-App-09-Profile-01-Default`, `Tablet-00-App-09-Profile-01-Default`, `Phone-00-App-09-Profile-01-Default` | Header, Personal, Password, Preferences, Notifications |
+| `Desktop-00-App-09-Profile-02-Change_password`, `Phone-00-App-09-Profile-02-Change_password` | The dialog (on the phone, a full-screen form) with the rules checklist |
+| `Desktop-00-App-09-Profile-03-Password_error` | "The current password is not correct." and an unmet rule |
+| `Desktop-00-App-09-Profile-04-Signing`, `Tablet-00-App-09-Profile-04-Signing`, `Phone-00-App-09-Profile-04-Signing` | The Manager's Profile with the Signature and Lab stamp cards (built in phase 4, moved into the new layout) |
+| `Desktop-00-App-09-Profile-05-Signature_upload` (and Tablet, Phone) | The existing upload dialog, unchanged |
+| `Desktop-00-App-07-User_menu-01-Open`, `Phone-00-App-07-User_menu-02-Drawer` | The user menu, and the phone drawer's profile block |
+
+- **Header:** avatar 64, the name in Display, the role badges and the email, and **Sign out** at the right. On the phone, Sign out is full width under the header.
+- **Personal:** Name (editable), Email (read-only, "Only a Superadmin can change the email."), and **Save**, enabled once the name has changed.
+- **Password:**
+  - "Last changed 12 Oct 2026", or "Not changed since the account was set up".
+  - **Change password** opens a dialog md: Current password, New password, Confirm, and the rules checklist from Configuration > Security, which ticks as the person types.
+  - Errors show under the fields. The server checks the rules again.
+  - On success, a toast "Password changed"; the person stays signed in.
+- **Preferences:** Sidebar (Expanded or Collapsed; tablets always show the rail), Language (English, read-only, with the D-24 note), Start page (only for roles with My work).
+- **Notifications:** one switch per event that reaches the person's roles (12.4), all on by default, and the line "Notifications are in the app only."
+- **Signature and Lab stamp:** the existing cards. On desktop they sit in the left column under Password; on the tablet and phone, after Password (App plan 18.2).
+- **Layout:** desktop has two columns (Personal, Password and the signing cards on the left; Preferences and Notifications on the right). Tablet and phone have one column.
+- **User menu:**
+  - Avatar 40, name, email, and the role badges.
+  - **Profile**, **Notification settings** (opens the Profile at its Notifications card), and **Sign out**.
+  - On the phone, the drawer gets the same block at its bottom, with Profile and Sign out, as the Drawer frame shows. The block moves from the drawer's top to its bottom.
+
+**C4 Audit links from other pages**
+- **Sample history:** an **Audit** link on every entry for roles with `audit.read`. It opens `/audit?record=<sample id>`, which lists the sample's rows together with its analyses and values (the value rows point to their analysis, not to the sample).
+- **User page** (`/users/:id`): its Recent activity card already has **Open in audit log** (`/audit?user=<id>`) from phase 1. Its five entries switch to the same readable text as the log, and its Security card gains "Password changed 2 Nov" from the new column (Admin plan 4.3).
+
+### 12.4 Who gets which notification switch
+
+The switches follow who each event reaches in `notify()` today:
+
+| Event | Switch label | Shown to |
+| --- | --- | --- |
+| N1 | Batch ready to receive | Preparation, Lab admin |
+| N2 | Samples did not arrive | CSO |
+| N3 | Batch ready for data entry | Analyst |
+| N4 | Analysis finished, RoA to upload | Lab admin |
+| N5 | Job order ready for its CoA | Lab admin |
+| N6 | CoA published, to send | CSO |
+| N7 | Batch due within 24 h | The roles with a queue (CSO, Preparation, Analyst, Lab admin) |
+| N8 | Batch past its deadline | Supervisor, Manager |
+| N9 | CoA waiting for my signature | Signatories (`report.sign`) |
+| N10 | CoA returned to me | Lab admin |
+
+A switch turned off is saved in `profiles.prefs.notifications` (for example `{"N7": false}`), and `notify()` skips anyone whose switch for that event is off. A person with two roles sees each switch once.
+
+### 12.5 Server
+
+| Need | How |
+| --- | --- |
+| `GET /dashboard/quality?period=&company=` (`dashboard.quality`) | One request: the KPIs with the previous period, the three scatters (points and regression), the trend per basis, and the first page of drill holes. The queries run in parallel. Values come from `analysis_values` (the primary value, round 1), joined to `parameters` by code (GCV, ASH, RD, FC, IM, TM) |
+| `GET /dashboard/quality/drill-holes?filter=&q=&page=` | The Drill holes card's paging and search, so paging does not reload the charts |
+| `GET /audit?from=&to=&user=&type=&action=&q=&record=&page=` (`audit.read`) | Read through row-level security. The server turns each row into text: table to record type, column to field label (a fixed dictionary), ids to names (sample, batch, job order, report, user, parameter and basis). Internal columns (`updated_at`, ids, hashes, storage paths) are left out of Changes |
+| `GET /audit/export` | The CSV of the same filters. It writes an **Exported** row |
+| Actions | An insert is **Created**, a delete **Deleted**. An update is **Status changed** when the status moved, **Published** when a report became issued, **Changed setting** on configuration tables, else **Updated**. On profiles changed by the screen "Sign in": **Signed in**, **Sign-in failed** or **Account locked**, from the columns that changed |
+| Record types | Job order, Batch, Sample, Result (analyses and values), Report, Master data, User, Configuration, Sign-in, Saved query |
+| Recorded exports | The API writes an **Exported** row (who, what, which filters) for the Audit log CSV, the advanced search CSV and the Sample history PDF (decision C-4) |
+| `POST /me/password` | Checks the current password with Supabase Auth (a wrong one counts as a failed attempt, as at sign-in), then the Security rules, then sets the password and `password_changed_at`. The reset and invite links also set the date |
+| `GET /me` | Adds `passwordChangedAt` |
+| `notify()` | Skips people whose `prefs.notifications.<event>` is `false` |
+
+### 12.6 SQL for the owner
+
+`supabase/migrations/20261126000100_profile_password_audit_index.sql` (written, not run):
+- `profiles.password_changed_at` (timestamptz), for the Password card;
+- the indexes `audit_actor (actor, at desc)` and `audit_table_at (table_name, at desc)`, for the User and Record type filters.
+
+### 12.7 Differences from the plans and frames
+
+| Item | Frame or plan | Build |
+| --- | --- | --- |
+| Audit log filters | Inside the table card | Above the card (Nov 24 rule) |
+| Dashboard Drill holes chips and search | In the card head | Above the card (Nov 24 rule) |
+| Trend CV limit line | "Limit 6,300 kcal/kg" | Left out (decision C-1) |
+| "RoA issued" (spec S-01) | — | "RoA uploaded", the dashboard plan's wording: the lab uploads a signed RoA |
+| Sign-in rows | Events of their own | Read from the profile change a sign-in makes; nothing new is stored |
+| The phone drawer's profile block | At the top in the app today | At the bottom with Profile and Sign out, as the Drawer frame |
+
+### 12.8 Demo data
+
+`pnpm seed:quality` (`--remove` takes it out):
+- **Values:** gives the completed demo batches CV, RD and FC values where they lack them, so the scatters and the trend have points (about 120 samples).
+- **Drill-hole CoAs:** about one in six drill holes with samples has no CoA.
+- **Audit rows:** the seeds and the e2e runs already fill the log. The script adds an export and a locked account for Bagus Prasetyo, made through the sign-in route rather than written by hand.
+
+### 12.9 Tests (`e2e/phase5-quality-audit-profile.spec.ts`, three sizes)
+
+- **QA1:** the Lab admin sees both tabs; the CSO sees no tab switch. The Quality tab shows its KPIs, three scatters with R² and n, and the trend. Switching the basis changes the trend.
+- **QA2:** the Drill holes card filters to Missing CoA, searches and pages. The Lab admin sees Upload CoA; the Supervisor doesn't.
+- **AU1:** the Supervisor opens the Audit log, filters by user and record type, opens a row's diff, and downloads the CSV, which then shows as an Exported row.
+- **AU2:** the Sample history Audit link opens the log filtered to that sample, value rows included. Removing the chip clears the filter. The Lab admin gets No access on `/audit`, and her Sample history has no Audit link.
+- **PR1:** the Profile saves the name. Change password refuses a wrong current password and an unmet rule, then changes the password and changes it back.
+- **PR2:** a person who turns off "Batch ready to receive" gets no N1. A batch made by the CSO still reaches the other Lab admins and Preparation.
+- **PR3:** the user menu shows the roles and opens the Notification settings. On the phone, the drawer shows the profile block at its bottom, with Sign out.
+- **Unit:** the audit row-to-text mapping (actions, record types, field labels, sign-in rows) and the regression (slope, R², n).
+
+### 12.10 Frames to update in FigCraft (decision 6)
+
+- **Audit log**, Desktop `01` to `03` and Tablet `01`: the filters move above the card, with the Search label.
+- **Dashboard Quality**, Desktop `01` and `02`, Tablet `01`, Phone `01`: the Drill holes chips and search move above the card.
+- **Trend CV**, Desktop `01` to `03`, Tablet `01`, Phone `01`: the limit line and its label are removed (decision C-1). The scatters get axis names (C-2).
+- **Phone drawer** (`Phone-00-App-02-Menu_drawer-01-Lab_admin`, `-02-CSO`): the profile block at the bottom, as in `Phone-00-App-07-User_menu-02-Drawer`.
+
+### 12.11 Decisions for the owner
+
+Checked on Nov 25 against every plan and research document, the SIM Lab Quality dashboard in the proposal (`source-documents/Proposal LIMS PT Energy Fortune Invesment.pdf`, page 17, the source of spec F-DSH-02) and the prototype. Five of the seven are settled by the documents; C-4 and C-7 stay open with a default.
+
+| # | Question | What the documents say | Answer |
+| --- | --- | --- | --- |
+| C-1 | Trend CV's limit line ("Limit 6,300 kcal/kg") | No document defines a CV limit. The value came from the prototype (6,300 on ADB, 5,400 on AR), and the chart generator copied it. SIM Lab's Trend CV has no limit line. Spec limits belong to contract specs (D-27, D-43), and control charts to the QC module (research plan, v2) | **Settled: no limit line in v1.** It can come back with contract specs in v2 |
+| C-2 | Scatter axes | SIM Lab plots "CV (ADB) vs Ash (ADB)" with CV across and Ash up, "RD vs Ash" with RD across, "FC vs GCV" with FC across; each with the line's equation and r² | **Settled, and the opposite of the first default:** the first-named value runs across. The card head keeps "R² 0.81, n 312" as the frame |
+| C-3 | Sign-ins in the Audit log | Admin plan 5 lists the actions Signed in, Sign-in failed and Account locked and the record type Sign-in; the Default frame shows a Signed in row; the user page (Admin plan 4.3) lists "Signed in" in its activity | **Settled: shown.** The Action filter hides them |
+| C-4 | Which exports are logged | Admin plan 5 has the action Exported and names only the audit log export. Spec S-30 says the history PDF is "for an audit". Nothing else asks for it | **Open.** Default: all three (Audit CSV, advanced search CSV, Sample history PDF) |
+| C-5 | Can N8 and N9 be turned off? | App plan section 2: switches "so a user can mute what does not concern them"; 18.4 draws "Batch past its deadline" and "CoA waiting for my signature" as switches on the Manager's Profile | **Settled: yes**, every switch can be turned off |
+| C-6 | Batches completed caption | The research plan (screen 9) and SIM Lab show three counts for the date range: in progress, completed, and **Total Batch**. The dashboard plan's Q1 says "23 total" | **Settled, and different from the first default:** "N total" is every batch in the period, whatever its status |
+| C-7 (new) | Trend CV per sample or per batch | SIM Lab plots CV (arb) for every sample, about 1,150 dots along the sample order. The Dashboard v2 plan (Q6), the frame and the prototype draw one line point per completed batch | **Open.** Default: per batch, as the approved plan and frame. One line point per sample would be unreadable at that count |
+
+**Size:** M to L. The audit row-to-text mapping and the scatters are the bigger parts.

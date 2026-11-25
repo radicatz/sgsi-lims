@@ -17,7 +17,7 @@ export function renderHistoryHtml(h: SampleHistory): string {
   const a = baseAssets(), s = h.sample;
   const depth = s.depthFrom != null && s.depthTo != null ? `${s.depthFrom.toFixed(2)} to ${s.depthTo.toFixed(2)} m` : "-";
   const kv: Array<[string, string]> = [
-    ["Drill hole", s.drillHole ?? "-"], ["Depth", depth], ["Description", s.description ?? "-"], ["Sample type", s.sampleType ?? "-"],
+    ["Drill hole", s.drillHole ?? "-"], ["Depth", depth], ["Description", s.description ?? "-"], ["Ply or composite", s.plyComp === "comp" ? "Composite" : s.plyComp === "ply" ? "Ply" : "-"], ["Sample type", s.sampleType ?? "-"],
     ["Mass received", s.mass != null ? `${s.mass.toFixed(2)} kg` : "-"], ["Condition", s.condition ?? "-"], ["Status", s.status],
     ...(s.held ? [["Held reason", [s.held.reason, s.held.note].filter(Boolean).join(", ") || "-"] as [string, string]] : []),
   ];

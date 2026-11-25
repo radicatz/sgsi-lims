@@ -639,13 +639,13 @@ For v1 the biggest risk is the calendar: four weeks only works if SIM Lab access
 
 - [ ] Rapid-lot CV DAF formula: the workbook gives 7291.7 for lot 1 where the standard formula gives 7224; final composite values match the standard formula. Likely a surveyor correction (see the workbook's Corr. Combust. & Non Combust. sheet)
 - [ ] CoA layout per issuer: the sample CoA (SUCOFINDO, per barge, ASTM) vs the workbook's COA sheet (per vessel, ISO) — one template or several
-- [ ] Is PT Energy Fortune Investment's lab doing shipment work itself, or does a superintending surveyor (SUCOFINDO, SCI) issue the CoA? If the surveyor issues it, our CoA may be an internal quality certificate, not the commercial one.
+- [x] Is PT Energy Fortune Investment's lab doing shipment work itself, or does a superintending surveyor (SUCOFINDO, SCI) issue the CoA? If the surveyor issues it, our CoA may be an internal quality certificate, not the commercial one. **Answered Nov 16, 2026 (owner): the lab, SGSI, issues the CoA** (spec D-26). Whether the shipment desk is built waits on R-12.
 - [ ] Which methods are used per parameter today (ISO, ASTM, GB/T, or mixed)? Need the lab's controlled method list with repeatability limits.
-- [ ] NCV formula and any client-specific "formula" variants (workbook has SCI vs KPC formula columns).
-- [ ] CoA templates: one per buyer or one house template? Required wording, signatories, numbering scheme.
+- [x] NCV formula and any client-specific "formula" variants (workbook has SCI vs KPC formula columns). **Answered Nov 16, 2026 (owner):** hydrogen estimated (Seyler), net CV by the batch's standard (spec 12.1). Client-specific variants are not in v1; request item 13 confirms the standard.
+- [x] CoA templates: one per buyer or one house template? Required wording, signatories, numbering scheme. **Answered for v1:** one house template, versioned in Configuration; `CoA-{job order}-{revision}`; the Laboratory Manager signs, digitally (`Reports_Build_Design.md`, Reports plan 12.4 and 12.8). Per-client templates are next goal.
 - [ ] Are production and stockpile samples real flows at this site, and what are their sample codes and locations?
 - [ ] Rapid analysis: which parameters and what TAT target outside shipments?
-- [ ] Who verifies and who signs: roles and the number of approval levels.
+- [x] Who verifies and who signs: roles and the number of approval levels. **Answered:** no approval gates in v1 (D-34, D-42, D-49); the Supervisor signs the paper RoA outside the system; the Laboratory Manager signs the CoA in the app (R-21, owner Nov 16 and Nov 20).
 - [ ] Hosting: on-premise at the mine site, client cloud, or vendor-hosted? Internet reliability at site.
 - [ ] Data migration: how much historical drill-hole and shipment data must be loaded?
 

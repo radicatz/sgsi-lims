@@ -179,7 +179,7 @@ The Dashboard's drill-hole list uses codes like DH-0412. It changes to these cod
 | 3 | Company scoping | Masters are per company; a Company select on Drill hole, Lithology and Seam | Data model; SIM Lab has a Company column |
 | 4 | Import | On Drill hole, Lithology and Seam; wizard designed with the App group | R-08, S-16 |
 | 5 | Seam order | A number field in v1 | S-06 |
-| 6 | Lithology kinds | Coal, Parting, No lithology | SIM Lab, corrected spelling |
+| 6 | Lithology kinds | Coal, Parting, No lithology. **Nov 25, 2026 (owner):** samples do not record their seam or lithology in v1 (next goal, spec D-19), so the lists' sample counts by lithology and seam stay empty until then | SIM Lab, corrected spelling |
 | 7 | Client logo | Optional upload, shown in the list and on the client page | SIM Lab shows logos |
 | 8 | Rows per page | 25, as SIM Lab | SIM Lab |
 | 9 | Billing address | Added; shipping address not needed (the lab sends reports, not goods) | Clarity accounts (spec 6) |

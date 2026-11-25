@@ -40,7 +40,7 @@ The prototype is done when a reviewer can follow every flow in the group plans f
 | Tokens | Generated from `design/figcraft/tokens/sgsi-tokens.css` (Light and Dark), including the elevation, radius and spacing scales | Same values as the file |
 | Light and dark | A **Light / Dark** switch in the review bar, using the dark tokens. No dark frames are drawn (owner, Nov 6: the screens viewed with the dark tokens are already good) | Dark mode is reviewed in the prototype only |
 | Type and icons | Google Fonts: Noto Sans, Newsreader and JetBrains Mono, with the library's text styles (section 3.1 of `../Design System/Component_Library_Plan.md`) as CSS classes. Icons are the Phosphor Regular SVGs of the library's glyph list plus eye-slash and sign-out, embedded inline (the artifact host blocks icon-font stylesheets) | Matches the library |
-| Charts | Hand-drawn SVG that copies the chart shells in the frames (Dashboard plan) | Looks like the frames, needs no chart library, and stays small. The real app uses ECharts |
+| Charts | Hand-drawn SVG that copies the chart shells in the frames (Dashboard plan) | Looks like the frames, needs no chart library, and stays small. The app kept hand-drawn SVG too (Phase 5 decision 3, Nov 24, 2026). |
 | Routing | Hash routes that follow the spec URLs (listed in each group plan), so a reviewer can send a link to one screen, for example `#/batches/B-2026-0422` | Links in feedback point at the exact screen |
 | Backend | None. Demo data lives in the page, and changes are kept in the viewer's browser. **Reset demo** restores the start state | Same as version 31 |
 

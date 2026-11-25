@@ -159,7 +159,8 @@
   padding-top: 8px;
   padding-bottom: 8px;
 }
-.sgrid input.gc {
+.sgrid input.gc,
+.sgrid select.gc {
   width: 100%;
   min-width: 0;
   height: 32px;
@@ -173,6 +174,11 @@
   color: var(--text-foreground);
   outline: 0;
 }
+.sgrid select.gc {
+  appearance: none;
+  padding-right: 8px;
+  cursor: pointer;
+}
 .sgrid input.gc.ref {
   font: 600 13px/20px var(--f-mono);
   color: var(--text-heading);
@@ -182,11 +188,14 @@
   font: 400 13px/20px var(--f-body);
 }
 .desktop .sgrid tr:hover input.gc,
+.desktop .sgrid tr:hover select.gc,
+.desktop .sgrid select.gc:hover,
 .desktop .sgrid input.gc:hover {   /* hover is a mouse thing: on a touch screen a tap leaves the row "hovered" */
   border-color: var(--surface-border);
   background: var(--surface-card);
 }
-.sgrid input.gc:focus {
+.sgrid input.gc:focus,
+.sgrid select.gc:focus {
   border-color: var(--primary);
   background: var(--surface-card);
   box-shadow: 0 0 0 3px var(--primary-200);
@@ -357,7 +366,8 @@ table.sgrid.tgrid {
 }
 /* the fields of a row (frame "Table row samples tablet ref"): at rest a field is plain text, as tall as its font; while the row is being edited or
    filled every field is 26 px high with a 1 px border, radius 4 and padding 2 / 4, 2 px apart (the row grows once, and stays steady while typing) */
-.tgrid input.gc {
+.tgrid input.gc,
+.tgrid select.gc {
   height: 16px;
   margin: 0;
   padding: 0;
@@ -378,7 +388,15 @@ table.sgrid.tgrid {
 .tgrid input.gc::placeholder {
   font: 400 12px/16px var(--f-body);
 }
+.tgrid select.gc {
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  cursor: pointer;
+}
 .tgrid tr.edit input.gc,
+.tgrid tr.edit select.gc,
+.tgrid tr:focus-within select.gc,
 .tgrid tr:focus-within input.gc {
   height: 26px;
   padding: 0 4px;

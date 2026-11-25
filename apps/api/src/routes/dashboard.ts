@@ -60,7 +60,7 @@ export async function dashboardRoutes(app: FastifyInstance) {
            from batches b where true ${cf}`,
         tx`select ${shownStatus(tx)} as st, count(*)::int as n from batches b where true ${cf} group by 1`,
         tx`select j.status::text as st, count(*)::int as n from job_orders j where j.status::text = any(${ORDER_STATUSES as unknown as string[]}) ${co ? tx`and j.company_id = ${co}` : tx``} group by 1`,
-        tx`select coalesce(nullif(trim(j.sample_type), ''), 'Not set') as k, count(*)::int as n from samples s join job_orders j on j.id = s.job_order_id
+        tx`select case s.ply_comp when 'ply' then 'Ply' when 'comp' then 'Composite' else 'Not set' end as k, count(*)::int as n from samples s join job_orders j on j.id = s.job_order_id
            where s.received_at is not null and ${tx.unsafe(dayOf("s.received_at"))} between ${from} and ${to} ${co ? tx`and j.company_id = ${co}` : tx``} group by 1 order by 2 desc`,
         tx`select to_char(${tx.unsafe(dayOf("s.received_at"))}, 'YYYY-MM-DD') as d, count(*)::int as n
            from samples s join job_orders j on j.id = s.job_order_id where s.received_at is not null and ${tx.unsafe(dayOf("s.received_at"))} between ${dayFrom} and ${to} ${co ? tx`and j.company_id = ${co}` : tx``} group by 1 order by 1`,
