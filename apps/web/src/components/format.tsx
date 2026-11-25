@@ -13,3 +13,6 @@ export function fmtWhen(iso: string | null | undefined) {
   if (day(d) === day(new Date())) return "Today " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: tz });
   return fmtDate(iso);
 }
+
+/** The label above a Work page's title: today's day in the lab's time zone, "WEDNESDAY, 25 NOVEMBER 2026" (owner, Nov 25: the same on every page under Work, at every size). */
+export const todayLabel = () => new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" }).toUpperCase();

@@ -158,7 +158,8 @@ export function DrillHoles() {
   const { data = [], isLoading } = useList<DrillHole>("drill-holes");
   const [co, setCo] = useCompanyFilter();
   const companies = useCompanyOptions("All companies");
-  const [q, setQ] = useState(""),
+  const [initial] = useSearchParams(),
+    [q, setQ] = useState(initial.get("q") ?? ""),
     [chip, setChip] = useState<DhChip>("all");
   const [form, setForm] = useState<DrillHole | "new" | null>(null),
     [coaFor, setCoaFor] = useState<DrillHole | null>(null),

@@ -1,6 +1,6 @@
 # Phase 5 · Monitoring and search · Build design
 
-Nov 24, 2026 · **Slice A built (not committed); owner's go given, plan defaults used** · phase 5 of `V1_Build_Plan.md` section 2
+Nov 25, 2026 · **Slice A built and pushed (29cb3ca); slice B planned (section 10), waiting for go** · phase 5 of `V1_Build_Plan.md` section 2
 
 Written for: the product owner (decisions in section 8) and the developers who build it.
 
@@ -121,9 +121,9 @@ Defaults are used if you say go without answering.
 | # | Question | Default |
 | --- | --- | --- |
 | 1 | Advanced search export: CSV and XLSX now, or CSV now and XLSX with phase 6's "export on every list"? | CSV now, XLSX in phase 6 |
-| 2 | Sample history **Export PDF**: now (through Gotenberg, as the RoA) or phase 6? | Phase 6 |
+| 2 | Sample history **Export PDF**: now (through Gotenberg, as the RoA) or phase 6? | Phase 6; **changed Nov 25: built now** at the owner's request (section 11, feedback round) |
 | 3 | Dashboard charts: hand-drawn SVG to match the frames, or a chart library (heavier, less exact)? | Hand-drawn SVG |
-| 4 | Does Preparation see result values in search (Search plan open point 1)? | No |
+| 4 | Does Preparation see result values in search (Search plan open point 1)? | No (reopened as B-5 in section 10.11: the role grid gives Preparation `result.read`) |
 | 5 | Turnaround target for a custom parameter set (no service) | 5 days for Basic-sized sets, 10 for the rest, until the lab says |
 | 6 | Frames: update in FigCraft per slice where the Nov 23 and 24 rules change them (section 4), or leave the frames as drawn and follow the rules in the app only? | Update per slice |
 | 7 | Sample type categories for the mix chart (R-07) | The job order's sample type as entered |
@@ -205,3 +205,306 @@ Still **not committed and not pushed**.
 - **Bar colours:** the Job orders by status bars and the Receiving bar take the pill colours in every Dashboard frame that has charts, ref frames included.
 
 **Tests:** `e2e/phase5-work.spec.ts` passes 12 of 12 at the three sizes. WK3 now runs on the phone too (tick boxes on the cards, the bottom bar, the zip download). DB1 checks the late mark by its "Past due" title.
+
+## 10 · Slice B plan: Search and Sample history (Nov 25, 2026)
+
+**Status:** waiting for the owner's go.
+
+**Sources** (checked against every project document; see 10.2):
+- `../Search/Search_Screen_Plan.md`, with the owner edits S-1 to S-8 of its section 15;
+- `../Search/Search_Prototype_Plan.md`;
+- spec S-29 and S-30, plus sections 6.1, 6.2, 8.2, 8.3, 13.5, 14 and 15;
+- `../Navigation/Navigation_Screen_Plan.md` section 4;
+- `Sample_Identifiers_Plan.md`, `V1_Build_Plan.md` and `Stack_Decision_Record.md`;
+- the rules of section 4 here.
+
+### 10.1 What exists today
+
+- **Top bar:** the search field and scan button are drawn but do nothing.
+- **Holding page:** `/search` is still a holding page.
+- **Saved queries:** the `saved_queries` table (spec T-26) exists, with row-level security: own rows, plus shared rows for staff.
+- **No camera scanning anywhere:** a USB label scanner types into a focused field like a keyboard, so it already works with any text box.
+- **Samples:** they hold the drill hole as text (`drill_hole_text`), not as a link to the Drill hole master. They hold no seam or lithology.
+- **Drill hole list:** it has a search box but does not read a search word from the address yet.
+
+### 10.2 Checked against the project documentation
+
+| Document | What it says | Effect on this plan |
+| --- | --- | --- |
+| Spec S-29 | Searching for job orders, batches, samples, results. Operators: is, contains, between, greater, less, is empty. Column chooser; export CSV and XLSX; saved and shared queries; header quick search by Sample ID, sample code, client reference, batch, job order. The CSO never gets RoA values | All in. XLSX moves to phase 6 (section 8 decision 1, and `V1_Build_Plan` phase 6: "CSV and XLSX export on every list") |
+| Spec S-30 | v1 events: registration, reception, hold, batch, ADL, values, RoA upload, CoA publish, revise, send. Each entry links to its audit rows. Export PDF | Events as listed in 10.3 B4. The audit link comes with slice C (`/audit` doesn't exist yet). Export PDF is phase 6 (decision 2) |
+| Spec 6.1 | The Sample ID is unique, the barcode carries it, and "search matches it first" | An exact Sample ID ranks first in quick search, ahead of every other exact match |
+| Spec 6.2, item 6 | The client reference is not printed on reports but stays in the app's search, history and grids | Quick search and the results page match the client reference |
+| `Sample_Identifiers_Plan` decision 5 | A scanned label opens the sample by Sample ID; the placeholder text | Decision B-2 (opens the history). The placeholder is already built |
+| Spec 8.2 role grid (and the live `role_permissions`) | `result.read`: everyone except the CSO, so **Preparation has it**. `master.read`: Lab admin, Supervisor, Manager, Superadmin. `company.read`: CSO, Lab admin, Manager, Superadmin. `coa.download`: everyone except Prep and Analyst. `roa.download`: everyone except the CSO and Prep | The types and values each role gets are keyed to these codes (10.4), not to role names. Two corrections to Search plan section 3: drill holes are **not** found by the CSO, Preparation or Analyst (no `master.read`); Clients are **not** found by the Supervisor (no `company.read`). Preparation and values: decision B-5 |
+| Spec 8.3 and Navigation section 4 | A link to a page the role cannot open shows as plain text. The CSO's search never shows values or RoA files | In history and results, a hidden page's link (a drill hole for the CSO, a CoA for the Analyst) shows as plain text |
+| `Batch_Build_Design` 15.1 | "Everyone else reads only". Preparation already sees values on the batch page; only the CSO sees counts | This is why decision B-5 recommends following `result.read` |
+| Spec 13.5 | Lists a view `v_sample_history` (sample, event, at, by, detail, link) | The history is assembled in the API from the same tables. No view, so there is no extra migration and the value hiding stays in one place. Spec 13.5 gets a note when the build lands |
+| Spec 14 API | `GET /search?q=`, `POST /search/advanced`, saved-queries CRUD, `GET /samples/:ref/history`; values only with `values.view` | The endpoints are as listed, plus `GET /search/quick` and the CSV export. `values.view` in the spec is `result.read` in the code. The history is keyed by the sample's **id**, because the Sample ID only exists after reception and the client reference is unique only within its job order. Spec 14 and 15 get updated route lines when the build lands |
+| Spec 15 | Route `/samples/:ref/history`; TanStack Table; touch 44; no horizontal page scroll | Route `/samples/:id/history`, as above. Tables use the app's own `Table` component, as every built list does. The phone rules apply |
+| `Search_Prototype_Plan` | The `/` key focuses the quick search. Flows SE1 (quick search to history), SE2 (advanced search, Lab admin), SE3 (history, then Audit, Supervisor). A **History** item in the Samples tab and Reception row menus | The `/` shortcut is in. SE1 and SE2 are in the tests. SE3 waits for slice C |
+| `V1_Build_Plan` phase 5 | "quick and advanced search, saved queries, sample history" | Matches B1 to B5 |
+| Phase 5 section 4 | The Nov 23 and 24 rules: Search label over list searches, phone touch 44, filters outside cards, chips scroll | Applied to the results page, the phone start screen and advanced search |
+
+### 10.3 Screens and their frames
+
+Frame names are the FigCraft names (`Size-MM-Module-SS-Screen-VV-Variant`).
+
+**B1 Quick search** (top bar panel, any page; desktop and tablet)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-08-Search-01-Quick_search-01-Recent` | Empty field: last 5 records opened, last 3 searches |
+| `Desktop-08-Search-01-Quick_search-02-Typing` and `Tablet-08-Search-01-Quick_search-02-Typing` | Hits grouped by type, matched part bold, See all N results |
+| `Desktop-08-Search-01-Quick_search-03-Exact_match` | The exact match first, marked **Go to** |
+| `Desktop-08-Search-01-Quick_search-04-No_match` | "No match for …" and **Open advanced search** |
+
+- **Opening it:** focusing the field opens the panel (560 wide, Elevation/md). The `/` key focuses the field from anywhere.
+- **Hits:** from 2 characters, after a 200 ms pause, up to 3 hits per type, in the order Samples, Batches, Job orders, Drill holes, Reports, Clients.
+- **Exact matches:** an exact Sample ID comes first (spec 6.1), then any other exact ID.
+- **Keys:** ↑ and ↓ move, Enter opens, Esc closes.
+- **Scanned Sample ID:** a Sample ID typed or scanned exactly opens that sample's history (B-2).
+
+**B2 Search results** (`/search?q=&type=`)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-08-Search-02-Search_results-01-All`, `Tablet-08-Search-02-Search_results-01-All`, `Phone-08-Search-02-Search_results-01-All` | Types card with counts, one card per type (5 rows, **Show all**) |
+| `Desktop-08-Search-02-Search_results-02-One_type` | One type, 10-row pager |
+| `Desktop-08-Search-02-Search_results-03-CSO` | The CSO's types: no RoA, no values |
+| `Desktop-08-Search-02-Search_results-04-No_results` | "Nothing matches …", **Open advanced search** |
+| `Phone-08-Search-02-Search_results-05-Phone_start` | The phone's Search page with an empty field: field, **Scan a label**, Recent |
+
+- **Header:** overline SEARCH, title `Results for "…"`, and **Advanced search** (Secondary, lg).
+- **Search field:** lg, with its Search label (the Nov 24 rule), above the results.
+- **Types card:** 240 wide and fills the row (S-3). A type with no hits is muted.
+- **Result cards:** a Title section with a Count pill, plus a ghost **Show all** (S-2).
+- **Tablet and phone:** the types become scrolling chips, and the phone rows become cards.
+- **Phone entry:** the phone reaches this page from Search in the menu drawer (`Phone-00-App-02-Menu_drawer-01-Lab_admin`).
+- **Scan a label:** it opens the camera scan (B-1). The camera screen follows `Phone-04-Batches-02-Batch_detail-07-Reception_scan_label`.
+
+**B3 Advanced search** (`/search/advanced?query=`)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-08-Search-03-Advanced_search-01-Empty` | Searching for Samples, one empty condition, Saved queries, "Build a query, then press Search." |
+| `Desktop-08-Search-03-Advanced_search-02-Sample_query`, `Tablet-08-Search-03-Advanced_search-02-Sample_query`, `Phone-08-Search-03-Advanced_search-02-Sample_query` | Three conditions and the results |
+| `Desktop-08-Search-03-Advanced_search-03-Results_query` | Searching for Results: parameter, value, basis, entered by, date |
+| `Desktop-08-Search-03-Advanced_search-04-Columns_menu` | The Columns popover (checkboxes) |
+| `Desktop-08-Search-03-Advanced_search-05-Save_query` | Save query dialog md with **Share with staff** |
+| `Desktop-08-Search-03-Advanced_search-06-Over_limit` | Info alert "Showing the first 500 of 2,318" |
+
+- **Searching for:** Samples, Batches, Job orders, Results. Results needs `result.read` (B-5).
+- **Match:** All or Any, on the Segmented control (S-1).
+- **Condition rows:** a number, then a Select container (field, operator, value, basis; S-5), then remove. Operators by type:
+  - text: is, is not, contains, starts with, is empty;
+  - number: equals, greater than, less than, between;
+  - date: on, before, after, between;
+  - choice: is, is any of.
+- **Buttons:** Add condition, Clear all, Save query, Search. When a condition changes after a search, the results read "Out of date, search again".
+- **Results card:**
+  - The count, plus **Columns** and **Export CSV**.
+  - Sortable columns, a 25-row pager.
+  - Above 500 rows an Info alert; the export still holds every row.
+  - A sample or result row opens the Sample history.
+- **Saved queries card:** 260 wide, fills the row (S-4).
+  - Lists My queries and Shared with me. Opening one fills the conditions and runs them.
+  - Row menu: Rename, Duplicate, Share or Unshare, Delete. A query shared by someone else offers Duplicate only.
+- **Tablet and phone:** saved queries become a select, and condition rows wrap. Phone results are cards with the first three columns; Columns is hidden and Export stays.
+
+**B4 Sample history** (`/samples/:id/history`)
+
+| Frame | Shows |
+| --- | --- |
+| `Desktop-08-Search-04-Sample_history-01-Default`, `Tablet-08-Search-04-Sample_history-01-Default`, `Phone-08-Search-04-Sample_history-01-Default` | Every v1 event up to a CoA revision |
+| `Desktop-08-Search-04-Sample_history-02-CSO` | Values hidden, no View values |
+| `Desktop-08-Search-04-Sample_history-03-In_progress` | A sample in analysis: pending steps grey |
+| `Desktop-08-Search-04-Sample_history-04-Held` | Held at reception with the reason, then released |
+
+- **Header:**
+  - Breadcrumb: Job orders, the job order, the sample.
+  - Title: the Sample ID (the client reference before reception) and its status badge.
+  - Separate texts: sample code, client reference, job order link, batch link, client.
+- **Sample card:** 378 wide. It holds drill hole, depth from and to, client description, sample type, mass as received, condition, status, and the held reason when held.
+- **History card:** a list with dividers (S-6). Each entry has a dot in a 20 × 20 container, the event, an avatar 24 with the name, and the date and time as separate texts.
+- **Events (spec S-30 v1 note), built from stored data only:**
+  - registered on the job order;
+  - released from a batch (awaiting arrival) or marked not received;
+  - arrived;
+  - received and labelled (mass, condition, photos);
+  - held or released;
+  - added to a batch;
+  - preparation finished with ADL;
+  - values entered, with the count of parameters, and edited;
+  - analysis finished;
+  - batch completed, with the RoA number;
+  - CoA published, revised, voided or sent.
+- **Values:** parameter and value pairs on the measured basis, plus **View values** to the batch Analysis tab. Without `result.read` (the CSO), the entry reads "Values entered (8 parameters)", with no numbers and no link.
+- **Pending steps:** grey dots, with no person or date.
+- **Links:** a link to a page the role can't open shows as plain text. The **Audit** link, with `audit.read`, comes with slice C, per `Desktop-15-Audit_log-01-Audit_log-03-Filtered_by_record`.
+
+**B5 History in the row menus** (no new frames)
+
+| Frame it extends | Change |
+| --- | --- |
+| `Desktop-03-Job_orders-03-Job_order_detail-06-Samples`, `-07-Samples_mixed_states` (and the Tablet and Phone `06` and `07`) | Row menu gets **History** |
+| `Desktop-04-Batches-02-Batch_detail-01-Reception_receiving` (and Tablet, Phone `01`) | Row menu gets **History** |
+
+History opens for every role that sees the row, also before reception (the route uses the sample's id).
+
+### 10.4 What each role finds (keyed to permission codes)
+
+| Type, or values | Needs | Roles today (live grid) |
+| --- | --- | --- |
+| Samples, Batches, Job orders | `batch.read`, `order.read` | All seven |
+| Drill holes | `master.read` | Lab admin, Supervisor, Manager, Superadmin |
+| Reports: CoAs | `coa.download` | CSO, Lab admin, Supervisor, Manager, Superadmin |
+| Reports: RoAs | `roa.download` | Analyst, Lab admin, Supervisor, Manager, Superadmin |
+| Clients | `company.read` | CSO, Lab admin, Manager, Superadmin |
+| Results target, values in history, value columns | `result.read` | Everyone except the CSO (Preparation included: decision B-5) |
+
+A hit the role cannot open is never returned, so counts are per role. Row-level security applies under all of it.
+
+### 10.5 Server
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /search/quick?q=` | Up to 3 hits per type, plus the exact match. One small query per offered type, run in parallel as the signed-in user, each `ilike '%q%'` on lower-cased IDs. Order: exact Sample ID, other exact IDs, starts-with, newest |
+| `GET /search?q=&type=&page=` | Counts per type, plus 5 rows per type (or one type paged by 10) |
+| `POST /search/advanced` | `{ target, match, conditions[], sort, page }`. Fields come only from a fixed list per target (column or join, type, operators); values are bound parameters, never text in SQL. Returns rows, total and `capped` (above 500) |
+| `POST /search/advanced/export` | The same query as CSV, every row |
+| `GET`, `POST`, `PATCH`, `DELETE /saved-queries` | Through RLS. A definition is checked against the field list before it is saved |
+| `GET /samples/:id/history` | The sample card and the events, assembled from `samples`, `batch_status_log`, `analyses` and `analysis_values`, `sample_photos`, `batch_documents`, `reports`, `report_sources` and `report_deliveries`. Values are included only with `result.read` |
+
+**Unit tests** (vitest, API): one per operator and one per target. They check that a field outside the list is refused and that values are bound as parameters.
+
+**Small change elsewhere:** the Drill hole list reads `?q=` into its search box, so a drill hole hit opens the list already searched.
+
+### 10.6 Migration for the owner
+
+`supabase/migrations/20261125000100_search_trgm.sql`:
+- `pg_trgm`, with trigram indexes on every ID column search matches;
+- two indexes for the saved queries list.
+
+Search works without it, only slower on a big table. The build does not wait for it; the gate does.
+
+### 10.7 Differences from the Search plan
+
+| Plan | Build | Why |
+| --- | --- | --- |
+| Section 3: the CSO, Preparation and Analyst find drill holes; the Supervisor finds clients | Drill holes need `master.read`; Clients need `company.read` | The role grid (spec 8.2) and the sidebar (8.3) |
+| Advanced fields include seam and lithology | Not offered | Samples store neither; only the drill hole as text |
+| A drill hole hit opens "the list filtered to it" | The list with the code in its search (`?q=`) | Same effect, no new filter |
+| Export CSV and XLSX | CSV | Decision 1; XLSX with phase 6 |
+| Sample history Export PDF | Not built | Decision 2: phase 6 |
+| Audit link per entry | With slice C | `/audit` is slice C |
+| Route `/samples/:ref/history` (spec 14, 15) | `/samples/:id/history` | The Sample ID exists only after reception |
+| `v_sample_history` view (spec 13.5) | Assembled in the API | No migration; value hiding in one place |
+| Frames show old lab codes (`B0417-07`, `BNM-3507`) | Spec 6.1 identifiers | Format mismatch flagged Nov 10; the spec wins |
+
+### 10.8 Demo data
+
+`pnpm seed:search` (`--remove` takes it out):
+- **Saved queries:** "High-ash samples" and "Held this month" (Maya's), and "Late batches" (Hendra's, shared).
+- **Histories:** the existing demo batches already give full histories. B-2026-0450 to 0459 run to the CoA, B-2026-0418 is in analysis, B-2026-0422 is at reception, and B-2026-0413 is in preparation. No new job orders.
+
+### 10.9 Tests (`e2e/phase5-search.spec.ts`, three sizes)
+
+| Test | Flow | Checks |
+| --- | --- | --- |
+| SR1 | SE1 | Quick search: grouped hits, an exact Sample ID first with Go to, Enter opens the history, `/` focuses, Esc closes, See all (desktop, tablet) |
+| SR2 | | Results: Types counts, Show all, one type with a pager, No results; phone start screen from the drawer |
+| SR3 | SE2 | Advanced (Lab admin): two conditions, Match Any, Columns, Export CSV downloads, Out of date notice |
+| SR4 | SE2 | Saved queries: save shared, open, rename; another user duplicates it; delete |
+| SR5 | | Roles: the CSO gets no RoA, no Drill holes and no Results target, and its history has no values; the Analyst gets RoAs but no CoAs; the Supervisor gets no Clients |
+| SR6 | | History: events in order, pending steps grey, View values opens the Analysis tab; History from the Samples and Reception row menus |
+
+SE3 (history, then Audit) is tested with slice C.
+
+### 10.10 Frames to update in FigCraft (decision 6: only where a later rule changes them)
+
+- **Search label:** the results field in `Desktop-08-Search-02-Search_results-01-All` and `-02-One_type`, the Tablet and Phone `01-All`, and `Phone-08-Search-02-Search_results-05-Phone_start`.
+- **Phone touch 44:** the **Scan a label** button and the advanced search phone actions (`Phone-08-Search-03-Advanced_search-02-Sample_query`).
+- **History in row menus:** none to draw; the menus are drawn closed.
+
+The identifier format stays as drawn (flagged mismatch).
+
+### 10.11 Decisions for the owner
+
+Defaults are used if you say go without answering.
+
+| # | Question | Default |
+| --- | --- | --- |
+| B-1 | **Phone camera scan.** Only Android Chrome reads barcodes from the camera without a library; iPhone Safari needs one (about 150 KB). Options: camera where supported and the button hidden elsewhere; a library for every phone; or no camera scan in v1 | **Camera where supported, hidden elsewhere** |
+| B-2 | **What a Sample ID match opens**, typed or scanned | **Sample history** (Search plan open point 3, identifiers decision 5) |
+| B-3 | **Archived drill holes and clients** in search | **Shown with an Archived tag** (open point 7) |
+| B-4 | **Order.** B4 Sample history and B5 first, then B1 to B3 | **History first** |
+| B-5 | **Preparation and result values** in search and history. Section 8 decision 4 said "No". But the role grid gives Preparation `result.read`, and the batch page already shows Preparation the values; only the CSO is hidden. Follow the permission (Preparation sees values and the Results target), or keep the extra Preparation rule? | **Follow `result.read`.** This replaces decision 4 so that search and the batch page agree |
+
+**Size: L**, about the same as Phase 4 slice B.
+
+## 11 · Slice B build status (Nov 25, 2026)
+
+Built, **not committed** (commit when the owner says). The owner gave go with the defaults and ran `20261125000100_search_trgm.sql` (checked: `pg_trgm` and all 11 trigram indexes exist). Decision B-5 applied: Preparation follows `result.read`.
+
+**Built**
+- **Sample history** (`/samples/:id/history`, `features/search/SampleHistory.tsx`, `routes/sample-history.ts`):
+  - The sample card and a timeline of the events in 10.3 B4, with pending steps (Preparation, Analysis, CoA) grey.
+  - Values show as parameter and value pairs with **View values** only with `result.read`. The CSO sees "Values entered (7 parameters)" and nothing more.
+  - A link to a page the role cannot open shows as plain text.
+- **History in the row menus:**
+  - A **History** icon button on every saved row of the job order Samples tab.
+  - A **History** item in the Reception row menu.
+  - Both also work before reception.
+- **Quick search** (top bar, `features/search/QuickSearch.tsx`, `routes/search.ts`):
+  - The panel opens on focus and shows Recent records and Recent searches when the field is empty.
+  - From 2 characters it shows up to 3 hits per type, with the matched part bold.
+  - An exact Sample ID ranks first and is marked **Go to**; Enter opens it.
+  - Keys: arrows, Enter, Esc, and `/` to focus. The panel never shows or lets a click use the answer to an earlier word.
+- **Search results** (`/search?q=&type=&page=`): the Types card (chips on tablet and phone), one card per type with **Show all**, one type paged by 10, the Nothing-matches state, and the phone start screen with Recent.
+- **Camera scan** (`Scan.tsx`, decision B-1): shown only where the browser has `BarcodeDetector` (Android Chrome); a read Sample ID opens its history. A USB scanner types into the field.
+- **Advanced search** (`/search/advanced`, `routes/advanced-search.ts`, `routes/search-query.ts`):
+  - The four targets, Match All or Any, and condition rows with operators per field type.
+  - On Samples, a Result condition (parameter, basis, number operator).
+  - Columns menu (changing it re-runs the search), sortable columns, a 25-row pager, the over-500 notice, **Out of date** when a condition changes, and **Export CSV**.
+  - **Saved queries:** mine and shared with me; Rename, Duplicate, Share or Unshare, Delete; a Save dialog with Share with staff. `?query=` opens one.
+- **Drill hole list:** it reads `?q=` into its search box.
+- **Work pages:** every page under Work now shows today's day above its title, at every size, from one helper (`todayLabel`): My work, Dashboard, Job orders, Batches, Reports, Search, Results and Advanced search.
+- **Types by permission:** drill holes need `master.read`, clients `company.read`, CoAs `coa.download`, RoAs `roa.download`.
+- **Demo data:** `pnpm seed:search` adds "High-ash samples", "Held this month" (Maya) and "Late batches" (Hendra, shared); `--remove` takes them out.
+
+**Tests**
+- **Unit:** `apps/api/src/routes/search-query.test.ts`, 11 tests (values as bound parameters, unknown fields and wrong operators refused, each operator and target, role limits).
+- **E2E:** `e2e/phase5-search.spec.ts` (SR1 to SR6) and `e2e/phase5-work.spec.ts` pass together at 1440, 834 and 390: 29 passed, 1 skipped (quick search has no field on the phone).
+- **Bugs the tests found:**
+  - Quick search let a click use the previous word's answer. It now shows only the answer to the current word.
+  - `useNavigate` was called after an early return in the job order Samples tab, which broke that tab. It is at the top of the component now.
+  - A SQL fragment with its own parameters clashed with the outer ones, so the rank now uses quoted literals.
+
+**Differences from the plan**
+- **Saved queries on tablet and phone:** a select that opens a query. Rename, Duplicate, Share and Delete are in the desktop list only; the plan gave no row menu for the select.
+- **Sample history keys:** it is keyed by the sample's id (10.7). The "Added to batch" entry is dated from the batch's creation entry in the batch log, because a sample's own date of joining a batch is not stored.
+- **Results columns:** the Results target returns one row per sample and parameter (round 1), with the reporting basis of the value.
+- **Statuses:** the status choices in advanced search results show as grey badges, not in their status colours.
+
+**Left for later**
+- **FigCraft frames:** not updated this slice (10.10); the Work date label also changes the frames' overlines (REPORTS, SEARCH, phone variants).
+- **Audit link on history entries:** with slice C.
+- **XLSX export:** phase 6. (The Sample history PDF was built in the feedback round below.)
+
+### Slice B, owner feedback round (Nov 25, 2026)
+
+Built, **not committed**.
+- **Links:** no underline anywhere, at rest or on hover (`a` in `base.css`, `.link`, `.linkbtn`, breadcrumbs, the batch page meta); hover now darkens a link slightly or turns a row title brand blue.
+- **Quick search, no match** (frame `Desktop-08-Search-01-Quick_search-04-No_match`): the title and the hint stack with space between them; **Open advanced search** is a ghost button with the funnel icon under them.
+- **Search results:** the Types card is sticky and as tall as the window; **Advanced search** has the funnel icon and shows on the Search start page too (all sizes). The Nothing-matches card offers a ghost Open advanced search button.
+- **Advanced search:**
+  - **Save query** and **Search** carry the floppy-disk and magnifying-glass icons.
+  - **Save dialog** (frame `Desktop-08-Search-03-Advanced_search-05-Save_query`): centred on desktop and tablet (it was always a phone sheet), with the line "Saved queries appear on the left and can be run again." ("in the list above" on tablet and phone), Name marked required, and "Share with staff (they can run and duplicate it)".
+  - **Close and return:** a **Close** button at the top right of the page returns to where Advanced search was opened from: the results for the same word, or the page the quick search was used on. Opened directly, it returns to Search. The browser's Back works the same way. The date overline stays (the Work rule).
+  - **Phone results** (frame `Phone-08-Search-03-Advanced_search-02-Sample_query`): list rows with dividers, not cards. The top line has the first column and the status; text columns sit under it; number and date columns come last with their labels. The export button reads **Export** on the phone.
+- **Sample history:**
+  - **Export PDF** at the top right on desktop and tablet (the phone frame has none). `GET /samples/:id/history/pdf` renders the page's card and timeline on A4 through Gotenberg, with the lab's name from the Laboratory settings and its logo. Values appear only with `result.read`.
+  - **Tablet** (frame `Tablet-08-Search-04-Sample_history-01-Default`): one column; the Sample card shows two key-value columns.
+- **Tests:** SR7 added (no-match button, Close back to the work page and to the results, dialog vs sheet, phone rows, PDF download). SR1 to SR7 pass at the three sizes.
+- **Cleanup:** two leftover "E2E query" saved queries from earlier runs were deleted.

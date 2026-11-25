@@ -348,6 +348,11 @@ export function ReceptionTab({
           icon: "printer",
           onClick: () => setLabels({ only: [r.id] }),
         },
+      {
+        label: "History",
+        icon: "clock-counter-clockwise",
+        onClick: () => nav(`/samples/${r.id}/history`),
+      },
     ];
     return (
       <span

@@ -21,7 +21,7 @@ import {
   Table,
   cx,
   type Col,
-  type Tone,
+  type Tone, todayLabel
 } from "../../components";
 import { useCompanyOptions } from "../master-data/shared";
 import { STATUS_LABEL, STATUS_TONE } from "../batches/shared";
@@ -132,16 +132,6 @@ const dWeek = (d: string) =>
     day: "numeric",
     month: "short",
   });
-const longDate = () =>
-  new Date()
-    .toLocaleDateString("en-GB", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "Asia/Makassar",
-    })
-    .toUpperCase();
 const addDays = (d: string, n: number) =>
   new Date(at(d).getTime() + n * 86_400_000 + 12 * 3_600_000)
     .toISOString()
@@ -549,7 +539,7 @@ export function DashboardPage() {
   return (
     <div className="page">
       <PageHead
-        overline={phone ? "DASHBOARD" : longDate()}
+        overline={todayLabel()}
         title="Dashboard"
         actions={
           phone ? (

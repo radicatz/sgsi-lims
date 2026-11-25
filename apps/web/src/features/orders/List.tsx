@@ -19,7 +19,7 @@ import {
   Table,
   Tag,
   useSort,
-  type Col,
+  type Col, todayLabel
 } from "../../components";
 import { useCompanyOptions } from "../master-data/shared";
 import { CancelDialog } from "./Detail";
@@ -69,16 +69,6 @@ const SORT_KEY: Record<string, string> = {
   Status: "status",
   CoA: "coa",
 };
-const LONG_DAY = () =>
-  new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Makassar",
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-    .format(new Date())
-    .toUpperCase();
 
 export function Orders() {
   const { me } = useSession(),
@@ -296,7 +286,7 @@ export function Orders() {
       <div className="page-head">
         <div className="tt">
           <span className="t-over">
-            {bp === "desktop" ? LONG_DAY() : "JOB ORDERS"}
+            {todayLabel()}
           </span>
           <h1 className="t-display">Job orders</h1>
         </div>

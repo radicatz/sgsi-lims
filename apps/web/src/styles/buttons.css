@@ -28,5 +28,5 @@ a.btn.secondary, a.btn.ghost, a.btn.tertiary { color: var(--action-brand-text); 
 .btn.icon.sm { width: 28px; } .btn.icon.lg { width: 36px; height: 36px; } .btn.icon.touch { width: 44px; padding: 0; }
 .btn.icon:disabled { background: none; } .btn.icon.ghost:disabled { border-color: transparent; }
 .linkbtn { display: inline-flex; align-items: center; gap: 6px; color: var(--action-brand-text); font: 600 13px/18px var(--f-body); }
-.linkbtn:hover { text-decoration: underline; }
-.linkbtn:disabled { color: var(--text-muted); text-decoration: none; }
+.linkbtn:hover { opacity: 0.8; }
+.linkbtn:disabled { color: var(--text-muted); opacity: 1; }

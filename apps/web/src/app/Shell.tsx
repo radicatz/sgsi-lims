@@ -1,5 +1,6 @@
 // App shell: top bar, sidebar by role (expanded or collapsed), tablet rail, phone drawer, user menu
 // (Navigation_Screen_Plan.md, App_Screen_Plan.md). Pages render in <Outlet/>.
+import { QuickSearch } from "../features/search/QuickSearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BellPanel } from "../features/notifications/Notifications";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
@@ -189,17 +190,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
       </Link>
       <span className="grow" />
       {bp !== "phone" && (
-        <label className="tsearch">
-          <Icon n="magnifying-glass" />
-          <input
-            placeholder="Search by sample ID, batch, job order or drill hole…"
-            disabled
-            title="Search arrives in phase 5"
-          />
-          <span className="scanbtn">
-            <Icon n="barcode" />
-          </span>
-        </label>
+        <QuickSearch />
       )}
       <div className="bellwrap" ref={bellRef}>
         <Button

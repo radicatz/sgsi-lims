@@ -40,8 +40,10 @@ textarea {
   font: inherit;
   color: inherit;
 }
+/* owner, Nov 25 2026: no underline on any link, at rest or on hover */
 a {
   color: inherit;
+  text-decoration: none;
 }
 a.nav,
 a.brand,
@@ -178,7 +180,7 @@ button:disabled {
   text-decoration: none;
 }
 .link:hover {
-  text-decoration: underline;
+  opacity: 0.8;
 }
 .plain {
   color: inherit;

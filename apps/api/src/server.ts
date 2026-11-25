@@ -18,6 +18,9 @@ import { signingRoutes } from "./routes/signing";
 import { reportListRoutes } from "./routes/reports-list";
 import { workRoutes } from "./routes/work";
 import { dashboardRoutes } from "./routes/dashboard";
+import { sampleHistoryRoutes } from "./routes/sample-history";
+import { searchRoutes } from "./routes/search";
+import { advancedSearchRoutes } from "./routes/advanced-search";
 
 const app = Fastify({
   logger: process.env.NODE_ENV === "production" ? true : { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -58,6 +61,9 @@ await app.register(async (api) => {
   await api.register(reportListRoutes);
   await api.register(workRoutes);
   await api.register(dashboardRoutes);
+  await api.register(sampleHistoryRoutes);
+  await api.register(searchRoutes);
+  await api.register(advancedSearchRoutes);
 }, { prefix: "/api" });
 
 await app.listen({ port: env.API_PORT, host: "0.0.0.0" });

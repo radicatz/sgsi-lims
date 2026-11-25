@@ -2,7 +2,7 @@
 // types or pastes rows; changes stay local (orange dot) until Save, which sends adds, edits and removals at once. A row in a batch,
 // received or marked not received is locked (lock with its reason). Mark as not received and Restore act at once. Phone: cards, Add sample.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useBlocker } from "react-router";
+import { useBlocker, useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
 import { useSession } from "../../app/session";
@@ -225,6 +225,7 @@ export function SamplesTab({
   phone: boolean;
   tablet: boolean;
 }) {
+  const nav = useNavigate();
   const { me } = useSession();
   const mayEdit = !!me?.permissions.includes("order.edit");
   const q = useQuery({
@@ -501,6 +502,16 @@ export function SamplesTab({
 
   // frames: an editable Expected row has no action at rest; its icons show while the row is hovered or being typed in
   const action = (v: View, size: 32 | 44 = 32, tap = false) => {
+    const base = actionBase(v, size, tap);
+    if (!v.s?.id) return base;
+    return (
+      <span className="acts">
+        <Button iconOnly icon="clock-counter-clockwise" label={`History of ${v.s.clientRef}`} size={size === 44 ? "touch" : "md"} onClick={() => nav(`/samples/${v.s!.id}/history`)} />
+        {base}
+      </span>
+    );
+  };
+  const actionBase = (v: View, size: 32 | 44 = 32, tap = false) => {
     const s = v.s,
       bs = size === 44 ? "touch" : "md";
     if (!s)

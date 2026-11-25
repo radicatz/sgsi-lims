@@ -54,7 +54,7 @@
 .page-head .tt { display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-width: 0; }
 .phone .page-head .t-display { font-size: 28px; line-height: 34px; }
 .crumb { display: flex; align-items: center; gap: 6px; font: 500 12px/16px var(--f-body); color: var(--text-secondary); flex-wrap: wrap; }
-.crumb a { color: var(--text-secondary); cursor: pointer; } .crumb a:hover { color: var(--action-brand-text); text-decoration: underline; }
+.crumb a { color: var(--text-secondary); cursor: pointer; } .crumb a:hover { color: var(--action-brand-text); }
 .crumb b { color: var(--text-foreground); font-weight: 600; }
 
 /* top bar parts */

@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "../../app/api";
 import { useBreakpoint } from "../../app/session";
-import { Avatar, Badge, Button, Card, Check, Dialog, Empty, Icon, PageHead, Search, Select, Table, Tabs, cx, toast, type Col } from "../../components";
+import { Avatar, Badge, Button, Card, Check, Dialog, Empty, Icon, PageHead, Search, Select, Table, Tabs, cx, toast, type Col, todayLabel } from "../../components";
 import { STATUS_LABEL, STATUS_TONE } from "../batches/shared";
 
 export interface WorkData {
@@ -26,7 +26,6 @@ export function waiting(since: string | null, now = Date.now()): string {
   const h = Math.max(0, (now - new Date(since).getTime()) / 3_600_000);
   return h < 1 ? "Just now" : h < 24 ? `${Math.floor(h)} h` : `${Math.floor(h / 24)} d`;
 }
-const longDate = () => new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" }).toUpperCase();
 const dShort = (d: string | null) => (d ? new Date(`${d.slice(0, 10)}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "");
 const dDayMonth = (d: string | null) => (d ? new Date(`${d.slice(0, 10)}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "");
 
@@ -129,7 +128,7 @@ export function WorkPage() {
   );
   return (
     <div className="page fill">
-      <PageHead overline={phone ? "MY WORK" : longDate()} title="My work" />
+      <PageHead overline={todayLabel()} title="My work" />
       {!d ? (
         <Card><Empty icon="check-square-offset" title="Loading your work" /></Card>
       ) : d.queues.length === 0 ? (

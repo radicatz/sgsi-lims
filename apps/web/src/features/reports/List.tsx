@@ -24,7 +24,7 @@ import {
   toast,
   useSort,
   type Col,
-  type Tone,
+  type Tone, todayLabel
 } from "../../components";
 import { useCompanyOptions } from "../master-data/shared";
 
@@ -496,7 +496,7 @@ export function Reports() {
     <div className="page">
       <div className="page-head">
         <div className="tt">
-          <span className="t-over">REPORTS</span>
+          <span className="t-over">{todayLabel()}</span>
           <h1 className="t-display">Reports</h1>
         </div>
       </div>

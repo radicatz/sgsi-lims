@@ -21,7 +21,7 @@ import {
   TextField,
   cx,
   useSort,
-  type Col,
+  type Col, todayLabel
 } from "../../components";
 import { useCompanyOptions } from "../master-data/shared";
 import { AddBatch, ChooseOrder } from "./AddBatch";
@@ -65,16 +65,6 @@ const SORT_KEY: Record<string, string> = {
   Deadline: "deadline",
   RoA: "roa",
 };
-const LONG_DAY = () =>
-  new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Makassar",
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-    .format(new Date())
-    .toUpperCase();
 
 export function Batches() {
   const { me } = useSession(),
@@ -278,7 +268,7 @@ export function Batches() {
     <div className="page">
       <div className="page-head">
         <div className="tt">
-          <span className="t-over">{desk ? LONG_DAY() : "BATCHES"}</span>
+          <span className="t-over">{todayLabel()}</span>
           <h1 className="t-display">Batches</h1>
         </div>
         {!phone && addBtn && <div className="row g10">{addBtn}</div>}
