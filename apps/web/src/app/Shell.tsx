@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BellPanel } from "../features/notifications/Notifications";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { navFor, startPath } from "@sgsi/shared";
+import { useWork } from "../features/work/Work";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useBreakpoint, useSession } from "./session";
@@ -115,6 +116,7 @@ export function Shell() {
 
 function NavList({ rail }: { rail: boolean }) {
   const { me } = useSession();
+  const work = useWork(me!.permissions.includes("work.use"));
   const [shut, setShut] = useState<Record<string, boolean>>({});
   return (
     <>
@@ -132,7 +134,6 @@ function NavList({ rail }: { rail: boolean }) {
             >
               <span className="gtext">{g.group}</span>
               <i className="gline" />
-              <Icon n="caret-down" className={cx("gcaret", closed && "shut")} />
             </button>
             <div className={cx("gitems", closed && "shut")}>
               <div className="gin">
@@ -147,6 +148,7 @@ function NavList({ rail }: { rail: boolean }) {
                   >
                     <Icon n={it.icon} s={20} />
                     <span className="lbl">{it.label}</span>
+                    {it.id === "work" && !!work.data?.total && <span className="cpill nav-count" aria-label={`${work.data.total} waiting`}>{work.data.total}</span>}
                   </NavLink>
                 ))}
               </div>

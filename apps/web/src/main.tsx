@@ -20,6 +20,8 @@ import { CoaPage } from "./features/reports/CoaPage";
 import { RoaPage } from "./features/reports/RoaPage";
 import { Reports } from "./features/reports/List";
 import { Toasts } from "./components";
+import { QueuePage, WorkPage } from "./features/work/Work";
+import { DashboardPage } from "./features/dashboard/Dashboard";
 import "./styles/index.css";
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
@@ -38,7 +40,7 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
-const BUILT: Record<string, () => ReactElement> = { "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches, "/reports": Reports };
+const BUILT: Record<string, () => ReactElement> = { "/work": WorkPage, "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches, "/reports": Reports };
 const CLIENT_READ = ["company.read"];
 function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [
@@ -48,6 +50,7 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     ...pages.map((p) => ({ path: p.path, element: <Guard anyOf={p.anyOf}>{p.path === "/" ? <DashboardOrStart /> : BUILT[p.path] ? <Built path={p.path} /> : <Coming path={p.path} />}</Guard> })),
     { path: "/orders/:no/:tab?", element: <Guard anyOf={["order.read"]}><OrderPage /></Guard> },
     { path: "/batches/:no/:tab?", element: <Guard anyOf={["batch.read"]}><BatchPage /></Guard> },
+    { path: "/work/:queue", element: <Guard anyOf={["work.use"]}><QueuePage /></Guard> },
     { path: "/reports/coa/:id", element: <Guard anyOf={["coa.download", "report.publish", "report.sign"]}><CoaPage /></Guard> },
     { path: "/reports/roa/:no", element: <Guard anyOf={["roa.download"]}><RoaPage /></Guard> },
     { path: "/clients/:id", element: <Guard anyOf={CLIENT_READ}><ClientPage /></Guard> },
@@ -59,6 +62,6 @@ const router = createBrowserRouter([{ element: <Root />, children: [
     { path: "*", element: <NotFound /> },
   ] },
 ] }]);
-function DashboardOrStart() { return <Coming path="/" />; }
+function DashboardOrStart() { return <DashboardPage />; }
 
 createRoot(document.getElementById("root")!).render(<StrictMode><QueryClientProvider client={qc}><RouterProvider router={router} /></QueryClientProvider></StrictMode>);

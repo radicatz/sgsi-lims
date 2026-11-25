@@ -24,18 +24,18 @@
 .rail .nav { padding: 0 17px; gap: 0; }
 .rail .nav .lbl { max-width: 0; opacity: 0; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
 .nav .cnt { margin-left: auto; background: var(--accent-100); color: var(--accent-text); font: 600 12px/18px var(--f-body); padding: 0 6px; border-radius: 999px; min-width: 22px; text-align: center; }
-.rail .nav .cnt { position: absolute; margin: 0; right: 6px; top: 4px; }
+/* rail: the count pill sits in the vertical middle of the row at the right, kept clear of the rail edge (the sidebar clips sideways) and lifted with the Elevation scale like the bell badge */
+.rail .nav .nav-count { position: absolute; margin: 0; right: 5px; top: 50%; transform: translateY(-50%); box-shadow: var(--e-xs); }
 /* Group row: always 36px tall (design: fixed separator height), so the rail is as tall as the expanded sidebar. */
 .navg { display: flex; flex-direction: column; }
 .navgroup { display: flex; align-items: center; gap: 6px; width: 100%; height: 36px; padding: 14px 14px 6px; margin-bottom: 4px; font: 500 11px/16px var(--f-mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); transition: gap var(--motion-slow) var(--ease-standard); }
 .navgroup:disabled { cursor: default; }
 .navgroup .gtext { overflow: hidden; white-space: nowrap; max-width: 150px; opacity: 1; text-align: left; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-base) linear var(--motion-fast); }
 .navgroup .gline { flex: 1 1 0; min-width: 0; height: 1px; background: var(--surface-divider); }
-.navgroup .gcaret { flex: none; width: 14px; opacity: 1; transition: width var(--motion-slow) var(--ease-standard), opacity var(--motion-base) linear var(--motion-fast), transform var(--motion-base) var(--ease-standard); }
-.navgroup .gcaret.shut { transform: rotate(-90deg); }
+/* the separator runs to the right edge of the nav items (no chevron); the rail keeps its short one */
+.side:not(.rail) .navgroup { padding-right: 0; }
 .rail .navgroup { gap: 0; }
 .rail .navgroup .gtext { max-width: 0; opacity: 0; transition: max-width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
-.rail .navgroup .gcaret { width: 0; opacity: 0; transition: width var(--motion-slow) var(--ease-standard), opacity var(--motion-fast) linear; }
 .navgroup.static .gline { flex: 1 1 0; }
 /* Open and close a group: the row height animates 1fr to 0fr, the items fade. */
 .gitems { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--motion-base) var(--ease-standard); }

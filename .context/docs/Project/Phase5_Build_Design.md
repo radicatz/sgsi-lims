@@ -1,6 +1,6 @@
 # Phase 5 · Monitoring and search · Build design
 
-Nov 24, 2026 · **PLAN, waiting for the owner's go** · phase 5 of `V1_Build_Plan.md` section 2
+Nov 24, 2026 · **Slice A built (not committed); owner's go given, plan defaults used** · phase 5 of `V1_Build_Plan.md` section 2
 
 Written for: the product owner (decisions in section 8) and the developers who build it.
 
@@ -130,4 +130,78 @@ Defaults are used if you say go without answering.
 
 ## 9 · Build status
 
-Not started. Waiting for go.
+### Slice A (Nov 24, 2026): My work and the Dashboard's Operations tab
+
+The owner said go and left the section 8 decisions at their defaults. Built, **not committed and not pushed** (owner's instruction).
+
+**Built**
+- **API:** `routes/work.ts` (`GET /work`, `GET /work/:queue`) and `routes/dashboard.ts` (`GET /dashboard/operations`). Reads run as the signed-in user. Queues are offered by permission; Samples awaiting arrival only to the CSO and Preparation.
+- **My work** (`features/work/Work.tsx`): the overview (Work in progress, queue cards in flow order with the oldest waiting item and the past-due tone, empty queues folded into one line, Recent activity from the batch hand-offs), the queue page (tabs, Search, Company, Past due only, table with a single action, phone cards, multi-select with Download PDFs for CoAs to send), and the count pill on the sidebar's My work.
+- **Dashboard, Operations** (`features/dashboard/Dashboard.tsx`): Your queues strip, four KPIs, Batch workflow, Job orders by status, Sample type mix (donut), Samples received per day, Turnaround by company, Active batches (All, Due, Late; pager 8; phone cards), the deadline alert and the week strip; Period and Company filters, the phone Filters sheet. Charts are CSS and SVG in the token colours.
+- **Tests:** `e2e/phase5-work.spec.ts` (queues per role, a queue page, the zip, a refused queue, the dashboard cards and filters), 11 passed and 1 skipped (the bulk bar is not on the phone) at 1440, 834 and 390.
+
+**Differences from the plan and frames**
+- **Dashboard tab switch** is not shown yet: the Quality & reports tab is slice C, so the Operations tab stands alone for every role.
+- **Recent activity** comes from the batch status log, because the roles that have My work have no `audit.read`; it lists hand-offs, not every audit change.
+- **Work in progress** shows a reception the person started and analysis values they saved; Preparation entries are not included yet.
+- **Speed:** the dashboard request takes about 3 s against the remote database because its queries share one connection. Each card waits for the one request.
+- **Frames:** the My work queue frame already had the filters outside the card, and the page now matches it (Search, Company, Past due only as a checkbox). No frame was redrawn yet (decision 6: update per slice, still to do for the Search label and the Dashboard frames).
+- The top bar's user menu is not built yet (App plan section 4); it goes with slice C's Profile.
+
+**A bug found by the tests:** dates read from the database arrived as Date objects and were cut as text, so nothing counted as past due. They are cast to text in SQL now.
+
+### Slice A, owner feedback round (Nov 24, 2026)
+
+Still **not committed and not pushed**.
+
+**Data**
+- **Work in progress** now covers four kinds of started work: a reception you started, ADL values you saved in a batch that is still in Preparation, analysis values you saved (ADL excluded), and a CoA draft or revision you drafted. It links to the batch tab or to the CoA page.
+- **Demo data:** `pnpm seed:work` (`apps/api/scripts/seed-work-demo.ts`; `--remove` takes it out) adds:
+  - Dedi: an ADL value on B-2026-0413, which is still in Preparation.
+  - Maya: a revision 2 draft of the CoA of JO-2026-0124, opened two hours ago.
+  - Fitri already had analysis values saved from the Phase 3 demo.
+- **Recent activity** returns 20 items. The page shows 8; View all shows the rest.
+- **Samples received per day** shows the last 14 days of the period, with empty days included (owner: 14 thin columns as in the frame). The Samples received KPI also gives the number of batches.
+
+**My work** (frames `01-My_work-01-Overview-01` to `05`, Tablet `01`, Phone `01`, `02-01`, `02-02`)
+- **Work in progress:** the heading sits outside a card, and each item is a bordered row with an icon square in the accent colours. On the tablet, Continue goes under the text. On the phone, the items sit inside a card with a primary Continue button.
+- **Queue cards:** each has an icon square (primary-50), the title, the count in Newsreader, Oldest waiting, and the past-due line. They have no shadow and sit under a "My queues" heading. Desktop shows 3 per row and the tablet 1 per row. On the phone, each queue is a row: icon, title, Oldest, past due, count, caret.
+- **Recent activity:**
+  - Each item has an avatar and a sentence such as "Dedi Kurniawan confirmed reception of B-2026-0421", with the time in the muted colour.
+  - On desktop and tablet the card fills the screen height and keeps View all at the bottom.
+  - The phone has a Recent activity row that opens a sheet.
+- **Queue page on the phone:**
+  - Past due only sits under the search.
+  - The cards sit straight on the page, without an outer card. Each card has the number and date, the status pill, the job order and company, the waiting time and deadline with icons, the note, and a full-width action button.
+  - CoAs to send shows tick boxes on the cards and the bottom bar (`2 selected`, Clear, Download PDFs).
+
+**Dashboard** (frames `02-Dashboard-01-Operations-01-Lab_admin ref`, desktop and phone)
+- **Your queues:** the title and a secondary "Open My work" button (touch size on the phone) sit at the left. Each queue is a cell with a divider, the count in Newsreader 18 (red with a warning icon when past due), and the name underneath. On the phone the cells stack.
+- **Number fonts:** every number is JetBrains Mono (bar values, legend percentages, table progress). Display numbers are Newsreader: KPIs, the donut total and queue counts.
+- **Bar colours:**
+  - Batch workflow and Job orders by status bars take the colour of their status pill (`TONE_COLOR`). Receiving takes navy, i.e. primary-deep.
+  - Turnaround bars are green on target, amber up to 150% of target, and red beyond.
+- **KPIs:** the change on Samples received is a pill (`.delta`, green or red). The captions are separate texts, with no middle dots.
+- **Sample type mix:** the donut ring is thicker (40 of 200) and the legend shows percentages. On the phone, the legend sits under the donut.
+- **Samples received per day:** the 14 columns are 22 px wide at most, labelled with the day number, with no scroll bar.
+- **Deadline alert:** the callout of the frame. It has a navy card, the "Deadline alert" overline, a white title and text, and a full-width accent "Open batch" button.
+- **This week:**
+  - Today is filled. A day with deadlines has a dot, and tapping a day filters the list.
+  - Each item shows the batch, a tag (Past due, Due today, Due tomorrow or Due Fri), the day and the company.
+  - On desktop the card stretches to the height of Active batches, and the grid areas keep it in the right column.
+- **Layout by size:**
+  - Tablet: the Period and Company filters go under the title, and the cards run in two columns (frame Tablet `02-01`).
+  - Phone order: queues, KPIs, alert, week, workflow, job orders, mix, per day, turnaround, active batches.
+- **Active batches:** the chips show counts, and the status pills are md. Late deadlines show a warning icon in the table and "Past due" on the phone cards, both titled "Past due".
+
+**Frames updated in FigCraft**
+- **Desktop My work `02` to `05`:**
+  - Work in progress no longer sits in a card.
+  - Main and Columns fill the frame height.
+  - The activity items are wrapped in an "Activities" frame that fills.
+  - The Recent activity card fills the height.
+- **Your queues card** from the desktop ref replaces the old one in Desktop `01`, `03` CSO, `04` Sidebar collapsed and `06` No data, and in Tablet `01` and `05`. The CSO copies are renamed to its queues.
+- **Phone:** the phone ref's card replaces the old one in Phone `01`, `03` CSO and `07` Filters.
+- **Bar colours:** the Job orders by status bars and the Receiving bar take the pill colours in every Dashboard frame that has charts, ref frames included.
+
+**Tests:** `e2e/phase5-work.spec.ts` passes 12 of 12 at the three sizes. WK3 now runs on the phone too (tick boxes on the cards, the bottom bar, the zip download). DB1 checks the late mark by its "Past due" title.
