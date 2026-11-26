@@ -9,6 +9,7 @@ import { authenticate, requireAny } from "../auth";
 import { asUser, system, type Tx } from "../db";
 import { fail, uuid } from "../batch-lib";
 import { PdfUnavailable } from "../pdf";
+import { logExport } from "./audit";
 import { renderHistoryPdf } from "../sample-history-pdf";
 
 const SCREEN = "Search";
@@ -33,6 +34,7 @@ export async function sampleHistoryRoutes(app: FastifyInstance) {
     if (!h) return fail(reply, 404, "not_found", "This sample was not found.");
     try {
       const pdf = await renderHistoryPdf(h);
+      await logExport(req as never, `Sample history: ${h.sample.title}`, h.sample.orderNo, h.events.length);   // decision C-4
       return reply.header("content-type", "application/pdf").header("content-disposition", `attachment; filename="History-${h.sample.title.replace(/[^A-Za-z0-9._-]/g, "_")}.pdf"`).send(pdf);
     } catch (e) {
       if (e instanceof PdfUnavailable) return fail(reply, 503, "pdf_unavailable", e.message);

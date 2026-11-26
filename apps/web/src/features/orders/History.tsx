@@ -52,7 +52,7 @@ export function whenText(iso: string, short = false) {
 /** Numbers and codes in the data font, words in the body font; Before in muted text, After in the heading colour (frame 14). */
 const isData = (v: string) =>
   /^[<>]?[\d.,:\- ]+$/.test(v) || /^[A-Z0-9][A-Z0-9.\-_/]*$/.test(v);
-const Val = ({ v, after }: { v: string | null; after?: boolean }) =>
+export const Val = ({ v, after }: { v: string | null; after?: boolean }) =>
   v === null ? (
     <span className="t-sm c-mut">—</span>
   ) : (

@@ -15,6 +15,15 @@ interface Security { lock_after_attempts: number; lock_minutes: number; idle_sig
 const session = (s: { access_token: string; refresh_token: string; expires_at?: number | undefined }) =>
   ({ accessToken: s.access_token, refreshToken: s.refresh_token, expiresAt: s.expires_at ?? null });
 
+/** Count one failed attempt on an account (App plan open point 1: the run counts within the window; the last one locks). Returns the lock time when this attempt locked it. */
+async function countFailure(p: { id: string; status: string; failed_attempts: number | null; failed_since: Date | string | null }, sec: Security, screen: string, requestId: string): Promise<Date | null> {
+  const fresh = !p.failed_since || Date.now() - new Date(p.failed_since).getTime() > sec.lock_minutes * 60_000;
+  const n = fresh ? 1 : (p.failed_attempts ?? 0) + 1, since = fresh ? new Date() : new Date(p.failed_since!);
+  const lock = n >= sec.lock_after_attempts ? new Date(Date.now() + sec.lock_minutes * 60_000) : null;
+  await system({ requestId, screen }, (tx) => tx`update profiles set failed_attempts = ${lock ? 0 : n}, failed_since = ${lock ? null : since}, locked_until = ${lock}, status = ${lock ? "locked" : p.status} where id = ${p.id}`);
+  return lock;
+}
+
 export async function sessionRoutes(app: FastifyInstance) {
   const r = app.withTypeProvider<ZodTypeProvider>();
 
@@ -33,11 +42,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     const { data, error } = await authClient().auth.signInWithPassword({ email, password });
     if (error || !data.session) {
       if (p) {
-        // App plan open point 1: the failures count only within the window (the Security setting's lock minutes) from the first one; an older run starts again at 1
-        const fresh = !p.failed_since || Date.now() - new Date(p.failed_since).getTime() > sec.lock_minutes * 60_000;
-        const n = fresh ? 1 : (p.failed_attempts ?? 0) + 1, since = fresh ? new Date() : new Date(p.failed_since);
-        const lock = n >= sec.lock_after_attempts ? new Date(Date.now() + sec.lock_minutes * 60_000) : null;
-        await system(meta, (tx) => tx`update profiles set failed_attempts = ${lock ? 0 : n}, failed_since = ${lock ? null : since}, locked_until = ${lock}, status = ${lock ? "locked" : p.status} where id = ${p.id}`);
+        const lock = await countFailure(p as never, sec, meta.screen, req.id);
         if (lock) return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(lock) });
       }
       return reply.code(401).send({ code: "wrong_credentials", title: "The email or password is not correct.", text: "Check both and try again." });
@@ -66,7 +71,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     const { error } = await admin.auth.admin.updateUserById(req.user!.userId, { password: req.body.password });
     if (error) return reply.code(422).send({ code: "weak_password", field: "password", text: error.message });
     await system({ requestId: req.id, screen: "Set password" }, (tx) =>
-      tx`update profiles set status = 'active', failed_attempts = 0, failed_since = null, locked_until = null where id = ${req.user!.userId} and status in ('invited','locked','active')`);
+      tx`update profiles set status = 'active', failed_attempts = 0, failed_since = null, locked_until = null, password_changed_at = now() where id = ${req.user!.userId} and status in ('invited','locked','active')`);
     return reply.code(204).send();
   });
 
@@ -81,13 +86,13 @@ export async function sessionRoutes(app: FastifyInstance) {
     // the two settings and the profile queries are independent, so they run at the same time
     const [sec, tz, mine] = await Promise.all([getSetting<Security>("security"), getSetting<string>("timezone"),
       asUser(req.user!, { requestId: req.id }, async (tx) => {
-        const [p] = await tx`select id, email, full_name, title, prefs from profiles where id = auth.uid()`;
+        const [p] = await tx`select id, email, full_name, title, prefs, password_changed_at from profiles where id = auth.uid()`;
         const roles = await tx`select r.code from user_roles ur join roles r on r.id = ur.role_id where ur.user_id = auth.uid() order by r.sort_order`;
         const [n] = await tx`select count(*)::int as unread from notifications where user_id = auth.uid() and read_at is null`;
         return { p: p!, roles, unread: n!.unread as number };
       })]);
     return { id: mine.p.id, email: mine.p.email, fullName: mine.p.full_name, title: mine.p.title, roles: mine.roles.map((x) => x.code as string),
-      permissions: req.user!.permissions, prefs: mine.p.prefs ?? {}, unread: mine.unread,
+      permissions: req.user!.permissions, prefs: mine.p.prefs ?? {}, unread: mine.unread, passwordChangedAt: mine.p.password_changed_at ?? null,
       settings: { timezone: tz ?? env.LAB_TIMEZONE, idleSignOutMinutes: sec.idle_sign_out_minutes, warnBeforeSeconds: sec.warn_before_seconds } };
   });
 
@@ -95,6 +100,27 @@ export async function sessionRoutes(app: FastifyInstance) {
     await asUser(req.user!, { requestId: req.id, screen: "Profile" }, (tx) =>
       tx`update profiles set full_name = coalesce(${req.body.fullName ?? null}, full_name),
                              prefs = prefs || ${sql.json((req.body.prefs ?? {}) as never)} where id = auth.uid()`);
+    return reply.code(204).send();
+  });
+
+  // Change password (App plan section 6): the current password is checked with Supabase Auth (a wrong one counts as a failed attempt, as at sign-in), then the Security rules, then it is set
+  r.post("/me/password", { preHandler: authenticate, config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: z.object({ current: z.string().min(1, "Enter your current password."), password: z.string().min(1).max(200) }) } }, async (req, reply) => {
+    const sec = await getSetting<Security>("security");
+    const [p] = await sql`select id, email, status, failed_attempts, failed_since, locked_until from profiles where id = ${req.user!.userId}`;
+    if (!p) return reply.code(404).send({ code: "not_found", text: "This account was not found." });
+    if (p.locked_until && new Date(p.locked_until) > new Date()) return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: "Try again later, or reset your password from the sign-in page." });
+    const { error } = await authClient().auth.signInWithPassword({ email: p.email as string, password: req.body.current });
+    if (error) {
+      const lock = await countFailure(p as never, sec, "Profile", req.id);
+      return lock ? reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: "Your account is locked. Try again later, or reset your password from the sign-in page." })
+        : reply.code(422).send({ code: "wrong_current", field: "current", text: "The current password is not correct." });
+    }
+    const problem = passwordProblem(req.body.password, sec, p.email as string);
+    if (problem) return reply.code(422).send({ code: "weak_password", field: "password", text: problem });
+    if (req.body.password === req.body.current) return reply.code(422).send({ code: "same_password", field: "password", text: "Choose a password you have not used just now." });
+    const { error: e2 } = await admin.auth.admin.updateUserById(req.user!.userId, { password: req.body.password });
+    if (e2) return reply.code(422).send({ code: "weak_password", field: "password", text: e2.message });
+    await system({ requestId: req.id, screen: "Profile" }, (tx) => tx`update profiles set password_changed_at = now(), failed_attempts = 0, failed_since = null where id = ${req.user!.userId}`);
     return reply.code(204).send();
   });
 

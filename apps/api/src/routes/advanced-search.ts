@@ -4,6 +4,7 @@
 // security). The screen gets up to 500 rows; the CSV export gets every row. The CSO has no `result.read`: no Results target and no result conditions.
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { logExport } from "./audit";
 import { z } from "zod";
 import { authenticate, requireAny } from "../auth";
 import { asUser, type Tx } from "../db";
@@ -52,6 +53,7 @@ export async function advancedSearchRoutes(app: FastifyInstance) {
     try {
       const out = await as(req, (tx) => run(tx, req.body, (req.user as U).permissions, null));
       const text = csv([out.cols.map((f) => f.label), ...out.rows.map((x) => out.cols.map((f) => x.cells[f.id] ?? ""))]);
+      await logExport(req as never, `Search: ${req.body.target}`, `${req.body.conditions.length} condition${req.body.conditions.length === 1 ? "" : "s"}, match ${req.body.match}`, out.rows.length);   // decision C-4
       return reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", `attachment; filename="search-${req.body.target}.csv"`).send(`﻿${text}`);
     } catch (e) { return bad(reply, e); }
   });

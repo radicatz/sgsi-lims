@@ -552,7 +552,7 @@ function DrillHoleForm({
   );
 }
 
-function CoaUpload({ dh, onClose }: { dh: DrillHole; onClose: () => void }) {
+export function CoaUpload({ dh, onClose }: { dh: DrillHole; onClose: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const save = useSave(
     async () => {

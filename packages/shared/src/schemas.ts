@@ -26,5 +26,6 @@ export interface Me {
   roles: string[]; permissions: string[];
   prefs: { sidebar?: "expanded" | "collapsed"; startPage?: string; notifications?: Record<string, boolean> };
   unread: number;
+  passwordChangedAt?: string | null;
   settings: { timezone: string; idleSignOutMinutes: number; warnBeforeSeconds: number };
 }

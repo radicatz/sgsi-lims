@@ -77,6 +77,7 @@ export async function notify(tx: Tx, n: Note, to: { roles?: string[]; users?: st
     select distinct p.id, ${n.event}, ${EVENTS[n.event].icon}, ${n.title}, ${n.body}, ${n.link}
     from profiles p left join user_roles ur on ur.user_id = p.id left join roles r on r.id = ur.role_id
     where p.status = 'active' and (r.code = any(${to.roles ?? []}::text[]) or p.id = any(${to.users ?? []}::uuid[]))
+      and coalesce(p.prefs->'notifications'->>${n.event}, 'true') <> 'false'      -- a person who turned this event off on the Profile (App plan 6)
       ${actor ? tx`and p.id <> ${actor}` : tx``}
       ${once ? tx`and not exists (select 1 from notifications x where x.user_id = p.id and x.event = ${n.event} and x.link = ${n.link})` : tx``}
     returning id`;

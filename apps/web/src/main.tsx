@@ -6,7 +6,8 @@ import { NAV, startPath } from "@sgsi/shared";
 import { SessionProvider, useSession } from "./app/session";
 import { Guard, Shell } from "./app/Shell";
 import { Forgot, SetPassword, SignIn } from "./features/auth/Auth";
-import { Coming, NotFound, Profile } from "./features/common/Basics";
+import { Coming, NotFound } from "./features/common/Basics";
+import { Profile } from "./features/common/Profile";
 import { NotificationsPage } from "./features/notifications/Notifications";
 import { Clients, ClientPage } from "./features/master-data/Clients";
 import { DrillHoles, Lithologies, Seams } from "./features/master-data/Lists";
@@ -20,6 +21,7 @@ import { CoaPage } from "./features/reports/CoaPage";
 import { SampleHistoryPage } from "./features/search/SampleHistory";
 import { SearchPage } from "./features/search/Results";
 import { AdvancedPage } from "./features/search/Advanced";
+import { AuditPage } from "./features/admin/Audit";
 import { RoaPage } from "./features/reports/RoaPage";
 import { Reports } from "./features/reports/List";
 import { Toasts } from "./components";
@@ -43,7 +45,7 @@ function Private() {
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 
 const pages = NAV.flatMap((g) => g.items);
-const BUILT: Record<string, () => ReactElement> = { "/work": WorkPage, "/search": SearchPage, "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches, "/reports": Reports };
+const BUILT: Record<string, () => ReactElement> = { "/work": WorkPage, "/search": SearchPage, "/audit": AuditPage, "/clients": Clients, "/master/drill-holes": DrillHoles, "/master/lithologies": Lithologies, "/master/seams": Seams, "/users": Users, "/config": Config, "/orders": Orders, "/batches": Batches, "/reports": Reports };
 const CLIENT_READ = ["company.read"];
 function Built({ path }: { path: string }) { const Page = BUILT[path]!; return <Page />; }
 const router = createBrowserRouter([{ element: <Root />, children: [

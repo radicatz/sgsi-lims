@@ -4,7 +4,7 @@ import { QuickSearch } from "../features/search/QuickSearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BellPanel } from "../features/notifications/Notifications";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
-import { navFor, startPath } from "@sgsi/shared";
+import { navFor, ROLE_LABEL, startPath, type RoleCode } from "@sgsi/shared";
 import { useWork } from "../features/work/Work";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
@@ -21,7 +21,7 @@ import {
 } from "../components";
 
 export function Shell() {
-  const { me } = useSession();
+  const { me, signOut } = useSession();
   const bp = useBreakpoint();
   const loc = useLocation();
   const qc = useQueryClient();
@@ -98,16 +98,30 @@ export function Shell() {
                   onClick={() => setDrawer(false)}
                 />
               </div>
-              <Link to="/profile" className="row g10">
-                <Avatar name={me.fullName} size={40} />
-                <span className="col" style={{ gap: 0 }}>
-                  <b className="t-sm w6">{me.fullName}</b>
-                  <span className="t-cap c-sec">{me.title}</span>
-                </span>
-              </Link>
-              <div className="divider" />
             </div>
             <NavList rail={false} />
+            <div className="grow" />
+            <div className="col g8" id="drawer-profile" style={{ paddingTop: 12, borderTop: "1px solid var(--surface-divider)" }}>
+              <div className="row g10" style={{ flexWrap: "nowrap" }}>
+                <Avatar name={me.fullName} size={40} />
+                <span className="col" style={{ gap: 2, minWidth: 0 }}>
+                  <b className="t-sm w6 ellip">{me.fullName}</b>
+                  <span className="row g4 wrap">
+                    {(me.roles as RoleCode[]).map((r) => (
+                      <span key={r} className="role">{ROLE_LABEL[r] ?? r}</span>
+                    ))}
+                  </span>
+                </span>
+              </div>
+              <Link to="/profile" className="dlink" onClick={() => setDrawer(false)}>
+                <Icon n="user" s={20} />
+                <span className="lbl">Profile</span>
+              </Link>
+              <button className="dlink" id="drawer-signout" onClick={() => signOut()}>
+                <Icon n="sign-out" s={20} />
+                <span className="lbl">Sign out</span>
+              </button>
+            </div>
           </nav>
         </div>
       )}
@@ -222,14 +236,19 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         {menu && (
           <div
             className="menu"
-            style={{ right: 0, top: 48, width: 260 }}
+            style={{ right: 0, top: 48, width: 280 }}
             role="menu"
           >
             <div className="row g10" style={{ padding: "8px 10px" }}>
               <Avatar name={me!.fullName} size={40} />
-              <span className="col" style={{ gap: 0 }}>
+              <span className="col" style={{ gap: 2, minWidth: 0 }}>
                 <b className="t-sm w6">{me!.fullName}</b>
                 <span className="t-cap c-sec">{me!.email}</span>
+                <span className="row g4 wrap" id="menu-roles">
+                  {(me!.roles as RoleCode[]).map((r) => (
+                    <span key={r} className="role">{ROLE_LABEL[r] ?? r}</span>
+                  ))}
+                </span>
               </span>
             </div>
             <div className="mdiv" />
@@ -243,6 +262,18 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
             >
               <Icon n="user" />
               Profile
+            </button>
+            <button
+              className="mi"
+              role="menuitem"
+              id="menu-notes"
+              onClick={() => {
+                setMenu(false);
+                nav("/profile#notifications");
+              }}
+            >
+              <Icon n="bell" />
+              Notification settings
             </button>
             <div className="mdiv" />
             <button className="mi" role="menuitem" onClick={() => signOut()}>

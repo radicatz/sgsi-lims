@@ -3,7 +3,7 @@
 // Owner, Nov 24: the layout follows the "Operations-01-Lab_admin ref" frames. Bars take the colour of the status pill they count; every number is JetBrains Mono,
 // a display number (KPI, donut total, queue count) is Newsreader.
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../app/api";
 import { useBreakpoint, useSession } from "../../app/session";
@@ -19,6 +19,7 @@ import {
   Pager,
   Select,
   Table,
+  Tabs,
   cx,
   type Col,
   type Tone, todayLabel
@@ -30,6 +31,8 @@ import {
   STATUS_TONE as ORDER_TONE,
 } from "../orders/shared";
 import { useWork } from "../work/Work";
+import { Kpi, fmt } from "./Kpi";
+import { QualityTab } from "./Quality";
 
 interface Ops {
   period: {
@@ -122,7 +125,6 @@ const PIE = [
   "var(--primary-400)",
   "var(--status-st-created)",
 ];
-const fmt = (n: number) => n.toLocaleString("en-US");
 const at = (d: string) => new Date(`${d}T00:00:00`);
 const dShort = (d: string) =>
   at(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
@@ -255,55 +257,6 @@ function Donut({
   );
 }
 
-function Kpi({
-  label,
-  value,
-  captions,
-  delta,
-  id,
-  to,
-}: {
-  label: string;
-  value: string;
-  captions: Array<{ text: string; err?: boolean }>;
-  delta?: { up: boolean; text: string };
-  id: string;
-  to?: string;
-}) {
-  const body = (
-    <>
-      <span className="t-cap w5 c-sec">{label}</span>
-      <span className="row g10" style={{ flexWrap: "nowrap" }}>
-        <b className="t-num">{value}</b>
-        {delta && (
-          <span
-            className={cx("delta", delta.up ? "tn-green" : "tn-red")}
-            id={`${id}-delta`}
-          >
-            {delta.text}
-          </span>
-        )}
-      </span>
-      <span className="row g6 t-cap c-mut">
-        {captions.map((c, i) => (
-          <span key={i} className={c.err ? "c-err" : undefined}>
-            {c.text}
-          </span>
-        ))}
-      </span>
-    </>
-  );
-  return to ? (
-    <Link to={to} id={id} className="card kpi kpi-link">
-      {body}
-    </Link>
-  ) : (
-    <section id={id} className="card kpi">
-      {body}
-    </section>
-  );
-}
-
 /** Your queues (frame "Your queues card", owner redesign Nov 24): the title and Open My work at the left, one cell per queue with work. */
 function QueuesCard({
   queues,
@@ -382,6 +335,10 @@ export function DashboardPage() {
     desk = bp === "desktop",
     nav = useNavigate();
   const { me } = useSession();
+  // Operations for everyone; Quality & reports only for roles with dashboard.quality (Dashboard plan section 3), kept in the address (?tab=quality)
+  const [sp, setSp] = useSearchParams();
+  const canQuality = !!me?.permissions.includes("dashboard.quality");
+  const tab: "ops" | "quality" = canQuality && sp.get("tab") === "quality" ? "quality" : "ops";
   const [period, setPeriod] = useState("30"),
     [company, setCompany] = useState(""),
     [sheet, setSheet] = useState(false);
@@ -400,6 +357,7 @@ export function DashboardPage() {
     placeholderData: (p) => p,
     staleTime: 30_000,
     retry: false,
+    enabled: tab === "ops",
   });
   useEffect(() => setPage(1), [filter, period, company]);
   const d = q.data;
@@ -558,12 +516,26 @@ export function DashboardPage() {
           ) : undefined
         }
       />
+      {canQuality && (
+        <div className={phone ? "db-tabs sticky" : "db-tabs"}>
+          <Tabs
+            items={[
+              { id: "ops" as const, label: "Operations" },
+              { id: "quality" as const, label: "Quality & reports" },
+            ]}
+            value={tab}
+            onChange={(v) => setSp(v === "quality" ? { tab: "quality" } : {}, { replace: true })}
+          />
+        </div>
+      )}
       {tablet && (
         <div className="row g12" style={{ alignItems: "flex-end" }}>
           {filters}
         </div>
       )}
-      {!d ? (
+      {tab === "quality" ? (
+        <QualityTab period={period} company={company} phone={phone} tablet={tablet} desk={desk} />
+      ) : !d ? (
         <Card>
           <Empty icon="squares-four" title="Loading the dashboard" />
         </Card>

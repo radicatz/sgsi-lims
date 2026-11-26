@@ -15,7 +15,8 @@
     "seed:batches": "tsx --env-file=../../.env scripts/seed-batches-demo.ts",
     "seed:reports": "tsx --env-file=../../.env scripts/seed-reports-demo.ts",
     "seed:work": "tsx --env-file=../../.env scripts/seed-work-demo.ts",
-    "seed:search": "tsx --env-file=../../.env scripts/seed-search-demo.ts"
+    "seed:search": "tsx --env-file=../../.env scripts/seed-search-demo.ts",
+    "seed:quality": "tsx --env-file=../../.env scripts/seed-quality-demo.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",

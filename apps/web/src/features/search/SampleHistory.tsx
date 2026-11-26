@@ -230,6 +230,11 @@ export function SampleHistoryPage() {
                       </span>
                     )}
                     <span>{dateTime(e.at)}</span>
+                    {can("audit.read") && (
+                      <Link to={`/audit?record=${s.id}`} className="c-act sh-audit">
+                        Audit
+                      </Link>
+                    )}
                   </span>
                 )}
               </div>

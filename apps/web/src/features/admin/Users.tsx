@@ -61,6 +61,7 @@ interface UserPage extends User {
     label: string | null;
     screen: string | null;
     at: string;
+    text: string;
   }>;
 }
 interface RolesGrid {
@@ -1012,9 +1013,7 @@ export function UserPage() {
                   }}
                 >
                   <span className="t-sm">
-                    {a.screen === "Sign in"
-                      ? "Signed in"
-                      : `${a.action} ${a.table.replace(/_/g, " ")}${a.label ? `, ${a.label}` : ""}`}
+                    {a.text}
                   </span>
                   <span className="t-cap c-mut">{fmtWhen(a.at)}</span>
                 </div>

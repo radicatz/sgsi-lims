@@ -521,7 +521,7 @@ Saved to the main file (not committed; the file is 130 MB).
 
 ## 12 · Slice C plan: Dashboard Quality & reports, Audit log, Profile (Nov 25, 2026)
 
-**Status:** waiting for the owner's go and for the SQL in 12.6.
+**Status:** built Nov 26, 2026 (section 13). The owner ran the SQL in 12.6.
 
 **Sources** (checked against the project documents; see 12.2):
 - `../Dashboard/Dashboard_v2_Screen_Plan.md` sections 3, 4, 6, 7, 10, 12, and the owner edits of section 15;
@@ -741,3 +741,40 @@ Checked on Nov 25 against every plan and research document, the SIM Lab Quality 
 | C-7 (new) | Trend CV per sample or per batch | SIM Lab plots CV (arb) for every sample, about 1,150 dots along the sample order. The Dashboard v2 plan (Q6), the frame and the prototype draw one line point per completed batch | **Open.** Default: per batch, as the approved plan and frame. One line point per sample would be unreadable at that count |
 
 **Size:** M to L. The audit row-to-text mapping and the scatters are the bigger parts.
+
+## 13 · Slice C build status (Nov 26, 2026)
+
+Built, **not committed**. The owner ran the SQL of 12.6 (checked) and gave go with the decisions of 12.11: C-1 no limit line, C-2 the first-named value across, C-3 sign-ins shown, C-4 all three exports logged, C-5 every switch can be turned off, C-6 "N total", C-7 Trend CV per batch.
+
+**Built**
+- **Profile** (`features/common/Profile.tsx`, replaces the old page):
+  - Header with the avatar, the name, role badges, the email and **Sign out** (full width on the phone); **Personal** (Name, read-only Email, Save only once the name changed); **Password**; **Preferences**; **Notifications**; and the Signature and Lab stamp cards.
+  - **Change password** (`POST /me/password`): checks the current password with Supabase Auth, where a wrong one counts as a failed attempt and can lock the account like a failed sign-in (the window of M-9); then the Security rules, shown as a checklist that ticks while typing; then sets the password and `password_changed_at`. The reset and invite links set the date too. The Password card says "Last changed 25 Nov 2026".
+  - **Notifications:** one switch per event that reaches the person's roles (12.4). A switch off is saved in `profiles.prefs.notifications`; `notify()` skips that person for that event only.
+- **User menu:** role badges and **Notification settings** (opens the Profile at that card). **Phone drawer:** the person's block (avatar, name, roles, Profile, Sign out) sits at the bottom, as the frame shows.
+- **Audit log** (`/audit`, `features/admin/Audit.tsx`, `routes/audit.ts`, `audit-text.ts`):
+  - Filters above the card (Search labelled, Date, User, Record type, Action); the date options are Today, Last 7 days, Last 30 days, All time and Custom range. A link by record or user opens on All time with a counted chip and **Clear**.
+  - Rows read as text: record type, action (Created, Updated, Deleted, Status changed, Published, Signed in, Sign-in failed, Account locked, Exported, Changed setting), field labels, and names instead of ids. A result value is named by its parameter and basis ("Ash (ADB)"). A row opens its Field, Before and After.
+  - A record that has since been removed shows no link. Tablet: the user moves into the open block. Phone: cards, with the filters in a sheet.
+  - **Export CSV** writes every row of the filters; the export is logged as an **Exported** row, as are the advanced search CSV and the Sample history PDF (C-4).
+  - Sample history: an **Audit** link on each entry for roles with `audit.read`. User page: Recent activity uses the same wording as the log.
+- **Dashboard, Quality & reports tab** (`dashboard/Quality.tsx`, `routes/dashboard-quality.ts`):
+  - The tab switch for roles with `dashboard.quality` (full width and sticky on the phone), kept in the address (`?tab=quality`). The CSO has none and the API answers 403.
+  - Four KPIs; three scatters with the regression, "R² 0.78, n 32" in the head and a tooltip on a point; Trend CV (opens on AR, with the ADB, AR, DB and DAF switch); the Drill holes card (chips and labelled Search above it, table or cards, Upload CoA or Replace CoA for people with `coa.upload`).
+- **Demo data:** `pnpm seed:quality` adds an RD value to the 32 samples of completed batches (the batch demo had none), so RD vs Ash has points; `--remove` takes them out.
+- **Tests:**
+  - Unit: `audit-text.test.ts` (7) and `regression.test.ts` (5).
+  - E2E at 1440, 834 and 390: `phase5-profile.spec.ts` (PR1 to PR3), `phase5-audit.spec.ts` (AU1, AU2) and `phase5-quality.spec.ts` (QA1, QA1b, QA2).
+
+**Differences from the plan**
+- **Change password on the phone** is a bottom sheet like the other phone dialogs, not a full-screen form.
+- **RoA column** of the Drill holes card lists the RoA numbers as text; the download link of 12.3 is not built (the file link needs the batch number, not the RoA number).
+- **Samples of a drill hole** are matched by the sample's drill hole text to the hole's code within the job order's company, because only 11 of the demo samples have a drill hole interval.
+- **Demo data:** only the RD values were added. The completed batches already had a mix of holes with and without a CoA (3 of 10 missing), and the e2e runs and sign-ins already fill the log.
+- **Sign-ins are half the log** (3,400 of 4,400 rows today, because every test signs in); the Action filter hides them.
+- **Axis titles of the scatters** are in the app (C-2) but not drawn in the frames.
+
+**Frames updated in FigCraft (not committed)**
+- Audit log, Desktop `01` to `03` and Tablet `01`: the filters (and the record chip of `03`) sit above the card.
+- Dashboard Quality, Desktop `01` to `03`, Tablet `01`, Phone `01`: the Drill holes chips and Search sit above the card, and the Trend CV limit line and label are hidden (C-1).
+- The phone drawer frames already show the profile block at the bottom.

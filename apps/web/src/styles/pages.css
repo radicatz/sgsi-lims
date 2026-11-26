@@ -179,3 +179,20 @@ a.chip, a.chip:hover { text-decoration: none; }
 /* Advanced search results on the phone (frame Phone-08-Search-03-Advanced_search-02-Sample_query): list rows with a divider, 44 px or taller */
 .adv-row { display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 100%; min-height: 44px; padding: 12px 0; border-top: 1px solid var(--surface-divider); text-align: left; color: inherit; }
 .adv-row:first-child { border-top: 0; padding-top: 4px; }
+
+/* Profile (Phase 5 slice C3; frame Desktop-00-App-09-Profile-01): Personal, Password and the signing cards on the left, Preferences and Notifications on the right */
+.pf-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.pw-rules li .ph { flex: none; }
+
+/* Dashboard, Quality & reports tab (Phase 5 slice C1; frames 02-Dashboard-02): the tab switch under the title (full width and sticky on the phone), the scatters in rows, the chart text */
+.db-tabs { display: block; }
+.phone .db-tabs.sticky { position: sticky; top: 0; z-index: 4; background: var(--surface-shell); margin: 0 -16px; padding: 0 16px; }
+.qa-scatters { display: grid; gap: 16px; }
+.qa-scatters.d3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.qa-scatters.d2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.qa-scatters.d2 > :last-child { grid-column: 1 / -1; }
+.qa-scatters.d1 { grid-template-columns: minmax(0, 1fr); }
+.sc-t { font: 400 10px/12px var(--f-mono); fill: var(--text-muted); }
+.sc-l { font: 500 11px/14px var(--f-body); fill: var(--text-secondary); }
+.sc-tip { position: absolute; transform: translate(-50%, calc(-100% - 10px)); z-index: 5; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 10px; box-shadow: var(--e-md); pointer-events: none; white-space: nowrap; }
+.au-before .t-data, .au-before .t-sm { text-decoration: line-through; }

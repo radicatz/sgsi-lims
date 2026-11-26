@@ -53,6 +53,6 @@ test("sign out returns to Sign in", async ({ page }, info) => {
 
 test("shell screenshot for review", async ({ page }, info) => {
   await signIn(page, "maya@sgsi.co.id");
-  await expect(page.getByText("My work is built in phase 5")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "My work", level: 1 })).toBeVisible();   // My work was a holding page in phase 0; it is built now (phase 5)
   await page.screenshot({ path: `test-results/phase0-shell-${info.project.name}.png` });
 });

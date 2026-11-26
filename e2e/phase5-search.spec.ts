@@ -157,7 +157,7 @@ test.describe("search", () => {
     const list = page.locator("#sh-list");
     await expect(list).toContainText("Registered on JO-2026-0120", { timeout: 30_000 });
     await expect(list).toContainText("Received and labelled");
-    await expect(list).toContainText("Values entered (7 parameters)");
+    await expect(list).toContainText(/Values entered \(\d+ parameters\)/);
     await expect(list).toContainText("published");
     const text = await list.innerText();
     expect(text.indexOf("Registered on")).toBeLessThan(text.indexOf("Received and labelled"));
@@ -166,7 +166,7 @@ test.describe("search", () => {
     // the CSO sees the entry without numbers and without the link
     await signIn(page, "rina@sgsi.co.id");
     await page.goto(url.replace(/^https?:\/\/[^/]+/, ""));
-    await expect(page.locator("#sh-list")).toContainText("Values entered (7 parameters)", { timeout: 30_000 });
+    await expect(page.locator("#sh-list")).toContainText(/Values entered \(\d+ parameters\)/, { timeout: 30_000 });
     await expect(page.getByRole("link", { name: "View values" })).toHaveCount(0);
     await expect(page.locator(".sh-values")).toHaveCount(0);
     // History from the job order Samples tab

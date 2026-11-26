@@ -2114,7 +2114,7 @@ create table app_settings (key text primary key, value jsonb not null);
 | `v_lithology_totals`   | lithology, sample count                             | S-05            |
 | `v_results_wide`       | one row per sample and basis with common parameters | Charts, exports |
 | `v_work_queues`        | queue code, record id, role, age in days, due date  | S-19, S-01      |
-| `v_sample_history`     | sample, event, at, by, detail, link                 | S-30            |
+| `v_sample_history`     | sample, event, at, by, detail, link                 | S-30 (**as built Nov 25, 2026: no view**; the API assembles the history from the same tables, `routes/sample-history.ts`) |
 
 ### 13.6 Rules in the database
 
@@ -2193,7 +2193,7 @@ All paths are under `/api`. Each checks its permission (section 8.2) and returns
 | Session | `POST /auth/sign-in`, `POST /auth/sign-out`, `POST /auth/forgot`, `POST /auth/set-password`; `GET /me` (profile, roles, permissions, preferences, unread count), `PATCH /me`, `POST /me/password` | Public for the first four; any staff |
 | Notifications | `GET /notifications`, `POST /notifications/read` (ids or all) | Own rows |
 | My work | `GET /work` (queues and counts), `GET /work/:queue` | Roles with queues (S-19) |
-| Dashboard | `GET /dashboard/operations`, `GET /dashboard/quality` (period, company) | `dashboard.operations`, `dashboard.quality` |
+| Dashboard | `GET /dashboard/operations`, `GET /dashboard/quality` (period, company), `GET /dashboard/quality/drill-holes` (filter, search, page; built Nov 26, 2026) | `dashboard.operations`, `dashboard.quality` |
 | Job orders | `GET /orders`, `POST /orders`, `GET /orders/:no`, `PATCH /orders/:no`, `POST /orders/:no/transition` (submit, cancel, close; reason) | Read: any staff. Write: `order.create`, `order.edit`, `order.cancel` |
 | Job order samples | `POST /orders/:no/samples/preview` (pasted rows: mapping, duplicates), `PUT /orders/:no/samples`, `POST /orders/:no/samples/:ref/not-received`, `POST /orders/:no/samples/:ref/restore` | `order.edit` |
 | Job order files and history | `POST /orders/:no/files`, `DELETE /orders/:no/files/:id`, `GET /orders/:no/history` | `order.edit` or `batch.create`; any staff for history |
@@ -2202,9 +2202,9 @@ All paths are under `/api`. Each checks its permission (section 8.2) and returns
 | Preparation and analysis | `PUT /batches/:no/adl`, `PUT /batches/:no/values` (returns calculated values and rule messages), `POST /calc/preview` | `adl`, `result.write` |
 | Batch transitions | `POST /batches/:no/transition` (confirm_reception, finish_preparation, finish_analysis, complete); `POST /batches/:no/roa` (signed RoA upload) | `reception`, `adl`, `result.write`, `roa.upload` |
 | Reports | `GET /reports` (kind, filters), `POST /orders/:no/coa` (draft from completed batches), `GET /reports/:id`, `PATCH /reports/:id` (draft: bases, parameters, attention, signatory, client reference), `GET /reports/:id/preview`, `POST /reports/:id/transition` (publish, revise, void; reason), `POST /reports/:id/deliveries`, `POST /reports/download` (several as one archive) | `coa.download`, `roa.download`, `coa.write`, `coa.revise`, `coa.void`, `coa.send` |
-| Search | `GET /search?q=`, `POST /search/advanced`, `GET`, `POST`, `PATCH`, `DELETE /saved-queries`, `GET /samples/:ref/history` | `search.use`; values only with `values.view` |
+| Search | `GET /search/quick?q=`, `GET /search?q=&type=&page=`, `GET /search/advanced/fields`, `POST /search/advanced`, `POST /search/advanced/export` (CSV), `GET`, `POST`, `PATCH`, `DELETE /saved-queries`, `GET /samples/:id/history`, `GET /samples/:id/history/pdf` (**as built Nov 25, 2026**: keyed by the sample's id) | `search.use`; values only with `result.read` (spec `values.view`) |
 | Master data | Create, read, update and archive on `/clients` (with contacts and logo), `/drill-holes` (with CoA upload and history), `/lithologies`, `/seams` | `company.manage`, `master.write`, `coa.upload`; read follows sidebar access |
-| Admin | `/users` (list, invite, edit, deactivate, reactivate, unlock, send reset, resend invite), `GET /roles`, `GET /audit` (filters, CSV), `/config/{parameters,services,methods,rules,templates,lookups,laboratory,security}` | `user.manage`, `audit.read`, `config.write` |
+| Admin | `/users` (list, invite, edit, deactivate, reactivate, unlock, send reset, resend invite), `GET /roles`, `GET /audit` (filters, paging), `GET /audit/options`, `GET /audit/export` (CSV; each export is written to the log, as are the advanced search CSV and the history PDF; built Nov 26, 2026), `/config/{parameters,services,methods,rules,templates,lookups,laboratory,security}` | `user.manage`, `audit.read`, `config.write` |
 | Files | `GET /files/:id` (short-lived signed URL) | Permission of the owning record |
 
 Next goal (kept, not built in v1): worksheet results per tab (`PUT /batches/:id/results` with rounds), `POST /batches/:id/recheck`, RoA draft, approve and print, `POST /escalations`, `PUT /batches/:id/assignments`, `GET /batches/:id/export`, `GET /drill-holes/:id/export`, `POST /imports`.
@@ -2232,7 +2232,7 @@ Rewritten Nov 10, 2026 for v1. The technology is in `Stack_Decision_Record.md` S
 | --- | --- |
 | Stack | React 19, Vite, React Router 7, TanStack Query, react-hook-form with the shared zod schemas, TanStack Table and Virtual, ECharts, `@phosphor-icons/react`, date-fns |
 | Components | One React component per FigCraft library set, with the library's property names. Ported from the prototype's component layer (`prototype/src/ui.js`) and styled with CSS Modules on the `sgsi-tokens.css` variables (Light and Dark) |
-| Routes | `/login`, `/forgot`, `/set-password`, `/work`, `/work/:queue`, `/`, `/orders`, `/orders/:no/:tab?`, `/batches`, `/batches/:no/:tab?`, `/reports`, `/reports/:id`, `/reports/roa/:no`, `/search`, `/search/advanced`, `/samples/:ref/history`, `/clients`, `/clients/:code`, `/master/drill-holes`, `/master/lithologies`, `/master/seams`, `/users`, `/users/:id`, `/audit`, `/config/:section?`, `/notifications`, `/profile`. The prototype's `#name` links map one to one |
+| Routes | `/login`, `/forgot`, `/set-password`, `/work`, `/work/:queue`, `/`, `/orders`, `/orders/:no/:tab?`, `/batches`, `/batches/:no/:tab?`, `/reports`, `/reports/:id`, `/reports/roa/:no`, `/search`, `/search/advanced`, `/samples/:id/history`, `/clients`, `/clients/:code`, `/master/drill-holes`, `/master/lithologies`, `/master/seams`, `/users`, `/users/:id`, `/audit`, `/config/:section?`, `/notifications`, `/profile`. The prototype's `#name` links map one to one |
 | Landing page | The role's start page (Navigation section 2), or the Profile's Start page |
 | Guarding | Route guard from the permissions in `GET /me`; a hidden page shows No access. Hidden buttons mirror the server rules and never replace them |
 | State | Server state through the query cache. Forms and grids keep edits locally until saved, with one unsaved marker per row. Notifications refetch every 30 s |

@@ -69,3 +69,7 @@
 .userchip { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px; border-radius: 999px; }
 .userchip b { display: block; font: 600 13px/20px var(--f-body); white-space: nowrap; }
 .userchip small { display: block; font: 400 12px/16px var(--f-body); color: var(--text-secondary); white-space: nowrap; }
+
+/* the phone drawer's profile block (frame Phone-00-App-07-User_menu-02-Drawer): Profile and Sign out look like menu rows but are not sidebar items */
+.dlink { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 10px; color: var(--text-secondary); font: 500 14px/22px var(--f-body); width: 100%; text-align: left; }
+.dlink:hover { background: var(--primary-50); }

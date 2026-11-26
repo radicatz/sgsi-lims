@@ -8,6 +8,7 @@ import { asUser, type Tx } from "../db";
 import { authenticate, forgetUser, requireAny } from "../auth";
 import { admin } from "../supabase";
 import { env } from "../env";
+import { TYPE_OF_TABLE } from "../audit-text";
 
 const Id = z.object({ id: z.string().uuid() });
 const ROLE_CODES = ["superadmin", "lab_admin", "supervisor", "manager", "cso", "prep", "analyst"] as const;
@@ -65,7 +66,9 @@ export async function userRoutes(app: FastifyInstance) {
     });
     if (!out) return fail(reply, 404, "not_found", "This user was not found.");
     return { ...shape(out.u), permissions: out.perms.map((x) => x.code as string),
-      activity: out.activity.map((a) => ({ action: a.action, table: a.table_name, label: a.record_label, screen: a.screen, at: a.at })) };
+      activity: out.activity.map((a) => ({ action: a.action, table: a.table_name, label: a.record_label, screen: a.screen, at: a.at,
+        // the same words as the Audit log (Phase 5 slice C): "Updated sample ZE-N1", "Exported audit log"
+        text: a.table_name === "export" ? `Exported ${String(a.record_label ?? "").toLowerCase()}` : a.screen === "Sign in" ? "Signed in" : `${({ insert: "Created", update: "Updated", delete: "Deleted" } as Record<string, string>)[a.action as string] ?? a.action} ${(TYPE_OF_TABLE[a.table_name as string] ?? String(a.table_name).replace(/_/g, " ")).toLowerCase()}${a.record_label ? ` ${a.record_label}` : ""}` })) };
   });
 
   r.post("/users", { schema: { body: NewUserBody } }, async (req, reply) => {
