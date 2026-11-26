@@ -81,13 +81,17 @@ test.describe.serial("profile", () => {
 
   test("PR2: turning off an event stops it for that person only", async ({ page, request }, info) => {
     const no = `ZE-JO-06${["desktop", "tablet", "phone"].indexOf(info.project.name)}`;
+    // start from all switches on, also when an earlier run stopped before its clean-up
+    await request.patch(`${API}/me`, { headers: { authorization: `Bearer ${await token(request, "dedi@sgsi.co.id")}` }, data: { prefs: { notifications: {} } } });
     await signIn(page, "dedi@sgsi.co.id");
     await page.goto("/profile");
     const sw = page.locator("#nt-N1");
     await expect(sw).toContainText("Batch ready to receive");
     await expect(sw.locator("[role=switch]")).toHaveAttribute("aria-checked", "true");
+    const saved = page.waitForResponse((r) => r.url().endsWith("/api/me") && r.request().method() === "PATCH");
     await sw.click();
     await expect(sw.locator("[role=switch]")).toHaveAttribute("aria-checked", "false");
+    await saved;                                                                                   // the switch flips at once; the reload waits for the save
     await page.reload();
     await expect(page.locator("#nt-N1 [role=switch]")).toHaveAttribute("aria-checked", "false");
     try {

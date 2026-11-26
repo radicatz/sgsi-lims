@@ -60,7 +60,7 @@ export function BellPanel({ unread, onClose }: { unread: number; onClose: () => 
         <Button size="sm" id="notes-readall" disabled={!unread} why="Nothing is unread" onClick={act.readAll}>Mark all read</Button>
       </div>
       <div style={{ padding: "0 16px" }}><Tabs items={[{ id: "all" as const, label: "All" }, { id: "unread" as const, label: "Unread", count: unread }]} value={tab} onChange={setTab} /></div>
-      <div className="col" style={{ maxHeight: 420, overflowY: "auto" }}>
+      <div className="nlist" style={{ maxHeight: 420, overflowY: "auto" }}>
         {items.map((n) => <Item key={n.id} n={n} onOpen={() => act.open(n, onClose)} />)}
         {!q.isLoading && !items.length && <Empty icon="bell" title={tab === "unread" ? "You're all caught up" : "Nothing here yet"} text="New hand-offs and deadlines show up here." />}
       </div>
@@ -93,7 +93,7 @@ export function NotificationsPage() {
       {groups.map(([name, list]) => (
         <div key={name} className="col g8">
           <span className="t-cap w6 c-sec" style={{ letterSpacing: "0.06em", textTransform: "uppercase" }}>{name}</span>
-          <Card><div className="col">{list.map((n) => <Item key={n.id} n={n} onOpen={() => act.open(n)} />)}</div></Card>
+          <Card><div className="nlist">{list.map((n) => <Item key={n.id} n={n} onOpen={() => act.open(n)} />)}</div></Card>
         </div>
       ))}
       {q.hasNextPage && <span style={{ alignSelf: "center" }}><Button id="notes-more" disabled={q.isFetchingNextPage} onClick={() => q.fetchNextPage()}>Load more</Button></span>}

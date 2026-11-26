@@ -20,7 +20,9 @@ const NewUserBody = UserBody.extend({ email: z.string().trim().toLowerCase().ema
 const fail = (reply: FastifyReply, code: number, key: string, message: string, field?: string) => reply.code(code).send({ code: key, text: message, ...(field ? { field } : {}) });
 /** Invite validity in days, from Configuration, Security (default 7). */
 const inviteUntil = (tx: Tx) => tx`now() + coalesce((select (value->>'invite_days')::int from app_settings where key = 'security'), 7) * interval '1 day'`;
-const link = (type: "invite" | "recovery", email: string) => admin.auth.admin.generateLink({ type, email, options: { redirectTo: `${env.WEB_ORIGIN}/set-password` } } as never);
+/** The link opens Set password; `kind` tells it an invite from a reset even when the link has expired (a resent invite is a recovery link in Supabase). */
+const link = (type: "invite" | "recovery", email: string, kind: "invite" | "reset" = type === "invite" ? "invite" : "reset") =>
+  admin.auth.admin.generateLink({ type, email, options: { redirectTo: `${env.WEB_ORIGIN}/set-password?kind=${kind}` } } as never);
 
 export async function userRoutes(app: FastifyInstance) {
   const r = app.withTypeProvider<ZodTypeProvider>();
@@ -113,7 +115,7 @@ export async function userRoutes(app: FastifyInstance) {
     if (res === "missing") return fail(reply, 404, "not_found", "This user was not found.");
     if (res === "last") return fail(reply, 409, "last_superadmin", LAST, "roles");
     forgetUser(req.params.id);
-    if (newEmail) { const made = await link("recovery", newEmail); return { ok: true, inviteLink: made.data?.properties?.action_link ?? null }; }
+    if (newEmail) { const made = await link("recovery", newEmail, "invite"); return { ok: true, inviteLink: made.data?.properties?.action_link ?? null }; }
     return { ok: true };
   });
 
@@ -129,7 +131,7 @@ export async function userRoutes(app: FastifyInstance) {
     return { ok: true };
   });
   r.post("/users/:id/reactivate", { schema: { params: Id } }, async (req, reply) => {
-    const rows = await run(req, "User page", (tx) => tx`update profiles set status = case when last_sign_in_at is null then 'invited' else 'active' end, failed_attempts = 0, failed_since = null, locked_until = null
+    const rows = await run(req, "User page", (tx) => tx`update profiles set status = case when last_sign_in_at is null and password_changed_at is null then 'invited' else 'active' end, failed_attempts = 0, failed_since = null, locked_until = null
       where id = ${req.params.id} and status = 'inactive' returning id`);
     forgetUser(req.params.id);
     return rows.length ? { ok: true } : fail(reply, 404, "not_found", "This user is not deactivated.");
@@ -145,7 +147,7 @@ export async function userRoutes(app: FastifyInstance) {
       const [u] = await run(req, "User page", (tx) => tx`select email, status from profiles where id = ${req.params.id}`);
       if (!u) return fail(reply, 404, "not_found", "This user was not found.");
       if (invited !== (u.status === "invited")) return fail(reply, 409, "wrong_state", invited ? "This user has already accepted the invite." : "This user has not accepted the invite yet. Resend the invite instead.");
-      const made = await link("recovery", u.email as string);
+      const made = await link("recovery", u.email as string, invited ? "invite" : "reset");
       if (made.error) throw made.error;
       if (invited) await run(req, "User page", (tx) => tx`update profiles set invited_at = now(), invite_expires_at = ${inviteUntil(tx)} where id = ${req.params.id}`);
       return { link: made.data.properties?.action_link ?? null, emailed: false };

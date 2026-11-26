@@ -595,7 +595,7 @@ Frame names are the FigCraft names.
   - Columns: Code; Company; Samples (in the period); RoA (the RoA numbers of the batches that hold its samples, a download where the role has `roa.download`); CoA (the Uploaded tag with the file name, or the Missing tag); Actions.
   - Actions: **Upload CoA** or **Replace CoA** for roles with `coa.upload` (Lab admin, Superadmin), with the existing dialog.
   - Tablet: no Company column. Phone: cards with the same actions.
-- **Phone:** the tabs are full width under the title and stick when the page scrolls. The Filters button opens the sheet, as on Operations. The scatters stack, and Trend CV scrolls sideways inside its card.
+- **Phone:** the tabs are full width under the title and scroll with the page (they stuck to the top until the owner's Nov 26 feedback, section 15). The Filters button opens the sheet, as on Operations. The scatters stack, and Trend CV scrolls sideways inside its card.
 
 **C2 Audit log** (`/audit`: Supervisor, Manager, Superadmin)
 
@@ -778,3 +778,59 @@ Built, **not committed**. The owner ran the SQL of 12.6 (checked) and gave go wi
 - Audit log, Desktop `01` to `03` and Tablet `01`: the filters (and the record chip of `03`) sit above the card.
 - Dashboard Quality, Desktop `01` to `03`, Tablet `01`, Phone `01`: the Drill holes chips and Search sit above the card, and the Trend CV limit line and label are hidden (C-1).
 - The phone drawer frames already show the profile block at the bottom.
+
+## 14 · Slice D: sign-in pages and the tablet sidebar (built Nov 26, 2026)
+
+Plan and gap table: `Frames_Coverage_Check_Nov26.md`. Owner went with defaults A-1 to A-6 on Nov 26.
+
+- **Sign in, Forgot password, Set password** (`features/auth/Auth.tsx`) now follow frames 00-App-04 to 06 (generator `rowN.js`):
+  - Desktop is a split page: a 720 px brand panel with the white logo, the tagline, the company name and the faint mark.
+  - Tablet is a navy page with the white logo above a 440 px card.
+  - Phone is the shell colour with the colour logo above a full-width card.
+  - The footer has Version 1.0 and **Privacy**.
+- **Sign in states:**
+  - Wrong credentials: the password is cleared.
+  - Locked: Warning "Try again at 10:42, or reset your password." with **Reset password** (opens Forgot with the email). Password and Sign in are off until the lock time; the API now returns `until`.
+  - Inactive: "This account is inactive. Ask your Superadmin to activate it."
+  - Signed out (idle): the email is pre-filled, and the alert gives the idle minutes from Configuration.
+  - Session ended.
+  - Plain sign-out: "You signed out."
+- **Return to the page:** after a timeout, an ended session or a link opened while signed out, sign-in goes back to that page. After a plain sign-out it goes to the start page.
+- **Forgot password:** "It works for N minutes" (N from Security `reset_link_minutes`), envelope icon, **Resend link** locked for 60 seconds.
+- **Set password:**
+  - New endpoint `GET /auth/link-info` (bearer = the link's token): email, roles, invited, and `invitedBy` (the actor of the audit log's insert of the profile; no name when none).
+  - Invite: "{Inviter} added you to the lab. Set a password to sign in." with the email and role badges. It goes straight into the app, to the person's start page.
+  - Reset: "For {email}". The link's own session is signed out, then a toast and Sign in with the email filled.
+  - Both show the shared rules checklist (`common/PasswordRules.tsx`, also used by Change password).
+- **Expired links:**
+  - Links now carry `?kind=invite|reset` (the Supabase redirect allow-list accepts it; checked Nov 26), because a resent invite is a recovery link in Supabase.
+  - Invite: "Invite links work for 7 days. Ask your Superadmin for a new invite."
+  - Reset: "Reset links work for 60 minutes. Ask for a new one and use it soon after." with **Send a new link**.
+- **Privacy (A-1):** a dialog covering staff and client-contact data, the audit log kept without expiry, UU PDP No. 27/2022, and who to ask. **The lab confirms the wording before go-live.**
+- **Sign-out is this device only (A-6):** `/auth/sign-out` called Supabase `admin.signOut(token)`, whose default scope is global. Signing out anywhere ended every session of that person. It is now `local`.
+- **Fix:** reactivate put a person who joined through the invite link (never used the sign-in form) back to Invited. It now also checks `password_changed_at`.
+- **Tablet sidebar** (frame `Tablet-02-Dashboard-01-Operations-05-Sidebar_open`, Dashboard plan section 9): **Expand** at the bottom of the rail opens the 248 px sidebar over the whole page with the scrim and **Collapse** at its bottom. An item, the scrim or Esc closes it.
+- **Tests:** `e2e/phase5-auth.spec.ts` AD1 to AD7 at three sizes (19 pass; AD7 is tablet only). They use a real invite link and a real reset link, the lock after five failures, an idle sign-out on a fake clock, and expired links. Regression run: phase0, phase1-users and phase5-profile pass. PR2 now resets its switch first and waits for the save before the reload.
+- **Open for the owner:**
+  - Supabase email links (invite, reset) expire after the project's **Email OTP expiration** (Auth settings; default 1 hour, at most 24 hours), not after Configuration > Security. "Invite links work for 7 days" cannot hold. Set the expiration to 86400 seconds; a 7-day invite needs app-made invite tokens (App plan data model `password_tokens`), phase 6.
+  - Set `reset_link_minutes` to match the Supabase value, so the pages tell the truth.
+
+## 15 · Owner feedback on slice C and the shell (Nov 26, 2026)
+
+Built the same day, not committed. The owner's FigCraft edits are the reference where named.
+
+| # | Feedback | Done |
+| --- | --- | --- |
+| F1 | Phone, Dashboard Operations, Active batches: rows like the frame `Phone-02-Dashboard-01-Operations-01-Lab_admin`, not a card per batch | Plain rows with a 1 px divider, 16 apart (`.rowlist`), company in the secondary colour |
+| F2 | Desktop, Trend CV: the chart takes the card's width, and a point shows a tooltip like the scatters | The chart measures its box; with more batches than fit (56 px each) it scrolls. A point (hover or tap, 24 px target) shows the batch, completion date, mean CV on the basis and the sample count. The tip opens below high points and to the side at the edges of the part on screen |
+| F3 | Drill holes card, desktop frame: the Search sits in the card head at the right, the chips under it. Same on tablet, and the tablet frame gets them | App: Search sm (32 px, 240 wide) in the head, chips under it, inside the card. Frame `Tablet-02-Dashboard-02-Quality_and_reports-01-Default` now has the Search and the chips, copied from the desktop frame |
+| F4 | Phone: the Operations and Quality & reports tabs no longer stick | They scroll with the page |
+| F5 | Phone, Drill holes, frame `Phone-02-Dashboard-02-Quality_and_reports-01-Default`: the Search inside the card, no Search label, fix the CoA missing tag | Search lg (44 px) without a label under the title, then the chips; each drill hole is a row (code with the CoA tag at the right, company, samples and RoA, then Upload or Replace CoA). The tag no longer stretches to the card's width. The chips and the action stay, though the frame has neither: the chips filter Missing CoA and the action is the Lab admin's upload |
+| F6 | Desktop sidebar: the group separator still opened and closed its group | A group row is a label only; the open and close code and its motion are gone (Motion.md updated) |
+| F7 | Tablet: the sidebar opened over the page has no logo | The logo (40 px, links to the start page) heads it, as in the phone drawer |
+| F8 | Notification items: odd spacing | The list used the shared column class, which put 8 px between items; the items now touch with only the 1 px line, in the bell panel and on the page |
+| F9 | Audit log: rows were 57 px for the Supervisor and 58 px for the Superadmin | A record that is a link sat on a taller line. Every row now has a least height of 58 px |
+| F10 | Audit log from Sample history: a sample with rows, to see it | The demo seeds write without audit rows, so demo samples show none. Samples changed through the app have rows: **SG.261119.003.RI.075** (12 rows) and **SG.261119.003.RI.071** (10), both in B-2026-0413. Opening one took 4 s: the policy `audit_read` called `has_permission()` (security definer, so never inlined) for every row of about 15,600, and the page reads twice. `supabase/migrations/20261126000400_audit_policy_once.sql` wraps the call in a sub-select so it runs once per query (**owner runs it**) |
+| F11 | Phone: no user menu in the top bar, since the drawer has it; frames too | The top bar keeps the menu button, the logo and the bell. In FigCraft the Avatar of the `Breakpoint=Mobile` top bar component is hidden, so every phone frame follows |
+
+Tests: `phase5-quality` checks the trend's width and tooltip and the Search inside the card without a label; `phase0` and `phase5-auth` sign out on the phone from the drawer; AD7 checks the logo and that group labels are not buttons.

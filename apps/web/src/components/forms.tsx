@@ -13,12 +13,12 @@ export function TextField({ label, value, onChange, error, help, type = "text", 
     {error ? <span className="help err">{error}</span> : help ? <span className="help">{help}</span> : null}</div>;
 }
 
-export function PasswordField({ label, value, onChange, error, help, placeholder, autoComplete = "current-password", id }: {
-  label: string; value: string; onChange: (v: string) => void; error?: string | null; help?: string; placeholder?: string; autoComplete?: string; id?: string }) {
+export function PasswordField({ label, value, onChange, error, help, placeholder, autoComplete = "current-password", id, disabled }: {
+  label: string; value: string; onChange: (v: string) => void; error?: string | null; help?: string; placeholder?: string; autoComplete?: string; id?: string; disabled?: boolean }) {
   const [show, setShow] = useState(false); const auto = useId(); const fid = id ?? auto;
   return <div className="field"><label className="flabel" htmlFor={fid}>{label}</label>
-    <div className={cx("input", error && "err")} style={{ paddingRight: 4 }}><input id={fid} type={show ? "text" : "password"} value={value} placeholder={placeholder} autoComplete={autoComplete} aria-invalid={!!error} onChange={(e) => onChange(e.target.value)} />
-      <Button iconOnly icon={show ? "eye-slash" : "eye"} label={show ? "Hide password" : "Show password"} onClick={() => setShow(!show)} /></div>
+    <div className={cx("input", error && "err", disabled && "dis")} style={{ paddingRight: 4 }}><input id={fid} type={show ? "text" : "password"} value={value} placeholder={placeholder} autoComplete={autoComplete} aria-invalid={!!error} disabled={disabled} onChange={(e) => onChange(e.target.value)} />
+      <Button iconOnly icon={show ? "eye-slash" : "eye"} label={show ? "Hide password" : "Show password"} disabled={disabled} onClick={() => setShow(!show)} /></div>
     {error ? <span className="help err">{error}</span> : help ? <span className="help">{help}</span> : null}</div>;
 }
 
@@ -44,9 +44,10 @@ export function Select({ label, req, help, error, value, onChange, options, id, 
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><Icon n="caret-down" /></div></Field></div>;
 }
 
-export function Search({ value, onChange, placeholder, id, width, label }: { value: string; onChange: (v: string) => void; placeholder: string; id?: string; width?: number | string; label?: string }) {
+/** `size`: sm is 32 high (a card head, as the library's Search sm), lg is 44 (a phone's touch size); the default is 40. */
+export function Search({ value, onChange, placeholder, id, width, label, size }: { value: string; onChange: (v: string) => void; placeholder: string; id?: string; width?: number | string; label?: string; size?: "sm" | "lg" }) {
   const auto = useId(); const fid = id ?? auto;
-  const box = <label className="search" style={width && !label ? { width, maxWidth: "100%" } : undefined}><Icon n="magnifying-glass" /><input id={fid} value={value} placeholder={placeholder} aria-label={label ? undefined : placeholder} onChange={(e) => onChange(e.target.value)} />
+  const box = <label className={cx("search", size)} style={width && !label ? { width, maxWidth: "100%" } : undefined}><Icon n="magnifying-glass" /><input id={fid} value={value} placeholder={placeholder} aria-label={label ? undefined : placeholder} onChange={(e) => onChange(e.target.value)} />
     {value && <button type="button" aria-label="Clear search" onClick={() => onChange("")}><Icon n="x" /></button>}</label>;
   if (!label) return box;
   return <div className="field" style={width ? { width, maxWidth: "100%" } : undefined}><label className="flabel" htmlFor={fid}>{label}</label>{box}</div>;

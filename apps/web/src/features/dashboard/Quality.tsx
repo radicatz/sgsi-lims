@@ -1,7 +1,7 @@
 // Dashboard, Quality & reports tab (Phase 5, slice C1; frames 02-Dashboard-02-Quality_and_reports-01 to 03, Dashboard_v2_Screen_Plan.md section 6, Phase5_Build_Design.md 12.3):
 // four KPIs, three scatters (CV vs Ash, RD vs Ash, FC vs GCV: the first named value runs across, as SIM Lab), Trend CV with a basis switch, and the Drill holes card.
 // Charts are SVG in the token colours (Phase 5 decision 3). The regression and R² come from the server; the card head says "R² 0.81, n 312".
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../app/api";
 import { useSession } from "../../app/session";
@@ -77,29 +77,63 @@ function ScatterChart({ s, color }: { s: Scatter; color: string }) {
   );
 }
 
-/** Trend CV: the mean CV of each completed batch, by completion date. It scrolls sideways inside its card on a narrow screen. */
-function TrendChart({ rows }: { rows: Quality["trend"][Basis] }) {
-  const W = Math.max(560, rows.length * 56), H = 220, L = 62, B = 34, T = 10, Rr = 14;
+/** Trend CV: the mean CV of each completed batch, by completion date. It takes the card's whole width; with more batches than fit (56 px each) it scrolls sideways inside the card.
+ *  A point under the pointer (or tapped) shows the batch, its completion date, the mean CV and how many samples it averages, as the scatters do. */
+function TrendChart({ rows, basis }: { rows: Quality["trend"][Basis]; basis: Basis }) {
+  const box = useRef<HTMLDivElement>(null), [avail, setAvail] = useState(0), [tip, setTip] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = box.current; if (!el) return;
+    const ro = new ResizeObserver(() => setAvail(el.clientWidth)); ro.observe(el); setAvail(el.clientWidth);
+    return () => ro.disconnect();
+  }, [rows.length > 0]);   // the box exists only while there are points
+  useEffect(() => setTip(null), [basis, rows]);
+  const W = Math.max(avail || 560, rows.length * 56), H = 220, L = 62, B = 34, T = 10, Rr = 14;
   if (!rows.length) return <Empty icon="chart-line" title="No batch completed in this period" />;
   const vs = rows.map((r) => r.value), pad = (Math.max(...vs) - Math.min(...vs)) * 0.15 || 100, y0 = Math.min(...vs) - pad, y1 = Math.max(...vs) + pad;
-  const sx = (i: number) => L + (rows.length === 1 ? (W - L - Rr) / 2 : (i / (rows.length - 1)) * (W - L - Rr)), sy = (v: number) => H - B - ((v - y0) / (y1 - y0)) * (H - B - T);
+  const P0 = L + 10;   // the first point sits clear of the sticky axis, so it is not half covered
+  const sx = (i: number) => P0 + (rows.length === 1 ? (W - P0 - Rr) / 2 : (i / (rows.length - 1)) * (W - P0 - Rr)), sy = (v: number) => H - B - ((v - y0) / (y1 - y0)) * (H - B - T);
+  const t = tip == null ? null : rows[tip];
+  // the tip opens to the side that has room in the part of the chart on screen (the chart scrolls sideways on a phone)
+  const seen = tip == null ? 0 : sx(tip) - (box.current?.scrollLeft ?? 0), view = box.current?.clientWidth ?? W;
+  const side = seen < 110 ? "l" : seen > view - 110 ? "r" : undefined;
   return (
-    <div className="scroll-x" id="tr-scroll">
-      <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label="Trend CV per completed batch" style={{ display: "block", minWidth: "100%" }}>
-        {ticks(y0, y1).map((v) => (<g key={v}><line x1={L} x2={W - Rr} y1={sy(v)} y2={sy(v)} stroke="var(--surface-divider)" /><text x={L - 6} y={sy(v) + 3} textAnchor="end" className="sc-t">{fmtTick(v)}</text></g>))}
-        <line x1={L} x2={L} y1={T} y2={H - B} stroke="var(--surface-border-strong)" /><line x1={L} x2={W - Rr} y1={H - B} y2={H - B} stroke="var(--surface-border-strong)" />
-        <polyline fill="none" stroke="var(--primary)" strokeWidth={2} points={rows.map((r, i) => `${sx(i)},${sy(r.value)}`).join(" ")} />
-        {rows.map((r, i) => (
-          <g key={r.batchNo}><circle cx={sx(i)} cy={sy(r.value)} r={3.6} fill="var(--primary)"><title>{`${r.batchNo}, ${dLong(r.at)}: ${fmt(r.value)} kcal/kg (${r.n} ${r.n === 1 ? "sample" : "samples"})`}</title></circle>
-            <text x={sx(i)} y={H - B + 14} textAnchor="middle" className="sc-t">{dShort(r.at)}</text></g>
-        ))}
-        <text transform={`translate(11 ${(T + H - B) / 2}) rotate(-90)`} textAnchor="middle" className="sc-l">CV (kcal/kg)</text>
-      </svg>
+    <div className="scroll-x" id="tr-scroll" ref={box}>
+      <div style={{ position: "relative", width: W }}>
+        {/* the vertical axis (numbers, title and line) stays at the left edge while the plot scrolls under it */}
+        <svg className="tr-yaxis" width={L + 1} height={H} aria-hidden="true">
+          {ticks(y0, y1).map((v) => (<text key={v} x={L - 6} y={sy(v) + 3} textAnchor="end" className="sc-t">{fmtTick(v)}</text>))}
+          <line x1={L} x2={L} y1={T} y2={H - B} stroke="var(--surface-border-strong)" />
+          <text transform={`translate(11 ${(T + H - B) / 2}) rotate(-90)`} textAnchor="middle" className="sc-l">CV (kcal/kg)</text>
+        </svg>
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label="Trend CV per completed batch" style={{ display: "block" }}>
+          {ticks(y0, y1).map((v) => (<line key={v} x1={L} x2={W - Rr} y1={sy(v)} y2={sy(v)} stroke="var(--surface-divider)" />))}
+          <line x1={L} x2={W - Rr} y1={H - B} y2={H - B} stroke="var(--surface-border-strong)" />
+          <polyline fill="none" stroke="var(--primary)" strokeWidth={2} points={rows.map((r, i) => `${sx(i)},${sy(r.value)}`).join(" ")} />
+          {rows.map((r, i) => (
+            <g key={r.batchNo}>
+              <circle cx={sx(i)} cy={sy(r.value)} r={tip === i ? 5.5 : 3.6} fill="var(--primary)" />
+              {/* a wider target than the dot, so the point is easy to hit */}
+              <circle cx={sx(i)} cy={sy(r.value)} r={12} fill="transparent" data-batch={r.batchNo} onMouseEnter={() => setTip(i)} onMouseLeave={() => setTip(null)} onClick={() => setTip(tip === i ? null : i)} style={{ cursor: "pointer" }} />
+              <text x={sx(i)} y={H - B + 14} textAnchor="middle" className="sc-t">{dShort(r.at)}</text>
+            </g>
+          ))}
+        </svg>
+        {t && (
+          // the chart box scrolls sideways, so it also clips upwards: a high point gets its tip below it
+          <div className={cx("sc-tip", side, sy(t.value) < H / 2 && "b")} role="status" id="tr-tip" style={{ left: sx(tip!), top: sy(t.value) }}>
+            <b className="t-data-b c-head">{t.batchNo}</b>
+            <span className="t-cap c-sec">Completed {dLong(t.at)}</span>
+            <span className="t-data-sm">CV {basis.toUpperCase()} {fmt(t.value)} kcal/kg</span>
+            <span className="t-cap c-sec">Mean of {t.n} {t.n === 1 ? "sample" : "samples"}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/** The Drill holes card: the chips and the Search sit above it (Nov 24 rule); the card holds the table and the pager. */
+/** The Drill holes card (owner frames Nov 26): on desktop and tablet the Search sits in the card head at the right and the chips go under it; on the phone the Search (lg, no label)
+ *  and the chips sit under the title, and each drill hole is a plain row: code and CoA tag, company, samples and RoA, then the action. */
 function DrillHoles({ qs, phone, tablet }: { qs: string; phone: boolean; tablet: boolean }) {
   const { can } = useSession(), qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | "missing">("all"), [q, setQ] = useState(""), [page, setPage] = useState(1), [upload, setUpload] = useState<Hole | null>(null);
@@ -107,25 +141,27 @@ function DrillHoles({ qs, phone, tablet }: { qs: string; phone: boolean; tablet:
   const data = useQuery({ queryKey: ["dash-holes", p.toString()], queryFn: () => api<Holes>(`/dashboard/quality/drill-holes?${p}`), placeholderData: (x) => x });
   const d = data.data, canUp = can("coa.upload");
   const act = (h: Hole) => canUp && <Button size={phone ? "touch" : "sm"} icon="upload-simple" id={`dh-up-${h.code}`} onClick={() => setUpload(h)}>{h.coa ? "Replace CoA" : "Upload CoA"}</Button>;
-  const coa = (h: Hole) => (h.coa ? <span className="row g8 wrap"><Tag label="CoA uploaded" tone="green" icon="check-circle" /><span className="t-cap c-sec ellip">{h.coa.fileName}</span></span> : <Tag label="CoA missing" tone="outline" icon="file-x" />);
+  const coaTag = (h: Hole) => (h.coa ? <Tag label="CoA uploaded" tone="green" icon="check-circle" /> : <Tag label="CoA missing" tone="outline" icon="file-x" />);
+  const coa = (h: Hole) => (h.coa ? <span className="row g8 wrap">{coaTag(h)}<span className="t-cap c-sec ellip">{h.coa.fileName}</span></span> : coaTag(h));
+  const search = <Search id="dh-q" size={phone ? "lg" : "sm"} value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="Search drill hole" width={phone ? "100%" : 240} />;
+  const chips = <Chips scroll items={[{ id: "all", label: "All", count: d?.counts.all ?? 0 }, { id: "missing", label: "Missing CoA", count: d?.counts.missing ?? 0 }]} value={filter} onChange={(v) => { setFilter(v as "all" | "missing"); setPage(1); }} />;
   return (
     <>
-      <div className="row g12 wrap" style={{ alignItems: "flex-end" }}>
-        <Chips scroll items={[{ id: "all", label: "All", count: d?.counts.all ?? 0 }, { id: "missing", label: "Missing CoA", count: d?.counts.missing ?? 0 }]} value={filter} onChange={(v) => { setFilter(v as "all" | "missing"); setPage(1); }} />
-        <span className="grow" />
-        <Search id="dh-q" label="Search" value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="Search drill hole" width={phone ? "100%" : 260} />
-      </div>
-      <Card title="Drill holes">
+      <Card title="Drill holes" actions={phone ? undefined : search}>
+        {phone && search}
+        {chips}
         {!d ? <span className="t-sm c-mut">Loading…</span> : d.items.length === 0 ? (
           <Empty icon="cylinder" title={filter === "missing" ? "No drill hole is missing its CoA" : "No drill hole has samples in this period"} text="Change the period or the company." />
         ) : phone ? (
-          <div className="col g10" id="dh-cards">
+          <div className="rowlist" id="dh-cards">
             {d.items.map((h) => (
-              <div key={h.id} className="scard">
-                <span className="row between g8"><b className="t-data-b c-head">{h.code}</b><span className="t-data-sm c-sec">{h.samples} samples</span></span>
+              <div key={h.id} className="dh-row">
+                <span className="row between g8" style={{ flexWrap: "nowrap" }}><b className="t-data-b c-head">{h.code}</b>{coaTag(h)}</span>
                 <span className="t-cap c-sec">{h.company}</span>
-                {h.roas.length > 0 && <span className="t-data-sm c-act">{h.roas.join(", ")}</span>}
-                {coa(h)}
+                <span className="row g12 t-cap c-sec" style={{ flexWrap: "wrap" }}>
+                  <span>{h.samples} {h.samples === 1 ? "sample" : "samples"}</span>
+                  {h.roas.length > 0 && <span className="t-data-sm c-sec">{h.roas.join(", ")}</span>}
+                </span>
                 {act(h)}
               </div>
             ))}
@@ -185,7 +221,7 @@ export function QualityTab({ period, company, phone, tablet, desk }: { period: s
         ))}
       </div>
       <Card title="Trend CV" actions={<Seg label="Basis" items={[["adb", "ADB"], ["ar", "AR"], ["db", "DB"], ["daf", "DAF"]]} value={basis} onChange={setBasis} />}>
-        <TrendChart rows={d.trend[basis]} />
+        <TrendChart rows={d.trend[basis]} basis={basis} />
         <span className="t-cap c-mut" id="tr-note">The mean CV of each batch completed in the period, in kcal/kg on the {basis.toUpperCase()} basis.</span>
       </Card>
       <DrillHoles qs={qs} phone={phone} tablet={tablet} />

@@ -1,6 +1,6 @@
 import { StrictMode, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider, Outlet } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider, Outlet, useLocation, type Location } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NAV, startPath } from "@sgsi/shared";
 import { SessionProvider, useSession } from "./app/session";
@@ -32,15 +32,19 @@ import "./styles/index.css";
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
 
 function Root() { return <SessionProvider><Outlet /><Toasts /></SessionProvider>; }
+/** After sign-in: back to the page the person was on when the session ended or the link they opened (App plan 3.1 and 3.2), else their start page. */
 function Public() {
   const { me, loading } = useSession();
+  const from = (useLocation().state as { from?: Location } | null)?.from;
   if (loading) return null;
-  return me ? <Navigate to={startPath(me.permissions, me.prefs.startPage)} replace /> : <Outlet />;
+  return me ? <Navigate to={from ? `${from.pathname}${from.search}${from.hash}` : startPath(me.permissions, me.prefs.startPage)} replace /> : <Outlet />;
 }
 function Private() {
-  const { me, loading } = useSession();
+  const { me, loading, signedOut } = useSession();
+  const loc = useLocation();
   if (loading) return <div className="boot">Loading…</div>;
-  return me ? <Shell /> : <Navigate to="/login" replace />;
+  // a person who signed out on purpose starts fresh; a timeout, an ended session or a link opened while signed out comes back here
+  return me ? <Shell /> : <Navigate to="/login" replace state={signedOut === "manual" ? undefined : { from: loc }} />;
 }
 function Start() { const { me } = useSession(); return <Navigate to={startPath(me!.permissions, me!.prefs.startPage)} replace />; }
 

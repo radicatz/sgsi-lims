@@ -26,12 +26,17 @@ export function Shell() {
   const loc = useLocation();
   const qc = useQueryClient();
   const [drawer, setDrawer] = useState(false);
+  // tablet: the rail's Expand opens the whole sidebar over the page (frame Tablet-02-Dashboard-01-Operations-05-Sidebar_open; Dashboard plan section 9)
+  const [over, setOver] = useState(false);
   const main = useRef<HTMLElement>(null);
   useEsc(() => setDrawer(false), drawer);
+  useEsc(() => setOver(false), over);
   useEffect(() => {
     main.current?.scrollTo(0, 0);
     setDrawer(false);
+    setOver(false);
   }, [loc.pathname]);
+  useEffect(() => { if (bp !== "tablet") setOver(false); }, [bp]);
   const savePrefs = useMutation({
     mutationFn: (prefs: Record<string, unknown>) =>
       api("/me", { method: "PATCH", json: { prefs } }),
@@ -47,6 +52,17 @@ export function Shell() {
         {bp !== "phone" && (
           <nav className={cx("side", rail && "rail")} aria-label="Main">
             <NavList rail={rail} />
+            {bp === "tablet" && (
+              <div className="sidefoot">
+                <div className="navgroup static" aria-hidden="true">
+                  <i className="gline" />
+                </div>
+                <button className="nav" id="side-expand" title="Expand" aria-label="Expand sidebar" aria-expanded={over} onClick={() => setOver(true)}>
+                  <Icon n="caret-double-left" s={20} className="flip" />
+                  <span className="lbl">Expand</span>
+                </button>
+              </div>
+            )}
             {bp === "desktop" && (
               <div className="sidefoot">
                 <div className="navgroup static" aria-hidden="true">
@@ -73,6 +89,26 @@ export function Shell() {
           <Outlet />
         </main>
       </div>
+      {over && (
+        <div className="scrim side-over" onMouseDown={(e) => e.target === e.currentTarget && setOver(false)}>
+          <nav className="side" id="side-over" aria-label="Main">
+            {/* it covers the top bar, so it carries the logo itself (owner Nov 26), as the phone drawer does */}
+            <Link className="side-logo" to={startPath(me.permissions, me.prefs.startPage)} aria-label="SGSI LIMS, start page" onClick={() => setOver(false)}>
+              <span className="logo" />
+            </Link>
+            <NavList rail={false} />
+            <div className="sidefoot">
+              <div className="navgroup static" aria-hidden="true">
+                <i className="gline" />
+              </div>
+              <button className="nav" id="side-collapse" aria-label="Collapse sidebar" onClick={() => setOver(false)}>
+                <Icon n="caret-double-left" s={20} />
+                <span className="lbl">Collapse</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
       {drawer && (
         <div
           className="scrim"
@@ -132,25 +168,18 @@ export function Shell() {
 function NavList({ rail }: { rail: boolean }) {
   const { me } = useSession();
   const work = useWork(me!.permissions.includes("work.use"));
-  const [shut, setShut] = useState<Record<string, boolean>>({});
   return (
     <>
       {navFor(me!.permissions).map((g) => {
-        const closed = !rail && !!shut[g.group];
         // One structure for expanded and rail, so the row heights never change and the width change can animate.
+        // The group row is a label only: groups no longer open and close (owner Nov 26, the chevron was already gone).
         return (
           <div key={g.group} className="navg">
-            <button
-              className="navgroup"
-              disabled={rail}
-              aria-expanded={!closed}
-              tabIndex={rail ? -1 : 0}
-              onClick={() => setShut({ ...shut, [g.group]: !shut[g.group] })}
-            >
+            <div className="navgroup">
               <span className="gtext">{g.group}</span>
               <i className="gline" />
-            </button>
-            <div className={cx("gitems", closed && "shut")}>
+            </div>
+            <div className="gitems">
               <div className="gin">
                 {g.items.map((it) => (
                   <NavLink
@@ -158,7 +187,6 @@ function NavList({ rail }: { rail: boolean }) {
                     to={it.path}
                     end={it.path === "/"}
                     title={rail ? it.label : undefined}
-                    tabIndex={closed ? -1 : 0}
                     className={({ isActive }) => cx("nav", isActive && "on")}
                   >
                     <Icon n={it.icon} s={20} />
@@ -218,7 +246,8 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         {me!.unread > 0 && <span className="badge-n">{me!.unread}</span>}
         {bell && bp !== "phone" && <BellPanel unread={me!.unread} onClose={() => setBell(false)} />}
       </div>
-      <div ref={ref} style={{ position: "relative" }}>
+      {/* the phone has the person's block at the bottom of the menu drawer instead (owner Nov 26) */}
+      {bp !== "phone" && <div ref={ref} style={{ position: "relative" }}>
         <button
           className="userchip"
           aria-label="User menu"
@@ -282,7 +311,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
             </button>
           </div>
         )}
-      </div>
+      </div>}
     </header>
   );
 }

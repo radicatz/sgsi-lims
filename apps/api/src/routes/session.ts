@@ -9,7 +9,7 @@ import { asUser, getSetting, sql, system } from "../db";
 import { authenticate, authenticateForPassword, forgetToken } from "../auth";
 import { env } from "../env";
 
-interface Security { lock_after_attempts: number; lock_minutes: number; idle_sign_out_minutes: number; warn_before_seconds: number;
+interface Security { lock_after_attempts: number; lock_minutes: number; idle_sign_out_minutes: number; warn_before_seconds: number; reset_link_minutes?: number; invite_days?: number;
   min_password_length: number; require_letter_and_number: boolean; require_special_character: boolean; forbid_email_in_password: boolean }
 
 const session = (s: { access_token: string; refresh_token: string; expires_at?: number | undefined }) =>
@@ -35,15 +35,16 @@ export async function sessionRoutes(app: FastifyInstance) {
     const tz = env.LAB_TIMEZONE;
     const lockedText = (until: Date) => `Try again at ${until.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: tz })}, or reset your password.`;
     if (p?.locked_until && new Date(p.locked_until) > new Date())
-      return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(new Date(p.locked_until)) });
+      return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(new Date(p.locked_until)), until: new Date(p.locked_until).toISOString() });
     if (p && (p.status === "inactive" || p.status === "invited"))
-      return reply.code(403).send({ code: "account_inactive", title: "This account cannot sign in", text: p.status === "invited" ? "Open the invite email to set your password first." : "Ask your lab admin to reactivate it." });
+      return reply.code(403).send(p.status === "invited" ? { code: "account_inactive", title: "This account is not set up yet", text: "Open the invite link to set your password first." }
+        : { code: "account_inactive", title: "This account is inactive", text: "Ask your Superadmin to activate it." });
 
     const { data, error } = await authClient().auth.signInWithPassword({ email, password });
     if (error || !data.session) {
       if (p) {
         const lock = await countFailure(p as never, sec, meta.screen, req.id);
-        if (lock) return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(lock) });
+        if (lock) return reply.code(423).send({ code: "locked", title: "Too many failed attempts", text: lockedText(lock), until: lock.toISOString() });
       }
       return reply.code(401).send({ code: "wrong_credentials", title: "The email or password is not correct.", text: "Check both and try again." });
     }
@@ -60,7 +61,7 @@ export async function sessionRoutes(app: FastifyInstance) {
 
   r.post("/auth/forgot", { schema: { body: ForgotBody }, config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (req, reply) => {
     // Always the same answer, so the form does not reveal which emails have accounts.
-    await authClient().auth.resetPasswordForEmail(req.body.email, { redirectTo: `${env.WEB_ORIGIN}/set-password` });
+    await authClient().auth.resetPasswordForEmail(req.body.email, { redirectTo: `${env.WEB_ORIGIN}/set-password?kind=reset` });
     return reply.code(204).send();
   });
 
@@ -78,7 +79,8 @@ export async function sessionRoutes(app: FastifyInstance) {
   r.post("/auth/sign-out", { preHandler: authenticate }, async (req, reply) => {
     const token = req.headers.authorization!.slice(7);
     forgetToken(token);
-    await admin.auth.admin.signOut(token).catch(() => undefined);
+    // this device only: the person's other sessions stay signed in (Frames coverage check, decision A-6)
+    await admin.auth.admin.signOut(token, "local").catch(() => undefined);
     return reply.code(204).send();
   });
 
@@ -126,6 +128,17 @@ export async function sessionRoutes(app: FastifyInstance) {
 
   r.get("/auth/rules", async () => {
     const sec = await getSetting<Security>("security");
-    return { minPasswordLength: sec.min_password_length, requireLetterAndNumber: sec.require_letter_and_number, requireSpecialCharacter: sec.require_special_character };
+    return { minPasswordLength: sec.min_password_length, requireLetterAndNumber: sec.require_letter_and_number, requireSpecialCharacter: sec.require_special_character,
+      resetLinkMinutes: sec.reset_link_minutes ?? 60, inviteDays: sec.invite_days ?? 7 };
+  });
+
+  // Set password (App plan 3.4): who the link is for, and for an invite who added the person (from the audit log's insert of the profile; no name when none)
+  r.get("/auth/link-info", { preHandler: authenticateForPassword }, async (req) => {
+    const id = req.user!.userId;
+    const [p] = await sql`select email, full_name, status from profiles where id = ${id}`;
+    const roles = await sql`select r.code from user_roles ur join roles r on r.id = ur.role_id where ur.user_id = ${id} order by r.sort_order`;
+    const [by] = await sql`select actor_name from audit_log where table_name = 'profiles' and record_id = ${id} and action = 'insert' and actor is not null and actor <> ${id}::uuid order by at desc limit 1`;
+    return { email: (p?.email as string) ?? req.user!.email, fullName: (p?.full_name as string | null) ?? null, invited: p?.status === "invited",
+      roles: roles.map((x) => x.code as string), invitedBy: (by?.actor_name as string | null) ?? null };
   });
 }

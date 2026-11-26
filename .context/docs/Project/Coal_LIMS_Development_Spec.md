@@ -1162,7 +1162,7 @@ Global rules for all list screens: search box; filters with Reset; "Total X: n" 
 
 ### S-00 Sign in `/login` (Fixed)
 
-**v1 note (Nov 6, 2026):** built with Forgot password and Set password (reset and invite), lockout after 5 failures for 15 minutes, idle sign-out after 30 minutes: `../App/App_Screen_Plan.md`.
+**v1 note (Nov 6, 2026):** built with Forgot password and Set password (reset and invite), lockout after 5 failures for 15 minutes, idle sign-out after 30 minutes: `../App/App_Screen_Plan.md`. **Nov 26, 2026 (Phase 5 slice D):** the three pages now follow the frames at three sizes (brand panel on desktop, navy tablet page, phone with the colour logo), with the Locked, Signed out and You signed out states, return to the page after a timeout, invite details (`GET /auth/link-info`), expired-link kinds and the Privacy dialog (UU PDP; wording to confirm with the lab): `Phase5_Build_Design.md` section 14.
 
 - Fields: Email, Password. Link: "Lupa Password?". Button: Login.
 - Errors: wrong credentials (generic message), locked account (shows when it unlocks), inactive user.

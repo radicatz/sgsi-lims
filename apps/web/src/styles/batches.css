@@ -640,7 +640,13 @@
   padding: 8px;
   border-top: 1px solid var(--surface-border);
 }
+/* items touch: only the 1px line between them (owner Nov 26: no gap) */
+.nlist {
+  display: flex;
+  flex-direction: column;
+}
 .nitem {
+  flex: none;
   display: flex;
   align-items: flex-start;
   gap: 12px;

@@ -2,12 +2,13 @@
 // Change password dialog, Preferences, Notifications (one switch per event that reaches the person's roles), and the Signature and Lab stamp cards.
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navFor, passwordProblem, ROLE_LABEL, startPath, type RoleCode } from "@sgsi/shared";
 import { api, ApiError } from "../../app/api";
 import { useBreakpoint, useSession } from "../../app/session";
 import { SigningCards } from "./SigningCards";
-import { Avatar, Button, Card, Dialog, Icon, PageHead, PasswordField, Select, Seg, Switch, TextField, cx, fmtDate, toast } from "../../components";
+import { PasswordRules, toRules, useAuthRules } from "./PasswordRules";
+import { Avatar, Button, Card, Dialog, PageHead, PasswordField, Select, Seg, Switch, TextField, fmtDate, toast } from "../../components";
 
 /** The events a person can switch off (App plan 5.1 and 18.1) and the roles each one reaches (Phase 5 section 12.4); N9 reaches whoever may sign. */
 export const NOTE_EVENTS: Array<{ id: string; label: string; roles: RoleCode[] | "signers" }> = [
@@ -23,33 +24,11 @@ export const NOTE_EVENTS: Array<{ id: string; label: string; roles: RoleCode[] |
   { id: "N10", label: "CoA returned to me", roles: ["lab_admin"] },
 ];
 
-interface Rules { minPasswordLength: number; requireLetterAndNumber: boolean; requireSpecialCharacter: boolean }
-const toRules = (r: Rules) => ({ min_password_length: r.minPasswordLength, require_letter_and_number: r.requireLetterAndNumber, require_special_character: r.requireSpecialCharacter, forbid_email_in_password: true });
-
-/** The rules of Configuration > Security, as a checklist that ticks while the person types. */
-function Checklist({ pw, email }: { pw: string; email: string }) {
-  const rules = useQuery({ queryKey: ["auth-rules"], queryFn: () => api<Rules>("/auth/rules"), staleTime: 300_000 });
-  if (!rules.data) return null;
-  const r = rules.data, items: Array<[string, boolean]> = [[`At least ${r.minPasswordLength} characters`, pw.length >= r.minPasswordLength]];
-  if (r.requireLetterAndNumber) items.push(["A letter and a number", /[a-z]/i.test(pw) && /\d/.test(pw)]);
-  if (r.requireSpecialCharacter) items.push(["A special character", /[^a-z0-9]/i.test(pw)]);
-  items.push(["Not your email", !!pw && !pw.toLowerCase().includes(email.split("@")[0]!.toLowerCase())]);
-  return (
-    <ul className="col g6 pw-rules" id="pw-rules" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-      {items.map(([t, ok]) => (
-        <li key={t} className={cx("row g8 t-sm", ok ? "c-ok" : "c-sec")} style={{ flexWrap: "nowrap" }}>
-          <Icon n={ok ? "check-circle" : "circle"} />
-          <span>{t}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 /** Change password (frames 09-Profile-02 and -03; on the phone a sheet that fills the screen). */
 function PasswordDialog({ email, phone, onClose }: { email: string; phone: boolean; onClose: () => void }) {
   const qc = useQueryClient();
-  const rules = useQuery({ queryKey: ["auth-rules"], queryFn: () => api<Rules>("/auth/rules"), staleTime: 300_000 });
+  const rules = useAuthRules();
   const [cur, setCur] = useState(""), [pw, setPw] = useState(""), [again, setAgain] = useState(""), [err, setErr] = useState<Record<string, string>>({});
   const save = useMutation({
     mutationFn: () => api("/me/password", { method: "POST", json: { current: cur, password: pw } }),
@@ -73,7 +52,7 @@ function PasswordDialog({ email, phone, onClose }: { email: string; phone: boole
       <PasswordField id="pw-current" label="Current password" value={cur} onChange={(v) => { setCur(v); setErr({}); }} error={err.current ?? null} autoComplete="current-password" />
       <PasswordField id="pw-new" label="New password" value={pw} onChange={(v) => { setPw(v); setErr({}); }} error={err.password ?? null} autoComplete="new-password" />
       <PasswordField id="pw-again" label="Confirm new password" value={again} onChange={(v) => { setAgain(v); setErr({}); }} error={err.again ?? null} autoComplete="new-password" />
-      <Checklist pw={pw} email={email} />
+      <PasswordRules pw={pw} email={email} />
     </Dialog>
   );
 }

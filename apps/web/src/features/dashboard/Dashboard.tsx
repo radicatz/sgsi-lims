@@ -517,7 +517,7 @@ export function DashboardPage() {
         }
       />
       {canQuality && (
-        <div className={phone ? "db-tabs sticky" : "db-tabs"}>
+        <div className="db-tabs">
           <Tabs
             items={[
               { id: "ops" as const, label: "Operations" },
@@ -715,7 +715,7 @@ export function DashboardPage() {
               }
             >
               {phone ? (
-                <div className="col g8" id="db-active">
+                <div className="rowlist" id="db-active">
                   {pageRows.map((x) => (
                     <Link
                       key={x.batchNo}
@@ -733,7 +733,7 @@ export function DashboardPage() {
                           tone={STATUS_TONE(x.status)}
                         />
                       </span>
-                      <span className="t-cap c-for">{x.company}</span>
+                      <span className="t-cap c-sec">{x.company}</span>
                       <span
                         className="row g12 t-cap c-sec"
                         style={{ flexWrap: "nowrap" }}

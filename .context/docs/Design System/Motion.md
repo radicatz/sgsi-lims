@@ -50,7 +50,7 @@ The row track animates between `1fr` and `0fr`, so the block grows to its real h
 |---|---|---|---|
 | Sidebar collapse and expand | `.side` width 248 to 88 | slow, standard | Labels shrink to `max-width: 0` and fade; the gap and side padding shrink so each icon glides to the centre of the rail. The Collapse arrow rotates 180 degrees. |
 | Sidebar group label | text, caret and gap | slow, base | A group row is always 36 px tall. In the rail only a 26 px line remains. |
-| Sidebar group open and close | `grid-template-rows`, opacity, caret rotation | base, fast | Click a group label. Disabled in the rail. |
+| ~~Sidebar group open and close~~ | — | — | Removed Nov 26, 2026 (owner): a group label is a label only, groups no longer open and close. |
 | Nav item hover and press | background | fast, linear | |
 | Switch (`.sw`) | track colour, thumb position | existing, 150 ms | Predates this document; move to the tokens next time it is touched. |
 | Loading skeleton | background position | existing | The only looping animation. |

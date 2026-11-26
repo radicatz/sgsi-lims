@@ -45,8 +45,15 @@ test("a wrong password shows the error and no session", async ({ page }) => {
 test("sign out returns to Sign in", async ({ page }, info) => {
   await signIn(page, "maya@sgsi.co.id");
   await expect(page).toHaveURL(/\/work$/);
-  await page.getByRole("button", { name: "User menu" }).click();
-  await page.getByRole("menuitem", { name: "Sign out" }).click();
+  if (info.project.name === "phone") {
+    // the phone has no user menu in the top bar; Sign out is at the bottom of the menu drawer
+    await expect(page.getByRole("button", { name: "User menu" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.locator("#drawer-signout").click();
+  } else {
+    await page.getByRole("button", { name: "User menu" }).click();
+    await page.getByRole("menuitem", { name: "Sign out" }).click();
+  }
   await expect(page).toHaveURL(/\/login$/);
   await page.screenshot({ path: `test-results/phase0-signin-${info.project.name}.png` });
 });

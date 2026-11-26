@@ -80,6 +80,8 @@ One page for two cases: a **reset** link and a **new user's invite** (S-02 add f
 | Action | **Set password**, then a success toast on the sign-in page with the email pre-filled | **Set password and sign in**, straight into the app |
 | Expired link | Card "This link has expired" (reset after 60 minutes, invite after 7 days), **Send a new link** (reset) or "Ask your Superadmin for a new invite" (invite) | |
 
+**Build note (Nov 26, 2026):** sections 3.1 to 3.4 rebuilt to the frames in Phase 5 slice D (`../Project/Phase5_Build_Design.md` section 14). The invite text follows the frame ("{Inviter} added you to the lab." with the email and role badges). Link lifetimes come from Supabase's email-link setting, which must match Configuration > Security (owner action).
+
 ## 4 · User menu (the name in the top bar)
 
 Clicking the user chip opens a menu under it (width 280, Elevation/md):

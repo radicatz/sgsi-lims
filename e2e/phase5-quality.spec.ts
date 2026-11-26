@@ -43,6 +43,12 @@ test.describe("dashboard, quality and reports", () => {
     await expect(page.locator(".sc-tip").first()).toContainText("CV (ADB)");
     // the trend opens on AR and switches basis
     await expect(page.locator("#tr-note")).toContainText("AR basis");
+    // the trend takes the card's width (owner Nov 26) and a point shows its batch
+    const [chart, card] = await Promise.all([page.locator("#tr-scroll svg").boundingBox(), page.locator("#tr-scroll").boundingBox()]);
+    expect(chart!.width).toBeGreaterThanOrEqual(card!.width - 1);
+    await page.locator("#tr-scroll circle[data-batch]").first().hover({ force: true });
+    await expect(page.locator("#tr-tip")).toContainText(/B-\d{4}-\d{4}/);
+    await expect(page.locator("#tr-tip")).toContainText("kcal/kg");
     await page.getByRole("group", { name: "Basis" }).getByRole("button", { name: "DAF" }).click();
     await expect(page.locator("#tr-note")).toContainText("DAF basis");
     // a reload keeps the tab
@@ -69,11 +75,14 @@ test.describe("dashboard, quality and reports", () => {
     await expect(page.locator('[id^="dh-up-"]').first()).toBeVisible();                      // Lab admin may upload
     const all = await page.getByRole("button", { name: /^All \d+/ }).last().innerText();
     await page.getByRole("button", { name: /^Missing CoA \d+/ }).click();
-    await expect(page.locator(phone ? "#dh-cards .scard" : "#dh-table tbody tr").first()).toContainText("CoA missing", { timeout: 20_000 });
+    await expect(page.locator(phone ? "#dh-cards .dh-row" : "#dh-table tbody tr").first()).toContainText("CoA missing", { timeout: 20_000 });
     await expect(page.getByText("CoA uploaded")).toHaveCount(0, { timeout: 20_000 });
     await page.getByRole("button", { name: /^All \d+/ }).last().click();
     await page.locator("#dh-q").fill("DH-BNM-02");
-    await expect(page.locator(phone ? "#dh-cards .scard" : "#dh-table tbody tr").first()).toContainText("DH-BNM-02", { timeout: 20_000 });
+    await expect(page.locator(phone ? "#dh-cards .dh-row" : "#dh-table tbody tr").first()).toContainText("DH-BNM-02", { timeout: 20_000 });
+    // the Search sits inside the Drill holes card, without a label (owner frames Nov 26)
+    await expect(page.locator("section.card").filter({ hasText: "Drill holes" }).locator("#dh-q")).toBeVisible();
+    await expect(page.locator('label[for="dh-q"]')).toHaveCount(0);
     expect(all).toMatch(/\d+/);
     if (!tablet && !phone) await expect(page.locator("#dh-table th", { hasText: "Company" })).toBeVisible();
     if (tablet) await expect(page.locator("#dh-table th", { hasText: "Company" })).toHaveCount(0);
