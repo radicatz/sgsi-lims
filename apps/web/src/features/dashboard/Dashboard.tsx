@@ -389,11 +389,12 @@ export function DashboardPage() {
     !!x.deadline && !x.late && x.deadline <= addDays(today, 7);
   const counts = {
     all: d?.active.length ?? 0,
-    due: d?.active.filter((x) => x.late || soon(x)).length ?? 0,
+    // Due is what is still ahead (today up to 7 days); Late is what is past its deadline; the two never overlap (owner Nov 26)
+    due: d?.active.filter(soon).length ?? 0,
     late: d?.active.filter((x) => x.late).length ?? 0,
   };
   const rows = (d?.active ?? []).filter((x) =>
-    filter === "all" ? true : filter === "late" ? x.late : x.late || soon(x),
+    filter === "all" ? true : filter === "late" ? x.late : soon(x),
   );
   const pageRows = rows.slice((page - 1) * 8, page * 8);
   const deadline = (x: Ops["active"][number]) =>

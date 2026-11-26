@@ -146,10 +146,12 @@ export async function auditRoutes(app: FastifyInstance) {
 
   r.get("/audit", { preHandler: need, schema: { querystring: Filters } }, async (req) => {
     const f = req.query;
-    const out = await asUser(user(req), { requestId: req.id, screen: SCREEN }, async (tx) => ({ rows: await select(tx, f, PER, (f.page - 1) * PER), total: await total(tx, f) }));
-    const names = await namesFor(out.rows as never);
+    // the page and the count are independent, and so is the record's name: they run together (the hosted database is a round trip away, so waiting for each in turn cost seconds)
     // the chip of a record link names the record (a sample: its Sample ID, else its client reference)
-    const recordLabel = f.record ? ((await system({ requestId: req.id, screen: SCREEN }, (tx) => tx`select coalesce(sample_no, client_ref) as l from samples where id = ${f.record!}::uuid`))[0]?.l as string | undefined) ?? null : null;
+    const label = f.record ? system({ requestId: req.id, screen: SCREEN }, (tx) => tx`select coalesce(sample_no, client_ref) as l from samples where id = ${f.record!}::uuid`) : Promise.resolve([]);
+    const out = await asUser(user(req), { requestId: req.id, screen: SCREEN }, async (tx) => { const [rows, n] = await Promise.all([select(tx, f, PER, (f.page - 1) * PER), total(tx, f)]); return { rows, total: n }; });
+    const [names, lab] = await Promise.all([namesFor(out.rows as never), label]);
+    const recordLabel = (lab[0]?.l as string | undefined) ?? null;
     return { total: out.total, page: f.page, pages: Math.max(1, Math.ceil(out.total / PER)), per: PER, recordLabel, items: shape(out.rows as never, names) };
   });
 

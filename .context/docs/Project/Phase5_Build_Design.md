@@ -806,7 +806,7 @@ Plan and gap table: `Frames_Coverage_Check_Nov26.md`. Owner went with defaults A
   - Links now carry `?kind=invite|reset` (the Supabase redirect allow-list accepts it; checked Nov 26), because a resent invite is a recovery link in Supabase.
   - Invite: "Invite links work for 7 days. Ask your Superadmin for a new invite."
   - Reset: "Reset links work for 60 minutes. Ask for a new one and use it soon after." with **Send a new link**.
-- **Privacy (A-1):** a dialog covering staff and client-contact data, the audit log kept without expiry, UU PDP No. 27/2022, and who to ask. **The lab confirms the wording before go-live.**
+- **Privacy (A-1):** a dialog covering staff and client-contact data, the audit log kept without expiry, UU PDP No. 27/2022, and who to ask. **UNCONFIRMED: the lab has not confirmed the wording (owner, Nov 26). It must be confirmed before go-live.**
 - **Sign-out is this device only (A-6):** `/auth/sign-out` called Supabase `admin.signOut(token)`, whose default scope is global. Signing out anywhere ended every session of that person. It is now `local`.
 - **Fix:** reactivate put a person who joined through the invite link (never used the sign-in form) back to Invited. It now also checks `password_changed_at`.
 - **Tablet sidebar** (frame `Tablet-02-Dashboard-01-Operations-05-Sidebar_open`, Dashboard plan section 9): **Expand** at the bottom of the rail opens the 248 px sidebar over the whole page with the scrim and **Collapse** at its bottom. An item, the scrim or Esc closes it.
@@ -834,3 +834,11 @@ Built the same day, not committed. The owner's FigCraft edits are the reference 
 | F11 | Phone: no user menu in the top bar, since the drawer has it; frames too | The top bar keeps the menu button, the logo and the bell. In FigCraft the Avatar of the `Breakpoint=Mobile` top bar component is hidden, so every phone frame follows |
 
 Tests: `phase5-quality` checks the trend's width and tooltip and the Search inside the card without a label; `phase0` and `phase5-auth` sign out on the phone from the drawer; AD7 checks the logo and that group labels are not buttons.
+
+**Follow-ups (Nov 26, after F1 to F11):**
+- **Due and Late (owner):** Due is now only what is still ahead (a deadline today up to 7 days away); Late is past its deadline. They no longer overlap. Before, Due included Late, so five late batches showed Due 5 and Late 5.
+- **Trend CV on the phone (owner):** the vertical axis (numbers, title, line) is its own sticky layer at the left of the scrolling chart, so it stays in view.
+- **Phone Drill holes (owner):** the chips and the Upload or Replace CoA button stay; the frame `Phone-02-Dashboard-02-Quality_and_reports-01-Default` now has both, for documentation.
+- **Audit policy migration (owner ran it Nov 26):** `audit_read` is now `(select has_permission('audit.read'))`; the row check costs 0.57 s against 0.39 s without, down from 1.1 s. `GET /audit` also runs its page, count and record name together. A sample's log opens in about 2.2 s (was 4 s). The remaining time is the server scanning about 15,600 rows for the JSON filters; an index on the sample id inside the row JSON, or a sample id column, would remove it (phase 6 performance).
+- **Link lifetimes (Nov 26, owner did the setting):** the Reset link field in Configuration > Security > Links is read-only by design (Component Library plan: "set in Supabase Auth"). Supabase's **Email OTP Expiration** decides how long links work (set to 86400 s); the number the pages show is `reset_link_minutes` in `app_settings` (security), changed to 1440 by SQL, not by the screen. Invite validity is still the 7-day setting, which Supabase links cannot honour; app-made invite tokens are phase 6.
+- **Next (after this commit):** the Phase 5 gate suite (prototype flows as e2e at three sizes, about half a day), then Phase 6; Phase 4 gate G1 to G9 with the lab. Open owner items: the lab confirms the Privacy wording; Supabase OTP and `reset_link_minutes` set.
