@@ -44,7 +44,7 @@ test.describe("dashboard, quality and reports", () => {
     // the trend opens on AR and switches basis
     await expect(page.locator("#tr-note")).toContainText("AR basis");
     // the trend takes the card's width (owner Nov 26) and a point shows its batch
-    const [chart, card] = await Promise.all([page.locator("#tr-scroll svg").boundingBox(), page.locator("#tr-scroll").boundingBox()]);
+    const [chart, card] = await Promise.all([page.locator("#tr-scroll svg[role=img]").boundingBox(), page.locator("#tr-scroll").boundingBox()]);
     expect(chart!.width).toBeGreaterThanOrEqual(card!.width - 1);
     await page.locator("#tr-scroll circle[data-batch]").first().hover({ force: true });
     await expect(page.locator("#tr-tip")).toContainText(/B-\d{4}-\d{4}/);

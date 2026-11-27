@@ -28,24 +28,16 @@ export async function cleanupTestData() {
   if (certs.length) await admin.storage.from("reports").remove(certs.map((f) => f.storage_path as string));
   await sql.begin(async (tx) => {
     await tx`select set_config('app.skip_audit', 'on', true)`;
-    await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;
-    await tx`delete from drill_holes where company_id in (${co})`;
-    await tx`delete from seams where company_id in (${co})`;
-    await tx`delete from lithologies where company_id in (${co})`;
-    await tx`delete from company_contacts where company_id in (${co})`;
-    await tx`delete from companies where code like 'ZT%' or code like 'ZE%'`;
     await tx`delete from lookups where value like 'ZT %' or value like 'ZE %'`;
     await tx`delete from methods where parameter_id in (select id from parameters where code like 'ZT-%' or code like 'ZE-%')`;
     await tx`delete from parameters where code like 'ZT-%' or code like 'ZE-%'`;
-    // contacts added from the job order form by the browser tests
-    await tx`delete from company_contacts where full_name like 'ZE %' or full_name like 'ZT %'`;
-    const ordersOf = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
+    const ordersOf = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %' or company_id in (${co})`;
     await tx`delete from notifications n using reports r where r.job_order_id in (${ordersOf}) and n.link like '/reports/coa/' || r.id || '%'`;
     await tx`delete from report_deliveries where report_id in (select id from reports where job_order_id in (${ordersOf}))`;
     await tx`delete from report_sources where report_id in (select id from reports where job_order_id in (${ordersOf}))`;
     await tx`delete from reports where job_order_id in (${ordersOf})`;
     // batches of the test job orders: the notifications that point at them, the samples' links to them, then the batches (the log and parameters go with them)
-    const testOrders = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
+    const testOrders = tx`select id from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %' or company_id in (${co})`;
     await tx`delete from notifications n using batches b where b.job_order_id in (${testOrders}) and n.link like '/batches/' || b.batch_no || '/%'`;
     await tx`delete from notifications where link like '/orders/ZT-%' or link like '/orders/ZE-%'`;
     await tx`update samples set batch_id = null, released_from_batch_id = null where job_order_id in (${testOrders})`;
@@ -53,7 +45,17 @@ export async function cleanupTestData() {
     // notifications that point at a batch that no longer exists (left by an interrupted run)
     await tx`delete from notifications n where n.link ~ '^/batches/B-[0-9]{4}-[0-9]{4}/' and not exists (select 1 from batches b where n.link like '/batches/' || b.batch_no || '/%')`;
     // Job orders made by the checks and the browser tests
-    await tx`delete from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %'`;
+    await tx`delete from job_orders where order_no like 'ZT-%' or order_no like 'ZE-%' or client_reference like 'ZT %' or client_reference like 'ZE %' or company_id in (${co})`;
+    // contacts added from the job order form by the browser tests (after the job orders, which point at them)
+    await tx`delete from company_contacts where full_name like 'ZE %' or full_name like 'ZT %'`;
+    // the test clients last: their job orders (above) point at their contacts (the gate's journey uses its own client)
+    await tx`delete from coa_files where drill_hole_id in (select id from drill_holes where company_id in (${co}))`;
+    await tx`delete from drill_holes where company_id in (${co})`;
+    await tx`delete from seams where company_id in (${co})`;
+    await tx`delete from lithologies where company_id in (${co})`;
+    await tx`delete from company_contacts where company_id in (${co})`;
+    await tx`delete from sample_counters where company_id in (${co})`;   // the Sample ID counters of a test client that received samples
+    await tx`delete from companies where code like 'ZT%' or code like 'ZE%'`;
     // Configuration slice B: services, methods and standards, template drafts made by the checks
     await tx`delete from service_parameters where service_id in (select id from services where name like 'ZT %' or name like 'ZE %')`;
     await tx`delete from services where name like 'ZT %' or name like 'ZE %'`;

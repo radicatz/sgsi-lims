@@ -71,7 +71,7 @@ test.describe.serial("reports, slice A", () => {
     await expect(page.getByText("The password is not correct.")).toBeVisible();
     await page.locator("#coa-password").fill(PW);
     await page.locator("#coa-sign-ok").click();
-    await expect(page.getByText("Certificate signed and published").first()).toBeVisible();
+    await expect(page.getByText("Certificate signed and published").first()).toBeVisible({ timeout: 45_000 }); // signing renders the final PDF in Gotenberg; slow on the tablet run
     await expect(page.getByText("Published", { exact: true }).first()).toBeVisible();
     await expect(page.getByText(new RegExp(`CoA-${order}-1`)).first()).toBeVisible();
   });

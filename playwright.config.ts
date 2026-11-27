@@ -11,7 +11,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: [["list"]],
-  use: { baseURL: "http://localhost:5173", screenshot: "only-on-failure", ...(process.env.CI ? {} : { channel: "chrome" }) },
+  use: { baseURL: "http://localhost:5173", screenshot: "only-on-failure", trace: "retain-on-failure", ...(process.env.CI ? {} : { channel: "chrome" }) },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
     { name: "tablet", use: { viewport: { width: 834, height: 1112 }, hasTouch: true } },

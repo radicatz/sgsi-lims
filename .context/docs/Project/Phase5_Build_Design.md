@@ -842,3 +842,131 @@ Tests: `phase5-quality` checks the trend's width and tooltip and the Search insi
 - **Audit policy migration (owner ran it Nov 26):** `audit_read` is now `(select has_permission('audit.read'))`; the row check costs 0.57 s against 0.39 s without, down from 1.1 s. `GET /audit` also runs its page, count and record name together. A sample's log opens in about 2.2 s (was 4 s). The remaining time is the server scanning about 15,600 rows for the JSON filters; an index on the sample id inside the row JSON, or a sample id column, would remove it (phase 6 performance).
 - **Link lifetimes (Nov 26, owner did the setting):** the Reset link field in Configuration > Security > Links is read-only by design (Component Library plan: "set in Supabase Auth"). Supabase's **Email OTP Expiration** decides how long links work (set to 86400 s); the number the pages show is `reset_link_minutes` in `app_settings` (security), changed to 1440 by SQL, not by the screen. Invite validity is still the 7-day setting, which Supabase links cannot honour; app-made invite tokens are phase 6.
 - **Next (after this commit):** the Phase 5 gate suite (prototype flows as e2e at three sizes, about half a day), then Phase 6; Phase 4 gate G1 to G9 with the lab. Open owner items: the lab confirms the Privacy wording; Supabase OTP and `reset_link_minutes` set.
+
+## 16 · Gate plan (Nov 27, 2026)
+
+V1 plan, phase 5 gate: "Every prototype flow passes as an end-to-end test at 1440, 834 and 390." The owner warned (Nov 27) that the prototype (`.context/prototype`, built Nov 6) is old and unfinished, so a gate that only follows it would let later features go untested. This plan keeps the prototype's flows as the list, tests each one **as the app works today**, and adds what came after the prototype.
+
+### 16.1 What the gate checks
+
+1. **The 45 prototype flows** (registered in the prototype's Flows panel, the same list as the group prototype plans: AP1–8, MW1–2, DB1–2, JO1–12, BA1–8, MD1–3, AD1–4, RE1–3, SE1–3). Where the prototype is out of date, the build designs, screen plans and owner rulings decide the expected result (16.3).
+2. **What the prototype never had** (16.4): each already has its own test in the phase specs; the gate runs them.
+3. **One journey across the roles** (GT1): a job order from the CSO's request to the CoA sent, then found again in search, history, audit and the dashboards. No per-phase test follows one order through every hand-off.
+4. **The whole suite once**, at the three sizes, on freshly seeded data, with the results recorded here (16.6).
+
+### 16.2 The 45 flows and their tests
+
+| Flow | Test today | Gap |
+| --- | --- | --- |
+| AP1 Sign in, land on the start page | phase0 (one person), WK1 (queues per role) | **GT2**: every persona lands on its start page with its own sidebar |
+| AP2 Wrong password, locked | AD3 | — |
+| AP3 Forgot and set password | AD3, AD4 | — |
+| AP4 Invite | AD2 | — |
+| AP5 Notifications | phase3-batches-b (bell) | — |
+| AP6 Profile and password | PR1, PR3 | **GT3**: Preferences (sidebar Collapsed, start page) keep after a reload |
+| AP7 Session timeout | AD6 (signed out) | **GT4**: "Still there?" then **Stay signed in** keeps the session |
+| AP8 No access | the "has no access" tests in phase1 and phase5 | — |
+| MW1 Work a queue | WK2 | — |
+| MW2 Send several CoAs | WK3 (Download PDFs) | none: Mark sent stays one by one (16.3) |
+| DB1 Operations by role | DB1 (cards, filters) | **GT5**: Due and Late chips, the deadline alert's **Open batch**, the CSO without tabs |
+| DB2 Quality & reports | QA1, QA2 | **GT6**: **Upload CoA** from the dashboard changes the Missing CoA count |
+| JO1–JO12 | phase2-orders (all twelve), phase3-batches (JO6), phase4-reports (JO7) | — |
+| BA1 Receive a batch | phase3-batches (receive) | — |
+| BA2 Confirm with fewer, hold | phase3-batches (confirm with fewer) | **GT7**: hold a sample with a reason, release it; the CSO gets N2 for the samples that went back |
+| BA3–BA8 | phase3-batches, phase3-batches-b | — |
+| MD1–MD3 | phase1-master | — |
+| AD1 Add and invite a user | phase1-users | — |
+| AD2 Lock, deactivate, last Superadmin | phase1-users, AD4 (unlock by reset link) | **GT8**: **Unlock** on the user page |
+| AD3 Audit trail | AU1 | — |
+| AD4 Configuration feeds the app | phase1-config (each section on its own) | **GT9**: a new condition in Lookups shows in Reception; a new idle time is what the session uses |
+| RE1 Find and download reports | RB2, RB3 | — |
+| RE2 Build and publish a CoA | RA1, RA2 | none: signing replaced Publish (16.3) |
+| RE3 Revise and void | RB4 | — |
+| SE1–SE3 | SR1, SR6, AU2 | — |
+
+### 16.3 Where the prototype is out of date (the app follows the right column)
+
+| Prototype | Today | Source |
+| --- | --- | --- |
+| RE2: the Lab admin publishes the CoA | The Lab admin sends it for signature; the named signatory signs with the password; signing publishes it | Reports_Build_Design (phase 4), owner Nov 16 "Manager signs" |
+| MW2: tick several CoAs and Mark sent them together | Download PDFs for several; Mark sent one by one (each CoA has its own recipient and channels) | My_Work_Screen_Plan "Rule" row |
+| Samples keyed by client reference only | Sample ID `SG.YYMMDD.CCC.BB.NNN` and sample code given on arrival | Spec 6.1 and 6.2 |
+| BA5: the Lab admin uploads a signed RoA only | The app drafts the RoA; the signed one is uploaded | Phase 4 RoA notes |
+| DB1: Due includes late batches | Due is upcoming only (today to 7 days); Late is past the deadline | Owner Nov 26 (section 15) |
+| Sign-in, set password, sidebar | Rebuilt to the frames in slice D; groups no longer collapse | Section 14, section 15 F6 |
+| Saved queries in the browser | Saved on the server, shared with staff | Section 10 (slice B) |
+
+### 16.4 After the prototype (already tested; the gate runs them)
+
+Signing and the signing cards (RA2, RB1), Sample IDs (phase2-orders, phase3-batches), Ply/Comp per sample (ply-comp), delete a batch (batch-delete), the app-drafted RoA (RB3), camera scan and history PDF (SR7), saved queries (SR4), notification switches (PR2), audit links (AU2), real invite and reset links (AD2, AD4, AD5), Configuration services, methods and templates (phase1-config-b).
+
+### 16.5 New tests (`e2e/phase5-gate.spec.ts`)
+
+- **GT1 Journey**, one order per size, numbered `ZG-…` and removed afterwards:
+  1. The CSO creates and submits a job order and registers three samples.
+  2. The Lab admin adds a batch; the batch shows on Preparation's My work.
+  3. Preparation receives two samples (Sample IDs appear) and holds one, then confirms; the held sample goes back to the job order.
+  4. Preparation enters the ADL and finishes; the Analyst enters the values (FC calculated) and finishes.
+  5. The Lab admin uploads the signed RoA and completes the batch; generates the CoA and sends it for signature; the Manager signs.
+  6. The CSO sees the CoA on My work (CoAs to send) and marks it sent; the job order reads Delivered.
+  7. Afterwards: quick search finds a Sample ID, Sample history lists every step, the Audit log has the record's rows, and the Operations dashboard counts the completed batch.
+- **GT2** to **GT9** as named in 16.2.
+
+### 16.6 The run
+
+- Seeds first, in order: `pnpm seed:master`, `seed:demo`, `seed:batches`, `seed:reports`, `seed:work`, `seed:quality`. Gotenberg must run (`docker start sgsi-gotenberg`).
+- One Playwright run, one worker, the three sizes. About 100 tests a size, so expect **45 to 60 minutes**.
+- A test that fails and then passes on a rerun is fixed, not ignored.
+- The result goes into a table here: tests per size, passed, failed, skipped, and anything fixed.
+
+### 16.7 Decisions for the owner
+
+| # | Question | What the documents say | Proposed answer |
+| --- | --- | --- | --- |
+| G-1 | Test the prototype's flows as the prototype does them, or as the app does them today? | V1 plan: each screen "behaves like the prototype"; but later documents changed RE2, MW2, Sample IDs and Due (16.3) | **As the app does them today**; 16.3 records each difference |
+| G-2 | Update the prototype to match? | No document asks for it. The Sample ID memo already left the frames and prototype behind (spec 6.2) | **Decided by the owner (Nov 27): do not update the prototype.** The app and the frames are the reference; 16.3 is its errata |
+| G-3 | The journey at all three sizes, or desktop only? | The gate text says three sizes | **All three** (three orders, about 6 minutes each) |
+| G-4 | Seven personas signing in at three sizes hit Supabase's sign-in limit | Earlier runs: two Playwright runs at once failed on it | **Sign each persona in once per size and reuse the session** in the gate spec |
+
+**Size:** about half a day: GT1 to GT9 about 2 to 3 hours, then the full run and fixes.
+
+### 16.8 Gate build (Nov 27, 2026)
+
+The owner decided G-2 (do not update the prototype); G-1, G-3 and G-4 were taken as proposed.
+
+**`e2e/phase5-gate.spec.ts`**: seven tests, serial, at the three sizes. **21 of 21 pass.** Desktop takes about 4 minutes, tablet and phone about 8 together.
+- **GT1, the journey.** Each step is done through the API as the role that does it, and the next person's screen is checked in the browser. The screens of each step have their own tests in the phase specs.
+  - It runs on its own test client, contact and drill hole, so the demo data is untouched.
+  - The chain: the CSO's order, the Lab admin's batch (due tomorrow), and N1 to Preparation. Then reception: two samples arrive and get Sample IDs. One sample is held in the browser with a hold reason added in Lookups a moment before, then released. One sample never comes, and N2 goes to the CSO.
+  - Then the ADL (N3 to the analyst), the values (N4 to the Lab admin), the signed RoA and Complete, the CoA, Send for signature and N9 to the Manager. The Manager signs, the order appears in the CSO's CoAs to send, Mark sent, and the order reads Delivered.
+  - Finally the Supervisor finds the Sample ID in search, its history shows the steps, and the Audit log has its rows.
+- **GT2:** each of the seven personas lands on its start page (computed with the shared `startPath`) with exactly the sidebar `navFor` gives its permissions.
+- **GT3:** the Profile's start page and sidebar choice keep after a reload.
+- **GT4 and GT9:** Security's idle time of 5 minutes is what the session uses; "Still there?" then Stay signed in keeps the person signed in.
+- **GT5:** Late shows only past deadlines, Due none of them, and the two never add up to more than All. The deadline alert opens a batch.
+- **GT6:** Upload CoA on the Quality tab clears the journey drill hole's Missing CoA.
+- **GT8:** five failed sign-ins lock Bagus Prasetyo; Unlock on his user page brings him back.
+
+**How it was built** (skills: playwright-expert for the suite, debugging-wizard for the failures):
+- **Sessions:** each persona signs in once per size and the stored session is reused (G-4).
+- **Selectors:** accessible names and the app's ids, not colour classes. GT5 reads the "Past due" label.
+- **Traces:** `trace: "retain-on-failure"` was added to `playwright.config.ts`.
+- **Shared state:** the gate is serial and shares GT1's records with GT5 and GT6 on purpose. The rest of the suite keeps its tests independent.
+
+**Found and fixed on the way:**
+- **Cleanup deleted in the wrong order.** It removed test clients and their contacts before the job orders that point at them; it also missed a test client's job orders and its Sample ID counter. It now deletes job orders first, then contacts, counters and clients.
+- **A 500 mid-journey came from the network, not the app.** The machine briefly could not resolve the Supabase database host (`ENOTFOUND`, then `CONNECTION_CLOSED`, in the API log at 02:33). It passed on the rerun.
+
+**The full run (Nov 27, 2026).** The whole e2e suite was run at the three sizes, with Gotenberg running: **293 passed, 4 failed, 11 skipped by design, 1 not run.** It took 1.5 hours. None of the failures was an app bug; the tests were fixed and both files rerun at all three sizes: **18 of 18 pass.**
+| Size | Tests | Passed | Failed | Skipped | Not run | After the fixes |
+|---|---|---|---|---|---|---|
+| Desktop | 103 | 99 | 1 (QA1) | 3 | 0 | all pass |
+| Tablet | 103 | 98 | 2 (QA1, RA2) | 2 | 1 (RA3) | all pass |
+| Phone | 103 | 96 | 1 (QA1) | 6 | 0 | all pass |
+
+The run took 1.5 hours, longer than the 45 to 60 minutes estimated in s16.6. The gate file alone takes about 3.5 minutes a size; the slowest other file is phase2-orders at about 2.7 minutes.
+
+- **QA1 (desktop, tablet, phone): the test was out of date.** The sticky y axis of Trend CV (owner, Nov 26) is a second `svg` in `#tr-scroll`, so `#tr-scroll svg` matched two. The test now reads `svg[role=img]`.
+- **RA2 (tablet): the wait was too short.** Signing renders the final PDF in Gotenberg. The failure screenshot shows "Certificate signed and published"; it came after the 15 s wait. That one check now waits 45 s. RA3 did not run because the file is serial.
+- **The 11 skips** are tests that apply to one size only: phone-only Configuration buttons and sheets, desktop/tablet tables and header search, and the tablet rail.
+- **The owner reviewed the gate on Nov 27, 2026.** Still open for go-live: Phase 4 gate G1 to G9 with the lab, and the Privacy wording (lab to confirm, s14).
